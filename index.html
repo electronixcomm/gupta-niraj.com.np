@@ -1219,44 +1219,61 @@
 
   <div class="video-grid">
 
+    
     <!-- ── Card 1 ── -->
-    <div class="video-card">
-      <div class="video-thumb">
-        <span class="video-thumb-icon">🎬</span>
-        <span class="video-thumb-label">Download to watch</span>
-        <span class="video-thumb-fmt">MKV · VLC required</span>
-      </div>
-      <div class="video-info">
-        <div class="video-category">Film · 2026</div>
-        <div class="video-title">Mana Shankara Vara Prasad Garu (2026)</div>
-        <div class="video-badges">
-          <span class="vbadge q">1080p</span>
-          <span class="vbadge f">WEBRip</span>
-          <span class="vbadge f">x265</span>
-          <span class="vbadge f">DDP 5.1</span>
-          <span class="vbadge l">Hindi</span>
-          <span class="vbadge l">Telugu</span>
-          <span class="vbadge l">ESub</span>
-        </div>
-      </div>
-      <div class="video-actions">
-        <a
-          class="btn-video-dl"
-          href="https://nkg12.blob.core.windows.net/video/movie_for_you.mp4"
-          download="Mana Shankara Vara Prasad Garu (2026) 1080p.mkv">
-          ⬇ Download · 2.94 GB
-        </a>
-        <div class="video-meta">
-          Open with VLC<br>
-          Hindi &amp; Telugu · Subtitles
-        </div>
-      </div>
+<div class="video-card">
+
+  <!-- MP4 native browser player -->
+  <video
+    controls
+    preload="metadata"
+    style="width:100%; display:block; background:#000; max-height:480px;">
+    <source
+      src="https://nkg12.blob.core.windows.net/video/videonkg/yourchoicemoviefromazureblob.mp4"
+      type="video/mp4">
+    Your browser does not support video playback.
+  </video>
+
+  <div class="video-info">
+    <div class="video-category">Film · 2026</div>
+    <div class="video-title">Mana Shankara Vara Prasad Garu (2026)</div>
+    <div class="video-badges">
+      <span class="vbadge q">1080p</span>
+      <span class="vbadge f">WEBRip</span>
+      <span class="vbadge f">x265</span>
+      <span class="vbadge f">AAC</span>
+      <span class="vbadge l">Hindi</span>
+      <span class="vbadge l">Telugu</span>
+      <span class="vbadge l">ESub</span>
+    </div>
+  </div>
+
+  <div class="video-actions">
+
+    <!-- stream button -->
+    
+      class="btn-video-dl"
+      href="https://nkg12.blob.core.windows.net/video/videonkg/yourchoicemoviefromazureblob.mp4"
+      target="_blank">
+      ▶ Watch Full Screen
+    </a>
+
+    <!-- download button -->
+    
+      class="btn-video-dl"
+      href="https://nkg12.blob.core.windows.net/video/videonkg/yourchoicemoviefromazureblob.mp4"
+      download="Mana Shankara Vara Prasad Garu (2026) 1080p.mp4"
+      style="background:transparent; color:var(--accent2); border:1px solid var(--accent2);">
+      ⬇ Download MP4
+    </a>
+
+    <div class="video-meta">
+      Streams in browser · Hindi &amp; Telugu · Subtitles included
     </div>
 
-    <!-- ── Add more video cards here following the same structure ── -->
-
   </div>
-</section>
+
+</div>
 <!-- ══ END VIDEOS ══════════════════════════════════════════════════════════ -->
 <!-- ══ DOCUMENTS ════════════════════════════════════════════════════════════ -->
 <section id="docs" style="background: rgba(12,20,25,0.5);">
@@ -1355,4 +1372,6 @@
 </script>
 </body>
 </html>
+
+    
 
