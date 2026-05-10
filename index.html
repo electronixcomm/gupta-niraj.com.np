@@ -378,7 +378,7 @@
 
   .tag.accent { border-color: rgba(0,229,255,0.4); color: var(--accent); }
   .tag.orange { border-color: rgba(255,107,53,0.4); color: var(--accent2); }
-  .tag.green { border-color: rgba(127,255,107,0.4); color: var(--accent3); }
+  .tag.green  { border-color: rgba(127,255,107,0.4); color: var(--accent3); }
 
   /* EXPERIENCE */
   .exp-timeline {
@@ -431,10 +431,7 @@
     margin-bottom: 1rem;
   }
 
-  .exp-bullets {
-    list-style: none;
-    padding: 0;
-  }
+  .exp-bullets { list-style: none; padding: 0; }
 
   .exp-bullets li {
     font-size: 0.78rem;
@@ -566,6 +563,184 @@
 
   .project-link:hover { border-color: var(--accent); }
 
+  /* ── VIDEO SECTION ───────────────────────────────────────── */
+  .video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 2rem;
+  }
+
+  .video-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s, transform 0.3s;
+  }
+
+  .video-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,107,53,0.04), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+
+  .video-card:hover::after  { opacity: 1; }
+  .video-card:hover         { border-color: rgba(255,107,53,0.35); transform: translateY(-3px); }
+
+  .video-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: var(--accent2);
+    transform: scaleY(0);
+    transition: transform 0.3s;
+    transform-origin: bottom;
+    z-index: 1;
+  }
+
+  .video-card:hover::before { transform: scaleY(1); }
+
+  /* thumbnail / placeholder */
+  .video-thumb {
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: #050d12;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .video-thumb::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(
+        45deg,
+        rgba(0,229,255,0.015) 0px,
+        rgba(0,229,255,0.015) 1px,
+        transparent 1px,
+        transparent 12px
+      );
+  }
+
+  .video-thumb-icon {
+    font-size: 2.8rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .video-thumb-label {
+    font-size: 0.62rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    position: relative;
+    z-index: 1;
+  }
+
+  .video-thumb-fmt {
+    font-size: 0.58rem;
+    color: var(--accent2);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border: 1px solid rgba(255,107,53,0.3);
+    padding: 0.2rem 0.6rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* info block */
+  .video-info {
+    padding: 1.4rem 1.6rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .video-category {
+    font-size: 0.58rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 0.5rem;
+  }
+
+  .video-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    line-height: 1.35;
+    color: var(--text);
+    margin-bottom: 0.9rem;
+  }
+
+  .video-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .vbadge {
+    font-size: 0.58rem;
+    padding: 0.22rem 0.6rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 1px solid;
+  }
+
+  .vbadge.q  { border-color: rgba(127,255,107,0.35); color: var(--accent3); }
+  .vbadge.f  { border-color: rgba(255,107,53,0.35);  color: var(--accent2); }
+  .vbadge.l  { border-color: rgba(0,229,255,0.35);   color: var(--accent);  }
+
+  /* action bar */
+  .video-actions {
+    padding: 1.2rem 1.6rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-video-dl {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.4rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: none;
+    background: var(--accent2);
+    color: var(--bg);
+    font-weight: 700;
+    transition: all 0.25s;
+    border: 1px solid transparent;
+  }
+
+  .btn-video-dl:hover {
+    background: transparent;
+    color: var(--accent2);
+    border-color: var(--accent2);
+  }
+
+  .video-meta {
+    font-size: 0.62rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+  /* ── END VIDEO SECTION ───────────────────────────────────── */
+
   /* FOOTER */
   footer {
     padding: 3rem 4rem;
@@ -642,6 +817,7 @@
     .hero-visual { display: none; }
     .about-grid, .edu-grid { grid-template-columns: 1fr; }
     footer { flex-direction: column; gap: 1rem; text-align: center; }
+    .video-grid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -660,6 +836,7 @@
     <li><a href="#experience">Experience</a></li>
     <li><a href="#education">Education</a></li>
     <li><a href="#projects">Projects</a></li>
+    <li><a href="#videos">Videos</a></li>
   </ul>
 </nav>
 
@@ -680,19 +857,18 @@
     </div>
   </div>
 
-  <!-- Geometric SVG visual -->
   <svg class="hero-visual" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
     <circle cx="250" cy="250" r="200" stroke="#00e5ff" stroke-width="0.5"/>
     <circle cx="250" cy="250" r="160" stroke="#00e5ff" stroke-width="0.5"/>
     <circle cx="250" cy="250" r="120" stroke="#00e5ff" stroke-width="0.5"/>
-    <circle cx="250" cy="250" r="80" stroke="#00e5ff" stroke-width="0.5"/>
-    <line x1="50" y1="250" x2="450" y2="250" stroke="#00e5ff" stroke-width="0.5"/>
-    <line x1="250" y1="50" x2="250" y2="450" stroke="#00e5ff" stroke-width="0.5"/>
+    <circle cx="250" cy="250" r="80"  stroke="#00e5ff" stroke-width="0.5"/>
+    <line x1="50"  y1="250" x2="450" y2="250" stroke="#00e5ff" stroke-width="0.5"/>
+    <line x1="250" y1="50"  x2="250" y2="450" stroke="#00e5ff" stroke-width="0.5"/>
     <line x1="109" y1="109" x2="391" y2="391" stroke="#00e5ff" stroke-width="0.5"/>
     <line x1="391" y1="109" x2="109" y2="391" stroke="#00e5ff" stroke-width="0.5"/>
-    <circle cx="250" cy="50" r="5" fill="#00e5ff"/>
+    <circle cx="250" cy="50"  r="5" fill="#00e5ff"/>
     <circle cx="250" cy="450" r="5" fill="#00e5ff"/>
-    <circle cx="50" cy="250" r="5" fill="#00e5ff"/>
+    <circle cx="50"  cy="250" r="5" fill="#00e5ff"/>
     <circle cx="450" cy="250" r="5" fill="#00e5ff"/>
     <circle cx="109" cy="109" r="4" fill="#ff6b35"/>
     <circle cx="391" cy="391" r="4" fill="#ff6b35"/>
@@ -817,7 +993,6 @@
     <div class="section-line"></div>
   </div>
   <div class="exp-timeline">
-
     <div class="exp-item">
       <div class="exp-org">NDCL</div>
       <div class="exp-role">Senior Engineer</div>
@@ -826,7 +1001,6 @@
         <li>Guide and mentor graduate-level students during field visits, explaining complex network and telecommunication systems.</li>
       </ul>
     </div>
-
     <div class="exp-item">
       <div class="exp-org">ISMT College, Pokhara · Affiliated to Sunderland University, UK</div>
       <div class="exp-role">Visiting Lecturer</div>
@@ -836,7 +1010,6 @@
         <li>Delivered and supervised Specialist Projects (CET140 – Specialist Project).</li>
       </ul>
     </div>
-
     <div class="exp-item">
       <div class="exp-org">Infomax College, Pokhara · Affiliated to APU, Malaysia</div>
       <div class="exp-role">Visiting Lecturer</div>
@@ -845,7 +1018,6 @@
         <li>Demonstrated practical applications using the Little Man Computer (LMC) simulator to teach microcontroller fundamentals.</li>
       </ul>
     </div>
-
     <div class="exp-item">
       <div class="exp-org">SOCH College of IT, Pokhara · Affiliated to Tribhuvan University</div>
       <div class="exp-role">Visiting Lecturer</div>
@@ -853,7 +1025,6 @@
         <li>Instructed students in CSC115 – C Programming, establishing strong programming logic and techniques.</li>
       </ul>
     </div>
-
   </div>
 </section>
 
@@ -914,30 +1085,55 @@
   </div>
 </section>
 
+<!-- ══ VIDEOS ══════════════════════════════════════════════════════════════ -->
+<section id="videos" style="background: rgba(12,20,25,0.5);">
+  <div class="section-header">
+    <span class="section-num">06</span>
+    <h2 class="section-title">Videos</h2>
+    <div class="section-line"></div>
+  </div>
 
-  <div class="video-card">
-  <div class="video-thumb">
-    <span class="video-thumb-icon">🎬</span>
-    <span class="video-thumb-label">Download to watch</span>
-    <span class="video-thumb-fmt">MKV · VLC required</span>
-  </div>
-  <div class="video-info">
-    <div class="video-category">Film · 2025</div>           <!-- ← change -->
-    <div class="video-title">Your Movie Title Here</div>    <!-- ← change -->
-    <div class="video-badges">
-      <span class="vbadge q">1080p</span>
-      <span class="vbadge l">Hindi</span>
+  <div class="video-grid">
+
+    <!-- ── Card 1 ── -->
+    <div class="video-card">
+      <div class="video-thumb">
+        <span class="video-thumb-icon">🎬</span>
+        <span class="video-thumb-label">Download to watch</span>
+        <span class="video-thumb-fmt">MKV · VLC required</span>
+      </div>
+      <div class="video-info">
+        <div class="video-category">Film · 2026</div>
+        <div class="video-title">Mana Shankara Vara Prasad Garu (2026)</div>
+        <div class="video-badges">
+          <span class="vbadge q">1080p</span>
+          <span class="vbadge f">WEBRip</span>
+          <span class="vbadge f">x265</span>
+          <span class="vbadge f">DDP 5.1</span>
+          <span class="vbadge l">Hindi</span>
+          <span class="vbadge l">Telugu</span>
+          <span class="vbadge l">ESub</span>
+        </div>
+      </div>
+      <div class="video-actions">
+        <a
+          class="btn-video-dl"
+          href="https://nkg12.blob.core.windows.net/video/videonkg/yourchoicemoviefromazureblob.mkv"
+          download="Mana Shankara Vara Prasad Garu (2026) 1080p.mkv">
+          ⬇ Download · 2.94 GB
+        </a>
+        <div class="video-meta">
+          Open with VLC<br>
+          Hindi &amp; Telugu · Subtitles
+        </div>
+      </div>
     </div>
+
+    <!-- ── Add more video cards here following the same structure ── -->
+
   </div>
-  <div class="video-actions">
-    <a class="btn-video-dl"
-       href="YOUR_BLOB_URL"                                 <!-- ← change -->
-       download="filename.mkv">
-      ⬇ Download · X GB                                    <!-- ← change -->
-    </a>
-    <div class="video-meta">Open with VLC</div>
-  </div>
-</div>
+</section>
+<!-- ══ END VIDEOS ══════════════════════════════════════════════════════════ -->
 
 <!-- FOOTER -->
 <footer>
@@ -949,25 +1145,25 @@
 <script>
   // Custom cursor
   const cursor = document.getElementById('cursor');
-  const ring = document.getElementById('cursorRing');
+  const ring   = document.getElementById('cursorRing');
   let mx = 0, my = 0, rx = 0, ry = 0;
 
   document.addEventListener('mousemove', e => {
     mx = e.clientX; my = e.clientY;
     cursor.style.left = mx - 6 + 'px';
-    cursor.style.top = my - 6 + 'px';
+    cursor.style.top  = my - 6 + 'px';
   });
 
   function animRing() {
     rx += (mx - rx) * 0.15;
     ry += (my - ry) * 0.15;
     ring.style.left = rx - 18 + 'px';
-    ring.style.top = ry - 18 + 'px';
+    ring.style.top  = ry - 18 + 'px';
     requestAnimationFrame(animRing);
   }
   animRing();
 
-  document.querySelectorAll('a, button, .skill-card, .project-card').forEach(el => {
+  document.querySelectorAll('a, button, .skill-card, .project-card, .video-card').forEach(el => {
     el.addEventListener('mouseenter', () => {
       cursor.style.transform = 'scale(2.5)';
       ring.style.opacity = '1';
