@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>C Programming — Teaching Hub · Niraj Kumar Gupta</title>
+  <meta name="description" content="C Programming study material — MCQs, conceptual Q&amp;A, video lectures, and downloadable notes. Based on CSC115 coursework." />
+  <meta name="theme-color" content="#0b1d3a" />
+  <link rel="canonical" href="https://gupta-niraj.com.np/teaching/c-programming.html" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a href="/" class="brand"><span class="brand-mark" aria-hidden="true"></span><span>Niraj Kumar Gupta</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false"><span></span></button>
+      <nav class="nav" aria-label="Primary">
+        <a href="/#about">About</a>
+        <a href="/#experience">Experience</a>
+        <a href="/#projects">Research</a>
+        <a href="/teaching/">Teaching Hub</a>
+        <a href="/#contact" class="cta">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="page-hero">
+      <div class="container">
+        <div class="crumbs"><a href="/">Home</a><span>›</span><a href="/teaching/">Teaching Hub</a><span>›</span>C Programming</div>
+        <h1>C Programming</h1>
+        <p>Course material based on CSC115 — programming logic, control structures, functions, arrays, pointers, structures, and file I/O. Curated for first-year computer-science students.</p>
+        <div class="tags" style="margin-top: 16px;">
+          <span class="tag gold">CSC115</span>
+          <span class="tag">Tribhuvan University</span>
+          <span class="tag">SOCH College, Pokhara</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container" data-tabs>
+        <div class="tablist" role="tablist">
+          <button class="tab active" data-tab="mcq" role="tab">MCQ</button>
+          <button class="tab" data-tab="qa" role="tab">Q&amp;A</button>
+          <button class="tab" data-tab="video" role="tab">Videos</button>
+          <button class="tab" data-tab="notes" role="tab">Notes</button>
+        </div>
+
+        <!-- MCQ Panel -->
+        <div class="tabpanel active" data-panel="mcq" role="tabpanel">
+          <div class="mcq-list">
+            <div class="mcq">
+              <div class="mcq-q"><span class="num">Q1.</span>Which header file is required to use <code>printf()</code> in C?</div>
+              <ul class="mcq-options">
+                <li>&lt;conio.h&gt;</li>
+                <li data-correct="true">&lt;stdio.h&gt;</li>
+                <li>&lt;stdlib.h&gt;</li>
+                <li>&lt;string.h&gt;</li>
+              </ul>
+              <div class="mcq-reveal"><strong>Explanation:</strong> <code>stdio.h</code> (standard input/output) declares <code>printf</code>, <code>scanf</code>, and related I/O functions.</div>
+            </div>
+            <div class="placeholder">
+              <h3>More MCQs coming soon</h3>
+              <p>This section is being expanded with topic-wise MCQs covering operators, control flow, functions, pointers, and structures.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Q&A Panel -->
+        <div class="tabpanel" data-panel="qa" role="tabpanel">
+          <div class="qa">
+            <article class="qa-item">
+              <button class="qa-q">What is the difference between <code>=</code> and <code>==</code> in C?</button>
+              <div class="qa-a">
+                <p><code>=</code> is the assignment operator — it stores the right-hand value into the left-hand variable. <code>==</code> is the equality operator — it compares two values and returns 1 (true) or 0 (false). Confusing them inside an <code>if</code> condition is one of the most common bugs in introductory C.</p>
+              </div>
+            </article>
+            <article class="qa-item">
+              <button class="qa-q">Explain the difference between a pointer and an array.</button>
+              <div class="qa-a">
+                <p>An array is a contiguous block of memory holding elements of the same type — its name decays to a pointer to the first element in most expressions, but it is <em>not</em> a pointer. A pointer is a separate variable that <em>stores</em> an address. <code>sizeof(arr)</code> returns the total size of the array, while <code>sizeof(ptr)</code> returns the size of a pointer (typically 8 bytes on a 64-bit system).</p>
+              </div>
+            </article>
+            <div class="placeholder">
+              <h3>More Q&amp;A coming soon</h3>
+              <p>Topics queued: storage classes, recursion vs. iteration, structures vs. unions, file I/O modes.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Videos Panel -->
+        <div class="tabpanel" data-panel="video" role="tabpanel">
+          <div class="placeholder">
+            <h3>Video lectures coming soon</h3>
+            <p>Recorded lectures and demonstrations for control flow, pointers, and memory management will be published here.</p>
+          </div>
+        </div>
+
+        <!-- Notes Panel -->
+        <div class="tabpanel" data-panel="notes" role="tabpanel">
+          <div class="placeholder">
+            <h3>Notes coming soon</h3>
+            <p>Topic-wise reference notes and downloadable PDFs will be uploaded as the syllabus is covered.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <h4>C Programming</h4>
+          <p style="color: rgba(251, 249, 243, .7);">CSC115 — first-year programming foundations. Logic, syntax, and memory.</p>
+        </div>
+        <div>
+          <h4>Other Subjects</h4>
+          <a href="/teaching/cloud-computing.html">Cloud Computing</a>
+          <a href="/teaching/electrical-engineering.html">Electrical Engineering</a>
+          <a href="/teaching/ai-ml.html">AI / ML / DL</a>
+        </div>
+        <div>
+          <h4>Site</h4>
+          <a href="/">Home</a>
+          <a href="/teaching/">Teaching Hub</a>
+          <a href="/#contact">Contact</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 Niraj Kumar Gupta</span>
+        <span><a href="/teaching/" style="color: inherit;">← All subjects</a></span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/assets/js/main.js" defer></script>
+</body>
+</html>
