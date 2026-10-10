@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>2.2 Switching Methods — Routing & Switching</title>
+<title>Unit 2.2 · Switching Methods — Switching &amp; Routing</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Slab:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -472,9 +472,40 @@
   }
 </style>
 </head>
-<body><div style="font:14px/1.4 Inter,-apple-system,Segoe UI,sans-serif;background:#0b1d3a;padding:10px 16px;"><a href="/teaching/switching-routing.html" style="color:#fbf9f3;text-decoration:none;">&larr; Switching &amp; Routing &middot; all units</a></div>
-
-<div class="wrap">
+<body><!--nkg:bar--><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600&amp;display=swap"><style>
+#nkg-unitbar,#nkg-unitfoot{all:initial;display:block;box-sizing:border-box;position:relative;z-index:2147483000;align-self:stretch;justify-self:stretch;
+  background:#0b1d3a;color:#fbf9f3;font:500 14px/1.2 Inter,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+#nkg-unitbar{height:50px;border-bottom:2px solid #c9a14a}
+#nkg-unitbar[data-mode=fixed]{position:fixed;top:0;left:0;right:0}
+#nkg-unitfoot{border-top:2px solid #c9a14a;margin-top:48px}
+#nkg-unitbar *,#nkg-unitfoot *{box-sizing:border-box}
+#nkg-unitbar .nkg-in,#nkg-unitfoot .nkg-in{display:flex;align-items:center;gap:12px;height:100%;max-width:1280px;margin:0 auto;padding:0 16px}
+#nkg-unitfoot .nkg-in{padding:18px 16px;gap:12px;flex-wrap:wrap}
+#nkg-unitbar a,#nkg-unitfoot a{color:#fbf9f3!important;text-decoration:none!important;background:none;border:0;font:inherit;cursor:pointer}
+#nkg-unitbar .nkg-mark{flex:none;display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;
+  background:linear-gradient(135deg,#11295a,#1c3a78);color:#d9b769;font:700 11px/1 Georgia,serif;letter-spacing:.02em;box-shadow:0 0 0 1px rgba(201,161,74,.5)}
+#nkg-unitbar .nkg-subj{flex:none;font-weight:600;white-space:nowrap}
+#nkg-unitbar .nkg-subj:hover{color:#d9b769!important}
+#nkg-unitbar .nkg-sep{flex:none;color:#c9a14a}
+#nkg-unitbar .nkg-unit{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#cdd5e3}
+#nkg-unitbar .nkg-unit b{color:#d9b769;font-weight:600;margin-right:6px}
+#nkg-unitbar .nkg-nav{flex:none;display:flex;gap:6px}
+#nkg-unitbar .nkg-btn{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:6px;border:1px solid rgba(251,249,243,.22)!important;white-space:nowrap}
+#nkg-unitbar .nkg-btn:hover{border-color:#c9a14a!important;color:#d9b769!important}
+#nkg-unitbar .nkg-btn[aria-disabled=true]{opacity:.35;pointer-events:none}
+#nkg-unitfoot .nkg-card{flex:1 1 260px;display:flex;flex-direction:column;gap:4px;padding:12px 16px;border-radius:8px;border:1px solid rgba(251,249,243,.18)!important}
+#nkg-unitfoot .nkg-card:hover{border-color:#c9a14a!important}
+#nkg-unitfoot .nkg-card.next{text-align:right}
+#nkg-unitfoot .nkg-k{font:600 11px/1 Inter,-apple-system,"Segoe UI",sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#c9a14a}
+#nkg-unitfoot .nkg-t{font-size:15px;font-weight:600}
+#nkg-unitfoot .nkg-copy{flex-basis:100%;font-size:12px;color:#8c93ab;text-align:center;padding-top:6px}
+@media (max-width:640px){
+  #nkg-unitbar .nkg-subj,#nkg-unitbar .nkg-sep{display:none}
+  #nkg-unitbar .nkg-btn span{display:none}
+  #nkg-unitbar .nkg-btn{padding:0 10px}
+}
+@media (max-width:760px){table{display:block;max-width:100%;overflow-x:auto}}
+</style><nkg-unitbar id="nkg-unitbar" data-mode="flow" role="navigation" aria-label="Course navigation"><span class="nkg-in"><a class="nkg-mark" href="/teaching/" title="Teaching Hub">NKG</a><a class="nkg-subj" href="/teaching/switching-routing.html">Switching &amp; Routing</a><span class="nkg-sep">/</span><span class="nkg-unit"><b>Unit 2.2</b>Switching Methods</span><span class="nkg-nav"><a class="nkg-btn" href="/teaching/switching-routing/unit-1-3-cisco-ios-cli-basics.html" title="Previous: Unit 1.3 · Cisco IOS &amp; CLI Basics">&#8249;<span> Prev</span></a><a class="nkg-btn" href="/teaching/switching-routing.html" title="All units">&#9776;<span> All units</span></a><a class="nkg-btn" href="/teaching/switching-routing/unit-2-3-mac-address-table.html" title="Next: Unit 2.3 · MAC Address Table &amp; Frame Forwarding"><span>Next </span>&#8250;</a></span></span></nkg-unitbar><!--/nkg:bar--><div class="wrap">
   <header class="hero">
     <p class="kicker">NCS 485 · Routing &amp; Switching <span class="dot">·</span> Unit 2.2</p>
     <h1 class="title">How a switch decides when to forward a frame</h1>
@@ -799,7 +830,9 @@
   }
   slider.addEventListener('input', render);
   render();
-</script>
-
+</script><!--nkg:foot--><nkg-unitfoot id="nkg-unitfoot" role="navigation" aria-label="Lesson navigation"><span class="nkg-in"><a class="nkg-card prev" href="/teaching/switching-routing/unit-1-3-cisco-ios-cli-basics.html"><span class="nkg-k">&#8249; Previous</span><span class="nkg-t">Unit 1.3 · Cisco IOS &amp; CLI Basics</span></a><a class="nkg-card" href="/teaching/switching-routing.html"><span class="nkg-k">NCS 485</span><span class="nkg-t">All Switching &amp; Routing units</span></a><a class="nkg-card next" href="/teaching/switching-routing/unit-2-3-mac-address-table.html"><span class="nkg-k">Next &#8250;</span><span class="nkg-t">Unit 2.3 · MAC Address Table &amp; Frame Forwarding</span></a><span class="nkg-copy">Niraj Kumar Gupta · Teaching Hub · Switching &amp; Routing (NCS 485)</span></span></nkg-unitfoot><script>(function(){try{var b=document.getElementById('nkg-unitbar'),f=document.getElementById('nkg-unitfoot'),cs=getComputedStyle(document.body),n=function(p){return parseFloat(cs[p])||0};
+var l=n('paddingLeft')+n('marginLeft'),r=n('paddingRight')+n('marginRight');
+if(b&&b.getAttribute('data-mode')!=='fixed'){var t=n('paddingTop')+n('marginTop');b.style.marginTop=-t+'px';b.style.marginLeft=-l+'px';b.style.marginRight=-r+'px';b.style.marginBottom=n('paddingTop')+'px';}
+if(f){f.style.marginLeft=(parseFloat(f.style.marginLeft)||0)-l+'px';f.style.marginRight=-r+'px';f.style.marginBottom=-(n('paddingBottom')+n('marginBottom'))+'px';}}catch(e){}})();</script><!--/nkg:foot-->
 </body>
 </html>

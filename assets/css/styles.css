@@ -605,3 +605,80 @@ p { margin: 0 0 1em; }
   .fade-up.d3 { animation-delay: .3s; }
   @keyframes fadeUp { to { opacity: 1; transform: none; } }
 }
+
+/* ---------- Unit catalogue (subject pages) ---------- */
+.unit-section { padding-top: clamp(40px, 6vw, 64px); }
+.course-bar {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: 14px 24px; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid var(--line);
+}
+.course-stats { display: flex; flex-wrap: wrap; gap: 8px 22px; color: var(--ink-500); font-size: .95rem; }
+.course-stats strong { font-variant-numeric: lining-nums; font-family: var(--serif); font-size: 1.6rem; color: var(--navy-800); margin-right: 4px; font-weight: 700; }
+.unit-jump { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.unit-jump span { font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-300); margin-right: 6px; }
+.unit-jump a {
+  width: 34px; height: 34px; display: inline-grid; place-items: center; border-radius: 50%;
+  border: 1px solid var(--line); background: var(--card); color: var(--navy-800);
+  font-family: var(--serif); font-weight: 700; font-size: 1.05rem; font-variant-numeric: lining-nums;
+  transition: background .2s ease, color .2s ease, border-color .2s ease;
+}
+.unit-jump a:hover { background: var(--navy-800); color: var(--gold-400); border-color: var(--navy-800); }
+
+.unit-list { display: grid; gap: 22px; }
+.unit {
+  display: grid; grid-template-columns: 96px minmax(0, 1fr);
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-lg);
+  overflow: hidden; box-shadow: var(--shadow-sm); scroll-margin-top: 90px;
+}
+.unit-num {
+  background: linear-gradient(165deg, var(--navy-800), var(--navy-600));
+  color: var(--gold-400); font-family: var(--serif); font-weight: 700; font-size: 2.8rem; line-height: 1; font-variant-numeric: lining-nums;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 6px; padding-top: 26px;
+}
+.unit-num span { font-family: var(--sans); font-size: .68rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: rgba(251, 249, 243, .7); }
+.unit-body { padding: 24px 26px 26px; min-width: 0; }
+.unit-body h2 { font-size: 1.65rem; margin: 0 0 4px; }
+.unit-summary { color: var(--ink-500); margin: 0 0 16px; max-width: 70ch; }
+.lessons { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.lesson a {
+  display: grid; grid-template-columns: 74px minmax(0, 1fr) auto; align-items: center; gap: 14px;
+  padding: 12px 16px; border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--cream-50); color: var(--ink-900);
+  transition: border-color .2s ease, background .2s ease, transform .2s ease, box-shadow .2s ease;
+}
+.lesson a:hover { border-color: var(--gold-500); background: #fff; transform: translateX(3px); box-shadow: var(--shadow-sm); }
+.lesson a:focus-visible { outline: 2px solid var(--gold-500); outline-offset: 2px; }
+.lesson-kind {
+  justify-self: start; font: 600 .66rem/1 var(--mono); letter-spacing: .08em; text-transform: uppercase;
+  padding: 6px 9px; border-radius: 999px; background: var(--navy-100); color: var(--navy-700);
+}
+.lesson-kind.lab { background: #f4ead2; color: #7a5a17; }
+.lesson-kind.slides { background: #e5efe9; color: #2d6148; }
+.lesson-text { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.lesson-title { font-weight: 600; }
+.lesson-meta { font-size: .87rem; color: var(--ink-500); }
+.lesson-go { color: var(--gold-600); font-size: 1.15rem; transition: transform .2s ease; }
+.lesson a:hover .lesson-go { transform: translateX(3px); }
+.unit-files { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 14px; }
+.unit-files-label { font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-300); margin-right: 4px; }
+.file-chip {
+  display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px 6px 6px;
+  border: 1px dashed var(--gold-500); border-radius: 999px; font-size: .85rem; color: var(--ink-700); background: #fff;
+}
+.file-chip:hover { background: var(--cream-100); color: var(--navy-800); }
+.file-ext {
+  font: 600 .62rem/1 var(--mono); text-transform: uppercase; letter-spacing: .06em;
+  padding: 5px 7px; border-radius: 999px; background: var(--navy-800); color: var(--gold-400);
+}
+@media (max-width: 640px) {
+  .unit { grid-template-columns: 1fr; }
+  .unit-num { flex-direction: row; justify-content: flex-start; align-items: baseline; gap: 10px; font-size: 1.9rem; padding: 14px 20px; }
+  .unit-body { padding: 18px 18px 20px; }
+  .lesson a { grid-template-columns: minmax(0, 1fr) auto; row-gap: 8px; }
+  .lesson-kind { grid-column: 1 / -1; }
+  .lesson-go { grid-row: 2; grid-column: 2; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lesson a, .lesson-go, .unit-jump a { transition: none; }
+  .lesson a:hover, .lesson a:hover .lesson-go { transform: none; }
+}
