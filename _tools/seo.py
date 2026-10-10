@@ -39,7 +39,7 @@ PERSON = {
                    'C Programming', 'Python', 'Data Mining'],
     'sameAs': ['https://www.researchgate.net/publication/370580661'],
     'image': IMAGE,
-    'email': 'mailto:guptaniraj2051@gmail.com',
+    'email': 'mailto:contact@gupta-niraj.com.np',
     'subjectOf': {'@type': 'DigitalDocument', 'name': 'Curriculum Vitae', 'encodingFormat': 'application/pdf',
                   'url': SITE + '/assets/Niraj_Kumar_Gupta_CV.pdf'},
 }
