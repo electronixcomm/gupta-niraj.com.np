@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>IP Addressing: Classful vs. Classless — Network Design Guide</title>
+<style>
+  :root{
+    --bg: #FBFAF6;
+    --paper: #FFFFFF;
+    --ink: #221F1B;
+    --ink-soft: #5A5650;
+    --rule: #DEDACF;
+    --accent: #9E1B32;      /* muted crimson, echoing the Nepal flag */
+    --accent-soft: #F4E4E6;
+    --slate: #223047;       /* deep network-blue for secondary structure */
+    --slate-soft: #EDF0F4;
+    --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    --serif: Georgia, "Iowan Old Style", "Palatino Linotype", serif;
+    --sans: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--sans);
+    line-height:1.6;
+  }
+  .sheet{
+    max-width:900px;
+    margin:0 auto;
+    background:var(--paper);
+    padding:56px clamp(24px,5vw,72px) 80px;
+    border-left:1px solid var(--rule);
+    border-right:1px solid var(--rule);
+  }
+  header.title-block{
+    padding-bottom:28px;
+    margin-bottom:40px;
+    border-bottom:3px solid var(--slate);
+  }
+  .kicker{
+    font-family:var(--mono);
+    font-size:12.5px;
+    letter-spacing:.03em;
+    color:var(--accent);
+    margin:0 0 10px;
+  }
+  h1{
+    font-family:var(--serif);
+    font-size:clamp(28px,4vw,38px);
+    line-height:1.2;
+    margin:0 0 14px;
+    color:var(--slate);
+  }
+  .subtitle{
+    font-size:16px;
+    color:var(--ink-soft);
+    max-width:70ch;
+    margin:0;
+  }
+  h2{
+    font-family:var(--serif);
+    font-size:24px;
+    color:var(--slate);
+    margin:56px 0 6px;
+    padding-bottom:10px;
+    border-bottom:1px solid var(--rule);
+  }
+  h2 .num{
+    color:var(--accent);
+    font-family:var(--mono);
+    font-size:15px;
+    margin-right:10px;
+  }
+  h3{
+    font-family:var(--serif);
+    font-size:18px;
+    color:var(--ink);
+    margin:32px 0 10px;
+  }
+  h3 .num{
+    color:var(--accent);
+    font-family:var(--mono);
+    font-size:14px;
+    margin-right:6px;
+  }
+  p{ margin:0 0 14px; max-width:74ch; }
+  .callout{
+    background:var(--accent-soft);
+    border-left:3px solid var(--accent);
+    padding:16px 20px;
+    margin:18px 0 22px;
+    border-radius:2px;
+  }
+  .callout p{ margin:0; max-width:none; }
+  .callout .label{
+    display:block;
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--accent);
+    margin-bottom:6px;
+  }
+  table{
+    width:100%;
+    border-collapse:collapse;
+    margin:16px 0 28px;
+    font-size:14.5px;
+  }
+  caption{
+    text-align:left;
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-bottom:6px;
+  }
+  th, td{
+    padding:9px 12px;
+    text-align:left;
+    border-bottom:1px solid var(--rule);
+  }
+  th{
+    background:var(--slate);
+    color:#fff;
+    font-family:var(--sans);
+    font-weight:600;
+    font-size:13px;
+  }
+  tbody tr:nth-child(even){ background:var(--slate-soft); }
+  td.mono, th.mono{ font-family:var(--mono); }
+  code{
+    font-family:var(--mono);
+    background:var(--slate-soft);
+    padding:1px 5px;
+    border-radius:3px;
+    font-size:0.93em;
+  }
+  pre{
+    background:var(--slate);
+    color:#EAEFF5;
+    padding:18px 20px;
+    border-radius:4px;
+    overflow-x:auto;
+    font-family:var(--mono);
+    font-size:13.5px;
+    line-height:1.55;
+    margin:16px 0 24px;
+  }
+  pre .arrow{ color:#E8B4BC; }
+  pre .result{ color:#9FD3A0; }
+  ul, ol{ margin:0 0 16px; padding-left:22px; }
+  li{ margin-bottom:6px; }
+  .divider{
+    border:0;
+    border-top:1px solid var(--rule);
+    margin:48px 0;
+  }
+  .summary-table th:first-child, .summary-table td:first-child{ font-weight:600; }
+  footer{
+    margin-top:56px;
+    padding-top:20px;
+    border-top:1px solid var(--rule);
+    font-size:13px;
+    color:var(--ink-soft);
+  }
+  @media (max-width:600px){
+    .sheet{ padding:36px 18px 60px; border-left:none; border-right:none; }
+  }
+</style>
+</head>
+<body><div style="font:14px/1.4 Inter,-apple-system,Segoe UI,sans-serif;background:#0b1d3a;padding:10px 16px;"><a href="/teaching/switching-routing.html" style="color:#fbf9f3;text-decoration:none;">&larr; Switching &amp; Routing &middot; all units</a></div>
+<div class="sheet">
+
+  <header class="title-block">
+    <p class="kicker">NETWORK DESIGN REFERENCE</p>
+    <h1>IP Addressing: Classful vs. Classless</h1>
+    <p class="subtitle">Background theory plus three complete worked designs — Chaudhary Group (Class A), Pokhara University (Class B), and UniGlobe College (Class C) — covering subnetting, supernetting, and broadcast address calculation.</p>
+  </header>
+
+  <h2><span class="num">1</span>Background</h2>
+
+  <h3><span class="num">1.1</span>IPv4 Addressing Fundamentals</h3>
+  <p>An IPv4 address is a 32-bit number, written as four 8-bit octets in dotted-decimal notation (e.g., <code>192.168.1.10</code>). Every address logically splits into two parts: the <strong>network ID</strong>, identifying which network a device belongs to, and the <strong>host ID</strong>, identifying the specific device on that network. How that split happens is exactly what differs between classful and classless addressing.</p>
+
+  <h3><span class="num">1.2</span>Classful Addressing (1981–1993)</h3>
+  <p>In the original IPv4 design (RFC 791), the network/host boundary was fixed by the value of the address's leading bits. This produced five classes:</p>
+
+  <table>
+    <caption>Table 1 — The five address classes</caption>
+    <thead>
+      <tr><th>Class</th><th>Leading Bits</th><th>First Octet Range</th><th class="mono">Default Mask</th><th># Networks</th><th>Hosts / Network</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>A</td><td class="mono">0</td><td>1 – 126</td><td class="mono">255.0.0.0 (/8)</td><td>126</td><td>16,777,214</td></tr>
+      <tr><td>B</td><td class="mono">10</td><td>128 – 191</td><td class="mono">255.255.0.0 (/16)</td><td>16,384</td><td>65,534</td></tr>
+      <tr><td>C</td><td class="mono">110</td><td>192 – 223</td><td class="mono">255.255.255.0 (/24)</td><td>2,097,152</td><td>254</td></tr>
+      <tr><td>D</td><td class="mono">1110</td><td>224 – 239</td><td colspan="3">Reserved for multicast</td></tr>
+      <tr><td>E</td><td class="mono">1111</td><td>240 – 255</td><td colspan="3">Reserved / experimental</td></tr>
+    </tbody>
+  </table>
+  <p><em>(127.x.x.x is reserved for loopback and excluded from the usable Class A range.)</em></p>
+
+  <div class="callout">
+    <span class="label">THE PROBLEM</span>
+    <p>The class boundaries are rigid. An organization needing 300 hosts couldn't get "a bit more than a Class C" — it had to be bumped to an entire Class B (65,534 addresses), wasting over 65,000 of them. Multiplied across the growing internet, this inefficiency rapidly exhausted the IPv4 address space and bloated routing tables.</p>
+  </div>
+
+  <h3><span class="num">1.2.1</span>How to Select / Identify a Class</h3>
+  <p>Selecting a class works two ways: <strong>reading</strong> the class off an existing address, or <strong>choosing</strong> a class when designing a network the old way.</p>
+
+  <p><strong>Reading a class from an address</strong> — check the value of the first octet (or its leading bits):</p>
+  <table>
+    <caption>Table 1a — Selecting a class from the first octet</caption>
+    <thead>
+      <tr><th>First Octet (decimal)</th><th class="mono">Leading Bits</th><th>Class</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1 – 126</td><td class="mono">0...</td><td>A</td></tr>
+      <tr><td>128 – 191</td><td class="mono">10..</td><td>B</td></tr>
+      <tr><td>192 – 223</td><td class="mono">110.</td><td>C</td></tr>
+      <tr><td>224 – 239</td><td class="mono">1110</td><td>D (multicast)</td></tr>
+      <tr><td>240 – 255</td><td class="mono">1111</td><td>E (reserved)</td></tr>
+    </tbody>
+  </table>
+  <pre>Example:  172.16.0.0
+First octet = 172 → binary 10101100 → leading bits "10" → 128–191 range <span class="result">→ Class B</span>
+
+Example:  200.10.0.0
+First octet = 200 → binary 11001000 → leading bits "110" → 192–223 range <span class="result">→ Class C</span></pre>
+  <p><em>(127.x.x.x looks like Class A by range but is reserved for loopback — the one exception.)</em></p>
+
+  <p><strong>Choosing a class when designing (legacy method)</strong> — count the total hosts needed and pick the smallest class that covers it, to avoid waste:</p>
+  <ul>
+    <li>Up to 254 hosts → Class C is enough</li>
+    <li>Up to 65,534 hosts → Class B</li>
+    <li>Up to 16,777,214 hosts → Class A</li>
+  </ul>
+  <p>In modern classless practice, this step is skipped entirely — Formula 1 in §1.5 (<code>n = ⌈log₂(H+2)⌉</code>) sizes a prefix exactly to the host count, which is the whole point of CIDR.</p>
+
+  <h3><span class="num">1.3</span>Classless Addressing — CIDR (RFC 1519, 1993)</h3>
+  <p><strong>Classless Inter-Domain Routing (CIDR)</strong> removed the fixed class boundaries. The network/host split is instead defined by an explicit prefix length (<code>/n</code>), which can fall anywhere from <code>/0</code> to <code>/32</code>, independent of the address's first octet. This enables two complementary techniques, both demonstrated below:</p>
+  <ul>
+    <li><strong>Subnetting</strong> — borrowing host bits to split one large network into several smaller ones, matching address blocks to actual site or department size.</li>
+    <li><strong>Supernetting (route aggregation)</strong> — borrowing network bits to merge several contiguous smaller networks into one larger advertised block, shrinking backbone routing tables.</li>
+  </ul>
+
+  <h3><span class="num">1.4</span>Broadcast and Network Address Rules</h3>
+  <p>For any network or subnet: the <strong>network address</strong> is the address with all host bits set to <strong>0</strong> — it identifies the block itself and is never assigned to a device. The <strong>broadcast address</strong> is the address with all host bits set to <strong>1</strong> — it is used to reach every host on that subnet at once. Usable hosts fall strictly between the two.</p>
+
+  <h3><span class="num">1.5</span>Log Base 2 Formulas — Sizing Host Bits and Subnet Bits</h3>
+  <p>Every subnetting decision comes down to how the 32 available bits are split between <strong>network/subnet bits</strong> and <strong>host bits</strong>. Because each additional bit doubles the count it controls, the exact number of bits needed is found with <strong>log base 2</strong>, rounded up to the next whole bit (a fractional bit isn't usable, so the result is always ceiling-rounded).</p>
+
+  <div class="callout">
+    <span class="label">FORMULA 1 — HOST BITS NEEDED</span>
+    <p>To support <code>H</code> required hosts on a subnet, two addresses in every block are unusable (the network address and the broadcast address), so:</p>
+    <pre style="margin-top:10px;margin-bottom:0;">n = ⌈ log₂(H + 2) ⌉
+
+Verification:  2ⁿ − 2  ≥  H</pre>
+  </div>
+
+  <div class="callout">
+    <span class="label">FORMULA 2 — SUBNET BITS NEEDED</span>
+    <p>To create at least <code>N</code> separate subnets from one block, the number of bits borrowed from the network side is:</p>
+    <pre style="margin-top:10px;margin-bottom:0;">s = ⌈ log₂(N) ⌉
+
+Verification:  2ˢ  ≥  N</pre>
+  </div>
+
+  <p>Once <code>n</code> (host bits) is fixed by Formula 1, the new prefix length is simply <code>32 − n</code>. The bits left over between the original classful prefix and the new prefix (<code>new prefix − original prefix</code>) automatically become available subnet bits — this is what Formula 2 checks against, to confirm enough subnets exist for the number of sites the design needs. Both formulas are applied explicitly in each class's design below.</p>
+
+  <hr class="divider">
+
+  <h2><span class="num">2</span>Class A — Chaudhary Group (CG Corporation)</h2>
+
+  <h3><span class="num">2.0</span>Why Class A?</h3>
+  <p>Applying the class-selection rule from §1.2.1 to Chaudhary Group's requirement of <strong>250,000 hosts per region</strong>:</p>
+  <pre>Required hosts per region: 250,000
+
+Class C ceiling:  254 hosts        →  250,000 > 254        →  Class C is nowhere near enough
+Class B ceiling:  65,534 hosts     →  250,000 > 65,534     →  Class B is <span class="arrow">still not enough</span>
+Class A ceiling:  16,777,214 hosts →  250,000 ≤ 16,777,214 →  <span class="result">Class A is the smallest class that fits</span></pre>
+  <p>Since 250,000 clears the Class B ceiling of 65,536 addresses (65,534 usable) outright, Class B is disqualified immediately — there's no in-between option in classful addressing. Class A is therefore the only class large enough to host a single 250,000-device region, which is why <code>10.0.0.0/8</code> is the correct starting block.</p>
+
+  <div class="callout">
+    <span class="label">PROBLEM STATEMENT</span>
+    <p><strong>Chaudhary Group</strong>, Nepal's largest multinational conglomerate, is assigned the private Class A block <code>10.0.0.0/8</code> for its global data network. It operates six regional business hubs — Nepal, India, the Middle East, Africa, Southeast Asia, and Europe — each requiring capacity for up to 250,000 connected devices (POS systems, IoT sensors, and staff endpoints across hotels, FMCG plants, and financial branches), with room to grow. Design a subnetting scheme, compute each region's network, host range, and broadcast address, and show how two adjacent regions can be summarized for the corporate backbone.</p>
+  </div>
+
+  <h3><span class="num">2.1</span>Subnetting Solution</h3>
+  <pre>Formula 1 — host bits:
+n = ⌈ log₂(H + 2) ⌉ = ⌈ log₂(250,000 + 2) ⌉ = ⌈ log₂(250,002) ⌉ = ⌈ 17.93 ⌉ <span class="result">= 18 bits</span>
+
+Verification:  2¹⁸ − 2 = 262,142 ≥ 250,000  ✓
+
+New prefix = 32 − n = 32 − 18 = <span class="result">/14</span>  (mask 255.252.0.0)
+
+Formula 2 — subnet bits available for 6 regions:
+borrowed bits = new prefix − original prefix = 14 − 8 = 6  →  2⁶ = 64 subnets available
+Required: s = ⌈ log₂(6) ⌉ = ⌈ 2.58 ⌉ = 3 bits  →  64 ≥ 8 (2³), well within capacity  ✓</pre>
+  <p>Block size in the 2nd octet = 256 − 252 = <strong>4</strong>.</p>
+
+  <table>
+    <caption>Table 2 — Chaudhary Group regional subnets</caption>
+    <thead>
+      <tr><th>Region</th><th class="mono">Subnet (CIDR)</th><th class="mono">Network Address</th><th class="mono">First Host</th><th class="mono">Last Host</th><th class="mono">Broadcast Address</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Nepal HQ</td><td class="mono">10.0.0.0/14</td><td class="mono">10.0.0.0</td><td class="mono">10.0.0.1</td><td class="mono">10.3.255.254</td><td class="mono">10.3.255.255</td></tr>
+      <tr><td>India</td><td class="mono">10.4.0.0/14</td><td class="mono">10.4.0.0</td><td class="mono">10.4.0.1</td><td class="mono">10.7.255.254</td><td class="mono">10.7.255.255</td></tr>
+      <tr><td>Middle East</td><td class="mono">10.8.0.0/14</td><td class="mono">10.8.0.0</td><td class="mono">10.8.0.1</td><td class="mono">10.11.255.254</td><td class="mono">10.11.255.255</td></tr>
+      <tr><td>Africa</td><td class="mono">10.12.0.0/14</td><td class="mono">10.12.0.0</td><td class="mono">10.12.0.1</td><td class="mono">10.15.255.254</td><td class="mono">10.15.255.255</td></tr>
+      <tr><td>Southeast Asia</td><td class="mono">10.16.0.0/14</td><td class="mono">10.16.0.0</td><td class="mono">10.16.0.1</td><td class="mono">10.19.255.254</td><td class="mono">10.19.255.255</td></tr>
+      <tr><td>Europe</td><td class="mono">10.20.0.0/14</td><td class="mono">10.20.0.0</td><td class="mono">10.20.0.1</td><td class="mono">10.23.255.254</td><td class="mono">10.23.255.255</td></tr>
+    </tbody>
+  </table>
+  <p>Each region receives 262,142 usable hosts — comfortably above the 250,000 requirement.</p>
+
+  <h3><span class="num">2.2</span>Supernetting Solution</h3>
+  <p>Nepal HQ (<code>10.0.0.0/14</code>) and India (<code>10.4.0.0/14</code>) are contiguous and bit-aligned, so they can be summarized into a single backbone route:</p>
+  <pre>10.0.0.0/14   (Nepal HQ)      10.0.0.0 – 10.3.255.255
+10.4.0.0/14   (India)         10.4.0.0 – 10.7.255.255
+        <span class="arrow">↓ aggregate</span>
+<span class="result">10.0.0.0/13   →  mask 255.248.0.0  →  covers 10.0.0.0 – 10.7.255.255</span></pre>
+  <p>The backbone router now carries <strong>one /13 route</strong> instead of two /14 entries, while still reaching both regions.</p>
+
+  <hr class="divider">
+
+  <h2><span class="num">3</span>Class B — Pokhara University</h2>
+
+  <div class="callout">
+    <span class="label">PROBLEM STATEMENT</span>
+    <p><strong>Pokhara University</strong> is assigned the private Class B block <code>172.16.0.0/16</code> for its main campus network. It must allocate address space for ten blocks — the Faculty of Science & Technology, Faculty of Management, Faculty of Humanities & Social Sciences, School of Health Sciences, the Central Library, Administration, and four student hostel blocks — each needing up to 2,000 hosts. Design the subnetting scheme, calculate network and broadcast addresses, and demonstrate supernetting four adjacent blocks into one backbone route.</p>
+  </div>
+
+  <h3><span class="num">3.1</span>Subnetting Solution</h3>
+  <pre>Formula 1 — host bits:
+n = ⌈ log₂(H + 2) ⌉ = ⌈ log₂(2,000 + 2) ⌉ = ⌈ log₂(2,002) ⌉ = ⌈ 10.97 ⌉ <span class="result">= 11 bits</span>
+
+Verification:  2¹¹ − 2 = 2,046 ≥ 2,000  ✓
+
+New prefix = 32 − n = 32 − 11 = <span class="result">/21</span>  (mask 255.255.248.0)
+
+Formula 2 — subnet bits available for 10 blocks:
+borrowed bits = new prefix − original prefix = 21 − 16 = 5  →  2⁵ = 32 subnets available
+Required: s = ⌈ log₂(10) ⌉ = ⌈ 3.32 ⌉ = 4 bits  →  32 ≥ 16 (2⁴), well within capacity  ✓</pre>
+  <p>Block size in the 3rd octet = 256 − 248 = <strong>8</strong>.</p>
+
+  <table>
+    <caption>Table 3 — Pokhara University campus subnets</caption>
+    <thead>
+      <tr><th>Block</th><th class="mono">Subnet (CIDR)</th><th class="mono">Network Address</th><th class="mono">First Host</th><th class="mono">Last Host</th><th class="mono">Broadcast Address</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Science & Technology</td><td class="mono">172.16.0.0/21</td><td class="mono">172.16.0.0</td><td class="mono">172.16.0.1</td><td class="mono">172.16.7.254</td><td class="mono">172.16.7.255</td></tr>
+      <tr><td>Management</td><td class="mono">172.16.8.0/21</td><td class="mono">172.16.8.0</td><td class="mono">172.16.8.1</td><td class="mono">172.16.15.254</td><td class="mono">172.16.15.255</td></tr>
+      <tr><td>Humanities & Soc. Sciences</td><td class="mono">172.16.16.0/21</td><td class="mono">172.16.16.0</td><td class="mono">172.16.16.1</td><td class="mono">172.16.23.254</td><td class="mono">172.16.23.255</td></tr>
+      <tr><td>Health Sciences</td><td class="mono">172.16.24.0/21</td><td class="mono">172.16.24.0</td><td class="mono">172.16.24.1</td><td class="mono">172.16.31.254</td><td class="mono">172.16.31.255</td></tr>
+      <tr><td>Central Library</td><td class="mono">172.16.32.0/21</td><td class="mono">172.16.32.0</td><td class="mono">172.16.32.1</td><td class="mono">172.16.39.254</td><td class="mono">172.16.39.255</td></tr>
+      <tr><td>Administration</td><td class="mono">172.16.40.0/21</td><td class="mono">172.16.40.0</td><td class="mono">172.16.40.1</td><td class="mono">172.16.47.254</td><td class="mono">172.16.47.255</td></tr>
+      <tr><td>Hostel Block 1</td><td class="mono">172.16.48.0/21</td><td class="mono">172.16.48.0</td><td class="mono">172.16.48.1</td><td class="mono">172.16.55.254</td><td class="mono">172.16.55.255</td></tr>
+      <tr><td>Hostel Block 2</td><td class="mono">172.16.56.0/21</td><td class="mono">172.16.56.0</td><td class="mono">172.16.56.1</td><td class="mono">172.16.63.254</td><td class="mono">172.16.63.255</td></tr>
+      <tr><td>Hostel Block 3</td><td class="mono">172.16.64.0/21</td><td class="mono">172.16.64.0</td><td class="mono">172.16.64.1</td><td class="mono">172.16.71.254</td><td class="mono">172.16.71.255</td></tr>
+      <tr><td>Hostel Block 4</td><td class="mono">172.16.72.0/21</td><td class="mono">172.16.72.0</td><td class="mono">172.16.72.1</td><td class="mono">172.16.79.254</td><td class="mono">172.16.79.255</td></tr>
+    </tbody>
+  </table>
+
+  <h3><span class="num">3.2</span>Supernetting Solution</h3>
+  <p>Central Library, Administration, Hostel Block 1, and Hostel Block 2 (<code>172.16.32.0/21</code> through <code>172.16.56.0/21</code>) are four contiguous /21 blocks starting at an address divisible by 32 — properly aligned for aggregation into a single <strong>/19</strong>:</p>
+  <pre>172.16.32.0/21   (Central Library)
+172.16.40.0/21   (Administration)
+172.16.48.0/21   (Hostel Block 1)
+172.16.56.0/21   (Hostel Block 2)
+        <span class="arrow">↓ aggregate</span>
+<span class="result">172.16.32.0/19   →  mask 255.255.224.0  →  covers 172.16.32.0 – 172.16.63.255</span></pre>
+  <p>The campus core router now advertises <strong>one /19 route</strong> to the university's edge, instead of four separate /21 routes.</p>
+
+  <hr class="divider">
+
+  <h2><span class="num">4</span>Class C — UniGlobe College</h2>
+
+  <div class="callout">
+    <span class="label">PROBLEM STATEMENT</span>
+    <p><strong>UniGlobe College</strong> is assigned the private Class C block <code>192.168.1.0/24</code> for its Kathmandu head office, which has four departments — Admissions, Academics, IT Support, and Finance — each needing up to 25 hosts. Separately, UniGlobe's ISP, <strong>Vianet Communications</strong>, has assigned it four contiguous public Class C blocks (<code>200.10.0.0/24</code> through <code>200.10.3.0/24</code>) for its four branch campuses — Kathmandu, Pokhara, Chitwan, and Butwal. Design the internal subnetting for the head office, and show how Vianet supernets the four branch blocks into one advertised route.</p>
+  </div>
+
+  <h3><span class="num">4.1</span>Subnetting Solution (Head Office, 192.168.1.0/24)</h3>
+  <pre>Formula 1 — host bits:
+n = ⌈ log₂(H + 2) ⌉ = ⌈ log₂(25 + 2) ⌉ = ⌈ log₂(27) ⌉ = ⌈ 4.75 ⌉ <span class="result">= 5 bits</span>
+
+Verification:  2⁵ − 2 = 30 ≥ 25  ✓
+
+New prefix = 32 − n = 32 − 5 = <span class="result">/27</span>  (mask 255.255.255.224)
+
+Formula 2 — subnet bits available for 4 departments:
+borrowed bits = new prefix − original prefix = 27 − 24 = 3  →  2³ = 8 subnets available
+Required: s = ⌈ log₂(4) ⌉ = ⌈ 2 ⌉ = 2 bits  →  8 ≥ 4 (2²), capacity confirmed  ✓</pre>
+  <p>Block size in the 4th octet = 256 − 224 = <strong>32</strong>.</p>
+
+  <table>
+    <caption>Table 4 — UniGlobe College head-office subnets</caption>
+    <thead>
+      <tr><th>Department</th><th class="mono">Subnet (CIDR)</th><th class="mono">Network Address</th><th class="mono">First Host</th><th class="mono">Last Host</th><th class="mono">Broadcast Address</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Admissions</td><td class="mono">192.168.1.0/27</td><td class="mono">192.168.1.0</td><td class="mono">192.168.1.1</td><td class="mono">192.168.1.30</td><td class="mono">192.168.1.31</td></tr>
+      <tr><td>Academics</td><td class="mono">192.168.1.32/27</td><td class="mono">192.168.1.32</td><td class="mono">192.168.1.33</td><td class="mono">192.168.1.62</td><td class="mono">192.168.1.63</td></tr>
+      <tr><td>IT Support</td><td class="mono">192.168.1.64/27</td><td class="mono">192.168.1.64</td><td class="mono">192.168.1.65</td><td class="mono">192.168.1.94</td><td class="mono">192.168.1.95</td></tr>
+      <tr><td>Finance</td><td class="mono">192.168.1.96/27</td><td class="mono">192.168.1.96</td><td class="mono">192.168.1.97</td><td class="mono">192.168.1.126</td><td class="mono">192.168.1.127</td></tr>
+    </tbody>
+  </table>
+
+  <h3><span class="num">4.2</span>Supernetting Solution — Vianet's Branch Aggregation</h3>
+  <p>Vianet Communications has issued four whole Class C networks to UniGlobe's four branch campuses:</p>
+  <pre>200.10.0.0/24   (Kathmandu Branch)
+200.10.1.0/24   (Pokhara Branch)
+200.10.2.0/24   (Chitwan Branch)
+200.10.3.0/24   (Butwal Branch)
+        <span class="arrow">↓ aggregate</span>
+<span class="result">200.10.0.0/22   →  mask 255.255.252.0  →  covers 200.10.0.0 – 200.10.3.255
+                →  network address: 200.10.0.0   →  broadcast address: 200.10.3.255</span></pre>
+  <p>This is the textbook demonstration of why CIDR replaced classful addressing: four separate "Class C" routes collapse into a single /22 announcement on Vianet's core network — a prefix length that simply does not exist under the old classful rules, which only recognized /8, /16, and /24 boundaries.</p>
+
+  <hr class="divider">
+
+  <h2><span class="num">5</span>Classful vs. Classless — Summary</h2>
+  <table class="summary-table">
+    <thead>
+      <tr><th>Aspect</th><th>Classful</th><th>Classless (CIDR)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Network/host boundary</td><td>Fixed by class (/8, /16, /24)</td><td>Any arbitrary prefix length (/n)</td></tr>
+      <tr><td>Address efficiency</td><td>Poor — fixed block sizes waste addresses</td><td>High — blocks sized to actual need</td></tr>
+      <tr><td>Subnetting</td><td>Limited to class-default masks</td><td>Full VLSM support</td></tr>
+      <tr><td>Supernetting</td><td>Not possible</td><td>Fully supported — enables route aggregation</td></tr>
+      <tr><td>Routing table impact</td><td>Large — no aggregation possible</td><td>Compact, via CIDR summarization</td></tr>
+      <tr><td>Status today</td><td>Obsolete since 1993</td><td>Standard for all modern IP networking</td></tr>
+    </tbody>
+  </table>
+
+  <h2><span class="num">6</span>Key Takeaways</h2>
+  <ol>
+    <li><strong>Network address</strong> = all host bits set to 0 — identifies the block, never assigned to a device.</li>
+    <li><strong>Subnetting</strong> borrows host bits → creates smaller networks, sized to fit an actual department or campus.</li>
+    <li><strong>Supernetting</strong> borrows network bits → merges networks at aggregation points such as ISP backbones, shrinking routing tables.</li>
+    <li><strong>Broadcast address</strong> = all host bits set to 1 — always the last address in a block.</li>
+    <li>Classless (CIDR) addressing is what makes both operations flexible — the reason the modern internet routes efficiently at all.</li>
+  </ol>
+
+  <footer>Worked examples reference Chaudhary Group, Pokhara University, UniGlobe College, and Vianet Communications for illustrative purposes only; assigned address blocks are hypothetical and not their actual production networks.</footer>
+
+</div>
+</body>
+</html>

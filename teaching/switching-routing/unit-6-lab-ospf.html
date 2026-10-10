@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Unit 6 Lab · Open Shortest Path First Implementation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2F5F7; --paper:#FFFFFF; --ink:#18222F; --muted:#556275; --line:#D5DDE5;
+  --aqua:#1E9C9A;   /* OM3 fiber jacket: 6.1 */
+  --orange:#D9731A; /* OM1 fiber jacket: 6.2 */
+  --yellow:#B98D00; /* single-mode jacket: 6.3 */
+  --tag:#FFF6D6; --tag-ink:#4A3A00; --code-bg:#1B2533; --code-ink:#DDE6F0; --prompt:#8FC7FF;
+  --ok:#2E8B57; --warn:#B4442C;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121821; --paper:#19212C; --ink:#E4EAF1; --muted:#9AA8B8; --line:#2C3847;
+    --aqua:#3CC4C1; --orange:#F0914A; --yellow:#E2B92E;
+    --tag:#2B2616; --tag-ink:#F2E3AE; --code-bg:#0E141C; --code-ink:#DDE6F0; --prompt:#8FC7FF;
+    --ok:#5BC38A; --warn:#E5775F;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121821; --paper:#19212C; --ink:#E4EAF1; --muted:#9AA8B8; --line:#2C3847;
+  --aqua:#3CC4C1; --orange:#F0914A; --yellow:#E2B92E;
+  --tag:#2B2616; --tag-ink:#F2E3AE; --code-bg:#0E141C; --code-ink:#DDE6F0; --prompt:#8FC7FF;
+  --ok:#5BC38A; --warn:#E5775F;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 16px);scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+  font-size:1.0625rem;line-height:1.6}
+h1,h2,h3,h4{font-family:"Bricolage Grotesque","Atkinson Hyperlegible",system-ui,sans-serif;line-height:1.15;margin:0 0 .5em}
+h2{font-size:clamp(1.6rem,3.5vw,2.2rem);font-weight:800}
+h3{font-size:1.3rem;font-weight:700;margin-top:1.8em}
+h4{font-size:1.05rem;font-weight:700;margin-top:1.3em}
+p{margin:0 0 1em}
+a{color:inherit}
+code,pre,kbd{font-family:"JetBrains Mono",ui-monospace,Consolas,monospace;font-size:.88em}
+:not(pre)>code{background:color-mix(in srgb,var(--line) 55%,transparent);padding:.1em .35em;border-radius:4px}
+img,svg{max-width:100%}
+:focus-visible{outline:3px solid var(--orange);outline-offset:2px}
+
+/* layout */
+.shell{display:grid;grid-template-columns:240px minmax(0,1fr);gap:48px;max-width:1180px;margin:0 auto;padding:0 24px}
+nav.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 24px);align-self:start;padding:28px 0;font-size:.95rem}
+nav.toc p{font-weight:700;margin-bottom:.4em}
+nav.toc ol{list-style:none;margin:0;padding:0}
+nav.toc li{margin:.15em 0}
+nav.toc a{display:block;text-decoration:none;padding:.3em .6em;border-left:4px solid var(--line);color:var(--muted)}
+nav.toc a:hover{color:var(--ink)}
+nav.toc a[data-c="aqua"]{border-color:var(--aqua)}
+nav.toc a[data-c="orange"]{border-color:var(--orange)}
+nav.toc a[data-c="yellow"]{border-color:var(--yellow)}
+nav.toc .sub a{padding-left:1.4em;font-size:.9rem}
+main{max-width:76ch;padding-bottom:80px}
+@media (max-width:900px){.shell{grid-template-columns:1fr;gap:0}nav.toc{display:none}}
+
+/* hero */
+.hero{padding:40px 0 24px}
+.hero h1{font-size:clamp(2.2rem,6vw,3.6rem);font-weight:800;letter-spacing:-.02em;margin-bottom:.2em}
+.hero .unit{color:var(--muted);font-size:1.05rem;margin-bottom:.8em}
+.topo{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:12px;margin:18px 0 8px}
+.topo svg{display:block;width:100%;height:auto}
+.topo text{font-family:"JetBrains Mono",monospace;font-size:11px;fill:var(--muted)}
+.topo .rname{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:14px;fill:var(--ink)}
+.topo figcaption{font-size:.9rem;color:var(--muted);padding:4px 8px 2px}
+@media (prefers-reduced-motion: reduce){.pkt{display:none}}
+
+.objectives{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px 22px;margin:22px 0}
+.objectives h3{margin-top:0}
+.objectives ul{margin:0;padding-left:1.2em}
+
+/* sections */
+section.unit-part{padding-top:48px;margin-top:24px;border-top:6px solid var(--c)}
+section.unit-part > .num{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;color:var(--c);font-size:1rem;margin-bottom:.2em}
+ul,ol{padding-left:1.3em}
+li{margin:.25em 0}
+
+/* mnemonic "cable tag" */
+.tag{position:relative;background:var(--tag);color:var(--tag-ink);border-radius:6px 14px 14px 6px;padding:16px 20px 16px 44px;margin:1.4em 0;
+  border:1px dashed color-mix(in srgb,var(--tag-ink) 35%,transparent)}
+.tag::before{content:"";position:absolute;left:16px;top:20px;width:12px;height:12px;border-radius:50%;border:3px solid var(--tag-ink);opacity:.55}
+.tag .t{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:1.15rem;margin-bottom:.35em}
+.tag ul{margin:.3em 0 0}
+.tag b.l{font-size:1.15em}
+
+/* tables */
+.tw{overflow-x:auto;margin:1em 0 1.4em;border:1px solid var(--line);border-radius:10px;background:var(--paper)}
+table{border-collapse:collapse;width:100%;font-size:.95rem;min-width:520px}
+th,td{padding:.55em .8em;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+thead th{font-family:"Bricolage Grotesque",sans-serif;background:color-mix(in srgb,var(--line) 40%,var(--paper))}
+tbody tr:last-child td{border-bottom:0}
+td:first-child{font-weight:700}
+
+/* code */
+pre{background:var(--code-bg);color:var(--code-ink);padding:14px 16px;border-radius:10px;overflow-x:auto;line-height:1.5;margin:1em 0 1.3em}
+pre .p{color:var(--prompt)} pre .c{color:#8A9BB0;font-style:italic}
+
+/* side-by-side */
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:1em 0}
+.duo > div{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.duo h4{margin-top:0}
+.duo ul{margin:0}
+@media (max-width:620px){.duo{grid-template-columns:1fr}}
+
+.note{border-left:4px solid var(--c,var(--orange));padding:.4em 0 .4em 1em;margin:1.2em 0;color:var(--ink)}
+.note strong{font-family:"Bricolage Grotesque",sans-serif}
+
+/* steps (true sequence) */
+ol.steps{counter-reset:s;list-style:none;padding:0}
+ol.steps>li{counter-increment:s;position:relative;padding-left:2.6em;margin:.8em 0}
+ol.steps>li::before{content:counter(s);position:absolute;left:0;top:0;width:1.8em;height:1.8em;border-radius:50%;
+  background:var(--c);color:var(--paper);font-weight:700;display:grid;place-items:center;font-size:.9rem}
+
+/* labs */
+.lab{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:1.5em 0}
+.lab h4{margin-top:0}
+.lab label{display:block;font-weight:700;margin:.6em 0 .25em;font-size:.95rem}
+.lab input{font:inherit;font-family:"JetBrains Mono",monospace;width:100%;max-width:340px;padding:.5em .7em;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.lab .out{margin-top:.9em;font-family:"JetBrains Mono",monospace;font-size:.9rem;white-space:pre-wrap;background:var(--bg);border-radius:8px;padding:.7em .9em;min-height:2.5em}
+.lab .err{color:var(--warn)}
+
+/* quiz */
+details.q{background:var(--paper);border:1px solid var(--line);border-radius:10px;margin:.6em 0;padding:0}
+details.q summary{cursor:pointer;padding:.8em 1em;font-weight:700;list-style:none}
+details.q summary::-webkit-details-marker{display:none}
+details.q summary::after{content:"Show answer";float:right;font-weight:400;font-size:.85rem;color:var(--muted)}
+details.q[open] summary::after{content:"Hide"}
+details.q .a{padding:0 1em .9em;border-top:1px dashed var(--line);padding-top:.7em}
+.theme-btn{font:inherit;font-size:.85rem;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:.35em .9em;cursor:pointer;margin-top:1em}
+footer{color:var(--muted);font-size:.9rem;margin-top:3em}
+</style>
+<style>
+.topo .rtr{fill:var(--paper);stroke:var(--ink);stroke-width:2}
+.topo .end{fill:var(--bg);stroke:var(--muted);stroke-width:1.5;stroke-dasharray:4 3}
+.topo .ename{font-family:"Atkinson Hyperlegible",sans-serif;font-size:13px;fill:var(--ink)}
+.topo .sn text,.topo text.sn{fill:var(--muted)}
+.topo .sn{font-family:"JetBrains Mono",monospace}
+.topo .sn text{font-size:12px}
+.topo .ifl text{font-size:10px;fill:var(--orange);font-family:"JetBrains Mono",monospace}
+table.rs td:first-child{font-weight:400}
+table.rs td[rowspan]{font-weight:700;background:color-mix(in srgb,var(--line) 20%,var(--paper))}
+details.cfgset{border:1px solid var(--line);border-radius:10px;background:var(--paper);margin:.6em 0}
+details.cfgset summary{cursor:pointer;padding:.6em 1em;font-family:"Bricolage Grotesque",sans-serif;font-weight:700}
+details.cfgset pre{margin:0 .6em .6em}
+.prewrap{position:relative}
+.copy{position:absolute;top:8px;right:8px;font:inherit;font-size:.8rem;background:color-mix(in srgb,var(--code-ink) 12%,transparent);color:var(--code-ink);border:1px solid color-mix(in srgb,var(--code-ink) 30%,transparent);border-radius:6px;padding:.2em .6em;cursor:pointer}
+.check{border:2px solid var(--ok);border-radius:12px;padding:12px 18px;margin:1.2em 0;background:color-mix(in srgb,var(--ok) 7%,var(--paper))}
+.check .ct{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;color:var(--ok);margin-bottom:.2em}
+.check ul{margin:.2em 0}
+td.ans{font-weight:700;color:var(--orange)}
+#checklist label{display:flex;gap:.6em;align-items:flex-start;padding:.35em 0;border-bottom:1px dashed var(--line);font-weight:400;margin:0}
+#checklist input{margin-top:.35em;width:auto;accent-color:var(--orange)}
+#checklist label.done span{color:var(--muted);text-decoration:line-through}
+</style>
+</head>
+<body><div style="font:14px/1.4 Inter,-apple-system,Segoe UI,sans-serif;background:#0b1d3a;padding:10px 16px;"><a href="/teaching/switching-routing.html" style="color:#fbf9f3;text-decoration:none;">&larr; Switching &amp; Routing &middot; all units</a></div>
+<div class="shell">
+<nav class="toc" aria-label="Contents">
+  <p>Lab contents</p>
+  <ol>
+    <li><a href="#problem">1. Problem statement</a></li>
+    <li><a href="#structure" data-c="aqua">2. Network structure</a></li>
+    <li class="sub"><a href="#topology">Topology</a></li>
+    <li class="sub"><a href="#addressing">Addressing table</a></li>
+    <li class="sub"><a href="#design">OSPF design</a></li>
+    <li><a href="#tasks" data-c="orange">3. Single-area lab</a></li>
+    <li class="sub"><a href="#t1">Task 1 Base config</a></li>
+    <li class="sub"><a href="#t2">Task 2 Static routes</a></li>
+    <li class="sub"><a href="#t3">Task 3 Enable OSPF</a></li>
+    <li class="sub"><a href="#t4">Task 4 Default route</a></li>
+    <li class="sub"><a href="#t5">Task 5 Verification</a></li>
+    <li class="sub"><a href="#t6">Task 6 Cost and paths</a></li>
+    <li class="sub"><a href="#t7">Task 7 Troubleshooting</a></li>
+    <li><a href="#multi" data-c="yellow">4. Multi-area (later)</a></li>
+    <li><a href="#reflect">5. Reflection questions</a></li>
+  </ol>
+  <button class="theme-btn" id="themeBtn" type="button">Switch light/dark</button>
+</nav>
+
+<main>
+<header class="hero" id="top">
+  <p class="unit">Unit 6 · Practical lab · Cisco Packet Tracer</p>
+  <h1>Open Shortest Path First lab: from one area to many</h1>
+  <p>This lab builds Open Shortest Path First (OSPF) routing for a company with a headquarters (HQ) site, three branch (BR) offices and a link to an Internet Service Provider (ISP). You first run everything in a single area, which is the focus of this course now. A multi-area version of the same network is included at the end for later practice.</p>
+  <div class="objectives">
+    <h3>What you will practise</h3>
+    <ul>
+      <li>Reading a topology and building an addressing plan from it.</li>
+      <li>Configuring single-area OSPF with subnet and wildcard-mask network statements.</li>
+      <li>Connecting a router that cannot run OSPF using static routes and redistribution.</li>
+      <li>Setting a stable router ID (RID), using passive interfaces and advertising a default route.</li>
+      <li>Verifying neighbours, routes and paths, and predicting paths from OSPF cost.</li>
+      <li>Finding and fixing common OSPF faults.</li>
+    </ul>
+    <p style="margin:.8em 0 0"><strong>Time:</strong> about 3 hours for Parts 1–3. Part 4 is a separate later session.</p>
+  </div>
+</header>
+
+<!-- ============ PART 1 ============ -->
+<section class="unit-part" id="problem" style="--c:var(--ink)">
+  <div class="num">Part 1</div>
+  <h2>Problem statement</h2>
+  <p><strong>NovaTech Pvt. Ltd.</strong> has grown from one office to four. Today every router uses static routes, and each time a link fails or a new branch opens, the network team edits routes on every router by hand. Last month a fibre cut between HQ and Branch B took the branch offline for half a day, even though a second path through Branch A was available.</p>
+  <p>You have been hired as the network engineer. Your job is to replace internal static routing with OSPF so that:</p>
+  <ul>
+    <li>Every internal network can reach every other internal network.</li>
+    <li>If a link fails, traffic automatically moves to another path without anyone touching the routers.</li>
+    <li>All sites can reach the Internet server at <code>172.31.100.10</code> through HQ, with only one router needing to know about the ISP.</li>
+    <li>No routing updates are sent toward PCs or servers, where no routers exist.</li>
+    <li>Each router has a predictable, easy-to-read router ID.</li>
+    <li>Branch C stays reachable from every site and can reach the Internet, even though its router cannot run OSPF.</li>
+  </ul>
+  <div class="note" style="--c:var(--orange)"><strong>Constraint:</strong> the ISP does not run OSPF with NovaTech. The link to the ISP uses static routing only, and HQ-R1 must share a default route with the rest of the company.</div>
+  <div class="note" style="--c:var(--orange)"><strong>Constraint:</strong> the Branch C router (BR-C) is an older model that <strong>cannot run OSPF</strong>. BR-B and BR-C must use static routes between them, and no OSPF Hellos should be sent toward BR-C. BR-B must still make Branch C's network known to the rest of the OSPF network.</div>
+</section>
+
+<!-- ============ PART 2 ============ -->
+<section class="unit-part" id="structure" style="--c:var(--aqua)">
+  <div class="num">Part 2</div>
+  <h2>Network structure</h2>
+
+  <h3 id="topology">Topology</h3>
+  <figure class="topo">
+    <svg viewBox="0 0 780 640" role="img" aria-label="NovaTech topology: ISP-R connects to Internet-Server and to HQ-R1 by a copper link and a serial link. HQ-R1 connects to Server-HQ and HQ-R2. HQ-R2 connects to PC-HQ, to BR-A by copper and to BR-B by serial. BR-A connects to BR-B and PC-A. BR-B connects to BR-C and PC-B. BR-C connects to PC-C.">
+      <g fill="none" stroke-width="3">
+        <line x1="400" y1="70" x2="620" y2="70" stroke="var(--line)"/>
+        <line x1="345" y1="88" x2="345" y2="172" stroke="var(--line)"/>
+        <line x1="385" y1="88" x2="385" y2="172" stroke="var(--warn)"/>
+        <line x1="410" y1="190" x2="620" y2="190" stroke="var(--line)"/>
+        <line x1="365" y1="208" x2="365" y2="282" stroke="var(--line)"/>
+        <line x1="320" y1="300" x2="170" y2="300" stroke="var(--line)"/>
+        <line x1="340" y1="318" x2="185" y2="442" stroke="var(--line)"/>
+        <line x1="390" y1="318" x2="470" y2="442" stroke="var(--warn)"/>
+        <line x1="210" y1="460" x2="440" y2="460" stroke="var(--line)"/>
+        <line x1="530" y1="460" x2="640" y2="460" stroke="var(--line)"/>
+        <line x1="165" y1="478" x2="165" y2="552" stroke="var(--line)"/>
+        <line x1="485" y1="478" x2="485" y2="552" stroke="var(--line)"/>
+        <line x1="685" y1="478" x2="685" y2="552" stroke="var(--line)"/>
+      </g>
+      <g class="sn" font-size="12">
+        <text x="510" y="62" text-anchor="middle">172.31.100.0/24</text>
+        <text x="338" y="134" text-anchor="end">172.31.0.0/30</text>
+        <text x="392" y="134">172.31.0.4/30 (serial)</text>
+        <text x="515" y="182" text-anchor="middle">172.16.20.0/24</text>
+        <text x="373" y="250">10.0.0.0/30</text>
+        <text x="245" y="292" text-anchor="middle">10.1.10.0/24</text>
+        <text x="245" y="378" text-anchor="end">10.0.1.0/30</text>
+        <text x="438" y="378">10.0.2.0/30 (serial)</text>
+        <text x="325" y="452" text-anchor="middle">10.0.3.0/30</text>
+        <text x="585" y="452" text-anchor="middle">10.0.4.0/30 (static)</text>
+        <text x="173" y="520">172.16.50.0/24</text>
+        <text x="493" y="520">10.3.10.0/24</text>
+        <text x="693" y="520">192.168.30.0/24</text>
+      </g>
+      <g class="ifl" font-size="10">
+        <text x="404" y="84">G0/0 .1</text><text x="600" y="84" text-anchor="end">.10</text>
+        <text x="341" y="102" text-anchor="end">G0/1 .1</text><text x="341" y="168" text-anchor="end">G0/1 .2</text>
+        <text x="389" y="102">S0/0/0 .5 DCE</text><text x="389" y="168">S0/0/0 .6</text>
+        <text x="414" y="204">G0/2 .1</text><text x="600" y="204" text-anchor="end">.10</text>
+        <text x="369" y="222">G0/0 .1</text><text x="369" y="278">G0/0 .2</text>
+        <text x="316" y="314" text-anchor="end">G0/1 .1</text><text x="174" y="314">.10</text>
+        <text x="300" y="336" text-anchor="end">G0/2 .1</text><text x="196" y="434">G0/0 .2</text>
+        <text x="402" y="336">S0/0/0 .1 DCE</text><text x="478" y="434">S0/0/0 .2</text>
+        <text x="214" y="476">G0/1 .1</text><text x="436" y="476" text-anchor="end">G0/0 .2</text>
+        <text x="534" y="476">G0/1 .1</text><text x="636" y="476" text-anchor="end">G0/0 .2</text>
+        <text x="161" y="496" text-anchor="end">G0/2 .1</text>
+        <text x="481" y="496" text-anchor="end">G0/2 .1</text>
+        <text x="681" y="496" text-anchor="end">G0/1 .1</text>
+      </g>
+      <g>
+        <rect class="rtr" x="320" y="52" width="90" height="36" rx="9"/><text class="rname" x="365" y="75" text-anchor="middle">ISP-R</text>
+        <rect class="rtr" x="320" y="172" width="90" height="36" rx="9"/><text class="rname" x="365" y="195" text-anchor="middle">HQ-R1</text>
+        <rect class="rtr" x="320" y="282" width="90" height="36" rx="9"/><text class="rname" x="365" y="305" text-anchor="middle">HQ-R2</text>
+        <rect class="rtr" x="120" y="442" width="90" height="36" rx="9"/><text class="rname" x="165" y="465" text-anchor="middle">BR-A</text>
+        <rect class="rtr" x="440" y="442" width="90" height="36" rx="9"/><text class="rname" x="485" y="465" text-anchor="middle">BR-B</text>
+        <rect class="rtr" x="640" y="442" width="90" height="36" rx="9"/><text class="rname" x="685" y="465" text-anchor="middle">BR-C</text>
+        <rect class="end" x="620" y="52" width="130" height="36" rx="4"/><text class="ename" x="685" y="75" text-anchor="middle">Internet-Server</text>
+        <rect class="end" x="620" y="172" width="130" height="36" rx="4"/><text class="ename" x="685" y="195" text-anchor="middle">Server-HQ</text>
+        <rect class="end" x="60" y="282" width="110" height="36" rx="4"/><text class="ename" x="115" y="305" text-anchor="middle">PC-HQ</text>
+        <rect class="end" x="110" y="552" width="110" height="36" rx="4"/><text class="ename" x="165" y="575" text-anchor="middle">PC-A</text>
+        <rect class="end" x="430" y="552" width="110" height="36" rx="4"/><text class="ename" x="485" y="575" text-anchor="middle">PC-B</text>
+        <rect class="end" x="630" y="552" width="110" height="36" rx="4"/><text class="ename" x="685" y="575" text-anchor="middle">PC-C</text>
+      </g>
+      <g font-size="11" class="sn">
+        <line x1="40" y1="612" x2="80" y2="612" stroke="var(--line)" stroke-width="3"/><text x="88" y="616">Gigabit Ethernet (copper)</text>
+        <line x1="270" y1="612" x2="310" y2="612" stroke="var(--warn)" stroke-width="3"/><text x="318" y="616">Serial (red in Packet Tracer)</text>
+      </g>
+    </svg>
+    <figcaption>Redrawn from the supplied Packet Tracer topology, with interface names added. G = GigabitEthernet, S = Serial, DCE = data communications equipment (the end that supplies the clock rate). All routers are Cisco 2911 models. BR-C does not run OSPF; it is joined to BR-B by static routes.</figcaption>
+  </figure>
+
+  <div class="note" style="--c:var(--aqua)"><strong>Before you start in Packet Tracer:</strong> a 2911 has three Gigabit ports but no serial ports. Power the router off, add an <strong>HWIC-2T</strong> module, and power it on again on ISP-R, HQ-R1, HQ-R2 and BR-B. If your cabling uses different port numbers from the diagram, keep the IP addresses and change only the interface names in the commands.</div>
+
+  <h3 id="addressing">Addressing table</h3>
+  <div class="tw"><table class="rs">
+    <thead><tr><th>Device</th><th>Interface</th><th>IP address / mask</th><th>Connected to</th></tr></thead>
+    <tbody>
+      <tr><td rowspan="3">ISP-R</td><td>G0/0</td><td>172.31.100.1 /24</td><td>Internet-Server</td></tr>
+      <tr><td>G0/1</td><td>172.31.0.1 /30</td><td>HQ-R1 G0/1 (primary)</td></tr>
+      <tr><td>S0/0/0 (DCE)</td><td>172.31.0.5 /30</td><td>HQ-R1 S0/0/0 (backup)</td></tr>
+      <tr><td rowspan="4">HQ-R1</td><td>G0/0</td><td>10.0.0.1 /30</td><td>HQ-R2 G0/0</td></tr>
+      <tr><td>G0/1</td><td>172.31.0.2 /30</td><td>ISP-R G0/1</td></tr>
+      <tr><td>S0/0/0</td><td>172.31.0.6 /30</td><td>ISP-R S0/0/0</td></tr>
+      <tr><td>G0/2</td><td>172.16.20.1 /24</td><td>Server-HQ</td></tr>
+      <tr><td rowspan="4">HQ-R2</td><td>G0/0</td><td>10.0.0.2 /30</td><td>HQ-R1 G0/0</td></tr>
+      <tr><td>G0/1</td><td>10.1.10.1 /24</td><td>PC-HQ</td></tr>
+      <tr><td>G0/2</td><td>10.0.1.1 /30</td><td>BR-A G0/0</td></tr>
+      <tr><td>S0/0/0 (DCE)</td><td>10.0.2.1 /30</td><td>BR-B S0/0/0</td></tr>
+      <tr><td rowspan="3">BR-A</td><td>G0/0</td><td>10.0.1.2 /30</td><td>HQ-R2 G0/2</td></tr>
+      <tr><td>G0/1</td><td>10.0.3.1 /30</td><td>BR-B G0/0</td></tr>
+      <tr><td>G0/2</td><td>172.16.50.1 /24</td><td>PC-A</td></tr>
+      <tr><td rowspan="4">BR-B</td><td>S0/0/0</td><td>10.0.2.2 /30</td><td>HQ-R2 S0/0/0</td></tr>
+      <tr><td>G0/0</td><td>10.0.3.2 /30</td><td>BR-A G0/1</td></tr>
+      <tr><td>G0/1</td><td>10.0.4.1 /30</td><td>BR-C G0/0</td></tr>
+      <tr><td>G0/2</td><td>10.3.10.1 /24</td><td>PC-B</td></tr>
+      <tr><td rowspan="2">BR-C</td><td>G0/0</td><td>10.0.4.2 /30</td><td>BR-B G0/1</td></tr>
+      <tr><td>G0/1</td><td>192.168.30.1 /24</td><td>PC-C</td></tr>
+    </tbody>
+  </table></div>
+
+  <h4>End devices</h4>
+  <div class="tw"><table>
+    <thead><tr><th>Device</th><th>IP address</th><th>Subnet mask</th><th>Default gateway</th></tr></thead>
+    <tbody>
+      <tr><td>Internet-Server</td><td>172.31.100.10</td><td>255.255.255.0</td><td>172.31.100.1</td></tr>
+      <tr><td>Server-HQ</td><td>172.16.20.10</td><td>255.255.255.0</td><td>172.16.20.1</td></tr>
+      <tr><td>PC-HQ</td><td>10.1.10.10</td><td>255.255.255.0</td><td>10.1.10.1</td></tr>
+      <tr><td>PC-A</td><td>172.16.50.10</td><td>255.255.255.0</td><td>172.16.50.1</td></tr>
+      <tr><td>PC-B</td><td>10.3.10.10</td><td>255.255.255.0</td><td>10.3.10.1</td></tr>
+      <tr><td>PC-C</td><td>192.168.30.10</td><td>255.255.255.0</td><td>192.168.30.1</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3 id="design">OSPF design (single area)</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Router</th><th>Role</th><th>Router ID</th><th>OSPF networks (all area 0)</th><th>Passive interface</th></tr></thead>
+    <tbody>
+      <tr><td>ISP-R</td><td>External, no OSPF</td><td>–</td><td>–</td><td>–</td></tr>
+      <tr><td>HQ-R1</td><td>Edge router; advertises the default route (acts as ASBR, Autonomous System Boundary Router)</td><td>1.1.1.1</td><td>10.0.0.0/30, 172.16.20.0/24</td><td>G0/2</td></tr>
+      <tr><td>HQ-R2</td><td>Core router</td><td>2.2.2.2</td><td>10.0.0.0/30, 10.0.1.0/30, 10.0.2.0/30, 10.1.10.0/24</td><td>G0/1</td></tr>
+      <tr><td>BR-A</td><td>Branch</td><td>3.3.3.3</td><td>10.0.1.0/30, 10.0.3.0/30, 172.16.50.0/24</td><td>G0/2</td></tr>
+      <tr><td>BR-B</td><td>Branch; static link to BR-C; injects Branch C's network into OSPF (also an ASBR)</td><td>4.4.4.4</td><td>10.0.2.0/30, 10.0.3.0/30, 10.0.4.0/30, 10.3.10.0/24</td><td>G0/1, G0/2</td></tr>
+      <tr><td>BR-C</td><td>Branch, <strong>no OSPF</strong>: static default route to BR-B</td><td>–</td><td>–</td><td>–</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li><strong>Process ID:</strong> 10 on every router. It could differ per router, but one number keeps the lab tidy. <em>(Process is Private, Area must Agree.)</em></li>
+    <li><strong>The ISP links (172.31.0.0/30 and 172.31.0.4/30) are not put into OSPF.</strong> Internal routers reach them through the default route.</li>
+    <li><strong>Branch C:</strong> BR-C sends everything to BR-B with a static default route. BR-B has a static route to 192.168.30.0/24 and <em>redistributes</em> it into OSPF, so every OSPF router learns it automatically.</li>
+    <li><strong>BR-B G0/1 is passive:</strong> the 10.0.4.0/30 link is still advertised (so BR-C's interface can be reached), but no Hellos are sent toward BR-C.</li>
+    <li>The router IDs are set with the <code>router-id</code> command, so they win over any interface address. <em>(Real Love Prevails.)</em></li>
+  </ul>
+</section>
+
+<!-- ============ PART 3 ============ -->
+<section class="unit-part" id="tasks" style="--c:var(--orange)">
+  <div class="num">Part 3</div>
+  <h2>Single-area OSPF lab: commands and verification</h2>
+  <p>Each task gives the commands, then a check you must pass before moving on. Use the Copy button on a block and paste it into the router's command-line interface (CLI) tab.</p>
+
+  <!-- Task 1 -->
+  <h3 id="t1">Task 1: Basic device configuration and addressing</h3>
+  <p>Configure the hostname and every interface on each router. Serial DCE ends (ISP-R and HQ-R2) also need a clock rate.</p>
+
+  <details class="cfgset" open><summary>ISP-R</summary>
+<pre class="cfg">enable
+configure terminal
+hostname ISP-R
+no ip domain-lookup
+interface g0/0
+ description Link to Internet-Server
+ ip address 172.31.100.1 255.255.255.0
+ no shutdown
+interface g0/1
+ description Primary link to HQ-R1
+ ip address 172.31.0.1 255.255.255.252
+ no shutdown
+interface s0/0/0
+ description Backup serial link to HQ-R1 (DCE)
+ ip address 172.31.0.5 255.255.255.252
+ clock rate 64000
+ no shutdown
+end</pre></details>
+
+  <details class="cfgset"><summary>HQ-R1</summary>
+<pre class="cfg">enable
+configure terminal
+hostname HQ-R1
+no ip domain-lookup
+interface g0/0
+ description Link to HQ-R2
+ ip address 10.0.0.1 255.255.255.252
+ no shutdown
+interface g0/1
+ description Primary link to ISP-R
+ ip address 172.31.0.2 255.255.255.252
+ no shutdown
+interface s0/0/0
+ description Backup serial link to ISP-R
+ ip address 172.31.0.6 255.255.255.252
+ no shutdown
+interface g0/2
+ description Server-HQ LAN
+ ip address 172.16.20.1 255.255.255.0
+ no shutdown
+end</pre></details>
+
+  <details class="cfgset"><summary>HQ-R2</summary>
+<pre class="cfg">enable
+configure terminal
+hostname HQ-R2
+no ip domain-lookup
+interface g0/0
+ description Link to HQ-R1
+ ip address 10.0.0.2 255.255.255.252
+ no shutdown
+interface g0/1
+ description PC-HQ LAN
+ ip address 10.1.10.1 255.255.255.0
+ no shutdown
+interface g0/2
+ description Link to BR-A
+ ip address 10.0.1.1 255.255.255.252
+ no shutdown
+interface s0/0/0
+ description Serial link to BR-B (DCE)
+ ip address 10.0.2.1 255.255.255.252
+ clock rate 64000
+ no shutdown
+end</pre></details>
+
+  <details class="cfgset"><summary>BR-A</summary>
+<pre class="cfg">enable
+configure terminal
+hostname BR-A
+no ip domain-lookup
+interface g0/0
+ description Link to HQ-R2
+ ip address 10.0.1.2 255.255.255.252
+ no shutdown
+interface g0/1
+ description Link to BR-B
+ ip address 10.0.3.1 255.255.255.252
+ no shutdown
+interface g0/2
+ description PC-A LAN
+ ip address 172.16.50.1 255.255.255.0
+ no shutdown
+end</pre></details>
+
+  <details class="cfgset"><summary>BR-B</summary>
+<pre class="cfg">enable
+configure terminal
+hostname BR-B
+no ip domain-lookup
+interface s0/0/0
+ description Serial link to HQ-R2
+ ip address 10.0.2.2 255.255.255.252
+ no shutdown
+interface g0/0
+ description Link to BR-A
+ ip address 10.0.3.2 255.255.255.252
+ no shutdown
+interface g0/1
+ description Link to BR-C
+ ip address 10.0.4.1 255.255.255.252
+ no shutdown
+interface g0/2
+ description PC-B LAN
+ ip address 10.3.10.1 255.255.255.0
+ no shutdown
+end</pre></details>
+
+  <details class="cfgset"><summary>BR-C</summary>
+<pre class="cfg">enable
+configure terminal
+hostname BR-C
+no ip domain-lookup
+interface g0/0
+ description Link to BR-B
+ ip address 10.0.4.2 255.255.255.252
+ no shutdown
+interface g0/1
+ description PC-C LAN
+ ip address 192.168.30.1 255.255.255.0
+ no shutdown
+end</pre></details>
+
+  <p>Then set each PC and server's IP address, mask and default gateway from the end-devices table (Desktop → IP Configuration).</p>
+  <div class="check">
+    <div class="ct">Check before moving on</div>
+    <ul>
+      <li><code>show ip interface brief</code> on every router: all used interfaces show <strong>up / up</strong>.</li>
+      <li>Ping each directly connected neighbour, for example from BR-B: <code>ping 10.0.2.1</code>, <code>ping 10.0.3.1</code>, <code>ping 10.0.4.2</code>.</li>
+      <li>Each PC can ping its own default gateway.</li>
+      <li>Expected: PC-C <strong>cannot</strong> yet ping PC-HQ, because no routing exists between sites.</li>
+    </ul>
+  </div>
+
+  <!-- Task 2 -->
+  <h3 id="t2">Task 2: Static routing at the ISP edge and to Branch C</h3>
+  <p>The ISP does not run OSPF, so the edge uses static routes. The serial link is a backup, so its routes get a higher administrative distance (AD) of 10. This makes them <em>floating static routes</em> that appear only if the primary link fails.</p>
+  <details class="cfgset" open><summary>HQ-R1: default route toward the ISP</summary>
+<pre class="cfg">configure terminal
+ip route 0.0.0.0 0.0.0.0 172.31.0.1
+ip route 0.0.0.0 0.0.0.0 172.31.0.5 10
+end</pre></details>
+  <details class="cfgset" open><summary>ISP-R: routes back to NovaTech networks</summary>
+<pre class="cfg">configure terminal
+ip route 10.0.0.0 255.0.0.0 172.31.0.2
+ip route 172.16.0.0 255.255.0.0 172.31.0.2
+ip route 192.168.30.0 255.255.255.0 172.31.0.2
+ip route 10.0.0.0 255.0.0.0 172.31.0.6 10
+ip route 172.16.0.0 255.255.0.0 172.31.0.6 10
+ip route 192.168.30.0 255.255.255.0 172.31.0.6 10
+end</pre></details>
+  <div class="check">
+    <div class="ct">Check</div>
+    <ul>
+      <li>HQ-R1 <code>show ip route static</code> shows <code>S* 0.0.0.0/0 [1/0] via 172.31.0.1</code>. The serial route is hidden while G0/1 is up.</li>
+      <li>HQ-R1 <code>ping 172.31.100.10</code> succeeds.</li>
+    </ul>
+  </div>
+  <h4>Branch C static routing</h4>
+  <p>BR-C has only one way out, so a single default route is enough. BR-B needs a route to the Branch C network behind BR-C.</p>
+  <details class="cfgset" open><summary>BR-C: default route to BR-B</summary>
+<pre class="cfg">configure terminal
+ip route 0.0.0.0 0.0.0.0 10.0.4.1
+end</pre></details>
+  <details class="cfgset" open><summary>BR-B: route to the Branch C network</summary>
+<pre class="cfg">configure terminal
+ip route 192.168.30.0 255.255.255.0 10.0.4.2
+end</pre></details>
+  <div class="check">
+    <div class="ct">Check</div>
+    <ul>
+      <li>BR-C <code>show ip route</code> shows <code>S* 0.0.0.0/0 [1/0] via 10.0.4.1</code>.</li>
+      <li>BR-B <code>show ip route static</code> shows <code>S 192.168.30.0/24 [1/0] via 10.0.4.2</code>.</li>
+      <li>BR-B can ping PC-C at <code>192.168.30.10</code>. Other sites cannot reach it yet; that comes in Task 4.</li>
+    </ul>
+  </div>
+
+  <!-- Task 3 -->
+  <h3 id="t3">Task 3: Enable single-area OSPF</h3>
+  <p>On HQ-R1, HQ-R2, BR-A and BR-B (not BR-C): start process 10, set the router ID, add a <code>network</code> statement for every internal subnet in area 0 (subnet address + wildcard), and make the LAN interface passive.</p>
+  <div class="tag">
+    <div class="t">Wildcard reminder: "mask flipped, block size minus one"</div>
+    <p>/30 → <code>0.0.0.3</code> &nbsp;·&nbsp; /24 → <code>0.0.0.255</code></p>
+  </div>
+
+  <details class="cfgset" open><summary>HQ-R1</summary>
+<pre class="cfg">configure terminal
+router ospf 10
+ router-id 1.1.1.1
+ network 10.0.0.0 0.0.0.3 area 0
+ network 172.16.20.0 0.0.0.255 area 0
+ passive-interface g0/2
+end</pre></details>
+  <details class="cfgset"><summary>HQ-R2</summary>
+<pre class="cfg">configure terminal
+router ospf 10
+ router-id 2.2.2.2
+ network 10.0.0.0 0.0.0.3 area 0
+ network 10.0.1.0 0.0.0.3 area 0
+ network 10.0.2.0 0.0.0.3 area 0
+ network 10.1.10.0 0.0.0.255 area 0
+ passive-interface g0/1
+end</pre></details>
+  <details class="cfgset"><summary>BR-A</summary>
+<pre class="cfg">configure terminal
+router ospf 10
+ router-id 3.3.3.3
+ network 10.0.1.0 0.0.0.3 area 0
+ network 10.0.3.0 0.0.0.3 area 0
+ network 172.16.50.0 0.0.0.255 area 0
+ passive-interface g0/2
+end</pre></details>
+  <details class="cfgset"><summary>BR-B</summary>
+<pre class="cfg">configure terminal
+router ospf 10
+ router-id 4.4.4.4
+ network 10.0.2.0 0.0.0.3 area 0
+ network 10.0.3.0 0.0.0.3 area 0
+ network 10.0.4.0 0.0.0.3 area 0
+ network 10.3.10.0 0.0.0.255 area 0
+ passive-interface g0/1
+ passive-interface g0/2
+end</pre></details>
+  <div class="note" style="--c:var(--orange)"><strong>BR-C:</strong> no OSPF configuration. On BR-B, <code>passive-interface g0/1</code> keeps the 10.0.4.0/30 link in OSPF's advertisements while sending no Hellos toward BR-C.</div>
+  <p>As neighbours come up you should see console messages such as:</p>
+<pre>%OSPF-5-ADJCHG: Process 10, Nbr 2.2.2.2 on GigabitEthernet0/0 from LOADING to FULL, Loading Done</pre>
+  <div class="note" style="--c:var(--orange)"><strong>Why not add the ISP links?</strong> If <code>172.31.0.0/30</code> were in OSPF, HQ-R1 would send Hellos to the ISP router. That leaks internal information and does nothing, because the ISP does not run OSPF.</div>
+
+  <!-- Task 4 -->
+  <h3 id="t4">Task 4: Share the default route and the Branch C network</h3>
+  <p>Instead of adding a default route on every router, configure it once on HQ-R1 and let OSPF advertise it.</p>
+  <details class="cfgset" open><summary>HQ-R1</summary>
+<pre class="cfg">configure terminal
+router ospf 10
+ default-information originate
+end</pre></details>
+  <p>Next, OSPF must learn about 192.168.30.0/24. BR-B takes its static route and <strong>redistributes</strong> it, which means advertising a route learned another way into OSPF as an external route. Redistribution is beyond the exam objectives, but it is the standard way to connect a router that cannot run OSPF.</p>
+  <details class="cfgset" open><summary>BR-B</summary>
+<pre class="cfg">configure terminal
+router ospf 10
+ redistribute static subnets
+end</pre></details>
+  <p>The <code>subnets</code> keyword tells OSPF to redistribute subnetted routes too, not only whole classful networks. Include it by habit.</p>
+  <div class="check">
+    <div class="ct">Check</div>
+    <ul>
+      <li>On BR-A, <code>show ip route</code> includes <code>O*E2 0.0.0.0/0 [110/1] via 10.0.1.1</code> and <code>O E2 192.168.30.0/24 [110/20] via 10.0.3.2</code>.</li>
+      <li>PC-C can ping the Internet-Server at <code>172.31.100.10</code> and PC-HQ at <code>10.1.10.10</code>.</li>
+    </ul>
+  </div>
+  <div class="note" style="--c:var(--orange)"><strong>Why does this work without OSPF on BR-C?</strong> Outbound, PC-C → BR-C → default route → BR-B, and BR-B knows every OSPF route. Return traffic reaches BR-B because every router learned 192.168.30.0/24 from BR-B's redistribution, and BR-B's static route delivers it to BR-C.</div>
+
+  <!-- Task 5 -->
+  <h3 id="t5">Task 5: Verification</h3>
+  <p>Work through the commands in this order. <em>(Really Only Deal In Neighbour Problems: route, ospf, database, interface, neighbor, protocols.)</em></p>
+
+  <h4>5.1 Neighbours: <code>show ip ospf neighbor</code></h4>
+  <p>Five OSPF links means five adjacencies. BR-C runs no OSPF, so it has none. Every router should list these neighbours in the <strong>FULL</strong> state:</p>
+  <div class="tw"><table class="rs">
+    <thead><tr><th>Router</th><th>Neighbour ID</th><th>Interface</th><th>Expected state</th></tr></thead>
+    <tbody>
+      <tr><td>HQ-R1</td><td>2.2.2.2</td><td>G0/0</td><td>FULL/DR or FULL/BDR</td></tr>
+      <tr><td rowspan="3">HQ-R2</td><td>1.1.1.1</td><td>G0/0</td><td>FULL/DR or FULL/BDR</td></tr>
+      <tr><td>3.3.3.3</td><td>G0/2</td><td>FULL/DR or FULL/BDR</td></tr>
+      <tr><td>4.4.4.4</td><td>S0/0/0</td><td>FULL/ - (point-to-point, no election)</td></tr>
+      <tr><td rowspan="2">BR-A</td><td>2.2.2.2</td><td>G0/0</td><td>FULL/DR or FULL/BDR</td></tr>
+      <tr><td>4.4.4.4</td><td>G0/1</td><td>FULL/DR or FULL/BDR</td></tr>
+      <tr><td rowspan="2">BR-B</td><td>2.2.2.2</td><td>S0/0/0</td><td>FULL/ -</td></tr>
+      <tr><td>3.3.3.3</td><td>G0/0</td><td>FULL/DR or FULL/BDR</td></tr>
+      <tr><td>BR-C</td><td>–</td><td>–</td><td>No OSPF, so no neighbours</td></tr>
+    </tbody>
+  </table></div>
+  <p>On Ethernet links, a designated router (DR) and backup designated router (BDR) are elected. With equal priority, the higher router ID should win if both routers start together, but the election is not pre-emptive, so the router that came up first may keep the DR role.</p>
+
+  <h4>5.2 Routes: <code>show ip route ospf</code> (or <code>show ip route</code>)</h4>
+  <p>On BR-A you should see six internal <code>O</code> routes plus two external routes:</p>
+<pre>O    10.0.0.0/30   O    10.0.2.0/30   O    10.0.4.0/30
+O    10.1.10.0/24  O    10.3.10.0/24  O    172.16.20.0/24
+O E2 192.168.30.0/24 [110/20] via 10.0.3.2
+O*E2 0.0.0.0/0 [110/1] via 10.0.1.1</pre>
+  <p>BR-A's own networks (10.0.1.0/30, 10.0.3.0/30, 172.16.50.0/24) show as <code>C</code> (connected). External routes from redistribution get a default metric of 20.</p>
+  <p>On BR-C there are no <code>O</code> routes at all, only its connected networks and <code>S* 0.0.0.0/0 [1/0] via 10.0.4.1</code>.</p>
+
+  <h4>5.3 Other commands and what to look for</h4>
+  <div class="tw"><table>
+    <thead><tr><th>Command</th><th>Look for</th></tr></thead>
+    <tbody>
+      <tr><td><code>show ip ospf</code></td><td>"Routing Process "ospf 10" with ID x.x.x.x" matches the design table. On HQ-R1 and BR-B it also says the router is an autonomous system boundary router.</td></tr>
+      <tr><td><code>show ip ospf interface g0/0</code></td><td>Area 0, network type BROADCAST, cost 1, Hello 10, Dead 40, and the DR/BDR IDs.</td></tr>
+      <tr><td><code>show ip ospf interface s0/0/0</code></td><td>Network type POINT_TO_POINT, cost 64, no DR/BDR.</td></tr>
+      <tr><td><code>show ip ospf database</code></td><td>Four Router Link States entries, one per OSPF router (1.1.1.1 to 4.4.4.4), and two external entries: 0.0.0.0 (from 1.1.1.1) and 192.168.30.0 (from 4.4.4.4).</td></tr>
+      <tr><td><code>show ip protocols</code></td><td>Router ID, "Routing for Networks" matching your statements, passive interfaces listed, distance 110. On BR-B, static routes are listed as redistributed.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h4>5.4 End-to-end tests</h4>
+  <div class="tw"><table>
+    <thead><tr><th>From</th><th>Command</th><th>Expected</th></tr></thead>
+    <tbody>
+      <tr><td>PC-C</td><td><code>ping 10.1.10.10</code></td><td>Success (PC-HQ)</td></tr>
+      <tr><td>PC-A</td><td><code>tracert 172.16.20.10</code></td><td>172.16.50.1 → 10.0.1.1 → 10.0.0.1 → 172.16.20.10</td></tr>
+      <tr><td>PC-B</td><td><code>ping 172.31.100.10</code></td><td>Success through the default route</td></tr>
+      <tr><td>PC-HQ</td><td><code>tracert 192.168.30.10</code></td><td>HQ-R2 → BR-A → BR-B → BR-C (10.0.4.2) → PC-C, not over the serial link</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="lab">
+    <h4>Verification checklist</h4>
+    <p style="font-size:.9rem;color:var(--muted);margin:0 0 .4em">Tick items as you finish. Your ticks are saved in this browser.</p>
+    <div id="checklist"></div>
+  </div>
+
+  <!-- Task 6 -->
+  <h3 id="t6">Task 6: Cost, path selection and failover</h3>
+  <p>Gigabit links cost <strong>1</strong> and the serial links cost <strong>64</strong> (10<sup>8</sup> ÷ 1,544,000). <em>(Cost = 100 over Mbps.)</em></p>
+  <h4>6.1 Predict first</h4>
+  <p>Before running any command, calculate the total cost from HQ-R2 to PC-B's network (10.3.10.0/24) along each path:</p>
+  <div class="tw"><table>
+    <thead><tr><th>Path</th><th>Your working</th><th>Total</th></tr></thead>
+    <tbody>
+      <tr><td>HQ-R2 → BR-A → BR-B</td><td>G0/2 (1) + BR-A G0/1 (1) + BR-B G0/2 (1)</td><td class="ans">3</td></tr>
+      <tr><td>HQ-R2 → BR-B (serial)</td><td>S0/0/0 (64) + BR-B G0/2 (1)</td><td class="ans">65</td></tr>
+    </tbody>
+  </table></div>
+  <p>Check with <code>show ip route 10.3.10.0</code> on HQ-R2: the route should be <code>[110/3] via 10.0.1.2</code>.</p>
+  <h4>6.2 Simulate a link failure</h4>
+<pre class="cfg">configure terminal
+interface g0/2
+ shutdown
+end
+show ip route 10.3.10.0</pre>
+  <p>The route should switch to <code>[110/65] via 10.0.2.2, Serial0/0/0</code> within a few seconds. Run a continuous ping from PC-HQ to PC-B (<code>ping -t 10.3.10.10</code>) while you shut the link to watch the failover. Then restore it with <code>no shutdown</code>.</p>
+  <h4>6.3 Change the path on purpose</h4>
+  <p>Management wants traffic between HQ and Branch B to use the serial link. Lower its cost on <em>both</em> ends:</p>
+<pre class="cfg">! On HQ-R2 and on BR-B
+configure terminal
+interface s0/0/0
+ ip ospf cost 1
+end</pre>
+  <p>Now the serial path costs 1 + 1 = 2, which beats 3. Confirm with <code>show ip route 10.3.10.0</code>, then remove the change with <code>no ip ospf cost</code>.</p>
+  <h4>6.4 Challenge: reference bandwidth</h4>
+  <p>Enter <code>auto-cost reference-bandwidth 1000</code> under <code>router ospf 10</code> on <strong>every OSPF</strong> router (not BR-C). Record the new cost of a Gigabit interface and of a serial interface, and explain why this command must match on all routers.</p>
+  <details class="q"><summary>Answer</summary><div class="a">Gigabit = 1000 ÷ 1000 = 1; serial = 1000 ÷ 1.544 ≈ 647. If only some routers change the reference, they calculate costs on different scales and may choose inconsistent paths.</div></details>
+  <h4>6.5 Optional: control the DR election</h4>
+  <p>Make HQ-R2 the DR on its Ethernet links. Priority is checked first, then router ID. <em>(Priority first, RID second, zero never.)</em></p>
+<pre class="cfg">! HQ-R2
+configure terminal
+interface g0/0
+ ip ospf priority 255
+interface g0/2
+ ip ospf priority 255
+end
+clear ip ospf process</pre>
+  <p>Answer <code>yes</code> to the reset prompt, then confirm with <code>show ip ospf interface g0/0</code>.</p>
+
+  <!-- Task 7 -->
+  <h3 id="t7">Task 7: Troubleshooting</h3>
+  <p>The instructor, or a partner, secretly adds <strong>one</strong> fault from the list below. Find it using only <code>show</code> commands, then fix it. Open a fault only after you have solved it, or if you are the one creating the fault.</p>
+  <div class="tag">
+    <div class="t">Neighbour checklist: "A Stubborn Admin Hates mismatches"</div>
+    <p>Area ID, Stub flag, Authentication, Hello/Dead timers. Also check the subnet, the wildcard, and passive interfaces.</p>
+  </div>
+  <details class="q"><summary>Fault 1: Nobody can reach Branch C</summary><div class="a">
+    <p><strong>Break it (BR-B):</strong> <code>router ospf 10</code> → <code>no redistribute static subnets</code></p>
+    <p><strong>Symptom:</strong> BR-B can ping PC-C, but no other site can. PC-C's pings leave but replies never return.</p>
+    <p><strong>Diagnose:</strong> no <code>O E2 192.168.30.0/24</code> on other routers; <code>show ip protocols</code> on BR-B no longer lists static redistribution.</p>
+    <p><strong>Fix:</strong> re-enter <code>redistribute static subnets</code>.</p></div></details>
+  <details class="q"><summary>Fault 2: Branch A and Branch B stop talking directly</summary><div class="a">
+    <p><strong>Break it (BR-A):</strong> <code>router ospf 10</code> → <code>no network 10.0.3.0 0.0.0.3 area 0</code> then <code>network 10.0.3.0 0.0.0.3 area 1</code></p>
+    <p><strong>Symptom:</strong> no neighbour on the BR-A–BR-B link. The console may show a "mismatched area ID" message.</p>
+    <p><strong>Diagnose:</strong> <code>show ip protocols</code> or <code>show ip ospf interface g0/1</code> shows area 1 on BR-A.</p>
+    <p><strong>Fix:</strong> put the network back into area 0.</p></div></details>
+  <details class="q"><summary>Fault 3: PC-C reaches its gateway and nothing else</summary><div class="a">
+    <p><strong>Break it (BR-C):</strong> <code>no ip route 0.0.0.0 0.0.0.0 10.0.4.1</code> then <code>ip route 0.0.0.0 0.0.0.0 10.0.4.6</code></p>
+    <p><strong>Symptom:</strong> PC-C can ping 192.168.30.1 but nothing beyond BR-C.</p>
+    <p><strong>Diagnose:</strong> <code>show ip route</code> on BR-C has no <code>S*</code> entry. The next hop 10.0.4.6 is not on any connected network, so the route is never installed.</p>
+    <p><strong>Fix:</strong> point the default route at 10.0.4.1.</p></div></details>
+  <details class="q"><summary>Fault 4: Branches reach each other but not the Internet</summary><div class="a">
+    <p><strong>Break it (HQ-R1):</strong> <code>router ospf 10</code> → <code>no default-information originate</code></p>
+    <p><strong>Symptom:</strong> internal pings work; pings to 172.31.100.10 fail from every device except Server-HQ behind HQ-R1.</p>
+    <p><strong>Diagnose:</strong> no <code>O*E2</code> route on branch routers.</p>
+    <p><strong>Fix:</strong> re-enter <code>default-information originate</code>.</p></div></details>
+  <details class="q"><summary>Fault 5: A typo in the wildcard</summary><div class="a">
+    <p><strong>Break it (HQ-R2):</strong> <code>router ospf 10</code> → <code>no network 10.0.1.0 0.0.0.3 area 0</code> then <code>network 10.0.1.0 0.0.0.0 area 0</code></p>
+    <p><strong>Symptom:</strong> no neighbour between HQ-R2 and BR-A. The wildcard 0.0.0.0 matches only the address 10.0.1.0, which is not the interface address 10.0.1.1.</p>
+    <p><strong>Diagnose:</strong> <code>show ip ospf interface g0/2</code> returns "OSPF not enabled on GigabitEthernet0/2".</p>
+    <p><strong>Fix:</strong> use <code>0.0.0.3</code>, or <code>10.0.1.1 0.0.0.0</code>.</p></div></details>
+
+  <div class="check">
+    <div class="ct">Deliverables for Part 3</div>
+    <ul>
+      <li>Saved Packet Tracer file (<code>copy running-config startup-config</code> on every router).</li>
+      <li>Screenshots of <code>show ip ospf neighbor</code> on HQ-R2 and BR-B, and <code>show ip route</code> on BR-A and BR-C.</li>
+      <li>Your cost predictions from Task 6 and the result of the failover test.</li>
+      <li>For Task 7: the fault, the command that revealed it, and the fix.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ PART 4 ============ -->
+<section class="unit-part" id="multi" style="--c:var(--yellow)">
+  <div class="num">Part 4 · for later practice</div>
+  <h2>Multi-area OSPF scenario</h2>
+
+  <h3>Problem statement</h3>
+  <p>NovaTech plans to open more branches. As the single-area database grows, every link flap anywhere forces every router to rerun its SPF (Shortest Path First) calculation. The team decides to split the network into three areas so that changes in one region stay there.</p>
+
+  <h3>Area design</h3>
+  <figure class="topo">
+    <svg viewBox="0 0 780 600" role="img" aria-label="Multi-area design: links around HQ and the serial link to BR-B are area 0; links to and around BR-A are area 1; BR-B's PC-B network and its passive link to BR-C are area 2; BR-C and PC-C are outside OSPF, reached by static routes.">
+      <g fill="none" stroke-width="5">
+        <line x1="400" y1="70" x2="620" y2="70" stroke="var(--line)"/>
+        <line x1="365" y1="88" x2="365" y2="172" stroke="var(--line)"/>
+        <line x1="410" y1="190" x2="620" y2="190" stroke="var(--orange)"/>
+        <line x1="365" y1="208" x2="365" y2="282" stroke="var(--orange)"/>
+        <line x1="320" y1="300" x2="170" y2="300" stroke="var(--orange)"/>
+        <line x1="390" y1="318" x2="470" y2="442" stroke="var(--orange)"/>
+        <line x1="340" y1="318" x2="185" y2="442" stroke="var(--aqua)"/>
+        <line x1="210" y1="460" x2="440" y2="460" stroke="var(--aqua)"/>
+        <line x1="165" y1="478" x2="165" y2="552" stroke="var(--aqua)"/>
+        <line x1="530" y1="460" x2="640" y2="460" stroke="var(--yellow)" stroke-dasharray="10 6"/>
+        <line x1="485" y1="478" x2="485" y2="552" stroke="var(--yellow)"/>
+        <line x1="685" y1="478" x2="685" y2="552" stroke="var(--line)"/>
+      </g>
+      <g class="sn" font-size="12">
+        <text x="373" y="134">Static only</text>
+        <text x="245" y="380" text-anchor="end">Area 1</text>
+        <text x="440" y="380">Area 0 (serial)</text>
+        <text x="325" y="452" text-anchor="middle">Area 1</text>
+        <text x="585" y="438" text-anchor="middle">Area 2 (passive)</text><text x="585" y="452" text-anchor="middle">+ static</text>
+        <text x="373" y="250">Area 0</text>
+      </g>
+      <g>
+        <rect class="rtr" x="320" y="52" width="90" height="36" rx="9"/><text class="rname" x="365" y="75" text-anchor="middle">ISP-R</text>
+        <rect class="rtr" x="310" y="172" width="110" height="36" rx="9"/><text class="rname" x="365" y="195" text-anchor="middle">HQ-R1 ASBR</text>
+        <rect class="rtr" x="310" y="282" width="110" height="36" rx="9"/><text class="rname" x="365" y="305" text-anchor="middle">HQ-R2 ABR</text>
+        <rect class="rtr" x="120" y="442" width="90" height="36" rx="9"/><text class="rname" x="165" y="465" text-anchor="middle">BR-A</text>
+        <rect class="rtr" x="410" y="442" width="150" height="36" rx="9"/><text class="rname" x="485" y="465" text-anchor="middle">BR-B ABR+ASBR</text>
+        <rect class="rtr" x="640" y="442" width="90" height="36" rx="9" style="stroke-dasharray:4 3"/><text class="rname" x="685" y="465" text-anchor="middle">BR-C</text>
+        <rect class="end" x="620" y="52" width="130" height="36" rx="4"/><text class="ename" x="685" y="75" text-anchor="middle">Internet-Server</text>
+        <rect class="end" x="620" y="172" width="130" height="36" rx="4"/><text class="ename" x="685" y="195" text-anchor="middle">Server-HQ</text>
+        <rect class="end" x="60" y="282" width="110" height="36" rx="4"/><text class="ename" x="115" y="305" text-anchor="middle">PC-HQ</text>
+        <rect class="end" x="110" y="552" width="110" height="36" rx="4"/><text class="ename" x="165" y="575" text-anchor="middle">PC-A</text>
+        <rect class="end" x="430" y="552" width="110" height="36" rx="4"/><text class="ename" x="485" y="575" text-anchor="middle">PC-B</text>
+        <rect class="end" x="630" y="552" width="110" height="36" rx="4"/><text class="ename" x="685" y="575" text-anchor="middle">PC-C</text>
+      </g>
+    </svg>
+    <figcaption>Link colour shows the area: orange = area 0 (backbone), aqua = area 1, yellow = area 2, grey = outside OSPF. The dashed yellow link is in area 2 but passive, so BR-C (no OSPF) is still reached by static routes. ABR = Area Border Router, ASBR = Autonomous System Boundary Router.</figcaption>
+  </figure>
+
+  <div class="tw"><table>
+    <thead><tr><th>Area</th><th>Networks</th><th>Routers</th></tr></thead>
+    <tbody>
+      <tr><td>Area 0 (backbone)</td><td>10.0.0.0/30, 10.0.2.0/30 (serial), 10.1.10.0/24, 172.16.20.0/24</td><td>HQ-R1, HQ-R2, BR-B</td></tr>
+      <tr><td>Area 1</td><td>10.0.1.0/30, 10.0.3.0/30, 172.16.50.0/24</td><td>HQ-R2, BR-A, BR-B</td></tr>
+      <tr><td>Area 2</td><td>10.0.4.0/30 (passive), 10.3.10.0/24</td><td>BR-B only</td></tr>
+      <tr><td>Outside OSPF</td><td>192.168.30.0/24 (redistributed by BR-B as an external route)</td><td>BR-C, static only</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li><strong>HQ-R2 is an ABR</strong> (areas 0 and 1).</li>
+    <li><strong>BR-B is an ABR</strong> (areas 0, 1 and 2). It qualifies because its serial link to HQ-R2 is in area 0. Every ABR needs at least one interface in area 0.</li>
+    <li><strong>HQ-R1</strong> is an internal area 0 router and still the ASBR.</li>
+    <li><strong>BR-B</strong> is also an ASBR because it redistributes the static route to Branch C.</li>
+    <li><strong>BR-A</strong> is an internal area 1 router. <strong>BR-C</strong> still runs no OSPF; its static routes do not change.</li>
+  </ul>
+
+  <h3>Commands</h3>
+  <p>Start from the finished single-area lab. Only the <code>network</code> statements change, and a network must be removed from its old area before it is added to a new one. HQ-R1 and BR-C need no changes. BR-B keeps its static route and <code>redistribute static subnets</code>.</p>
+  <details class="cfgset" open><summary>HQ-R2</summary>
+<pre class="cfg">configure terminal
+router ospf 10
+ no network 10.0.1.0 0.0.0.3 area 0
+ network 10.0.1.0 0.0.0.3 area 1
+end</pre></details>
+  <details class="cfgset"><summary>BR-A</summary>
+<pre class="cfg">configure terminal
+router ospf 10
+ no network 10.0.1.0 0.0.0.3 area 0
+ no network 10.0.3.0 0.0.0.3 area 0
+ no network 172.16.50.0 0.0.0.255 area 0
+ network 10.0.1.0 0.0.0.3 area 1
+ network 10.0.3.0 0.0.0.3 area 1
+ network 172.16.50.0 0.0.0.255 area 1
+end</pre></details>
+  <details class="cfgset"><summary>BR-B</summary>
+<pre class="cfg">configure terminal
+router ospf 10
+ no network 10.0.3.0 0.0.0.3 area 0
+ no network 10.0.4.0 0.0.0.3 area 0
+ no network 10.3.10.0 0.0.0.255 area 0
+ network 10.0.3.0 0.0.0.3 area 1
+ network 10.0.4.0 0.0.0.3 area 2
+ network 10.3.10.0 0.0.0.255 area 2
+end</pre></details>
+  <p>Neighbours drop and re-form while you change areas, because both ends of a link must agree. Finish each link on both routers before judging the result.</p>
+
+  <h3>Verification</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Command</th><th>Look for</th></tr></thead>
+    <tbody>
+      <tr><td><code>show ip ospf</code> on HQ-R2 and BR-B</td><td>"It is an area border router" and the number of areas (2 on HQ-R2, 3 on BR-B). BR-B also says it is an autonomous system boundary router.</td></tr>
+      <tr><td><code>show ip ospf interface</code></td><td>Each interface lists the area from the design table.</td></tr>
+      <tr><td><code>show ip route ospf</code> on BR-A</td><td>Networks from areas 0 and 2 are marked <code>O IA</code> (inter-area), for example 10.1.10.0/24 and 10.3.10.0/24. 192.168.30.0/24 stays <code>O E2</code> and the default stays <code>O*E2</code>.</td></tr>
+      <tr><td><code>show ip ospf border-routers</code></td><td>The ABRs (2.2.2.2, 4.4.4.4) and the ASBRs (1.1.1.1, 4.4.4.4) this router knows about.</td></tr>
+      <tr><td><code>show ip ospf database</code></td><td>A separate section per area, with Summary Net Link States created by the ABRs.</td></tr>
+      <tr><td><code>show ip ospf neighbor</code></td><td>Still five FULL adjacencies. Changing areas should not lose any neighbour.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Investigate</h3>
+  <p>Run <code>tracert 10.1.10.10</code> from PC-C and compare it with the single-area lab.</p>
+  <details class="q"><summary>What changed, and why?</summary><div class="a">
+    <p>BR-C always hands traffic to BR-B through its default route, so the question is how BR-B reaches HQ. In the single-area lab, BR-B used BR-A over Gigabit links (cost 3 to 10.1.10.0/24). In the multi-area design, BR-B is an ABR and reaches area 0 networks through the backbone. Its only backbone link is the serial link, so its cost to 10.1.10.0/24 rises to 65 and traffic now uses the slow serial link.</p>
+    <p>The lesson: area boundaries affect path selection, because routers prefer intra-area paths and ABRs use the backbone for inter-area traffic. A better design might put the BR-A links in area 0 as well. Try it, and compare the traceroute again.</p></div></details>
+</section>
+
+<!-- ============ PART 5 ============ -->
+<section class="unit-part" id="reflect" style="--c:var(--ink)">
+  <div class="num">Part 5</div>
+  <h2>Reflection questions</h2>
+  <details class="q"><summary>1. Why did we use <code>router-id</code> instead of relying on interface addresses?</summary><div class="a">It gives a predictable RID that does not change if interfaces change, and it takes priority over loopback and physical addresses (Real Love Prevails). Remember to clear the process or reload if it is changed later.</div></details>
+  <details class="q"><summary>2. What would happen without the <code>passive-interface</code> commands?</summary><div class="a">OSPF would still work, but routers would send Hellos every 10 seconds onto PC and server networks. That wastes bandwidth and lets anyone on those networks try to form a neighbour relationship with the router.</div></details>
+  <details class="q"><summary>3. Why is the serial link between HQ-R2 and BR-B shown as FULL/ - instead of FULL/DR?</summary><div class="a">Serial links are point-to-point, and point-to-point networks do not elect a DR or BDR (Big Networks Pick Presidents).</div></details>
+  <details class="q"><summary>4. Why is the default route marked E2 with a cost of 1 on every OSPF router?</summary><div class="a">It is an external route injected by HQ-R1. By default it is type 2 (E2), which keeps the originally advertised cost (1) and does not add internal link costs as it travels.</div></details>
+  <details class="q"><summary>5. If the primary ISP link fails, what happens to Internet access?</summary><div class="a">HQ-R1's floating static route via 172.31.0.5 (AD 10) is installed, the default route still exists, so OSPF keeps advertising it. Branches notice no change. ISP-R's own floating routes send return traffic over the serial link.</div></details>
+  <details class="q"><summary>6. Why must BR-B redistribute its static route? Why not add a static route for 192.168.30.0/24 on every router?</summary><div class="a">Redistribution tells every OSPF router about Branch C automatically, and removes the route if BR-B's static route disappears. Static routes on every router would have to be typed and maintained by hand, which is the problem NovaTech wanted to escape.</div></details>
+  <details class="q"><summary>7. BR-C runs no OSPF. How does it survive a failure of the BR-A link?</summary><div class="a">It does not need to know. BR-C simply sends everything to BR-B. OSPF on BR-B and the other routers reroutes around the failure, and BR-C's default route stays the same.</div></details>
+  <details class="q"><summary>8. Why was BR-B able to be an ABR for area 2 without a virtual link?</summary><div class="a">Its serial link to HQ-R2 is in area 0, so BR-B touches the backbone directly. An ABR must have at least one interface in area 0.</div></details>
+</section>
+
+<footer>NovaTech OSPF lab for Unit 6 · Based on the supplied Packet Tracer topology. Commands are for Cisco IOS 15 on 2911 routers.</footer>
+</main>
+</div>
+
+<script>
+(function(){
+  document.getElementById('themeBtn').addEventListener('click',function(){
+    var r=document.documentElement,c=r.getAttribute('data-theme');
+    var dark=c?c==='dark':matchMedia('(prefers-color-scheme: dark)').matches;
+    r.setAttribute('data-theme',dark?'light':'dark');
+  });
+  document.querySelectorAll('pre.cfg').forEach(function(pre){
+    var w=document.createElement('div');w.className='prewrap';
+    pre.parentNode.insertBefore(w,pre);w.appendChild(pre);
+    var b=document.createElement('button');b.type='button';b.className='copy';b.textContent='Copy';
+    b.addEventListener('click',function(){
+      var t=pre.innerText;
+      function ok(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1500);}
+      function fallback(){
+        try{var r=document.createRange();r.selectNodeContents(pre);var s=getSelection();s.removeAllRanges();s.addRange(r);
+          if(document.execCommand('copy')){ok();}else{b.textContent='Selected: press Ctrl+C';}
+        }catch(e){b.textContent='Select and copy manually';}
+      }
+      try{if(navigator.clipboard){navigator.clipboard.writeText(t).then(ok,fallback);}else{fallback();}}catch(e){fallback();}
+    });
+    w.appendChild(b);
+  });
+  var items=[
+    'All router interfaces are up/up (show ip interface brief)',
+    'Every PC can ping its default gateway',
+    'HQ-R1 can ping the Internet-Server 172.31.100.10',
+    'BR-C has a static default route; BR-B has a static route to 192.168.30.0/24',
+    'Five OSPF adjacencies are in the FULL state',
+    'Router IDs are 1.1.1.1 to 4.4.4.4 (show ip ospf)',
+    'LAN interfaces appear as passive (show ip protocols)',
+    'Other routers show O E2 192.168.30.0/24 and an O*E2 default route',
+    'PC-C can ping PC-HQ and the Internet-Server',
+    'Cost prediction in Task 6 matches show ip route',
+    'Failover to the serial link observed and link restored',
+    'Troubleshooting fault found and fixed'
+  ];
+  var key='novatech-ospf-lab-checklist',saved={};
+  try{saved=JSON.parse(localStorage.getItem(key)||'{}')||{};}catch(e){saved={};}
+  var box=document.getElementById('checklist');
+  items.forEach(function(txt,i){
+    var l=document.createElement('label'),c=document.createElement('input'),s=document.createElement('span');
+    c.type='checkbox';c.checked=!!saved[i];s.textContent=txt;if(c.checked)l.className='done';
+    c.addEventListener('change',function(){saved[i]=c.checked;l.className=c.checked?'done':'';
+      try{localStorage.setItem(key,JSON.stringify(saved));}catch(e){}});
+    l.appendChild(c);l.appendChild(s);box.appendChild(l);
+  });
+})();
+</script>
+</body>
+</html>

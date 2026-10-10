@@ -1,0 +1,2105 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body><div style="font:14px/1.4 Inter,-apple-system,Segoe UI,sans-serif;background:#0b1d3a;padding:10px 16px;"><a href="/teaching/switching-routing.html" style="color:#fbf9f3;text-decoration:none;">&larr; Switching &amp; Routing &middot; all units</a></div>
+<title>Unit 7 Advanced Switching</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: NOC-console teaching tool — sticky top bar with Theory/Lab mode switch, left index rail, single reading column with embedded simulators. */
+:root{
+  --bg:#F3F5F6; --surface:#FFFFFF; --surface-2:#E9EEF1; --ink:#13212A; --muted:#566874; --line:#D3DCE1;
+  --accent:#0A6A8F; --accent-soft:#DCEEF5; --amber:#A85A06; --amber-soft:#FBEBD6;
+  --ok:#23784A; --ok-soft:#DDF1E5; --bad:#B3261E; --bad-soft:#FBE1DE;
+  --t4g:#2459B0; --t4g-soft:#E0E9F8; --t3g:#1D7E54; --t3g-soft:#DDF2E7; --t2g:#7340AA; --t2g-soft:#EEE5F8; --mg:#5F6E78; --mg-soft:#E7ECEF;
+  --code-bg:#0F1C24; --code-fg:#D3E1E8; --code-dim:#7F97A4; --code-prompt:#6FC3E4; --code-cmt:#E0A458; --code-out:#A9C4B5;
+  --f-display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --f-body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+  --r:8px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0D151A; --surface:#141F26; --surface-2:#1B2831; --ink:#E2EAEE; --muted:#93A4AE; --line:#27363F;
+  --accent:#58B6DB; --accent-soft:#16313D; --amber:#E7A04F; --amber-soft:#3A2A16;
+  --ok:#62C48F; --ok-soft:#173226; --bad:#F27A6F; --bad-soft:#3D1D1A;
+  --t4g:#78A6EC; --t4g-soft:#1A2943; --t3g:#62C99A; --t3g-soft:#163327; --t2g:#B694E2; --t2g-soft:#2A2040; --mg:#9AA8B1; --mg-soft:#222E35;
+  --code-bg:#091116; --code-fg:#D3E1E8; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0D151A; --surface:#141F26; --surface-2:#1B2831; --ink:#E2EAEE; --muted:#93A4AE; --line:#27363F;
+  --accent:#58B6DB; --accent-soft:#16313D; --amber:#E7A04F; --amber-soft:#3A2A16;
+  --ok:#62C48F; --ok-soft:#173226; --bad:#F27A6F; --bad-soft:#3D1D1A;
+  --t4g:#78A6EC; --t4g-soft:#1A2943; --t3g:#62C99A; --t3g-soft:#163327; --t2g:#B694E2; --t2g-soft:#2A2040; --mg:#9AA8B1; --mg-soft:#222E35;
+  --code-bg:#091116; --code-fg:#D3E1E8; color-scheme:dark;}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.6}
+a{color:var(--accent)}
+h1,h2,h3,h4{font-family:var(--f-display);line-height:1.2;text-wrap:balance;margin:0}
+h2{font-size:1.75rem;font-weight:800;letter-spacing:-.01em}
+h3{font-size:1.2rem;font-weight:700;margin-top:2rem}
+h4{font-size:1rem;font-weight:700;margin-top:1.25rem}
+p{margin:.6rem 0}
+code{font-family:var(--f-mono);font-size:.88em;background:var(--surface-2);padding:.08em .35em;border-radius:4px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* top bar */
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
+.topbar-in{max-width:1280px;margin:0 auto;padding:.6rem 16px;display:flex;flex-wrap:wrap;gap:.6rem 1.2rem;align-items:center}
+.brand{display:flex;flex-direction:column;min-width:0;flex:1 1 260px}
+.brand .eyebrow{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.brand strong{font-family:var(--f-display);font-size:1.15rem;font-weight:800}
+.modes{display:flex;background:var(--surface-2);border-radius:999px;padding:3px;gap:3px}
+.modes button{border:0;background:transparent;color:var(--muted);font:600 .92rem var(--f-body);padding:.42rem 1.1rem;border-radius:999px;cursor:pointer}
+.modes button[aria-selected="true"]{background:var(--ink);color:var(--surface)}
+.progress{font-family:var(--f-mono);font-size:.78rem;color:var(--muted);white-space:nowrap}
+
+/* shell */
+.shell{max-width:1280px;margin:0 auto;padding-inline:16px;padding-block:1.5rem 4rem;display:grid;grid-template-columns:230px minmax(0,1fr);gap:2.5rem}
+.rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px);align-self:start;max-height:calc(100vh - 100px);overflow:auto}
+.rail nav{display:flex;flex-direction:column;gap:2px}
+.rail .rh{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:.2rem 0 .5rem}
+.rail a{display:block;text-decoration:none;color:var(--ink);font-size:.9rem;padding:.38rem .6rem;border-radius:6px;border-left:3px solid transparent}
+.rail a:hover{background:var(--surface-2)}
+.rail a.on{border-left-color:var(--accent);background:var(--accent-soft);font-weight:600}
+.rail a .n{font-family:var(--f-mono);font-size:.78rem;color:var(--muted);margin-right:.35rem}
+main{min-width:0}
+section.unit{padding-block:.5rem 2.5rem;border-bottom:1px solid var(--line);margin-bottom:2rem;scroll-margin-top:90px}
+section.unit:last-child{border-bottom:0}
+.sec-label{font-family:var(--f-mono);font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:.35rem}
+.lead{font-size:1.06rem;color:var(--muted);max-width:68ch}
+.prose{max-width:72ch}
+.hero{padding:1.2rem 0 1.6rem;border-bottom:1px solid var(--line);margin-bottom:2rem}
+.hero h1{font-size:clamp(1.8rem,4vw,2.6rem);font-weight:800;letter-spacing:-.02em}
+.hero .meta{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.9rem}
+.chip{display:inline-flex;align-items:center;gap:.35rem;font:500 .78rem var(--f-mono);padding:.2rem .6rem;border-radius:999px;background:var(--surface-2);color:var(--ink);border:1px solid var(--line)}
+.chip.t4g{background:var(--t4g-soft);color:var(--t4g);border-color:transparent}
+.chip.t3g{background:var(--t3g-soft);color:var(--t3g);border-color:transparent}
+.chip.t2g{background:var(--t2g-soft);color:var(--t2g);border-color:transparent}
+.chip.mg{background:var(--mg-soft);color:var(--mg);border-color:transparent}
+.outcomes{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:.8rem;margin-top:1.2rem}
+.outcomes div{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:.8rem .9rem;font-size:.92rem}
+.outcomes b{display:block;font-family:var(--f-mono);font-size:.72rem;color:var(--accent);letter-spacing:.06em;text-transform:uppercase;margin-bottom:.2rem}
+
+/* tables */
+.tw{overflow-x:auto;margin:1rem 0;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{text-align:left;padding:.5rem .7rem;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--f-mono);font-size:.74rem;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);background:var(--surface-2);font-weight:600}
+tr:last-child td{border-bottom:0}
+td.num,th.num{font-variant-numeric:tabular-nums;text-align:right}
+.y{color:var(--ok);font-weight:600}.n{color:var(--bad);font-weight:600}
+
+/* callouts */
+.note{border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:.8rem 1rem;margin:1rem 0;font-size:.94rem}
+.note.key{background:var(--accent-soft);border-color:transparent}
+.note.warn{background:var(--amber-soft);border-color:transparent}
+.note.bad{background:var(--bad-soft);border-color:transparent}
+.note.tel{background:var(--surface);border-left:4px solid var(--t4g)}
+.note > b:first-child{display:block;font-family:var(--f-mono);font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.2rem}
+
+/* code */
+.cli{position:relative;background:var(--code-bg);color:var(--code-fg);border-radius:var(--r);margin:1rem 0;overflow:hidden}
+.cli .bar{display:flex;justify-content:space-between;align-items:center;gap:.5rem;padding:.35rem .5rem .35rem .8rem;background:rgba(255,255,255,.05);font:500 .72rem var(--f-mono);color:var(--code-dim);letter-spacing:.05em;text-transform:uppercase}
+.cli pre{margin:0;padding:.8rem 1rem;overflow-x:auto;font:400 .84rem/1.55 var(--f-mono);white-space:pre}
+.cli .p{color:var(--code-prompt)} .cli .c{color:var(--code-cmt)} .cli .o{color:var(--code-out)}
+.copy{border:1px solid rgba(255,255,255,.18);background:transparent;color:var(--code-fg);font:500 .72rem var(--f-mono);padding:.2rem .55rem;border-radius:4px;cursor:pointer}
+.copy:hover{background:rgba(255,255,255,.1)}
+.tabs{display:flex;flex-wrap:wrap;gap:4px;margin-top:1rem}
+.tabs button{border:1px solid var(--line);background:var(--surface);color:var(--muted);font:600 .8rem var(--f-mono);padding:.3rem .7rem;border-radius:6px 6px 0 0;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--code-bg);color:var(--code-fg);border-color:var(--code-bg)}
+.tabs + .tabpanes .cli{margin-top:0;border-top-left-radius:0}
+
+/* widgets */
+.widget{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:1rem;margin:1.4rem 0}
+.widget-h{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:.4rem 1rem;margin-bottom:.7rem}
+.widget-h h4{margin:0;font-size:1.02rem}
+.widget-h span{font:500 .72rem var(--f-mono);color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.ctl{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin:.5rem 0}
+.btn{border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font:600 .85rem var(--f-body);padding:.42rem .8rem;border-radius:6px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.btn.danger{background:var(--bad-soft);border-color:transparent;color:var(--bad)}
+select,input[type=text],input[type=number]{font:500 .86rem var(--f-mono);padding:.35rem .5rem;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);min-width:0}
+label.f{display:flex;flex-direction:column;gap:.2rem;font-size:.78rem;color:var(--muted);font-family:var(--f-mono)}
+.svgwrap{overflow-x:auto}
+.svgwrap svg{display:block;max-width:100%;height:auto;margin:0 auto}
+.svg-t{fill:var(--ink);font-family:var(--f-mono);font-size:12px}
+.svg-m{fill:var(--muted);font-family:var(--f-mono);font-size:10.5px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;align-items:start}
+.grid2 > *{min-width:0}
+.stat{display:flex;gap:1.2rem;flex-wrap:wrap;font-family:var(--f-mono);font-size:.82rem}
+.stat b{font-size:1.15rem;font-variant-numeric:tabular-nums;display:block;color:var(--ink)}
+.meter{height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden;margin-top:.25rem;width:140px}
+.meter i{display:block;height:100%;background:var(--ok);width:5%;transition:width .3s}
+.log{background:var(--code-bg);color:var(--code-out);font:400 .78rem/1.5 var(--f-mono);padding:.6rem .8rem;border-radius:6px;height:150px;overflow:auto;white-space:pre-wrap}
+.pill{display:inline-block;font:600 .74rem var(--f-mono);padding:.15rem .55rem;border-radius:999px}
+.pill.up{background:var(--ok-soft);color:var(--ok)} .pill.down{background:var(--bad-soft);color:var(--bad)} .pill.mid{background:var(--amber-soft);color:var(--amber)}
+.timeline{display:flex;height:34px;border-radius:6px;overflow:hidden;border:1px solid var(--line);margin:.5rem 0}
+.timeline div{display:flex;align-items:center;justify-content:center;font:600 .7rem var(--f-mono);color:var(--ink);transition:opacity .3s;opacity:.3;white-space:nowrap;overflow:hidden}
+.timeline div.on{opacity:1}
+.matrix td,.matrix th{text-align:center}
+.matrix td.ok{background:var(--ok-soft);color:var(--ok);font-weight:600}
+.matrix td.no{background:var(--bad-soft);color:var(--bad)}
+.matrix td.hl{outline:3px solid var(--accent);outline-offset:-3px}
+
+/* quiz */
+.q{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:.8rem 1rem;margin:.7rem 0}
+.q p.qt{font-weight:600;margin:.1rem 0 .5rem}
+.q .opts{display:grid;gap:.35rem}
+.q .opts button{text-align:left;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font:400 .9rem var(--f-body);padding:.45rem .7rem;border-radius:6px;cursor:pointer}
+.q .opts button.right{background:var(--ok-soft);border-color:var(--ok);color:var(--ok);font-weight:600}
+.q .opts button.wrong{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.q .why{font-size:.88rem;color:var(--muted);margin-top:.5rem}
+details{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:.55rem .9rem;margin:.6rem 0}
+details summary{cursor:pointer;font-weight:600}
+details[open] summary{margin-bottom:.4rem}
+
+/* lab specifics */
+.lab-head{display:flex;flex-wrap:wrap;gap:.5rem 1rem;align-items:baseline;justify-content:space-between}
+.lab-meta{display:flex;gap:.4rem;flex-wrap:wrap}
+.ticket{border:1px solid var(--line);border-left:4px solid var(--amber);background:var(--surface);border-radius:var(--r);padding:.8rem 1rem;margin:1rem 0}
+.ticket .tid{font:600 .76rem var(--f-mono);color:var(--amber);letter-spacing:.05em}
+.ticket h4{margin:.15rem 0 .3rem}
+.steps{counter-reset:s;list-style:none;padding:0;margin:1rem 0}
+.steps > li{counter-increment:s;position:relative;padding:.1rem 0 .9rem 2.6rem}
+.steps > li::before{content:counter(s);position:absolute;left:0;top:.05rem;width:1.8rem;height:1.8rem;border-radius:50%;background:var(--surface-2);border:1px solid var(--line);font:600 .8rem/1.8rem var(--f-mono);text-align:center;color:var(--ink)}
+.check{display:flex;gap:.55rem;align-items:flex-start;padding:.35rem 0;font-size:.93rem}
+.check input{margin-top:.3rem;accent-color:var(--accent);width:1rem;height:1rem;flex:none}
+.checklist{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:.6rem 1rem;margin:1rem 0}
+.checklist h4{margin:.2rem 0 .3rem;font-size:.86rem;font-family:var(--f-mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.vl{display:inline-block;width:.7rem;height:.7rem;border-radius:2px;vertical-align:middle;margin-right:.3rem}
+.legend{display:flex;flex-wrap:wrap;gap:.4rem 1rem;font:500 .78rem var(--f-mono);color:var(--muted);margin:.4rem 0}
+.devinfo{min-height:4.5rem;font-size:.9rem;background:var(--surface-2);border-radius:6px;padding:.6rem .8rem;margin-top:.6rem}
+.topo-node{cursor:pointer}
+.topo-node:hover rect{stroke:var(--accent);stroke-width:2.5}
+@media (max-width:900px){
+  .shell{grid-template-columns:minmax(0,1fr);gap:1rem}
+  .rail{position:static;max-height:none}
+  .rail nav{flex-direction:row;flex-wrap:nowrap;overflow-x:auto;gap:4px;padding-bottom:4px}
+  .rail a{white-space:nowrap;border-left:0;border-bottom:3px solid transparent;font-size:.84rem}
+  .rail a.on{border-bottom-color:var(--accent)}
+  .rail .rh{display:none}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand"><span class="eyebrow">Computer Networks · Unit 7 · 6 hours</span><strong>Advanced Switching Concepts</strong></div>
+    <div class="modes" role="tablist" aria-label="Mode">
+      <button id="mode-theory" role="tab" aria-selected="true" data-mode="theory">Theory</button>
+      <button id="mode-lab" role="tab" aria-selected="false" data-mode="lab">Lab</button>
+    </div>
+    <span class="progress" id="progress">Lab tasks: 0 done</span>
+  </div>
+</header>
+
+<!-- ======================= THEORY ======================= -->
+<div class="shell" id="theory">
+  <aside class="rail">
+    <div class="rh">Theory index</div>
+    <nav>
+      <a href="#t-intro"><span class="n">00</span>Outcomes</a>
+      <a href="#t-71"><span class="n">7.1</span>Redundancy issues</a>
+      <a href="#t-72"><span class="n">7.2</span>STP &amp; root election</a>
+      <a href="#t-72b"><span class="n">7.2</span>STP versions, PVST+, RSTP</a>
+      <a href="#t-72c"><span class="n">7.2</span>Root config, PortFast</a>
+      <a href="#t-73"><span class="n">7.3</span>Port security</a>
+      <a href="#t-74"><span class="n">7.4</span>EtherChannel</a>
+      <a href="#t-75"><span class="n">7.5</span>Troubleshooting</a>
+      <a href="#t-vtp"><span class="n">+</span>VLAN, trunk &amp; VTP recap</a>
+      <a href="#t-quiz"><span class="n">Q</span>Review quiz</a>
+    </nav>
+  </aside>
+  <main>
+    <section class="unit hero" id="t-intro">
+      <div class="sec-label">Unit 7 · Theory</div>
+      <h1>Advanced Switching Concepts</h1>
+      <p class="lead">Redundant switch links keep a network alive when a cable or switch fails, but at Layer 2 they also create loops. This unit covers how Spanning Tree Protocol removes those loops, how port security locks down access ports, how EtherChannel turns parallel links into one fat pipe, and which show commands you use when it all goes wrong.</p>
+      <div class="meta">
+        <span class="chip">Based on Lammle Ch. 15 · Enhanced Switched Technologies</span>
+        <span class="chip">IEEE 802.1D · 802.1w · 802.1s · 802.3ad</span>
+        <span class="chip">Cisco 2960 / 3560 IOS</span>
+      </div>
+      <div class="outcomes">
+        <div><b>Outcome 1</b>Explain the need for redundancy in switched networks and the problems a Layer 2 loop causes.</div>
+        <div><b>Outcome 2</b>Describe the operation of STP: root bridge election, port roles, port states and timers.</div>
+        <div><b>Outcome 3</b>Configure switch port security: sticky MAC, maximum, aging and violation modes.</div>
+        <div><b>Outcome 4</b>Implement link aggregation using EtherChannel with PAgP, LACP or static mode.</div>
+        <div><b>Outcome 5</b>Troubleshoot switching with <code>show spanning-tree</code>, <code>show mac address-table</code> and related commands.</div>
+      </div>
+      <div class="tw"><table>
+        <thead><tr><th>Syllabus item</th><th>Topic</th><th class="num">Suggested time</th></tr></thead>
+        <tbody>
+          <tr><td>7.1</td><td>Redundancy issues in switched networks</td><td class="num">0.5 h</td></tr>
+          <tr><td>7.2</td><td>Spanning Tree Protocol operation and election of root bridge</td><td class="num">2 h</td></tr>
+          <tr><td>7.3</td><td>Switch port security (sticky MAC, aging, violation modes)</td><td class="num">1 h</td></tr>
+          <tr><td>7.4</td><td>Link aggregation with EtherChannel (PAgP, LACP)</td><td class="num">1.5 h</td></tr>
+          <tr><td>7.5</td><td>Troubleshooting switching issues (show spanning-tree, show mac-address-table)</td><td class="num">1 h</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- 7.1 -->
+    <section class="unit" id="t-71">
+      <div class="sec-label">7.1</div>
+      <h2>Redundancy issues in switched networks</h2>
+      <div class="prose">
+        <p>Redundant physical links between switches protect the network from a single link or switch failure. In a mobile operator's aggregation network this matters a great deal: if the one cable between a hub site and the core is cut, every eNodeB, NodeB and BTS behind it drops off air. So designers always build at least two paths.</p>
+        <p>The catch is that Ethernet frames have <strong>no TTL (Time To Live) field</strong>. An IP packet that loops is discarded after its TTL reaches zero, and routing protocols such as RIP, EIGRP and OSPF prevent loops at Layer 3. A Layer 2 frame that loops circulates forever. <strong>STP is the Layer 2 mechanism that prevents loops.</strong></p>
+      </div>
+      <h3>Problems caused by a Layer 2 loop</h3>
+      <div class="tw"><table>
+        <thead><tr><th>Problem</th><th>What happens</th></tr></thead>
+        <tbody>
+          <tr><td><b>Broadcast storm</b></td><td>Broadcasts, multicasts and unknown unicasts (frames whose destination is not in the CAM table) are flooded out every port and keep circling. Link load and switch CPU climb within seconds. If the loop is confined to one VLAN, only ports in that VLAN and the trunks carrying it suffer.</td></tr>
+          <tr><td><b>Multiple frame copies</b></td><td>The destination receives the same unicast frame several times. With more than one loop, every switch copies each frame out all ports again, so traffic multiplies.</td></tr>
+          <tr><td><b>MAC table instability (thrashing)</b></td><td>The same source MAC arrives on different ports, so the switch keeps re-learning (flapping) where the host is. It no longer knows where any host really lives.</td></tr>
+          <tr><td><b>Device unresponsiveness</b></td><td>With links saturated and CPUs near 100 %, switches stop answering console and SSH sessions, which makes troubleshooting almost impossible.</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="widget" id="w-storm">
+        <div class="widget-h"><h4>Loop simulator: one ARP broadcast in a triangle</h4><span>Interactive</span></div>
+        <p style="margin-top:0;font-size:.9rem;color:var(--muted)">This is the lab topology: SW2 and SW3 are joined by two gigabit links, so there are several loops. Send a single broadcast from the eNB on SW3. With STP off, every switch floods each frame out all ports except the one it arrived on, the copies multiply, and SW1 keeps re-learning the eNB's MAC on different ports. Turn STP on and SW2's two gigabit ports toward SW3 block, leaving one loop-free tree.</p>
+        <div class="ctl">
+          <button class="btn pri" id="storm-send">Send broadcast</button>
+          <button class="btn" id="storm-stp" aria-pressed="false">STP: OFF</button>
+          <button class="btn" id="storm-reset">Reset</button>
+        </div>
+        <div class="grid2">
+          <div class="svgwrap"><svg id="storm-svg" viewBox="0 0 420 300" width="420" role="img" aria-label="Three-switch triangle with frames looping"></svg></div>
+          <div>
+            <div class="stat">
+              <div>Frames in flight<b id="st-frames">0</b></div>
+              <div>Frames forwarded<b id="st-total">0</b></div>
+              <div>Switch CPU<b id="st-cpu">3 %</b><div class="meter"><i id="st-meter"></i></div></div>
+            </div>
+            <h4 style="margin-top:.8rem;font-size:.85rem">SW1 MAC table: eNB-01 (00d0.ba12.3401)</h4>
+            <div class="log" id="st-mac" aria-live="polite">Waiting for traffic…</div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Two ways STP itself can fail</h3>
+      <div class="prose">
+        <p><b>1. A port blocks when it should forward.</b> That segment becomes unusable, but the rest of the network keeps working, much like a failed routing protocol on one router.</p>
+        <p><b>2. A blocked port starts forwarding.</b> This is the dangerous case. Every port lights up blinking amber/green, and the four problems above hit the whole network.</p>
+      </div>
+      <div class="note warn"><b>Recovering from a loop</b>Systematically remove redundant links one by one until the storm stops and the switches recover. Then put the redundant links back one at a time while monitoring, so you find the failing port or switch. Keep a back-out plan ready in case it reoccurs.</div>
+    </section>
+
+    <!-- 7.2 -->
+    <section class="unit" id="t-72">
+      <div class="sec-label">7.2</div>
+      <h2>Spanning Tree Protocol operation and root bridge election</h2>
+      <div class="prose">
+        <p>STP (IEEE 802.1D, originally developed by DEC) uses the <strong>Spanning Tree Algorithm (STA)</strong> to build a topology database, elect a root bridge, and then block redundant ports so that exactly one active path exists between any two switches. Frames travel only on STP-chosen links. Switches exchange <strong>BPDUs (Bridge Protocol Data Units)</strong> every <strong>2 seconds</strong> (the hello time) out of all active ports; the bridge ID is carried inside each BPDU.</p>
+      </div>
+
+      <h3>Key terms</h3>
+      <div class="tw"><table>
+        <thead><tr><th>Term</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td>Bridge ID (BID)</td><td>8 bytes: 2-byte bridge priority (default <b>32768</b>) + 6-byte base MAC address. The <b>lowest</b> BID is best.</td></tr>
+          <tr><td>Root bridge</td><td>The switch with the lowest BID. It is the reference point; all its ports are designated (forwarding). It never has a root port.</td></tr>
+          <tr><td>Non-root bridge</td><td>Every other switch. Each must build a single path to the root.</td></tr>
+          <tr><td>Port cost</td><td>Value set by link bandwidth (see table below).</td></tr>
+          <tr><td>Path cost</td><td>Sum of port costs along a path to the root. Each possible path is evaluated separately.</td></tr>
+          <tr><td>Root port (RP)</td><td>On each non-root switch, the one port with the lowest path cost to the root. Exactly one per non-root switch.</td></tr>
+          <tr><td>Designated port (DP)</td><td>The single forwarding port on each segment: the one with the best cost to the root for that segment.</td></tr>
+          <tr><td>Non-designated port</td><td>Whatever is left after RPs and DPs are chosen. Placed in blocking (802.1D) or discarding (802.1w).</td></tr>
+          <tr><td>Forwarding port</td><td>Forwards frames; always either a root port or a designated port.</td></tr>
+          <tr><td>Blocked port</td><td>Drops all data frames and never transmits data, but still listens to BPDUs.</td></tr>
+          <tr><td>Alternate port (RSTP)</td><td>Blocked port that offers an alternative path to the root through a different switch, which holds the designated port on that segment.</td></tr>
+          <tr><td>Backup port (RSTP)</td><td>Blocked port connected to a segment where <i>another port on the same switch</i> is the designated port.</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="grid2">
+        <div>
+          <h4>IEEE STP port costs (short method)</h4>
+          <div class="tw"><table>
+            <thead><tr><th>Link speed</th><th class="num">Cost</th></tr></thead>
+            <tbody>
+              <tr><td>10 Mb/s</td><td class="num">100</td></tr>
+              <tr><td>100 Mb/s (Fast Ethernet)</td><td class="num">19</td></tr>
+              <tr><td>1 Gb/s (Gigabit)</td><td class="num">4</td></tr>
+              <tr><td>10 Gb/s</td><td class="num">2</td></tr>
+            </tbody>
+          </table></div>
+          <p style="font-size:.88rem;color:var(--muted)">A link runs at the speed of its slower end: a Gigabit port facing a 100 Mb/s port costs 19, not 4. Memorise this table.</p>
+        </div>
+        <div>
+          <h4>Bridge ID layout</h4>
+          <div class="svgwrap"><svg viewBox="0 0 360 120" width="360" role="img" aria-label="Bridge ID layout">
+            <rect x="4" y="22" width="64" height="40" rx="4" fill="var(--amber-soft)" stroke="var(--amber)"/>
+            <rect x="68" y="22" width="96" height="40" rx="4" fill="var(--accent-soft)" stroke="var(--accent)"/>
+            <rect x="164" y="22" width="190" height="40" rx="4" fill="var(--surface-2)" stroke="var(--line)"/>
+            <text x="36" y="47" text-anchor="middle" class="svg-t">Priority</text>
+            <text x="116" y="47" text-anchor="middle" class="svg-t">Sys-ID-ext</text>
+            <text x="259" y="47" text-anchor="middle" class="svg-t">Base MAC address</text>
+            <text x="36" y="80" text-anchor="middle" class="svg-m">4 bits</text>
+            <text x="116" y="80" text-anchor="middle" class="svg-m">12 bits = VLAN ID</text>
+            <text x="259" y="80" text-anchor="middle" class="svg-m">6 bytes, unique</text>
+            <text x="84" y="14" text-anchor="middle" class="svg-m">2 bytes (0–65535)</text>
+            <text x="180" y="108" text-anchor="middle" class="svg-m">PVST+ priority steps of 4096 · effective = priority + VLAN</text>
+          </svg></div>
+        </div>
+      </div>
+
+      <h3>The three-step STP process</h3>
+      <ol class="steps">
+        <li><b>Elect the root bridge.</b> Lowest priority wins; on a tie, the lowest MAC address. To compare MACs, read left to right until one digit is smaller: 0000.0c<b>a</b>b.3274 beats 0000.0c<b>f</b>6.9370.</li>
+        <li><b>Choose one root port on each non-root switch.</b> Lowest accumulated path cost to the root. Tie-breakers: lowest sender bridge ID, then lowest sender port priority, then lowest sender port number.</li>
+        <li><b>Choose one designated port per segment.</b> In order: (1) lowest accumulated path cost to the root from the switch on that segment; (2) if tied, lowest bridge ID; (3) port priority (default <b>128</b> in IOS output as <code>128.x</code>; Lammle's text quotes 32), which you can lower to force a port; (4) lowest port number, so Fa0/1 beats Fa0/2. Every remaining port blocks.</li>
+      </ol>
+      <div class="note key"><b>Worked example</b>S1 (lowest MAC) is root. S3 reaches it directly over Gigabit (cost 4); via S2 the cost would be 4 + 4 = 8, so S3's root port is the direct link. Same for S2. On the S2–S3 segment both switches have root path cost 4, so the lower bridge ID wins: S3 (000A.41D5.7937) beats S2 (0030.F222.2794), S3's port is designated and <b>S2's port blocks</b>.</div>
+
+      <div class="widget" id="w-stp">
+        <div class="widget-h"><h4>STP election calculator</h4><span>Change any value · results recompute</span></div>
+        <div class="grid2" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
+          <div><b style="font-family:var(--f-mono);font-size:.8rem">SW1</b>
+            <label class="f">Priority<select id="p1"></select></label>
+            <label class="f">MAC<input type="text" id="m1" value="0001.42A7.A603"></label></div>
+          <div><b style="font-family:var(--f-mono);font-size:.8rem">SW2</b>
+            <label class="f">Priority<select id="p2"></select></label>
+            <label class="f">MAC<input type="text" id="m2" value="0030.F222.2794"></label></div>
+          <div><b style="font-family:var(--f-mono);font-size:.8rem">SW3</b>
+            <label class="f">Priority<select id="p3"></select></label>
+            <label class="f">MAC<input type="text" id="m3" value="000A.41D5.7937"></label></div>
+          <div><b style="font-family:var(--f-mono);font-size:.8rem">Links &amp; VLAN</b>
+            <label class="f">SW1–SW2<select id="l12"></select></label>
+            <label class="f">SW1–SW3<select id="l13"></select></label>
+            <label class="f">SW2–SW3<select id="l23"></select></label>
+            <label class="f">VLAN (sys-id-ext)<input type="number" id="vl" value="110" min="1" max="4094"></label></div>
+        </div>
+        <div class="grid2" style="margin-top:.6rem">
+          <div class="svgwrap"><svg id="stp-svg" viewBox="0 0 440 320" width="440" role="img" aria-label="STP result diagram"></svg></div>
+          <div id="stp-out" style="font-size:.9rem"></div>
+        </div>
+      </div>
+
+      <h3>802.1D port states and timers</h3>
+      <div class="tw"><table>
+        <thead><tr><th>State</th><th>Receives BPDUs</th><th>Learns MACs</th><th>Forwards data</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>Disabled</td><td class="n">No</td><td class="n">No</td><td class="n">No</td><td>Administratively down; not really a transition state.</td></tr>
+          <tr><td>Blocking</td><td class="y">Yes</td><td class="n">No</td><td class="n">No</td><td>All ports start here at power-up. Prevents looped paths. Max age 20 s.</td></tr>
+          <tr><td>Listening</td><td class="y">Yes</td><td class="n">No</td><td class="n">No</td><td>15 s (forward delay). Checks no loop will form; MAC table not populated.</td></tr>
+          <tr><td>Learning</td><td class="y">Yes</td><td class="y">Yes</td><td class="n">No</td><td>15 s (forward delay). Populates the MAC table.</td></tr>
+          <tr><td>Forwarding</td><td class="y">Yes</td><td class="y">Yes</td><td class="y">Yes</td><td>Sends and receives all data frames.</td></tr>
+        </tbody>
+      </table></div>
+      <p class="prose">Default 802.1D convergence is about <b>50 seconds</b>: 20 s max age + 15 s listening + 15 s learning. No user data passes on that port until it reaches forwarding. A host plugged into a normal port sits amber for almost a minute, and a DHCP client may time out. If the switch detects the failure directly on its own root port, it skips max age, so the alternate port forwards after about 30 s.</p>
+
+      <div class="widget" id="w-states">
+        <div class="widget-h"><h4>Port bring-up timeline</h4><span>Time compressed 5×</span></div>
+        <div class="ctl">
+          <button class="btn pri" data-st="d">Plug in · 802.1D (indirect failure)</button>
+          <button class="btn" data-st="r">Plug in · RSTP edge / PortFast</button>
+          <span class="pill mid" id="st-clock">t = 0 s</span>
+        </div>
+        <div class="timeline" id="st-line">
+          <div style="flex:20;background:var(--bad-soft)">Blocking 20 s</div>
+          <div style="flex:15;background:var(--amber-soft)">Listening 15 s</div>
+          <div style="flex:15;background:var(--accent-soft)">Learning 15 s</div>
+          <div style="flex:10;background:var(--ok-soft)">Forwarding</div>
+        </div>
+        <p id="st-msg" style="font-size:.88rem;color:var(--muted);margin:.3rem 0 0">Press a button to watch a port come up.</p>
+      </div>
+    </section>
+
+    <section class="unit" id="t-72b">
+      <div class="sec-label">7.2 continued</div>
+      <h2>STP versions, PVST+ and RSTP</h2>
+      <div class="tw"><table>
+        <thead><tr><th>Version</th><th>Standard</th><th>Instances</th><th>Convergence</th><th>Resources</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>802.1D (CST)</td><td>IEEE</td><td>1 for all VLANs</td><td>Slow (~50 s)</td><td>Lowest</td><td>Common Spanning Tree. One root for every VLAN, even where that path is poor for some VLANs.</td></tr>
+          <tr><td>PVST+</td><td>Cisco</td><td>1 × 802.1D per VLAN</td><td>Slow</td><td>More than CST</td><td><b>Cisco IOS default</b> (shows as <code>protocol ieee</code>). Each VLAN can have its own root, allowing load sharing.</td></tr>
+          <tr><td>802.1w (RSTP)</td><td>IEEE</td><td>1</td><td>Fast</td><td>Higher than CST, less than PVST+</td><td>Improved BPDU handshake. States: discarding, learning, forwarding. New roles: alternate, backup. Falls back to 802.1D per port to talk to old switches.</td></tr>
+          <tr><td>Rapid PVST+</td><td>Cisco</td><td>1 × 802.1w per VLAN</td><td>Fastest</td><td>Highest CPU &amp; memory</td><td>Enabled with <code>spanning-tree mode rapid-pvst</code> (global). Shows as <code>protocol rstp</code>.</td></tr>
+          <tr><td>802.1s (MSTP)</td><td>IEEE (from Cisco MISTP)</td><td>Few, VLANs mapped to instances</td><td>Fast</td><td>Saves resources</td><td>Groups VLANs with the same traffic flow into one instance. Runs on top of RSTP. Does nothing until configured.</td></tr>
+        </tbody>
+      </table></div>
+      <div class="grid2">
+        <div>
+          <h4>802.1D vs 802.1w state names</h4>
+          <div class="tw"><table>
+            <thead><tr><th>802.1D</th><th>802.1w (RSTP)</th></tr></thead>
+            <tbody>
+              <tr><td>Disabled</td><td>Discarding</td></tr>
+              <tr><td>Blocking</td><td>Discarding</td></tr>
+              <tr><td>Listening</td><td>Discarding</td></tr>
+              <tr><td>Learning</td><td>Learning</td></tr>
+              <tr><td>Forwarding</td><td>Forwarding</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+        <div>
+          <h4>Extended system ID</h4>
+          <p style="font-size:.93rem">PVST+ needs a different BID per VLAN, so the 16-bit priority field is split into a <b>4-bit priority</b> and a <b>12-bit sys-id-ext</b> carrying the VLAN ID. Priority therefore moves in steps of <b>4096</b> (0, 4096 … 61440).</p>
+          <div class="ctl"><label class="f">Configured priority<select id="ext-p"></select></label><label class="f">VLAN<input type="number" id="ext-v" value="10" min="1" max="4094"></label></div>
+          <p id="ext-out" style="font-family:var(--f-mono);font-size:.95rem"></p>
+        </div>
+      </div>
+      <div class="note key"><b>RSTP designated-port rule in practice</b>Lammle's RSTP example 2: SC (priority 28672) is root. SA has a 10 Gb/s link to SC (cost 2). On the SA–SD segment, SD has the lower MAC, but SA's accumulated cost (2) is lower than SD's (4), so <b>SA's port is designated and SD's port discards</b>. Path cost is checked before bridge ID.</div>
+      <div class="note tel"><b>Telecom angle</b>PVST+/Rapid PVST+ lets an operator make the core switch root for 4G VLANs and a hub switch root for 2G/3G VLANs, so both uplinks carry traffic instead of one sitting idle. The lab uses exactly this design.</div>
+    </section>
+
+    <section class="unit" id="t-72c">
+      <div class="sec-label">7.2 continued</div>
+      <h2>Configuring the root bridge, PortFast and BPDU Guard</h2>
+      <h3>Choosing the root yourself</h3>
+      <p class="prose">Left alone, the oldest switch (lowest MAC) often becomes root, which can force traffic through a weak box. Always set the priority on the switch you want as root.</p>
+      <div class="cli" data-t="Root bridge configuration"><pre>S2(config)# spanning-tree vlan 2 priority ?
+  &lt;0-61440&gt;  bridge priority in increments of 4096
+S2(config)# spanning-tree vlan 2 priority 16384      ! effective 16384 + 2 = 16386
+S2(config)# spanning-tree vlan 3 root primary        ! sets 24576, or lower than current root
+S3(config)# spanning-tree vlan 3 root secondary      ! sets 28672
+S2(config)# spanning-tree mode rapid-pvst            ! global: Rapid PVST+ for all VLANs
+S2# show spanning-tree vlan 2
+S2# show spanning-tree summary                       ! "Root bridge for: VLAN0002 VLAN0003"</pre></div>
+      <ul class="prose">
+        <li>Priority 0 makes a switch root unless another switch also has 0 and a lower MAC. Never set every switch to 0.</li>
+        <li>If both primary and secondary root fail, the switch with the next-best BID takes over.</li>
+        <li>To be root for every VLAN, set the priority for each VLAN.</li>
+      </ul>
+      <h4>Reading show spanning-tree</h4>
+      <div class="cli" data-t="Sample · non-root switch (PVST+)"><pre>S3#sh spanning-tree vlan 1
+VLAN0001
+  Spanning tree enabled protocol ieee
+  Root ID    Priority    32769
+             Address     0001.42A7.A603
+             Cost        4
+             Port        26(GigabitEthernet1/2)
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     000A.41D5.7937
+             Aging Time  20
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- ----------
+Gi1/1            Desg FWD 4         128.25   P2p
+Gi1/2            Root FWD 4         128.26   P2p</pre></div>
+      <p class="prose">The top block is the <b>root</b>; the Bridge ID block is <b>this</b> switch. If they match you see <code>This bridge is the root</code>, and every port is <code>Desg FWD</code>; a root bridge never shows a blocked port. On a non-root switch, follow the root port and run <code>show cdp neighbors</code> to identify the neighbour toward the root.</p>
+
+      <h3>PortFast</h3>
+      <p class="prose">PortFast (a Cisco extension to 802.1D) moves an access port straight from blocking to forwarding, skipping the ~50 s wait. Use it only on ports that connect to a single end device (PC, server, router, or a cell-site baseband unit) and never to a switch or hub. IOS warns you when you enable it. <code>spanning-tree portfast default</code> enables it on all non-trunking ports; <code>spanning-tree portfast trunk</code> exists for a trunk to a server or router.</p>
+      <h3>BPDU Guard</h3>
+      <p class="prose">If a PortFast port receives a BPDU, BPDU Guard puts it into <b>err-disabled</b> (shut down), so nobody can extend the network with a rogue switch. Configure it on access-layer switches where users or devices connect. Recover with <code>shutdown</code> / <code>no shutdown</code> after removing the cause, or automatically with <code>errdisable recovery cause bpduguard</code>.</p>
+      <div class="cli" data-t="PortFast + BPDU Guard"><pre>S1(config)# interface fa0/5
+S1(config-if)# spanning-tree portfast
+%Warning: portfast should only be enabled on ports connected to a single
+ host. Connecting hubs, concentrators, switches, bridges, etc... to this
+ interface when portfast is enabled, can cause temporary bridging loops.
+ Use with CAUTION
+S1(config-if)# spanning-tree bpduguard enable
+! or globally, for every PortFast port
+S1(config)# spanning-tree portfast default
+S1(config)# spanning-tree portfast bpduguard default
+! console when a switch is plugged in:
+%SPANTREE-2-BLOCK_BPDUGUARD: Received BPDU on port Fa0/5 with BPDU Guard enabled. Disabling port.
+%PM-4-ERR_DISABLE: bpduguard error detected on Fa0/5, putting Fa0/5 in err-disable state</pre></div>
+      <div class="note warn"><b>Case from the textbook</b>A junior admin plugged a small switch into a core line card configured with PortFast and BPDU Guard so colleagues could watch the Super Bowl. Each port he tried went err-disabled, and he tried all 24. BPDU Guard did its job; the outage came from the user.</div>
+    </section>
+
+    <!-- 7.3 -->
+    <section class="unit" id="t-73">
+      <div class="sec-label">7.3</div>
+      <h2>Switch port security</h2>
+      <div class="prose">
+        <p>Port security limits which MAC addresses may send frames into an access port. It protects against MAC flooding attacks, rogue devices and unauthorised access, for example a laptop plugged into a cell-site switch port meant only for an eNodeB. The port must be statically set to access (or trunk); a port in dynamic (DTP) mode cannot use port security.</p>
+      </div>
+      <h3>How secure MAC addresses are learned</h3>
+      <div class="tw"><table>
+        <thead><tr><th>Type</th><th>How it is added</th><th>Where it is stored</th><th>Survives reload?</th></tr></thead>
+        <tbody>
+          <tr><td>Static secure</td><td>Typed: <code>switchport port-security mac-address 00d0.ba12.3401</code></td><td>Address table + running config</td><td class="y">Yes, after <code>copy run start</code></td></tr>
+          <tr><td>Dynamic secure (default)</td><td>Learned from traffic</td><td>Address table only</td><td class="n">No</td></tr>
+          <tr><td>Sticky secure</td><td>Learned dynamically, then written as <code>mac-address sticky &lt;mac&gt;</code></td><td>Address table + running config</td><td class="y">Yes, after <code>copy run start</code></td></tr>
+        </tbody>
+      </table></div>
+      <h3>Aging</h3>
+      <p class="prose">Secure addresses can expire so the maximum frees up. <code>switchport port-security aging time &lt;minutes&gt;</code> sets the timer. <code>aging type absolute</code> removes the address after that time regardless of activity; <code>aging type inactivity</code> removes it only after it has been idle for that time. Statically configured addresses do not age unless you add <code>aging static</code>. Aging is most useful for dynamically learned addresses; on many Catalyst platforms sticky addresses are not aged, so the lab combines a static address with dynamic learning when an entry must expire.</p>
+      <h3>Violation modes</h3>
+      <p class="prose">A violation occurs when a new MAC would exceed the maximum (default <b>1</b>), or when a secure MAC learned on one secure port appears on another secure port in the same VLAN.</p>
+      <div class="tw"><table>
+        <thead><tr><th>Mode</th><th>Drops violating frames</th><th>Syslog / SNMP</th><th>Violation counter</th><th>Port err-disabled</th></tr></thead>
+        <tbody>
+          <tr><td><b>shutdown</b> (default)</td><td class="y">Yes</td><td class="y">Yes</td><td class="y">Yes</td><td class="n">Yes, port goes down</td></tr>
+          <tr><td><b>restrict</b></td><td class="y">Yes</td><td class="y">Yes</td><td class="y">Yes</td><td>No, legitimate MAC keeps working</td></tr>
+          <tr><td><b>protect</b></td><td class="y">Yes</td><td>No</td><td>No</td><td>No, silent drop</td></tr>
+        </tbody>
+      </table></div>
+      <p class="prose">Recover an err-disabled port with <code>shutdown</code> then <code>no shutdown</code>, or enable <code>errdisable recovery cause psecure-violation</code>.</p>
+      <div class="cli" data-t="Port security configuration"><pre>S1(config)# interface fa0/3
+S1(config-if)# switchport mode access
+S1(config-if)# switchport port-security
+S1(config-if)# switchport port-security maximum 2
+S1(config-if)# switchport port-security mac-address sticky
+S1(config-if)# switchport port-security violation restrict
+S1(config-if)# switchport port-security aging time 10
+S1(config-if)# switchport port-security aging type inactivity
+S1# show port-security
+S1# show port-security interface fa0/3
+S1# show port-security address</pre></div>
+
+      <div class="widget" id="w-psec">
+        <div class="widget-h"><h4>Port security simulator: cell-site port Fa0/8 (eNB-01 O&amp;M)</h4><span>Interactive</span></div>
+        <div class="ctl">
+          <label class="f">Maximum<select id="ps-max"><option>1</option><option>2</option><option>3</option></select></label>
+          <label class="f">Learning<select id="ps-learn"><option value="sticky">sticky</option><option value="dynamic">dynamic</option></select></label>
+          <label class="f">Violation<select id="ps-mode"><option>shutdown</option><option>restrict</option><option>protect</option></select></label>
+          <label class="f">Aging (min)<select id="ps-age"><option value="0">0 (off)</option><option value="5">5</option><option value="30">30</option></select></label>
+          <label class="f">Aging type<select id="ps-atype"><option>absolute</option><option>inactivity</option></select></label>
+        </div>
+        <div class="ctl">
+          <button class="btn" data-dev="enb">Frame from eNB-01 O&amp;M</button>
+          <button class="btn" data-dev="fe">Frame from field engineer laptop</button>
+          <button class="btn" data-dev="rogue">Frame from rogue PC</button>
+          <button class="btn" id="ps-time">Advance 10 min (laptop idle)</button>
+        </div>
+        <div class="ctl">
+          <button class="btn" id="ps-save">copy run start</button>
+          <button class="btn" id="ps-reload">reload</button>
+          <button class="btn" id="ps-recover">shutdown / no shutdown</button>
+          <button class="btn danger" id="ps-reset">Reset simulator</button>
+        </div>
+        <div class="grid2">
+          <div>
+            <p style="margin:.2rem 0">Port status: <span class="pill up" id="ps-status">Secure-up</span> &nbsp; Violations: <b id="ps-count" style="font-family:var(--f-mono)">0</b></p>
+            <div class="tw" style="margin:.4rem 0"><table><thead><tr><th>Secure MAC</th><th>Type</th><th>Age</th></tr></thead><tbody id="ps-table"></tbody></table></div>
+            <div class="log" id="ps-log"></div>
+          </div>
+          <div class="cli" data-t="show running-config interface fa0/8"><pre id="ps-run"></pre></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7.4 -->
+    <section class="unit" id="t-74">
+      <div class="sec-label">7.4</div>
+      <h2>Link aggregation with EtherChannel</h2>
+      <div class="prose">
+        <p>When you cable several links between two switches, STP blocks all but one, and routing protocols may treat each link as a separate adjacency. <strong>EtherChannel</strong> (Cisco's term for port channelling) bundles <strong>2 to 8 active ports</strong> into one logical <code>port-channel</code> interface. STP and routing protocols then see a single link, so nothing blocks inside the bundle and only one routing adjacency forms.</p>
+        <p>Benefits: more bandwidth, load sharing across members (the <i>Load</i> column in <code>show etherchannel port-channel</code> is a hex value used to choose a member for each flow, not a traffic figure), and resilience: a failed member does not trigger STP reconvergence.</p>
+      </div>
+      <div class="note key"><b>Member ports must match</b>Speed, duplex, VLAN configuration and trunk mode, native VLAN and allowed VLAN list. You cannot mix interface types or settings in one bundle. Settings made under <code>interface port-channel</code> are inherited by the member interfaces.</div>
+      <div class="tw"><table>
+        <thead><tr><th>Method</th><th>Standard</th><th>Modes</th><th>Forms a channel</th><th>Does not form</th></tr></thead>
+        <tbody>
+          <tr><td>PAgP</td><td>Cisco proprietary</td><td><b>desirable</b> (initiates) / <b>auto</b> (responds only)</td><td>desirable–desirable, desirable–auto</td><td>auto–auto</td></tr>
+          <tr><td>LACP</td><td>IEEE 802.3ad (multi-vendor)</td><td><b>active</b> (initiates) / <b>passive</b> (responds only)</td><td>active–active, active–passive</td><td>passive–passive</td></tr>
+          <tr><td>Static</td><td>None</td><td><b>on</b></td><td>on–on only</td><td>on with any negotiating mode</td></tr>
+        </tbody>
+      </table></div>
+      <p class="prose">You cannot mix PAgP and LACP modes on opposite ends. PAgP sends packets every <b>30 seconds</b> to check consistency, link additions and failures. A negotiation protocol is preferred over <code>on</code> because it catches mismatches and manages member changes.</p>
+
+      <div class="widget" id="w-ec">
+        <div class="widget-h"><h4>EtherChannel negotiation checker</h4><span>Pick a mode for each end</span></div>
+        <div class="ctl">
+          <label class="f">AGG-SW2 Gi0/1-2<select id="ec-a"><option>active</option><option>passive</option><option>desirable</option><option>auto</option><option>on</option></select></label>
+          <label class="f">AGG-SW3 Gi0/1-2<select id="ec-b"><option>passive</option><option>active</option><option>desirable</option><option>auto</option><option>on</option></select></label>
+          <label class="f">SW3 Gi0/2 speed<select id="ec-spd"><option value="1000">1000 (match)</option><option value="100">100 (mismatch)</option></select></label>
+          <label class="f">SW3 Gi0/2 allowed VLANs<select id="ec-vl"><option value="ok">same list</option><option value="bad">VLAN 130 missing</option></select></label>
+        </div>
+        <div class="grid2">
+          <div class="cli" data-t="AGG-SW2# show etherchannel summary"><pre id="ec-out"></pre></div>
+          <div>
+            <p id="ec-verdict" style="font-weight:600"></p>
+            <div class="tw"><table class="matrix" id="ec-matrix"></table></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cli" data-t="LACP EtherChannel · Layer 2 trunk"><pre>S1(config)# interface range g0/1 - 2
+S1(config-if-range)# switchport trunk encapsulation dot1q   ! 3560 only; 2960 is dot1q-only
+S1(config-if-range)# switchport mode trunk
+S1(config-if-range)# channel-group 1 mode ?
+  active     Enable LACP unconditionally
+  auto       Enable PAgP only if a PAgP device is detected
+  desirable  Enable PAgP unconditionally
+  on         Enable Etherchannel only
+  passive    Enable LACP only if a LACP device is detected
+S1(config-if-range)# channel-group 1 mode active
+S1(config)# interface port-channel 1          ! number must match channel-group
+S1(config-if)# switchport mode trunk
+S1(config-if)# switchport trunk allowed vlan 1,2,3
+S1# show etherchannel summary
+S1# show etherchannel port-channel</pre></div>
+      <div class="tw"><table>
+        <thead><tr><th>Flag in <code>show etherchannel summary</code></th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><code>S</code> / <code>R</code></td><td>Layer 2 / Layer 3 port-channel</td></tr>
+          <tr><td><code>U</code></td><td>Port-channel in use. <code>Po1(SU)</code> = healthy Layer 2 bundle</td></tr>
+          <tr><td><code>P</code></td><td>Member is bundled in the port-channel</td></tr>
+          <tr><td><code>D</code></td><td>Down</td></tr>
+          <tr><td><code>I</code></td><td>Stand-alone: no negotiation partner (e.g. passive–passive)</td></tr>
+          <tr><td><code>s</code></td><td>Suspended: member settings do not match (speed, duplex, VLANs)</td></tr>
+          <tr><td><code>H</code></td><td>Hot-standby (LACP only, more than 8 members)</td></tr>
+          <tr><td><code>f</code> / <code>u</code> / <code>w</code> / <code>d</code></td><td>Failed to allocate aggregator / unsuitable for bundling / waiting to be aggregated / default port</td></tr>
+        </tbody>
+      </table></div>
+      <h3>Layer 3 EtherChannel</h3>
+      <p class="prose">Used between a switch and a router (or between two Layer 3 switches). The IP address goes on the <b>port-channel</b> interface; the physical members carry no IP address. On a Layer 3 switch, use <code>no switchport</code> on the members and on the port-channel.</p>
+      <div class="cli" data-t="Layer 3 EtherChannel on a router"><pre>Router(config)# interface port-channel 1
+Router(config-if)# ip address 20.2.2.2 255.255.255.0
+Router(config-if)# interface range g0/0 - 1
+Router(config-if-range)# channel-group 1
+GigabitEthernet0/0 added as member-1 to port-channel1
+GigabitEthernet0/1 added as member-2 to port-channel1</pre></div>
+    </section>
+
+    <!-- 7.5 -->
+    <section class="unit" id="t-75">
+      <div class="sec-label">7.5</div>
+      <h2>Troubleshooting switching issues</h2>
+      <div class="tw"><table>
+        <thead><tr><th>Command</th><th>What it shows</th></tr></thead>
+        <tbody>
+          <tr><td><code>show spanning-tree [vlan n]</code></td><td>Root ID vs Bridge ID, root port and cost, roles (Root/Desg/Altn/Back), states (FWD/BLK/LRN/LIS), port cost, Prio.Nbr, Type (P2p, Edge), protocol (ieee/rstp).</td></tr>
+          <tr><td><code>show spanning-tree summary</code></td><td>Mode (pvst / rapid-pvst), "Root bridge for:" list, PortFast and BPDU Guard defaults, per-VLAN counts of blocking/forwarding ports.</td></tr>
+          <tr><td><code>show mac address-table</code></td><td>MAC, VLAN, type (STATIC/DYNAMIC), port. A MAC moving between ports again and again signals a loop. Filters: <code>dynamic</code>, <code>interface fa0/5</code>, <code>address &lt;mac&gt;</code>, <code>vlan n</code>. Clear with <code>clear mac address-table dynamic</code>.</td></tr>
+          <tr><td><code>show vlan brief</code></td><td>Access ports per VLAN. Trunk ports are not listed here.</td></tr>
+          <tr><td><code>show interfaces trunk</code></td><td>Trunk ports, mode, encapsulation, native VLAN, allowed VLANs, VLANs active, VLANs forwarding and not pruned.</td></tr>
+          <tr><td><code>show interfaces fa0/x switchport</code></td><td>Administrative and operational mode (static access, trunk, dynamic desirable), access VLAN, native VLAN.</td></tr>
+          <tr><td><code>show etherchannel summary</code> / <code>port-channel</code></td><td>Bundle status, protocol, member flags.</td></tr>
+          <tr><td><code>show port-security [interface x]</code> / <code>address</code></td><td>Max addresses, current count, violation count, mode, port status (Secure-up / Secure-shutdown), sticky addresses.</td></tr>
+          <tr><td><code>show interfaces status err-disabled</code></td><td>Ports shut by BPDU Guard or port security, with the reason.</td></tr>
+          <tr><td><code>show cdp neighbors</code></td><td>Which switch is on which local port; used to walk to the root bridge.</td></tr>
+          <tr><td><code>show vtp status</code></td><td>VTP version, domain, mode, configuration revision.</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="widget" id="w-cmd">
+        <div class="widget-h"><h4>Command explorer: sample output from the telecom lab network</h4><span>Click a command</span></div>
+        <div class="ctl" id="cmd-btns"></div>
+        <div class="cli" data-t="output"><pre id="cmd-out"></pre></div>
+        <p id="cmd-tip" style="font-size:.9rem"></p>
+      </div>
+
+      <h3>Troubleshooting checklist</h3>
+      <div class="tw"><table>
+        <thead><tr><th>Symptom</th><th>Likely cause</th><th>Check</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr><td>Traffic takes a strange path; core links idle</td><td>Wrong root elected: an old switch with a low MAC, or a new switch with low priority</td><td><code>show spanning-tree vlan n</code>, follow root port, <code>show cdp neighbors</code></td><td>Lower priority on the intended core switch (<code>root primary</code>)</td></tr>
+          <tr><td><code>%CDP-4-NATIVE_VLAN_MISMATCH</code></td><td>Native VLAN differs at each trunk end</td><td><code>show interfaces trunk</code> on both ends</td><td>Make both ends match</td></tr>
+          <tr><td>Hosts in one VLAN cannot reach across a trunk</td><td>VLAN missing from allowed list, or VLAN not created on a switch</td><td><code>show interfaces trunk</code>, <code>show vlan brief</code></td><td><code>switchport trunk allowed vlan add n</code>; create VLAN</td></tr>
+          <tr><td>Port down, amber, no traffic</td><td>err-disabled by BPDU Guard or port security</td><td><code>show interfaces status err-disabled</code>, <code>show port-security interface</code></td><td>Remove cause, <code>shutdown</code> / <code>no shutdown</code></td></tr>
+          <tr><td>EtherChannel will not form</td><td>passive–passive, auto–auto, LACP vs PAgP, mismatched speed/duplex/VLANs</td><td><code>show etherchannel summary</code> (I, s flags)</td><td>Correct modes; match member settings</td></tr>
+          <tr><td>Network slow, CPUs at 100 %, LEDs blinking fast</td><td>Broadcast storm (loop)</td><td><code>show mac address-table</code> flapping; ports forwarding that should block</td><td>Remove redundant links, restore STP, re-add one by one</td></tr>
+          <tr><td>New VLANs do not appear on other switches</td><td>VTP domain/version/password mismatch, client mode, lower revision</td><td><code>show vtp status</code></td><td>Align domain, version, password; check revision</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section class="unit" id="t-vtp">
+      <div class="sec-label">Background for the lab</div>
+      <h2>VLAN, trunk and VTP recap</h2>
+      <div class="grid2">
+        <div class="prose">
+          <h4 style="margin-top:0">VLANs and trunks</h4>
+          <ul>
+            <li>VLAN 1 is the default and default native VLAN; it cannot be renamed or deleted. VLANs 1002–1005 are also reserved. Change the native VLAN to an unused VLAN for security.</li>
+            <li><code>switchport mode access</code> = permanent non-trunk. <code>dynamic auto</code> trunks only if the neighbour is trunk/desirable. <code>dynamic desirable</code> actively tries to trunk. <code>trunk</code> = permanent trunk. <code>switchport nonegotiate</code> stops DTP.</li>
+            <li>The 2960 supports only 802.1Q; on a 3560 enter <code>switchport trunk encapsulation dot1q</code> before <code>switchport mode trunk</code>.</li>
+            <li>All VLANs 1–4094 are allowed on a trunk by default. Edit with <code>switchport trunk allowed vlan add | remove | all | except</code>.</li>
+            <li><code>show vlan</code> lists only access ports; trunks appear in <code>show interfaces trunk</code>.</li>
+            <li>A voice VLAN (<code>switchport voice vlan n</code>) lets one access port carry an IP phone's voice VLAN plus the PC's data VLAN.</li>
+          </ul>
+        </div>
+        <div class="prose">
+          <h4 style="margin-top:0">VTP (VLAN Trunking Protocol)</h4>
+          <ul>
+            <li>Cisco protocol that propagates VLAN add/delete/rename across a domain over trunk links only. Normal-range VLANs 1–1005 only; extended VLANs 1006–4094 require transparent mode.</li>
+            <li><b>Server</b> (default): creates/changes VLANs, saves to NVRAM. <b>Client</b>: cannot create VLANs, learns from servers, does not save to NVRAM. <b>Transparent</b>: keeps its own local VLAN database and forwards VTP adverts without applying them.</li>
+            <li>To share VLANs: same version, same domain name, a server present, same password if used.</li>
+            <li>A higher configuration revision always wins. A new switch with a higher revision can wipe every VLAN in the domain. Reset by changing the domain name and back, or set it to client/transparent before connecting.</li>
+            <li>VTP pruning (off by default; VLANs 2–1001 eligible, VLAN 1 never) stops flooding a VLAN down trunks to switches that have no ports in it. VTPv2 adds Token Ring, unrecognised TLV support, version-independent transparent mode and consistency checks.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="note tel"><b>Operator practice</b>Many mobile operators run their RAN aggregation switches in VTP transparent mode, so a mis-wired switch cannot delete the 4G, 3G and 2G service VLANs network-wide. The lab does the same.</div>
+    </section>
+
+    <section class="unit" id="t-quiz">
+      <div class="sec-label">Review</div>
+      <h2>Review quiz</h2>
+      <p class="lead">Click an answer for instant feedback. Score: <b id="qz-score">0 / 0</b></p>
+      <div id="quiz"></div>
+      <h3>Short-answer questions</h3>
+      <details><summary>1. Why are Layer 2 loops more dangerous than Layer 3 loops?</summary>Ethernet frames have no TTL, so a looping frame never expires, and broadcasts are flooded out every port and multiplied.</details>
+      <details><summary>2. All priorities are 32768. MACs are 0000.0cab.3274 and 0000.0cf6.9370. Which is root?</summary>0000.0cab.3274: reading left to right, "a" is lower than "f".</details>
+      <details><summary>3. Root path cost for a switch two Gigabit hops from the root?</summary>4 + 4 = 8.</details>
+      <details><summary>4. Effective priority of VLAN 10 configured with priority 8192?</summary>8192 + 10 = 8202.</details>
+      <details><summary>5. Which violation mode counts violations but does not shut down the port?</summary>restrict.</details>
+      <details><summary>6. Which LACP pairing will not form a channel? Which PAgP pairing?</summary>passive–passive (LACP); auto–auto (PAgP).</details>
+      <details><summary>7. What happens to a PortFast port with BPDU Guard when a BPDU arrives?</summary>It is placed in err-disabled state (shut down).</details>
+      <details><summary>8. Which commands list the VLANs for which a switch is root?</summary><code>show spanning-tree summary</code> ("Root bridge for:") and <code>show spanning-tree vlan n</code> / <code>show spanning-tree</code> ("This bridge is the root").</details>
+      <details><summary>9. What standard is Rapid PVST+ based on?</summary>IEEE 802.1w (RSTP), one instance per VLAN.</details>
+      <details><summary>10. Why does a root switch never have a root port?</summary>A root port is a non-root switch's best path toward the root. The root is the destination, so all its ports are designated.</details>
+      <details><summary>11. Lammle review Q15: SA(32768, 100 Mb/s to root SC 4096), SB(16384), SD(32768); all others 1 Gb/s. SB's root port fails. New cost for SB?</summary>SB goes via SD: SB–SD 4 + SD–SC 4 = <b>8</b>.</details>
+    </section>
+  </main>
+</div>
+
+<!-- ======================= LAB ======================= -->
+<div class="shell" id="lab" hidden>
+  <aside class="rail">
+    <div class="rh">Lab index</div>
+    <nav>
+      <a href="#l-0"><span class="n">00</span>Scenario briefing</a>
+      <a href="#l-1"><span class="n">01</span>Base config, VLANs, trunks</a>
+      <a href="#l-2"><span class="n">02</span>STP &amp; root design</a>
+      <a href="#l-3"><span class="n">03</span>Rapid PVST+, PortFast, BPDU Guard</a>
+      <a href="#l-4"><span class="n">04</span>Port security</a>
+      <a href="#l-5"><span class="n">05</span>EtherChannel</a>
+      <a href="#l-6"><span class="n">06</span>NOC troubleshooting</a>
+      <a href="#l-final"><span class="n">FC</span>Final configs</a>
+      <a href="#l-report"><span class="n">RP</span>Lab report</a>
+    </nav>
+  </aside>
+  <main>
+    <section class="unit hero" id="l-0">
+      <div class="sec-label">Unit 7 · Lab series · about 6 hours</div>
+      <h1>RAN aggregation network for a mobile operator</h1>
+      <p class="lead">You are a transmission engineer at <b>HimalCell</b>, a fictional mobile operator. Three Cisco 2960 switches aggregate traffic from cell sites in the Pokhara cluster toward the core (MSC/EPC site). The network carries 4G, 3G and GSM services, each split into service and O&amp;M VLANs. Your job over six labs: build it, make it loop-free with a deliberate STP design, harden the cell-site ports, bundle the inter-hub links, and clear NOC trouble tickets.</p>
+      <div class="meta">
+        <span class="chip t4g">4G LTE · 4 VLANs</span>
+        <span class="chip t3g">3G UMTS · 2 VLANs</span>
+        <span class="chip t2g">GSM · 1 VLAN</span>
+        <span class="chip mg">MGMT 99 · NATIVE 999 · PARKING 666</span>
+        <span class="chip">Cisco Packet Tracer 8.x / GNS3 / real 2960</span>
+      </div>
+
+      <h3>Topology</h3>
+      <div class="legend">
+        <span><i class="vl" style="background:var(--t4g)"></i>4G LTE</span>
+        <span><i class="vl" style="background:var(--t3g)"></i>3G UMTS</span>
+        <span><i class="vl" style="background:var(--t2g)"></i>GSM</span>
+        <span><i class="vl" style="background:var(--mg)"></i>Trunk (802.1Q, native 999)</span>
+      </div>
+      <div class="svgwrap"><svg id="topo" viewBox="0 0 900 560" width="900" role="img" aria-label="Lab topology: CORE-SW1 at the top, AGG-SW2 bottom right, AGG-SW3 bottom left, with network elements attached"></svg></div>
+      <div class="devinfo" id="devinfo">Click a switch or network element in the diagram to see its ports and addressing.</div>
+
+      <h3>VLAN plan</h3>
+      <div class="tw"><table>
+        <thead><tr><th>VLAN</th><th>Name</th><th>Technology</th><th>Carries</th><th>Subnet</th><th>Root bridge (Lab 2)</th></tr></thead>
+        <tbody>
+          <tr><td><span class="vl" style="background:var(--t4g)"></span>110</td><td>LTE_S1U</td><td>4G</td><td>S1-U user plane: eNodeB ↔ S-GW (GTP-U)</td><td>10.11.0.0/24</td><td>CORE-SW1 (backup AGG-SW2)</td></tr>
+          <tr><td><span class="vl" style="background:var(--t4g)"></span>120</td><td>LTE_S1MME</td><td>4G</td><td>S1-MME control plane: eNodeB ↔ MME (S1AP over SCTP)</td><td>10.12.0.0/24</td><td>CORE-SW1</td></tr>
+          <tr><td><span class="vl" style="background:var(--t4g)"></span>130</td><td>LTE_X2</td><td>4G</td><td>X2: eNodeB ↔ eNodeB for handover</td><td>10.13.0.0/24</td><td>CORE-SW1</td></tr>
+          <tr><td><span class="vl" style="background:var(--t4g)"></span>140</td><td>LTE_OAM</td><td>4G</td><td>eNodeB O&amp;M ↔ LTE NMS/OSS</td><td>10.14.0.0/24</td><td>CORE-SW1</td></tr>
+          <tr><td><span class="vl" style="background:var(--t2g)"></span>210</td><td>GSM_ABIS_OAM</td><td>GSM</td><td>Abis over IP (traffic, signalling) + BTS O&amp;M ↔ BSC</td><td>10.21.0.0/24</td><td>AGG-SW2 (backup CORE-SW1)</td></tr>
+          <tr><td><span class="vl" style="background:var(--t3g)"></span>310</td><td>UMTS_IUB</td><td>3G</td><td>Iub user + control plane: NodeB ↔ RNC</td><td>10.31.0.0/24</td><td>AGG-SW2</td></tr>
+          <tr><td><span class="vl" style="background:var(--t3g)"></span>320</td><td>UMTS_OAM</td><td>3G</td><td>NodeB O&amp;M ↔ UMTS NMS/OSS</td><td>10.32.0.0/24</td><td>AGG-SW2</td></tr>
+          <tr><td>99</td><td>MGMT</td><td>Infra</td><td>Switch management SVIs (SSH/Telnet, SNMP)</td><td>10.99.0.0/24</td><td>CORE-SW1</td></tr>
+          <tr><td>999</td><td>NATIVE</td><td>Infra</td><td>Native VLAN on trunks only; no hosts</td><td>none</td><td>CORE-SW1</td></tr>
+          <tr><td>666</td><td>PARKING</td><td>Infra</td><td>Unused ports, administratively shut</td><td>none</td><td>n/a</td></tr>
+        </tbody>
+      </table></div>
+      <p style="font-size:.9rem;color:var(--muted)">Addressing rule: the second octet is the VLAN ID divided by 10 (VLAN 310 → 10.31.0.0/24). Core elements use host .1, hub-site A elements .11, hub-site B elements .12.</p>
+
+      <h3>Cabling and port map</h3>
+      <div class="tw"><table>
+        <thead><tr><th>Link</th><th>From</th><th>To</th><th>Speed</th><th>Mode</th></tr></thead>
+        <tbody>
+          <tr><td>L1</td><td>CORE-SW1 Fa0/1</td><td>AGG-SW2 Fa0/1</td><td>100 Mb/s (cost 19)</td><td>Trunk</td></tr>
+          <tr><td>L2</td><td>CORE-SW1 Fa0/2</td><td>AGG-SW3 Fa0/1</td><td>100 Mb/s (cost 19)</td><td>Trunk</td></tr>
+          <tr><td>L3a / L3b</td><td>AGG-SW2 Gi0/1, Gi0/2</td><td>AGG-SW3 Gi0/1, Gi0/2</td><td>2 × 1 Gb/s (cost 4 each)</td><td>Trunk → Po1 in Lab 5</td></tr>
+        </tbody>
+      </table></div>
+      <div class="tw"><table>
+        <thead><tr><th>Switch · port</th><th>Device (PT object)</th><th>VLAN</th><th>IP / mask</th></tr></thead>
+        <tbody id="hosttable"></tbody>
+      </table></div>
+      <div class="note tel"><b>Real network vs lab model</b>A real eNodeB baseband unit connects with one physical port that carries its four VLANs tagged (a trunk), and the core is reached through routers. In Packet Tracer we model each logical interface (S1-U, S1-MME, X2, O&amp;M) as a separate PC or Server on its own access port. That keeps every service testable with ping and gives us realistic access ports for PortFast, BPDU Guard and port security. No router is needed: each test stays inside its VLAN.</div>
+      <div class="note"><b>Build it in Packet Tracer</b>Place 3 × 2960-24TT switches, 9 PCs (RAN side) and 6 Servers (core side). Rename every device as in the table. Cable with copper straight-through for host ports and copper cross-over for switch-to-switch links. Set each end device's IP and mask in Desktop → IP Configuration (no gateway). Switches ship with no config; if a lab switch has an old config, run <code>erase startup-config</code>, <code>delete flash:vlan.dat</code>, <code>reload</code>.</div>
+    </section>
+
+    <!-- LAB 1 -->
+    <section class="unit" id="l-1">
+      <div class="lab-head"><div><div class="sec-label">Lab 1 · 50 min</div><h2>Base configuration, service VLANs and trunks</h2></div>
+        <div class="lab-meta"><span class="chip">Prerequisite for all labs</span></div></div>
+      <div class="ticket"><div class="tid">CHANGE REQUEST CR-2026-0711</div><h4>Commission the Pokhara aggregation switches</h4>Create the seven service VLANs plus infrastructure VLANs on all three switches, trunk every inter-switch link with a non-default native VLAN, allow only the VLANs the RAN needs, assign each network element to its VLAN, and park unused ports.</div>
+      <p class="prose"><b>Objectives:</b> hostnames and basic hygiene; VTP transparent; VLANs 99, 110, 120, 130, 140, 210, 310, 320, 666, 999; trunks with native VLAN 999 and a pruned allowed list; management SVIs; access ports; unused ports shut in VLAN 666.</p>
+
+      <h3>Step 1 · Common configuration (all three switches)</h3>
+      <div class="cli" data-t="All switches · change hostname per switch"><pre>Switch> enable
+Switch# configure terminal
+Switch(config)# hostname CORE-SW1            ! AGG-SW2 / AGG-SW3 on the others
+CORE-SW1(config)# no ip domain-lookup
+CORE-SW1(config)# enable secret Himal@123
+CORE-SW1(config)# service password-encryption
+CORE-SW1(config)# banner motd # HimalCell RAN aggregation - authorised staff only #
+CORE-SW1(config)# vtp mode transparent         ! protects service VLANs from VTP wipe
+CORE-SW1(config)# vtp domain HIMAL-RAN
+CORE-SW1(config)# vlan 99
+CORE-SW1(config-vlan)# name MGMT
+CORE-SW1(config-vlan)# vlan 110
+CORE-SW1(config-vlan)# name LTE_S1U
+CORE-SW1(config-vlan)# vlan 120
+CORE-SW1(config-vlan)# name LTE_S1MME
+CORE-SW1(config-vlan)# vlan 130
+CORE-SW1(config-vlan)# name LTE_X2
+CORE-SW1(config-vlan)# vlan 140
+CORE-SW1(config-vlan)# name LTE_OAM
+CORE-SW1(config-vlan)# vlan 210
+CORE-SW1(config-vlan)# name GSM_ABIS_OAM
+CORE-SW1(config-vlan)# vlan 310
+CORE-SW1(config-vlan)# name UMTS_IUB
+CORE-SW1(config-vlan)# vlan 320
+CORE-SW1(config-vlan)# name UMTS_OAM
+CORE-SW1(config-vlan)# vlan 666
+CORE-SW1(config-vlan)# name PARKING
+CORE-SW1(config-vlan)# vlan 999
+CORE-SW1(config-vlan)# name NATIVE
+CORE-SW1(config-vlan)# exit
+CORE-SW1(config)# line con 0
+CORE-SW1(config-line)# logging synchronous
+CORE-SW1(config-line)# exec-timeout 30 0</pre></div>
+
+      <h3>Step 2 · Trunks</h3>
+      <div class="tabs" role="tablist" data-group="l1t"><button aria-selected="true">CORE-SW1</button><button aria-selected="false">AGG-SW2</button><button aria-selected="false">AGG-SW3</button></div>
+      <div class="tabpanes" data-group="l1t">
+<div class="cli" data-t="CORE-SW1 · trunks to both hubs"><pre>CORE-SW1(config)# interface range fa0/1 - 2
+CORE-SW1(config-if-range)# description TRUNK to AGG-SW2 (Fa0/1) / AGG-SW3 (Fa0/2)
+CORE-SW1(config-if-range)# switchport mode trunk
+CORE-SW1(config-if-range)# switchport trunk native vlan 999
+CORE-SW1(config-if-range)# switchport trunk allowed vlan 99,110,120,130,140,210,310,320,999
+CORE-SW1(config-if-range)# switchport nonegotiate
+CORE-SW1(config-if-range)# no shutdown</pre></div>
+<div class="cli" data-t="AGG-SW2 · uplink + inter-hub links" hidden><pre>AGG-SW2(config)# interface range fa0/1 , gi0/1 - 2
+AGG-SW2(config-if-range)# description TRUNK to CORE-SW1 (Fa0/1) / AGG-SW3 (Gi0/1-2)
+AGG-SW2(config-if-range)# switchport mode trunk
+AGG-SW2(config-if-range)# switchport trunk native vlan 999
+AGG-SW2(config-if-range)# switchport trunk allowed vlan 99,110,120,130,140,210,310,320,999
+AGG-SW2(config-if-range)# switchport nonegotiate
+AGG-SW2(config-if-range)# no shutdown</pre></div>
+<div class="cli" data-t="AGG-SW3 · uplink + inter-hub links" hidden><pre>AGG-SW3(config)# interface range fa0/1 , gi0/1 - 2
+AGG-SW3(config-if-range)# description TRUNK to CORE-SW1 (Fa0/1) / AGG-SW2 (Gi0/1-2)
+AGG-SW3(config-if-range)# switchport mode trunk
+AGG-SW3(config-if-range)# switchport trunk native vlan 999
+AGG-SW3(config-if-range)# switchport trunk allowed vlan 99,110,120,130,140,210,310,320,999
+AGG-SW3(config-if-range)# switchport nonegotiate
+AGG-SW3(config-if-range)# no shutdown</pre></div>
+      </div>
+      <div class="note warn"><b>Expect this message</b>While you configure one end before the other, CDP logs <code>%CDP-4-NATIVE_VLAN_MISMATCH: Native VLAN mismatch discovered on FastEthernet0/1 (999), with AGG-SW2 FastEthernet0/1 (1)</code>. It stops once both ends use 999.</div>
+
+      <h3>Step 3 · Access ports for network elements and management SVI</h3>
+      <div class="tabs" role="tablist" data-group="l1a"><button aria-selected="true">CORE-SW1</button><button aria-selected="false">AGG-SW2</button><button aria-selected="false">AGG-SW3</button></div>
+      <div class="tabpanes" data-group="l1a">
+<div class="cli" data-t="CORE-SW1 · core elements"><pre>CORE-SW1(config)# interface fa0/5
+CORE-SW1(config-if)# description S-GW S1-U
+CORE-SW1(config-if)# switchport mode access
+CORE-SW1(config-if)# switchport access vlan 110
+CORE-SW1(config-if)# interface fa0/6
+CORE-SW1(config-if)# description MME S1-MME
+CORE-SW1(config-if)# switchport mode access
+CORE-SW1(config-if)# switchport access vlan 120
+CORE-SW1(config-if)# interface fa0/7
+CORE-SW1(config-if)# description NMS-LTE O&amp;M
+CORE-SW1(config-if)# switchport mode access
+CORE-SW1(config-if)# switchport access vlan 140
+CORE-SW1(config-if)# interface fa0/8
+CORE-SW1(config-if)# description BSC Abis/O&amp;M
+CORE-SW1(config-if)# switchport mode access
+CORE-SW1(config-if)# switchport access vlan 210
+CORE-SW1(config-if)# interface fa0/9
+CORE-SW1(config-if)# description RNC Iub
+CORE-SW1(config-if)# switchport mode access
+CORE-SW1(config-if)# switchport access vlan 310
+CORE-SW1(config-if)# interface fa0/10
+CORE-SW1(config-if)# description NMS-UMTS O&amp;M
+CORE-SW1(config-if)# switchport mode access
+CORE-SW1(config-if)# switchport access vlan 320
+CORE-SW1(config-if)# exit
+CORE-SW1(config)# interface vlan 99
+CORE-SW1(config-if)# ip address 10.99.0.1 255.255.255.0
+CORE-SW1(config-if)# no shutdown
+CORE-SW1(config-if)# exit
+CORE-SW1(config)# interface range fa0/3 - 4 , fa0/11 - 24 , gi0/1 - 2
+CORE-SW1(config-if-range)# switchport mode access
+CORE-SW1(config-if-range)# switchport access vlan 666
+CORE-SW1(config-if-range)# shutdown</pre></div>
+<div class="cli" data-t="AGG-SW2 · Hub site B (eNB-02, NodeB-02)" hidden><pre>AGG-SW2(config)# interface fa0/5
+AGG-SW2(config-if)# description eNB-02 S1-U
+AGG-SW2(config-if)# switchport mode access
+AGG-SW2(config-if)# switchport access vlan 110
+AGG-SW2(config-if)# interface fa0/6
+AGG-SW2(config-if)# description eNB-02 X2
+AGG-SW2(config-if)# switchport mode access
+AGG-SW2(config-if)# switchport access vlan 130
+AGG-SW2(config-if)# interface fa0/7
+AGG-SW2(config-if)# description NodeB-02 Iub
+AGG-SW2(config-if)# switchport mode access
+AGG-SW2(config-if)# switchport access vlan 310
+AGG-SW2(config-if)# interface fa0/8
+AGG-SW2(config-if)# description NodeB-02 O&amp;M
+AGG-SW2(config-if)# switchport mode access
+AGG-SW2(config-if)# switchport access vlan 320
+AGG-SW2(config-if)# exit
+AGG-SW2(config)# interface vlan 99
+AGG-SW2(config-if)# ip address 10.99.0.2 255.255.255.0
+AGG-SW2(config-if)# no shutdown
+AGG-SW2(config-if)# exit
+AGG-SW2(config)# interface range fa0/2 - 4 , fa0/9 - 24
+AGG-SW2(config-if-range)# switchport mode access
+AGG-SW2(config-if-range)# switchport access vlan 666
+AGG-SW2(config-if-range)# shutdown</pre></div>
+<div class="cli" data-t="AGG-SW3 · Hub site A (eNB-01, BTS-01)" hidden><pre>AGG-SW3(config)# interface fa0/5
+AGG-SW3(config-if)# description eNB-01 S1-U
+AGG-SW3(config-if)# switchport mode access
+AGG-SW3(config-if)# switchport access vlan 110
+AGG-SW3(config-if)# interface fa0/6
+AGG-SW3(config-if)# description eNB-01 S1-MME
+AGG-SW3(config-if)# switchport mode access
+AGG-SW3(config-if)# switchport access vlan 120
+AGG-SW3(config-if)# interface fa0/7
+AGG-SW3(config-if)# description eNB-01 X2
+AGG-SW3(config-if)# switchport mode access
+AGG-SW3(config-if)# switchport access vlan 130
+AGG-SW3(config-if)# interface fa0/8
+AGG-SW3(config-if)# description eNB-01 O&amp;M
+AGG-SW3(config-if)# switchport mode access
+AGG-SW3(config-if)# switchport access vlan 140
+AGG-SW3(config-if)# interface fa0/10
+AGG-SW3(config-if)# description BTS-01 Abis/O&amp;M
+AGG-SW3(config-if)# switchport mode access
+AGG-SW3(config-if)# switchport access vlan 210
+AGG-SW3(config-if)# exit
+AGG-SW3(config)# interface vlan 99
+AGG-SW3(config-if)# ip address 10.99.0.3 255.255.255.0
+AGG-SW3(config-if)# no shutdown
+AGG-SW3(config-if)# exit
+AGG-SW3(config)# interface range fa0/2 - 4 , fa0/9 , fa0/11 - 24
+AGG-SW3(config-if-range)# switchport mode access
+AGG-SW3(config-if-range)# switchport access vlan 666
+AGG-SW3(config-if-range)# shutdown
+AGG-SW3(config-if-range)# end
+AGG-SW3# copy running-config startup-config</pre></div>
+      </div>
+
+      <h3>Step 4 · Verify</h3>
+      <div class="cli" data-t="AGG-SW3 · expected"><pre>AGG-SW3# show vlan brief
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active
+99   MGMT                             active
+110  LTE_S1U                          active    Fa0/5
+120  LTE_S1MME                        active    Fa0/6
+130  LTE_X2                           active    Fa0/7
+140  LTE_OAM                          active    Fa0/8
+210  GSM_ABIS_OAM                     active    Fa0/10
+310  UMTS_IUB                         active
+320  UMTS_OAM                         active
+666  PARKING                          active    Fa0/2, Fa0/3, Fa0/4, Fa0/9 ...
+999  NATIVE                           active
+AGG-SW3# show interfaces trunk
+Port        Mode         Encapsulation  Status        Native vlan
+Fa0/1       on           802.1q         trunking      999
+Gig0/1      on           802.1q         trunking      999
+Gig0/2      on           802.1q         trunking      999
+Port        Vlans allowed on trunk
+Fa0/1       99,110,120,130,140,210,310,320,999</pre></div>
+      <div class="tw"><table>
+        <thead><tr><th>Service test (ping from)</th><th>To</th><th>Proves</th></tr></thead>
+        <tbody>
+          <tr><td>eNB-01-S1U 10.11.0.11</td><td>S-GW 10.11.0.1</td><td>4G user plane across SW3 → SW1</td></tr>
+          <tr><td>eNB-01-S1MME 10.12.0.11</td><td>MME 10.12.0.1</td><td>4G control plane</td></tr>
+          <tr><td>eNB-01-X2 10.13.0.11</td><td>eNB-02-X2 10.13.0.12</td><td>Inter-hub X2 for handover</td></tr>
+          <tr><td>eNB-01-OAM 10.14.0.11</td><td>NMS-LTE 10.14.0.1</td><td>4G O&amp;M</td></tr>
+          <tr><td>BTS-01 10.21.0.11</td><td>BSC 10.21.0.1</td><td>GSM Abis/O&amp;M</td></tr>
+          <tr><td>NodeB-02-Iub 10.31.0.12</td><td>RNC 10.31.0.1</td><td>3G Iub</td></tr>
+          <tr><td>NodeB-02-OAM 10.32.0.12</td><td>NMS-UMTS 10.32.0.1</td><td>3G O&amp;M</td></tr>
+          <tr><td>eNB-02-S1U 10.11.0.12</td><td>S-GW 10.11.0.1</td><td>4G user plane across SW2 → SW1</td></tr>
+          <tr><td>CORE-SW1 (10.99.0.1)</td><td>10.99.0.2, 10.99.0.3</td><td>Management VLAN over trunks</td></tr>
+        </tbody>
+      </table></div>
+      <div class="checklist" data-lab="1"><h4>Lab 1 sign-off</h4>
+        <label class="check"><input type="checkbox" id="c1-1"> All 10 VLANs exist on all three switches with correct names</label>
+        <label class="check"><input type="checkbox" id="c1-2"> All four trunks show native VLAN 999 and the pruned allowed list; no CDP mismatch</label>
+        <label class="check"><input type="checkbox" id="c1-3"> All nine service pings succeed</label>
+        <label class="check"><input type="checkbox" id="c1-4"> Unused ports are in VLAN 666 and administratively down</label>
+        <label class="check"><input type="checkbox" id="c1-5"> Configurations saved with <code>copy run start</code></label>
+      </div>
+      <details><summary>Why use VLAN 999 as native instead of VLAN 1 or VLAN 99?</summary>Untagged frames on a trunk land in the native VLAN. Using an unused VLAN with no hosts and no SVI blocks VLAN-hopping (double-tagging) attacks and stops management traffic from being exposed untagged. VLAN 1 is the default everywhere, so it is the first thing an attacker tries.</details>
+      <details><summary>Why is VLAN 310 listed on AGG-SW3 even though no 3G equipment connects there?</summary>In transparent mode each switch keeps its own VLAN database. SW3 is a transit switch for VLAN 310 when its traffic uses the SW2–SW3 path, and a VLAN that does not exist locally is not forwarded across a trunk.</details>
+    </section>
+
+    <!-- LAB 2 -->
+    <section class="unit" id="l-2">
+      <div class="lab-head"><div><div class="sec-label">Lab 2 · 60 min</div><h2>Observe STP and engineer the root bridge per technology</h2></div>
+        <div class="lab-meta"><span class="chip">Syllabus 7.1, 7.2</span></div></div>
+      <div class="ticket"><div class="tid">DESIGN NOTE DN-RAN-04</div><h4>Share load between both uplinks</h4>4G traffic must enter the core through CORE-SW1. GSM and 3G traffic should be rooted at AGG-SW2 so the gigabit inter-hub links carry it and the 100 Mb/s uplinks are not all used by 4G. Each root needs a backup.</div>
+
+      <h3>Part A · Predict before you look</h3>
+      <p class="prose">All switches are at default priority 32768 and run PVST+ (802.1D per VLAN). MACs (yours will differ in Packet Tracer; use your own from <code>show version</code> or <code>show spanning-tree</code>): CORE-SW1 <code>0001.42A7.A603</code>, AGG-SW2 <code>0030.F222.2794</code>, AGG-SW3 <code>000A.41D5.7937</code>. Fill in the table, then reveal.</p>
+      <div class="tw"><table>
+        <thead><tr><th>VLAN 110</th><th>Root?</th><th>Root port (cost)</th><th>Blocked port(s)</th></tr></thead>
+        <tbody>
+          <tr><td>CORE-SW1</td><td><input type="text" id="pr-1a" aria-label="SW1 root" placeholder="?"></td><td><input type="text" id="pr-1b" aria-label="SW1 RP" placeholder="?"></td><td><input type="text" id="pr-1c" aria-label="SW1 blocked" placeholder="?"></td></tr>
+          <tr><td>AGG-SW2</td><td><input type="text" id="pr-2a" aria-label="SW2 root" placeholder="?"></td><td><input type="text" id="pr-2b" aria-label="SW2 RP" placeholder="?"></td><td><input type="text" id="pr-2c" aria-label="SW2 blocked" placeholder="?"></td></tr>
+          <tr><td>AGG-SW3</td><td><input type="text" id="pr-3a" aria-label="SW3 root" placeholder="?"></td><td><input type="text" id="pr-3b" aria-label="SW3 RP" placeholder="?"></td><td><input type="text" id="pr-3c" aria-label="SW3 blocked" placeholder="?"></td></tr>
+        </tbody>
+      </table></div>
+      <details><summary>Reveal the answer</summary>
+        <p><b>CORE-SW1 is root</b> (lowest MAC, 0001…), all ports Desg FWD. AGG-SW2 root port Fa0/1 (cost 19; via SW3 it would be 4 + 19 = 23). AGG-SW3 root port Fa0/1 (cost 19). On the two gigabit segments both hubs have root cost 19, so the lower BID wins: <b>AGG-SW3 (000A…) is designated and AGG-SW2 Gi0/1 and Gi0/2 block</b>. CORE-SW1 became root by luck, because it happens to have the lowest MAC. Never leave this to chance.</p>
+      </details>
+
+      <h3>Part B · Observe</h3>
+      <ol class="steps">
+        <li>On all three switches run <code>show spanning-tree vlan 110</code>. Compare <b>Root ID</b> with <b>Bridge ID</b>; find the switch that says <i>This bridge is the root</i>.</li>
+        <li>On AGG-SW3, note the root port, then run <code>show cdp neighbors</code> to confirm which neighbour sits on it.</li>
+        <li>Repeat for VLAN 310 and VLAN 99. With default priorities every VLAN has the same root and the same blocked ports (only the sys-id-ext differs: 32768 + 110 = 32878).</li>
+        <li>Record priority, MAC, root port, blocked ports for each switch in your report.</li>
+      </ol>
+
+      <h3>Part C · Engineer the roots</h3>
+      <div class="tabs" role="tablist" data-group="l2"><button aria-selected="true">CORE-SW1</button><button aria-selected="false">AGG-SW2</button></div>
+      <div class="tabpanes" data-group="l2">
+<div class="cli" data-t="CORE-SW1"><pre>CORE-SW1(config)# spanning-tree vlan 99,110,120,130,140,999 root primary     ! 4G + infra
+CORE-SW1(config)# spanning-tree vlan 210,310,320 root secondary              ! backup for 2G/3G
+! explicit equivalent:  spanning-tree vlan 110 priority 24576</pre></div>
+<div class="cli" data-t="AGG-SW2" hidden><pre>AGG-SW2(config)# spanning-tree vlan 210,310,320 root primary                 ! GSM + 3G
+AGG-SW2(config)# spanning-tree vlan 99,110,120,130,140,999 root secondary    ! backup for 4G</pre></div>
+      </div>
+      <div class="grid2">
+        <div class="cli" data-t="AGG-SW3# show spanning-tree vlan 110"><pre>VLAN0110
+  Spanning tree enabled protocol ieee
+  Root ID    Priority    24686
+             Address     0001.42A7.A603
+             Cost        19
+             Port        1(FastEthernet0/1)
+  Bridge ID  Priority    32878  (priority 32768 sys-id-ext 110)
+             Address     000A.41D5.7937
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- ------
+Fa0/1            Root FWD 19        128.1    P2p
+Fa0/5            Desg FWD 19        128.5    P2p
+Gi0/1            Altn BLK 4         128.25   P2p
+Gi0/2            Altn BLK 4         128.26   P2p</pre></div>
+        <div class="cli" data-t="AGG-SW3# show spanning-tree vlan 310"><pre>VLAN0310
+  Spanning tree enabled protocol ieee
+  Root ID    Priority    24886
+             Address     0030.F222.2794
+             Cost        4
+             Port        25(GigabitEthernet0/1)
+  Bridge ID  Priority    33078  (priority 32768 sys-id-ext 310)
+             Address     000A.41D5.7937
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- ------
+Fa0/1            Desg FWD 19        128.1    P2p
+Gi0/1            Root FWD 4         128.25   P2p
+Gi0/2            Altn BLK 4         128.26   P2p</pre></div>
+      </div>
+      <p class="prose">Now SW2 is designated on the gigabit links for VLAN 110 (28782 beats 32878), so <b>SW3's Gi ports block</b>. For VLAN 310, SW3's cost to the root is only 4 through Gi0/1 (Gi0/1 beats Gi0/2 on port number), so SW3 is designated on the SW1–SW3 segment and <b>CORE-SW1 Fa0/2 blocks for 2G/3G VLANs</b>: the core switch itself has a blocked port. That is correct STP, not a fault.</p>
+      <div class="cli" data-t="CORE-SW1# show spanning-tree summary"><pre>Switch is in pvst mode
+Root bridge for: VLAN0099 VLAN0110 VLAN0120 VLAN0130 VLAN0140 VLAN0999
+Extended system ID           is enabled
+Portfast Default             is disabled
+PortFast BPDU Guard Default  is disabled</pre></div>
+
+      <h3>Part D · Cost calculation and failure test</h3>
+      <ol class="steps">
+        <li>Calculate: AGG-SW3 to the 4G root directly = 19; via AGG-SW2 = 4 + 19 = 23. CORE-SW1 to the 3G root directly = 19; via SW3 = 19 + 4 = 23.</li>
+        <li>On eNB-01-S1U start a continuous ping: <code>ping -t 10.11.0.1</code> (in PT, use the Command Prompt; stop with Ctrl+C).</li>
+        <li>Shut CORE-SW1 Fa0/2 (L2). SW3 loses its root port for VLAN 110 and must bring up Gi0/1 toward SW2 through listening and learning.</li>
+        <li>Count lost replies. With PVST+ expect about 30 s for a directly detected failure (15 s listening + 15 s learning), and up to 50 s for an indirect failure where max age must expire. For an eNodeB, a 30–50 s S1 outage means dropped calls and the cell going off air.</li>
+        <li><code>no shutdown</code> Fa0/2 and confirm the original roles return.</li>
+      </ol>
+      <div class="checklist" data-lab="2"><h4>Lab 2 sign-off</h4>
+        <label class="check"><input type="checkbox" id="c2-1"> Prediction table completed and compared with real output</label>
+        <label class="check"><input type="checkbox" id="c2-2"> <code>show spanning-tree summary</code> on CORE-SW1 lists VLANs 99, 110–140, 999; on AGG-SW2 lists 210, 310, 320</label>
+        <label class="check"><input type="checkbox" id="c2-3"> Effective priority values explained (24576 + VLAN, 28672 + VLAN)</label>
+        <label class="check"><input type="checkbox" id="c2-4"> PVST+ outage measured in seconds and recorded</label>
+      </div>
+      <details><summary>Q: What is CORE-SW1's effective priority for VLAN 110 after root primary?</summary>24576 + 110 = 24686. <code>root primary</code> sets 24576 when the current root has the default 32768; if another switch were already below 24576 it would set 4096 less than that switch.</details>
+      <details><summary>Q: Why does AGG-SW2 not choose the gigabit path to reach the 4G root?</summary>Via SW3 the path is Gi (4) + SW3–SW1 Fa (19) = 23, which is worse than its direct Fa link (19). STP picks lowest total cost, not the fastest first hop.</details>
+      <details><summary>Q: X2 traffic between eNB-01 (SW3) and eNB-02 (SW2) is in VLAN 130. Which path does it take after Part C?</summary>SW3 → CORE-SW1 → SW2, because SW3's Gi ports are blocked for VLAN 130. The X2 traffic is carried through the core. A designer could make SW2 root for VLAN 130 to keep X2 local, at the cost of S1 paths. That is the trade-off PVST+ lets you choose.</details>
+    </section>
+
+    <!-- LAB 3 -->
+    <section class="unit" id="l-3">
+      <div class="lab-head"><div><div class="sec-label">Lab 3 · 50 min</div><h2>Rapid PVST+, PortFast and BPDU Guard on cell-site ports</h2></div>
+        <div class="lab-meta"><span class="chip">Syllabus 7.2</span></div></div>
+      <div class="ticket"><div class="tid">INCIDENT INC-88231 (post-mortem action)</div><h4>Cell outage too long after uplink failure; contractor looped Hub A</h4>Lab 2 showed 30–50 s outages. Last month a tower contractor also plugged a small switch into a spare port at Hub site A. Actions: move to Rapid PVST+, make RAN ports come up instantly, and shut any RAN port that receives a BPDU.</div>
+      <h3>Part A · Rapid PVST+</h3>
+      <div class="cli" data-t="All three switches"><pre>CORE-SW1(config)# spanning-tree mode rapid-pvst
+CORE-SW1# show spanning-tree summary          ! "Switch is in rapid-pvst mode"
+CORE-SW1# show spanning-tree vlan 110         ! "Spanning tree enabled protocol rstp"</pre></div>
+      <p class="prose">Repeat the Lab 2 failure test with <code>ping -t</code> from eNB-01-S1U. Expect to lose about one reply (a second or two) instead of 30–50 s. In RSTP output the blocked gigabit ports show <code>Altn BLK</code> and are ready to take over immediately.</p>
+
+      <h3>Part B · PortFast and BPDU Guard on every network-element port</h3>
+      <div class="tabs" role="tablist" data-group="l3"><button aria-selected="true">CORE-SW1</button><button aria-selected="false">AGG-SW2</button><button aria-selected="false">AGG-SW3</button></div>
+      <div class="tabpanes" data-group="l3">
+<div class="cli" data-t="CORE-SW1"><pre>CORE-SW1(config)# interface range fa0/5 - 10
+CORE-SW1(config-if-range)# spanning-tree portfast
+CORE-SW1(config-if-range)# spanning-tree bpduguard enable</pre></div>
+<div class="cli" data-t="AGG-SW2" hidden><pre>AGG-SW2(config)# interface range fa0/5 - 8
+AGG-SW2(config-if-range)# spanning-tree portfast
+AGG-SW2(config-if-range)# spanning-tree bpduguard enable</pre></div>
+<div class="cli" data-t="AGG-SW3" hidden><pre>AGG-SW3(config)# interface range fa0/5 - 8 , fa0/10
+AGG-SW3(config-if-range)# spanning-tree portfast
+AGG-SW3(config-if-range)# spanning-tree bpduguard enable
+AGG-SW3# show running-config interface fa0/10
+interface FastEthernet0/10
+ description BTS-01 Abis/O&amp;M
+ switchport access vlan 210
+ switchport mode access
+ spanning-tree portfast
+ spanning-tree bpduguard enable</pre></div>
+      </div>
+      <div class="note"><b>Alternative</b>Global commands do the same for every access port: <code>spanning-tree portfast default</code> and <code>spanning-tree portfast bpduguard default</code>. Never enable PortFast on the trunks Fa0/1 or Gi0/1-2.</div>
+
+      <h3>Part C · Simulate the contractor's switch</h3>
+      <ol class="steps">
+        <li>Delete the cable from BTS-01 to AGG-SW3 Fa0/10. Add a spare 2960 named <code>CONTRACTOR-SW</code> and cable its Fa0/1 to AGG-SW3 Fa0/10.</li>
+        <li>Watch the AGG-SW3 console: <code>%SPANTREE-2-BLOCK_BPDUGUARD: Received BPDU on port Fa0/10 with BPDU Guard enabled. Disabling port.</code></li>
+        <li>Verify: <code>show interfaces status err-disabled</code> shows Fa0/10 with reason <code>bpduguard</code>. GSM site BTS-01 is now down, which is the price of safety.</li>
+        <li>Remove CONTRACTOR-SW, reconnect BTS-01, then recover:</li>
+      </ol>
+      <div class="cli" data-t="AGG-SW3 · recover"><pre>AGG-SW3(config)# interface fa0/10
+AGG-SW3(config-if)# shutdown
+AGG-SW3(config-if)# no shutdown
+! optional automatic recovery for unattended cell sites
+AGG-SW3(config)# errdisable recovery cause bpduguard
+AGG-SW3(config)# errdisable recovery interval 60</pre></div>
+      <p class="prose">Ping BSC from BTS-01 to confirm GSM service is restored.</p>
+      <div class="checklist" data-lab="3"><h4>Lab 3 sign-off</h4>
+        <label class="check"><input type="checkbox" id="c3-1"> All switches show <code>rapid-pvst</code> mode and <code>protocol rstp</code></label>
+        <label class="check"><input type="checkbox" id="c3-2"> Failover outage reduced from tens of seconds to about one ping</label>
+        <label class="check"><input type="checkbox" id="c3-3"> PortFast + BPDU Guard on all 15 network-element ports, none on trunks</label>
+        <label class="check"><input type="checkbox" id="c3-4"> BPDU Guard triggered, observed, and port recovered</label>
+      </div>
+      <details><summary>Q: Why must PortFast ports also use BPDU Guard?</summary>PortFast skips the loop check. If a switch is plugged into a PortFast port, a loop forms instantly. BPDU Guard detects the switch by its BPDUs and err-disables the port before damage spreads.</details>
+    </section>
+
+    <!-- LAB 4 -->
+    <section class="unit" id="l-4">
+      <div class="lab-head"><div><div class="sec-label">Lab 4 · 60 min</div><h2>Port security on RAN equipment ports</h2></div>
+        <div class="lab-meta"><span class="chip">Syllabus 7.3</span></div></div>
+      <div class="ticket"><div class="tid">SECURITY AUDIT FINDING SA-17</div><h4>Cell-site switch ports accept any device</h4>Anyone with access to the shelter can plug a laptop into an eNodeB port and reach the S1 or O&amp;M network. Lock each traffic port to its network element, allow one extra field-engineer laptop on O&amp;M ports for a limited time, and test all three violation modes.</div>
+      <div class="tw"><table>
+        <thead><tr><th>Port type</th><th>Ports</th><th>Max</th><th>Learning</th><th>Aging</th><th>Violation</th><th>Reason</th></tr></thead>
+        <tbody>
+          <tr><td>4G/3G traffic</td><td>SW3 Fa0/5-7, SW2 Fa0/5-7</td><td class="num">1</td><td>sticky</td><td>none</td><td>restrict</td><td>A violation is logged but the legitimate eNB/NodeB keeps carrying subscriber traffic.</td></tr>
+          <tr><td>O&amp;M</td><td>SW3 Fa0/8, SW2 Fa0/8</td><td class="num">2</td><td>static (network element) + dynamic (laptop)</td><td>30 min inactivity</td><td>shutdown</td><td>O&amp;M gives full control of the site; a third device is treated as an attack. The laptop's entry ages out 30 min after it stops sending.</td></tr>
+          <tr><td>GSM BTS</td><td>SW3 Fa0/10</td><td class="num">1</td><td>sticky</td><td>none</td><td>shutdown</td><td>Single combined Abis/O&amp;M interface.</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>Part A · Sticky MAC on traffic ports</h3>
+      <div class="cli" data-t="AGG-SW3 (repeat Fa0/5-7 on AGG-SW2)"><pre>AGG-SW3(config)# interface range fa0/5 - 7
+AGG-SW3(config-if-range)# switchport mode access
+AGG-SW3(config-if-range)# switchport port-security
+AGG-SW3(config-if-range)# switchport port-security maximum 1
+AGG-SW3(config-if-range)# switchport port-security mac-address sticky
+AGG-SW3(config-if-range)# switchport port-security violation restrict
+AGG-SW3(config-if-range)# end
+! generate traffic so the MAC is learned: ping 10.11.0.1 from eNB-01-S1U
+AGG-SW3# show port-security interface fa0/5
+Port Security              : Enabled
+Port Status                : Secure-up
+Violation Mode             : Restrict
+Aging Time                 : 0 mins
+Aging Type                 : Absolute
+SecureStatic Address Aging : Disabled
+Maximum MAC Addresses      : 1
+Total MAC Addresses        : 1
+Configured MAC Addresses   : 0
+Sticky MAC Addresses       : 1
+Last Source Address:Vlan   : 00D0.BA12.3401:110
+Security Violation Count   : 0
+AGG-SW3# show running-config interface fa0/5
+ switchport port-security mac-address sticky 00D0.BA12.3401
+AGG-SW3# copy running-config startup-config</pre></div>
+
+      <h3>Part B · O&amp;M ports: static element MAC, maximum 2, aging</h3>
+      <div class="cli" data-t="AGG-SW3 Fa0/8 (repeat on AGG-SW2 Fa0/8 with NodeB-02-OAM's MAC)"><pre>! find eNB-01-OAM's MAC in PT: click the PC > Config > FastEthernet0, or ipconfig /all
+AGG-SW3(config)# interface fa0/8
+AGG-SW3(config-if)# switchport mode access
+AGG-SW3(config-if)# switchport port-security
+AGG-SW3(config-if)# switchport port-security maximum 2
+AGG-SW3(config-if)# switchport port-security mac-address 00D0.BA12.3404   ! eNB-01 O&amp;M (static)
+AGG-SW3(config-if)# switchport port-security aging time 30
+AGG-SW3(config-if)# switchport port-security aging type inactivity
+AGG-SW3(config-if)# switchport port-security violation shutdown
+AGG-SW3# show port-security address</pre></div>
+      <p class="prose">The static entry never ages (no <code>aging static</code>), so the eNodeB is always allowed. A field laptop connected through a small hub, or swapped in for testing, is learned dynamically as the second address and removed 30 minutes after it goes quiet.</p>
+
+      <h3>Part C · Create violations and compare the three modes</h3>
+      <ol class="steps">
+        <li>Configure BTS-01's port Fa0/10 with <code>maximum 1</code>, <code>mac-address sticky</code>, <code>violation shutdown</code>. Ping BSC from BTS-01 so its MAC is stuck.</li>
+        <li>Simulate a BTS card swap or a rogue device: in PT, open BTS-01 → Config → FastEthernet0 and change the MAC address (e.g. to <code>0001.1111.2222</code>), then ping again.</li>
+        <li>Observe: port goes down, <code>show port-security interface fa0/10</code> shows <b>Secure-shutdown</b> and violation count 1; <code>show interfaces status err-disabled</code> lists <code>psecure-violation</code>.</li>
+        <li>Restore the original MAC, then <code>shutdown</code> / <code>no shutdown</code> on Fa0/10. Because the sticky MAC is still stored, BTS-01 works again.</li>
+        <li>Change to <code>violation restrict</code>, repeat with the wrong MAC: port stays up, counter increments, syslog <code>%PORT_SECURITY-2-PSECURE_VIOLATION</code> appears, the rogue's frames are dropped.</li>
+        <li>Change to <code>violation protect</code>, repeat: port stays up, rogue frames dropped silently, counter does not increment, no log.</li>
+      </ol>
+      <div class="tw"><table>
+        <thead><tr><th>Mode</th><th>Port state after violation</th><th>Log</th><th>Counter</th><th>Your observation</th></tr></thead>
+        <tbody>
+          <tr><td>shutdown</td><td>err-disabled (Secure-shutdown)</td><td class="y">Yes</td><td class="y">Yes</td><td><input type="text" id="obs-sh" aria-label="shutdown observation" placeholder="record result"></td></tr>
+          <tr><td>restrict</td><td>Up; violating frames dropped</td><td class="y">Yes</td><td class="y">Yes</td><td><input type="text" id="obs-re" aria-label="restrict observation" placeholder="record result"></td></tr>
+          <tr><td>protect</td><td>Up; violating frames dropped</td><td class="n">No</td><td class="n">No</td><td><input type="text" id="obs-pr" aria-label="protect observation" placeholder="record result"></td></tr>
+        </tbody>
+      </table></div>
+      <div class="cli" data-t="Optional automatic recovery + verification"><pre>AGG-SW3(config)# errdisable recovery cause psecure-violation
+AGG-SW3(config)# errdisable recovery interval 120
+AGG-SW3# show port-security
+Secure Port  MaxSecureAddr  CurrentAddr  SecurityViolation  Security Action
+                (Count)       (Count)          (Count)
+---------------------------------------------------------------------------
+     Fa0/5        1              1                 0            Restrict
+     Fa0/6        1              1                 0            Restrict
+     Fa0/7        1              1                 0            Restrict
+     Fa0/8        2              1                 0            Shutdown
+    Fa0/10        1              1                 1            Shutdown</pre></div>
+      <div class="checklist" data-lab="4"><h4>Lab 4 sign-off</h4>
+        <label class="check"><input type="checkbox" id="c4-1"> Sticky MACs appear in running config and are saved</label>
+        <label class="check"><input type="checkbox" id="c4-2"> O&amp;M ports allow element + one laptop, aging 30 min inactivity</label>
+        <label class="check"><input type="checkbox" id="c4-3"> All three violation modes tested and the observation table filled</label>
+        <label class="check"><input type="checkbox" id="c4-4"> Recovered an err-disabled port manually</label>
+      </div>
+      <details><summary>Q: When would you choose restrict over shutdown?</summary>When availability matters more than isolation: on a port carrying live subscriber traffic, restrict keeps the legitimate eNodeB in service while dropping and logging the intruder. Shutdown suits ports where any intrusion is serious, such as O&amp;M, because it cuts the port completely.</details>
+      <details><summary>Q: What happens to dynamic secure MACs after a reload? And sticky ones that were not saved?</summary>Both are lost. Dynamic entries live only in the address table; sticky entries are in the running config and survive only after <code>copy run start</code>.</details>
+    </section>
+
+    <!-- LAB 5 -->
+    <section class="unit" id="l-5">
+      <div class="lab-head"><div><div class="sec-label">Lab 5 · 60 min</div><h2>EtherChannel between the hub sites</h2></div>
+        <div class="lab-meta"><span class="chip">Syllabus 7.4</span></div></div>
+      <div class="ticket"><div class="tid">CAPACITY PLAN CP-Q4</div><h4>Use both gigabit inter-hub links</h4>STP keeps one of the two Gi links between AGG-SW2 and AGG-SW3 permanently blocked, wasting 1 Gb/s. GSM and 3G traffic from Hub A to their root at Hub B rides this path. Bundle the two links into Po1 with LACP and confirm a member failure causes no outage.</div>
+      <h3>Part A · LACP (active / passive)</h3>
+      <div class="tabs" role="tablist" data-group="l5"><button aria-selected="true">AGG-SW2</button><button aria-selected="false">AGG-SW3</button></div>
+      <div class="tabpanes" data-group="l5">
+<div class="cli" data-t="AGG-SW2 · active"><pre>AGG-SW2(config)# interface range gi0/1 - 2
+AGG-SW2(config-if-range)# shutdown
+AGG-SW2(config-if-range)# switchport mode trunk
+AGG-SW2(config-if-range)# switchport trunk native vlan 999
+AGG-SW2(config-if-range)# switchport trunk allowed vlan 99,110,120,130,140,210,310,320,999
+AGG-SW2(config-if-range)# channel-group 1 mode active
+Creating a port-channel interface Port-channel 1
+AGG-SW2(config-if-range)# no shutdown
+AGG-SW2(config-if-range)# exit
+AGG-SW2(config)# interface port-channel 1
+AGG-SW2(config-if)# description Po1 LACP to AGG-SW3
+AGG-SW2(config-if)# switchport mode trunk
+AGG-SW2(config-if)# switchport trunk native vlan 999
+AGG-SW2(config-if)# switchport trunk allowed vlan 99,110,120,130,140,210,310,320,999</pre></div>
+<div class="cli" data-t="AGG-SW3 · passive" hidden><pre>AGG-SW3(config)# interface range gi0/1 - 2
+AGG-SW3(config-if-range)# shutdown
+AGG-SW3(config-if-range)# switchport mode trunk
+AGG-SW3(config-if-range)# switchport trunk native vlan 999
+AGG-SW3(config-if-range)# switchport trunk allowed vlan 99,110,120,130,140,210,310,320,999
+AGG-SW3(config-if-range)# channel-group 1 mode passive
+AGG-SW3(config-if-range)# no shutdown
+AGG-SW3(config-if-range)# exit
+AGG-SW3(config)# interface port-channel 1
+AGG-SW3(config-if)# description Po1 LACP to AGG-SW2
+AGG-SW3(config-if)# switchport mode trunk
+AGG-SW3(config-if)# switchport trunk native vlan 999
+AGG-SW3(config-if)# switchport trunk allowed vlan 99,110,120,130,140,210,310,320,999</pre></div>
+      </div>
+      <div class="grid2">
+        <div class="cli" data-t="AGG-SW2# show etherchannel summary"><pre>Flags:  D - down        P - in port-channel
+        I - stand-alone s - suspended
+        H - Hot-standby (LACP only)
+        R - Layer3      S - Layer2
+        U - in use      f - failed to allocate aggregator
+Number of channel-groups in use: 1
+Number of aggregators:           1
+Group  Port-channel  Protocol    Ports
+------+-------------+-----------+------------------------
+1      Po1(SU)         LACP      Gig0/1(P) Gig0/2(P)</pre></div>
+        <div class="cli" data-t="AGG-SW3# show spanning-tree vlan 310 (after Po1)"><pre>VLAN0310
+  Spanning tree enabled protocol rstp
+  Root ID    Priority    24886
+             Address     0030.F222.2794
+             Cost        3
+             Port        27(Port-channel1)
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- ------
+Fa0/1            Desg FWD 19        128.1    P2p
+Po1              Root FWD 3         128.27   Shr</pre></div>
+      </div>
+      <p class="prose">STP now sees one port, <b>Po1</b>, instead of Gi0/1 and Gi0/2, so nothing inside the bundle blocks. On IOS the short-method cost for a 2 × 1 Gb/s bundle is typically 3 (Packet Tracer may display a different value). For the 4G VLANs, SW3's whole Po1 is still <code>Altn BLK</code> because their root is CORE-SW1 and the direct Fa uplink is cheaper (19 vs 3 + 19 = 22). EtherChannel removes blocking <i>inside</i> a bundle; STP still blocks redundant paths <i>between</i> bundles and other links.</p>
+      <div class="cli" data-t="AGG-SW2# show etherchannel port-channel"><pre>Port-channel: Po1    (Primary Aggregator)
+Age of the Port-channel   = 00d:00h:04m:12s
+Logical slot/port   = 2/1          Number of ports = 2
+Port state          = Port-channel
+Protocol            =   LACP
+Ports in the Port-channel:
+Index   Load   Port     EC state        No of bits
+------+------+------+------------------+-----------
+  0     00     Gig0/1   Active             0
+  0     00     Gig0/2   Active             0</pre></div>
+
+      <h3>Part B · PAgP (desirable / auto)</h3>
+      <div class="cli" data-t="Both hubs"><pre>AGG-SW2(config)# no interface port-channel 1
+AGG-SW2(config)# interface range gi0/1 - 2
+AGG-SW2(config-if-range)# channel-group 1 mode desirable
+! AGG-SW3: no interface port-channel 1, then channel-group 1 mode auto
+AGG-SW2# show etherchannel summary          ! Protocol column shows PAgP
+AGG-SW2# show etherchannel port-channel     ! EC state Desirable-Sl</pre></div>
+
+      <h3>Part C · Failure tests</h3>
+      <ol class="steps">
+        <li><b>Mode mismatch:</b> set both ends to <code>passive</code> (or both <code>auto</code>). The channel does not form; members show <b>I</b> (stand-alone) and STP blocks one Gi link again.</li>
+        <li><b>Mixed protocols:</b> <code>active</code> on SW2 and <code>desirable</code> on SW3. No channel.</li>
+        <li><b>Member mismatch:</b> restore LACP, then on SW3 set <code>speed 100</code> on Gi0/2 only (or remove VLAN 130 from its allowed list). Gi0/2 shows <b>s</b> (suspended) or drops out of the bundle.</li>
+        <li><b>Static:</b> <code>channel-group 1 mode on</code> on both ends. It comes up with Protocol <code>-</code>. Try <code>on</code> against <code>active</code>: it fails, which is why negotiation is safer.</li>
+        <li><b>Resilience:</b> with a healthy LACP bundle, run <code>ping -t 10.21.0.1</code> from BTS-01. GSM VLAN 210 is rooted at AGG-SW2, so this traffic rides Po1 (SW3 → Po1 → SW2 → CORE-SW1 → BSC). Shut Gi0/1 on SW2: expect no lost replies and no STP topology change, because Po1 stays up on the remaining member.</li>
+      </ol>
+      <div class="widget">
+        <div class="widget-h"><h4>Pairing quick reference</h4><span>From the theory checker</span></div>
+        <div class="tw"><table class="matrix">
+          <thead><tr><th>SW2 ↓ / SW3 →</th><th>active</th><th>passive</th><th>desirable</th><th>auto</th><th>on</th></tr></thead>
+          <tbody>
+            <tr><th>active</th><td class="ok">LACP</td><td class="ok">LACP</td><td class="no">none</td><td class="no">none</td><td class="no">none</td></tr>
+            <tr><th>passive</th><td class="ok">LACP</td><td class="no">none</td><td class="no">none</td><td class="no">none</td><td class="no">none</td></tr>
+            <tr><th>desirable</th><td class="no">none</td><td class="no">none</td><td class="ok">PAgP</td><td class="ok">PAgP</td><td class="no">none</td></tr>
+            <tr><th>auto</th><td class="no">none</td><td class="no">none</td><td class="ok">PAgP</td><td class="no">none</td><td class="no">none</td></tr>
+            <tr><th>on</th><td class="no">none</td><td class="no">none</td><td class="no">none</td><td class="no">none</td><td class="ok">static</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+      <h3>Part D (optional) · Layer 3 EtherChannel to the backhaul router</h3>
+      <p class="prose">Add a router <code>PE-RTR</code> (ISR 2911) and a Layer 3 switch <code>MBH-L3</code> (3560-24PS). Cable PE-RTR Gi0/0-1 to MBH-L3 Gi0/1-2. The IP address lives on the port-channel; members have none.</p>
+      <div class="tabs" role="tablist" data-group="l5d"><button aria-selected="true">PE-RTR</button><button aria-selected="false">MBH-L3</button></div>
+      <div class="tabpanes" data-group="l5d">
+<div class="cli" data-t="PE-RTR"><pre>PE-RTR(config)# interface port-channel 1
+PE-RTR(config-if)# ip address 10.200.0.1 255.255.255.252
+PE-RTR(config-if)# interface range g0/0 - 1
+PE-RTR(config-if-range)# channel-group 1
+PE-RTR(config-if-range)# no shutdown</pre></div>
+<div class="cli" data-t="MBH-L3 (3560)" hidden><pre>MBH-L3(config)# interface range gi0/1 - 2
+MBH-L3(config-if-range)# no switchport
+MBH-L3(config-if-range)# channel-group 1 mode on
+MBH-L3(config-if-range)# exit
+MBH-L3(config)# interface port-channel 1
+MBH-L3(config-if)# no switchport
+MBH-L3(config-if)# ip address 10.200.0.2 255.255.255.252
+MBH-L3# show etherchannel summary     ! Po1(RU) : R = Layer 3
+MBH-L3# ping 10.200.0.1</pre></div>
+      </div>
+      <div class="checklist" data-lab="5"><h4>Lab 5 sign-off</h4>
+        <label class="check"><input type="checkbox" id="c5-1"> Po1(SU) with LACP and both members (P)</label>
+        <label class="check"><input type="checkbox" id="c5-2"> STP shows Po1 as one port; no blocking inside the bundle</label>
+        <label class="check"><input type="checkbox" id="c5-3"> PAgP and static variants tested</label>
+        <label class="check"><input type="checkbox" id="c5-4"> I and s failure states reproduced and explained</label>
+        <label class="check"><input type="checkbox" id="c5-5"> Member link failure caused no outage</label>
+      </div>
+      <details><summary>Q: How does EtherChannel affect STP's view of the topology?</summary>All members appear as one logical port with a lower cost. STP has nothing to block inside the bundle, and a member failure only reduces bandwidth without an STP recalculation.</details>
+    </section>
+
+    <!-- LAB 6 -->
+    <section class="unit" id="l-6">
+      <div class="lab-head"><div><div class="sec-label">Lab 6 · 60 min</div><h2>NOC troubleshooting challenge</h2></div>
+        <div class="lab-meta"><span class="chip">Syllabus 7.5</span></div></div>
+      <p class="prose">Work in pairs. One student (or the instructor) injects a fault from the list in secret; the other receives only the NOC ticket and must find the fault using <b>show commands first</b>, then fix it. Keep a log for each ticket: symptom, command used, finding, fix, verification.</p>
+      <div class="ctl"><button class="btn" id="tk-reveal-all">Reveal all solutions (instructor)</button><button class="btn" id="tk-hide-all">Hide all</button></div>
+      <div id="tickets"></div>
+      <h3>Useful MAC table commands</h3>
+      <div class="cli" data-t="MAC address table"><pre>AGG-SW3# show mac address-table
+          Mac Address Table
+-------------------------------------------
+Vlan    Mac Address       Type        Ports
+----    -----------       --------    -----
+ 110    00d0.ba12.3401    STATIC      Fa0/5     ! sticky secure shows as STATIC
+ 110    0060.2f84.1a01    DYNAMIC     Fa0/1     ! S-GW learned via uplink
+ 140    00d0.ba12.3404    STATIC      Fa0/8
+ 210    0002.16c4.9a10    STATIC      Fa0/10
+AGG-SW3# show mac address-table dynamic interface fa0/1
+AGG-SW3# show mac address-table address 0060.2f84.1a01
+AGG-SW3# show mac address-table vlan 130
+AGG-SW3# clear mac address-table dynamic</pre></div>
+      <div class="checklist" data-lab="6"><h4>Lab 6 sign-off</h4>
+        <label class="check"><input type="checkbox" id="c6-1"> At least six tickets diagnosed using show commands before changing config</label>
+        <label class="check"><input type="checkbox" id="c6-2"> Troubleshooting log completed for every ticket</label>
+        <label class="check"><input type="checkbox" id="c6-3"> Final network matches the end-state checklist below</label>
+      </div>
+      <div class="note key"><b>End-state checklist</b>CORE-SW1 root for 4G + infra VLANs, AGG-SW2 root for GSM + 3G, each with backup · Rapid PVST+ on all switches · PortFast + BPDU Guard on all element ports · port security as per SA-17 · Po1 up with LACP · native VLAN 999 on all trunks · all nine service pings succeed · <code>copy run start</code> on every switch.</div>
+    </section>
+
+    <section class="unit" id="l-final">
+      <div class="sec-label">Reference</div>
+      <h2>Final configurations</h2>
+      <p class="lead">Complete end-state configuration after Labs 1–5 (LACP variant). Use it to check your work or to rebuild quickly. Sticky MAC lines are added automatically by the switch once traffic is seen.</p>
+      <div class="tabs" role="tablist" data-group="fc"><button aria-selected="true">CORE-SW1</button><button aria-selected="false">AGG-SW2</button><button aria-selected="false">AGG-SW3</button></div>
+      <div class="tabpanes" data-group="fc">
+        <div class="cli" data-t="CORE-SW1 · running-config"><pre id="fc-1"></pre></div>
+        <div class="cli" data-t="AGG-SW2 · running-config" hidden><pre id="fc-2"></pre></div>
+        <div class="cli" data-t="AGG-SW3 · running-config" hidden><pre id="fc-3"></pre></div>
+      </div>
+    </section>
+
+    <section class="unit" id="l-report">
+      <div class="sec-label">Assessment</div>
+      <h2>Lab report questions and marking guide</h2>
+      <ol class="prose">
+        <li>Why does a root switch never have a root port?</li>
+        <li>Why must PortFast ports also use BPDU Guard? Relate your answer to the contractor incident in Lab 3.</li>
+        <li>When would you choose <code>restrict</code> over <code>shutdown</code> on an eNodeB port?</li>
+        <li>How does EtherChannel affect STP's view of the topology? Why is Po1 still blocked for VLAN 110?</li>
+        <li>Explain, with costs, why CORE-SW1 Fa0/2 blocks for VLAN 310 but forwards for VLAN 110.</li>
+        <li>Compare measured outage times with PVST+ and Rapid PVST+. What would each mean for active calls and data sessions on the cell site?</li>
+        <li>Give two reasons for running the RAN switches in VTP transparent mode with native VLAN 999.</li>
+        <li>Propose an STP change that would keep X2 traffic between eNB-01 and eNB-02 off the core switch, and state its side effect.</li>
+      </ol>
+      <div class="tw"><table>
+        <thead><tr><th>Criterion</th><th class="num">Marks</th></tr></thead>
+        <tbody>
+          <tr><td>Lab 1–5 configuration correct and verified (screenshots of show output)</td><td class="num">40</td></tr>
+          <tr><td>STP prediction table and cost calculations</td><td class="num">15</td></tr>
+          <tr><td>Port security observation table</td><td class="num">10</td></tr>
+          <tr><td>Troubleshooting log (Lab 6)</td><td class="num">20</td></tr>
+          <tr><td>Report questions</td><td class="num">15</td></tr>
+          <tr><td><b>Total</b></td><td class="num"><b>100</b></td></tr>
+        </tbody>
+      </table></div>
+      <div class="ctl"><button class="btn danger" id="reset-checks">Clear my lab checkboxes and notes</button><span id="reset-msg" style="font-size:.85rem;color:var(--muted)"></span></div>
+    </section>
+  </main>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const SVGNS="http://www.w3.org/2000/svg";
+function el(tag,attrs,parent,text){const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(text!=null)e.textContent=text;if(parent)parent.appendChild(e);return e;}
+const store={get(){try{return JSON.parse(localStorage.getItem("u7lab")||"{}")}catch(e){return{}}},set(o){try{localStorage.setItem("u7lab",JSON.stringify(o))}catch(e){}}};
+
+/* ---------- shared data ---------- */
+const TECH={110:"t4g",120:"t4g",130:"t4g",140:"t4g",210:"t2g",310:"t3g",320:"t3g"};
+const VNAME={99:"MGMT",110:"LTE_S1U",120:"LTE_S1MME",130:"LTE_X2",140:"LTE_OAM",210:"GSM_ABIS_OAM",310:"UMTS_IUB",320:"UMTS_OAM",666:"PARKING",999:"NATIVE"};
+const HOSTS=[
+ {sw:"CORE-SW1",port:"Fa0/5",name:"S-GW",type:"Server",vlan:110,ip:"10.11.0.1",role:"4G Serving Gateway, terminates S1-U GTP-U tunnels"},
+ {sw:"CORE-SW1",port:"Fa0/6",name:"MME",type:"Server",vlan:120,ip:"10.12.0.1",role:"4G Mobility Management Entity, S1AP signalling"},
+ {sw:"CORE-SW1",port:"Fa0/7",name:"NMS-LTE",type:"Server",vlan:140,ip:"10.14.0.1",role:"LTE network management / OSS"},
+ {sw:"CORE-SW1",port:"Fa0/8",name:"BSC",type:"Server",vlan:210,ip:"10.21.0.1",role:"GSM Base Station Controller, Abis over IP"},
+ {sw:"CORE-SW1",port:"Fa0/9",name:"RNC",type:"Server",vlan:310,ip:"10.31.0.1",role:"3G Radio Network Controller, Iub"},
+ {sw:"CORE-SW1",port:"Fa0/10",name:"NMS-UMTS",type:"Server",vlan:320,ip:"10.32.0.1",role:"UMTS network management / OSS"},
+ {sw:"AGG-SW3",port:"Fa0/5",name:"eNB-01-S1U",type:"PC",vlan:110,ip:"10.11.0.11",role:"Hub A eNodeB user-plane interface"},
+ {sw:"AGG-SW3",port:"Fa0/6",name:"eNB-01-S1MME",type:"PC",vlan:120,ip:"10.12.0.11",role:"Hub A eNodeB control-plane interface"},
+ {sw:"AGG-SW3",port:"Fa0/7",name:"eNB-01-X2",type:"PC",vlan:130,ip:"10.13.0.11",role:"Hub A eNodeB X2 (handover to eNB-02)"},
+ {sw:"AGG-SW3",port:"Fa0/8",name:"eNB-01-OAM",type:"PC",vlan:140,ip:"10.14.0.11",role:"Hub A eNodeB O&M interface"},
+ {sw:"AGG-SW3",port:"Fa0/10",name:"BTS-01",type:"PC",vlan:210,ip:"10.21.0.11",role:"Hub A GSM BTS, combined Abis + O&M"},
+ {sw:"AGG-SW2",port:"Fa0/5",name:"eNB-02-S1U",type:"PC",vlan:110,ip:"10.11.0.12",role:"Hub B eNodeB user-plane interface"},
+ {sw:"AGG-SW2",port:"Fa0/6",name:"eNB-02-X2",type:"PC",vlan:130,ip:"10.13.0.12",role:"Hub B eNodeB X2"},
+ {sw:"AGG-SW2",port:"Fa0/7",name:"NodeB-02-Iub",type:"PC",vlan:310,ip:"10.31.0.12",role:"Hub B 3G NodeB Iub"},
+ {sw:"AGG-SW2",port:"Fa0/8",name:"NodeB-02-OAM",type:"PC",vlan:320,ip:"10.32.0.12",role:"Hub B 3G NodeB O&M"}
+];
+
+/* ---------- CLI blocks ---------- */
+const PROMPT=/^([A-Za-z][\w-]*(\([\w-]+\))?[#>])\s?(.*)$/;
+function decorateCli(box){
+  if(box.dataset.done)return; box.dataset.done="1";
+  const pre=$("pre",box); if(!pre)return;
+  const bar=document.createElement("div"); bar.className="bar";
+  const t=document.createElement("span"); t.textContent=box.dataset.t||"CLI"; bar.appendChild(t);
+  const b=document.createElement("button"); b.className="copy"; b.type="button"; b.textContent="Copy";
+  b.addEventListener("click",()=>{
+    const lines=pre.textContent.split("\n"); const cmds=[];
+    let hasPrompt=false;
+    lines.forEach(l=>{const m=l.match(PROMPT); if(m){hasPrompt=true; let c=m[3]; const i=c.indexOf(" !"); if(i>=0)c=c.slice(0,i); c=c.trimEnd(); if(c&&!c.endsWith("?"))cmds.push(c);}});
+    const txt=hasPrompt?cmds.join("\n"):pre.textContent;
+    const done=()=>{b.textContent="Copied";setTimeout(()=>b.textContent="Copy",1400)};
+    const fallback=()=>{const r=document.createRange();r.selectNodeContents(pre);const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent="Selected";setTimeout(()=>b.textContent="Copy",1400)};
+    try{navigator.clipboard.writeText(txt).then(done,fallback)}catch(e){fallback()}
+  });
+  bar.appendChild(b); box.insertBefore(bar,pre);
+  highlight(pre);
+}
+function highlight(pre){
+  const plain=pre.closest(".cli").hasAttribute("data-plain");
+  const out=pre.textContent.split("\n").map(l=>{
+    if(/^\s*!/.test(l))return '<span class="c">'+esc(l)+'</span>';
+    const m=l.match(PROMPT);
+    if(m){let rest=m[3],cm="";const i=rest.indexOf(" !");if(i>=0){cm=rest.slice(i);rest=rest.slice(0,i);}
+      return '<span class="p">'+esc(m[1])+'</span> '+esc(rest)+(cm?'<span class="c">'+esc(cm)+'</span>':"");}
+    if(plain)return esc(l);
+    const j=l.indexOf("   ! ");
+    if(j>=0)return '<span class="o">'+esc(l.slice(0,j))+'</span><span class="c">'+esc(l.slice(j))+'</span>';
+    return l.trim()?'<span class="o">'+esc(l)+'</span>':"";
+  });
+  pre.innerHTML=out.join("\n");
+}
+
+/* ---------- tabs ---------- */
+function initTabs(){
+  $$(".tabs[data-group]").forEach(tabs=>{
+    const panes=$('.tabpanes[data-group="'+tabs.dataset.group+'"]'); if(!panes)return;
+    const btns=$$("button",tabs), items=Array.from(panes.children);
+    btns.forEach((b,i)=>{b.type="button";b.setAttribute("role","tab");b.addEventListener("click",()=>{
+      btns.forEach((x,j)=>x.setAttribute("aria-selected",j===i?"true":"false"));
+      items.forEach((p,j)=>p.hidden=j!==i);
+    });});
+  });
+}
+
+/* ---------- mode switch + rail ---------- */
+function setMode(m,scroll){
+  $("#theory").hidden=m!=="theory"; $("#lab").hidden=m!=="lab";
+  $$(".modes button").forEach(b=>b.setAttribute("aria-selected",b.dataset.mode===m?"true":"false"));
+  if(scroll)window.scrollTo({top:0});
+}
+$$(".modes button").forEach(b=>b.addEventListener("click",()=>{setMode(b.dataset.mode,true);try{history.replaceState(null,"","#"+b.dataset.mode)}catch(e){}}));
+function initRail(){
+  const links=$$(".rail a");
+  const map=new Map(); links.forEach(a=>{const id=a.getAttribute("href").slice(1);map.set(id,a);});
+  if(!("IntersectionObserver" in window))return;
+  const io=new IntersectionObserver(ents=>{ents.forEach(en=>{if(en.isIntersecting){const a=map.get(en.target.id);if(!a)return;$$("a",a.parentNode).forEach(x=>x.classList.remove("on"));a.classList.add("on");}});},{rootMargin:"-20% 0px -70% 0px"});
+  $$("section.unit[id]").forEach(s=>io.observe(s));
+}
+
+/* ---------- 7.1 storm simulator ---------- */
+function initStorm(){
+  const svg=$("#storm-svg"); if(!svg)return;
+  const N={1:{x:210,y:48,l:"SW1"},2:{x:350,y:205,l:"SW2"},3:{x:70,y:205,l:"SW3"}};
+  const E=[{id:"12",a:1,b:2,off:0,pa:"Fa0/1",pb:"Fa0/1"},{id:"13",a:1,b:3,off:0,pa:"Fa0/2",pb:"Fa0/1"},{id:"23a",a:2,b:3,off:-9,pa:"Gi0/1",pb:"Gi0/1"},{id:"23b",a:2,b:3,off:9,pa:"Gi0/2",pb:"Gi0/2"}];
+  let stp=false,dots=[],total=0,last=0,running=false,lastPort=null,macLines=[];
+  const pts=e=>{const A=N[e.a],B=N[e.b];const dx=B.x-A.x,dy=B.y-A.y,len=Math.hypot(dx,dy);const ox=-dy/len*e.off,oy=dx/len*e.off;return{ax:A.x+ox,ay:A.y+oy,bx:B.x+ox,by:B.y+oy};};
+  const gE=el("g",{},svg), gD=el("g",{},svg), gN=el("g",{},svg);
+  const lines={};
+  function drawStatic(){
+    gE.innerHTML="";gN.innerHTML="";
+    E.forEach(e=>{const p=pts(e);const blocked=stp&&e.id.startsWith("23");
+      lines[e.id]=el("line",{x1:p.ax,y1:p.ay,x2:p.bx,y2:p.by,stroke:blocked?"var(--bad)":"var(--mg)","stroke-width":3,"stroke-dasharray":blocked?"6 5":"none"},gE);
+      if(blocked){const x=p.ax+(p.bx-p.ax)*.2,y=p.ay+(p.by-p.ay)*.2;el("circle",{cx:x,cy:y,r:6,fill:"var(--bad)"},gE);}
+    });
+    el("line",{x1:70,y1:205,x2:70,y2:268,stroke:"var(--t4g)","stroke-width":2},gE);
+    el("rect",{x:30,y:262,width:80,height:26,rx:4,fill:"var(--t4g-soft)",stroke:"var(--t4g)"},gN);
+    el("text",{x:70,y:279,"text-anchor":"middle",class:"svg-t"},gN,"eNB-01");
+    Object.values(N).forEach(n=>{el("rect",{x:n.x-30,y:n.y-16,width:60,height:32,rx:5,fill:"var(--surface)",stroke:"var(--ink)","stroke-width":1.5},gN);el("text",{x:n.x,y:n.y+4,"text-anchor":"middle",class:"svg-t"},gN,n.l);});
+    el("text",{x:280,y:126,class:"svg-m"},gN,"Fa 100 Mb/s");
+    el("text",{x:210,y:240,"text-anchor":"middle",class:"svg-m"},gN,"2 × Gi 1 Gb/s");
+    if(stp)el("text",{x:330,y:252,"text-anchor":"middle",class:"svg-m",fill:"var(--bad)"},gN,"SW2 Gi0/1-2 BLK");
+  }
+  function macLog(port){
+    if(port===lastPort)return;
+    macLines.push(lastPort?("00d0.ba12.3401 moved "+lastPort+" → "+port):("00d0.ba12.3401 learned on "+port));
+    if(lastPort)macLines.push("%SW_MATM-4-MACFLAP_NOTIF: Host 00d0.ba12.3401 in vlan 110 is flapping between "+lastPort+" and "+port);
+    lastPort=port; macLines=macLines.slice(-10); $("#st-mac").textContent=macLines.join("\n");
+  }
+  function frame(ts){
+    const dt=last?Math.min(.05,(ts-last)/1000):0; last=ts;
+    const next=[];
+    dots.forEach(d=>{d.t+=dt*1.1;
+      if(d.t>=1){ if(stp&&d.e.id.startsWith("23"))return; if(d.to===1)macLog(d.e.id==="12"?"Fa0/1":"Fa0/2"); spawnInto(next,d.to,d.e);} else next.push(d);});
+    dots=next; render();
+    if(dots.length){requestAnimationFrame(frame);}else{running=false;last=0;}
+  }
+  function spawnInto(arr,at,via){
+    if(at===3)total++;
+    E.forEach(e=>{if(e===via)return;if(e.a!==at&&e.b!==at)return;if(stp&&e.id.startsWith("23"))return;
+      total++; if(arr.length<260)arr.push({e,from:at,to:e.a===at?e.b:e.a,t:0});});
+  }
+  function render(){
+    gD.innerHTML="";
+    dots.forEach(d=>{const p=pts(d.e);const fwd=d.from===d.e.a;const sx=fwd?p.ax:p.bx,sy=fwd?p.ay:p.by,ex=fwd?p.bx:p.ax,ey=fwd?p.by:p.ay;
+      el("circle",{cx:sx+(ex-sx)*d.t,cy:sy+(ey-sy)*d.t,r:4,fill:"var(--amber)"},gD);});
+    $("#st-frames").textContent=dots.length>=260?"260+ (capped)":dots.length;
+    $("#st-total").textContent=total.toLocaleString();
+    const cpu=Math.min(100,Math.round(3+dots.length/2.2)); $("#st-cpu").textContent=cpu+" %";
+    const m=$("#st-meter"); m.style.width=cpu+"%"; m.style.background=cpu>80?"var(--bad)":cpu>40?"var(--amber)":"var(--ok)";
+  }
+  $("#storm-send").addEventListener("click",()=>{
+    E.forEach(e=>{if(e.a===3||e.b===3){if(stp&&e.id.startsWith("23"))return;total++;dots.push({e,from:3,to:e.a===3?e.b:e.a,t:0});}});
+    if(!running){running=true;requestAnimationFrame(frame);}
+  });
+  $("#storm-stp").addEventListener("click",ev=>{stp=!stp;ev.currentTarget.textContent="STP: "+(stp?"ON":"OFF");ev.currentTarget.setAttribute("aria-pressed",stp);ev.currentTarget.classList.toggle("pri",stp);drawStatic();});
+  $("#storm-reset").addEventListener("click",()=>{dots=[];total=0;lastPort=null;macLines=[];$("#st-mac").textContent="Waiting for traffic…";render();});
+  drawStatic(); render();
+}
+
+/* ---------- 7.2 STP calculator ---------- */
+function prioOptions(sel,def){for(let p=0;p<=61440;p+=4096){const o=document.createElement("option");o.value=p;o.textContent=p;if(p===def)o.selected=true;sel.appendChild(o);}}
+function speedOptions(sel,def){[["10 Mb/s",100],["100 Mb/s",19],["1 Gb/s",4],["10 Gb/s",2]].forEach(([l,c])=>{const o=document.createElement("option");o.value=c;o.textContent=l+" (cost "+c+")";if(c===def)o.selected=true;sel.appendChild(o);});}
+function initSTP(){
+  if(!$("#w-stp"))return;
+  prioOptions($("#p1"),32768);prioOptions($("#p2"),32768);prioOptions($("#p3"),32768);
+  speedOptions($("#l12"),19);speedOptions($("#l13"),19);speedOptions($("#l23"),4);
+  const PORT={1:{2:"Fa0/1",3:"Fa0/2"},2:{1:"Fa0/1",3:"Gi0/1"},3:{1:"Fa0/1",2:"Gi0/1"}};
+  const POS={1:{x:220,y:50},2:{x:380,y:270},3:{x:60,y:270}};
+  const svg=$("#stp-svg");
+  function calc(){
+    const v=Math.max(1,Math.min(4094,parseInt($("#vl").value)||1));
+    const S={};for(const i of[1,2,3]){const mac=($("#m"+i).value||"").replace(/[^0-9a-f]/gi,"").toLowerCase().padStart(12,"0").slice(-12);S[i]={p:+$("#p"+i).value,eff:+$("#p"+i).value+v,mac};}
+    const cmp=(a,b)=>S[a].eff!==S[b].eff?S[a].eff-S[b].eff:(S[a].mac<S[b].mac?-1:S[a].mac>S[b].mac?1:0);
+    const cost=(a,b)=>{const k=[a,b].sort().join("");return +$("#l"+k).value;};
+    const ids=[1,2,3].sort(cmp), r=ids[0];
+    const lines=[];const fmt=m=>m.replace(/(.{4})(.{4})(.{4})/,"$1.$2.$3");
+    lines.push("<b>1. Root bridge: SW"+r+"</b>. Effective priorities (priority + VLAN "+v+"): "+[1,2,3].map(i=>"SW"+i+" "+S[i].eff).join(", ")+"."+(S[ids[0]].eff===S[ids[1]].eff?" Tie on priority, so the lowest MAC ("+fmt(S[r].mac)+") wins.":""));
+    const RP={},RPC={};
+    [1,2,3].filter(x=>x!==r).forEach(x=>{const y=[1,2,3].find(z=>z!==r&&z!==x);
+      const d=cost(x,r),via=cost(x,y)+cost(y,r);
+      if(d<=via){RP[x]=r;RPC[x]=d;}else{RP[x]=y;RPC[x]=via;}
+      lines.push("<b>2. SW"+x+" root port: "+PORT[x][RP[x]]+"</b> (direct to root "+d+" vs via SW"+y+" "+cost(x,y)+" + "+cost(y,r)+" = "+via+(d===via?"; tie broken by lower sender BID, the root":"")+"). Root path cost "+RPC[x]+".");
+    });
+    RPC[r]=0;
+    const role={1:{},2:{},3:{}};
+    [[1,2],[1,3],[2,3]].forEach(([a,b])=>{
+      if(a===r||b===r){const o=a===r?b:a;role[r][o]="DP";role[o][r]=RP[o]===r?"RP":"BLK";
+        if(role[o][r]==="BLK")lines.push("<b>3. Segment SW"+a+"–SW"+b+"</b>: root port side is SW"+r+" (designated); SW"+o+" "+PORT[o][r]+" blocks.");
+        return;}
+      if(RP[a]===b){role[a][b]="RP";role[b][a]="DP";return;}
+      if(RP[b]===a){role[b][a]="RP";role[a][b]="DP";return;}
+      let w,why;
+      if(RPC[a]!==RPC[b]){w=RPC[a]<RPC[b]?a:b;why="lower root path cost ("+RPC[a]+" vs "+RPC[b]+")";}
+      else{w=cmp(a,b)<0?a:b;why="equal cost "+RPC[a]+", lower bridge ID";}
+      const l=w===a?b:a; role[w][l]="DP"; role[l][w]="BLK";
+      lines.push("<b>3. Segment SW"+a+"–SW"+b+"</b>: SW"+w+" "+PORT[w][l]+" is designated ("+why+"); <span style='color:var(--bad)'>SW"+l+" "+PORT[l][w]+" blocks</span>.");
+    });
+    // draw
+    svg.innerHTML="";
+    const col={RP:"var(--accent)",DP:"var(--ok)",BLK:"var(--bad)"};
+    [[1,2],[1,3],[2,3]].forEach(([a,b])=>{const A=POS[a],B=POS[b];const blk=role[a][b]==="BLK"||role[b][a]==="BLK";
+      el("line",{x1:A.x,y1:A.y,x2:B.x,y2:B.y,stroke:blk?"var(--bad)":"var(--mg)","stroke-width":3,"stroke-dasharray":blk?"7 6":"none"},svg);
+      const mx=(A.x+B.x)/2,my=(A.y+B.y)/2;el("text",{x:mx+(a===1&&b===3?-28:a===1?28:0),y:my+(a===2?18:0),"text-anchor":"middle",class:"svg-m"},svg,"cost "+cost(a,b));
+      [[a,b],[b,a]].forEach(([s,t])=>{const P=POS[s],Q=POS[t];const x=P.x+(Q.x-P.x)*.33,y=P.y+(Q.y-P.y)*.33;const rl=role[s][t];
+        el("rect",{x:x-24,y:y-11,width:48,height:22,rx:11,fill:col[rl]},svg);
+        el("text",{x:x,y:y+4,"text-anchor":"middle","font-family":"IBM Plex Mono, monospace","font-size":"11","font-weight":"600",fill:"var(--surface)"},svg,rl);
+        el("text",{x:x,y:y+(s===1?-15:24),"text-anchor":"middle",class:"svg-m"},svg,PORT[s][t]);});
+    });
+    [1,2,3].forEach(i=>{const P=POS[i];el("rect",{x:P.x-44,y:P.y-22,width:88,height:44,rx:6,fill:i===r?"var(--accent-soft)":"var(--surface)",stroke:i===r?"var(--accent)":"var(--ink)","stroke-width":i===r?2.5:1.5},svg);
+      el("text",{x:P.x,y:P.y-4,"text-anchor":"middle",class:"svg-t","font-weight":"600"},svg,"SW"+i+(i===r?" · ROOT":""));
+      el("text",{x:P.x,y:P.y+12,"text-anchor":"middle",class:"svg-m"},svg,S[i].eff+" / "+fmt(S[i].mac).slice(-9));});
+    $("#stp-out").innerHTML="<div class='legend'><span><i class='vl' style='background:var(--accent)'></i>RP root port</span><span><i class='vl' style='background:var(--ok)'></i>DP designated</span><span><i class='vl' style='background:var(--bad)'></i>BLK blocked</span></div>"+lines.map(l=>"<p style='margin:.35rem 0'>"+l+"</p>").join("");
+  }
+  $$("#w-stp select, #w-stp input").forEach(i=>i.addEventListener("input",calc));
+  calc();
+  // ext id
+  prioOptions($("#ext-p"),8192);
+  const ext=()=>{const p=+$("#ext-p").value,v=Math.max(1,Math.min(4094,parseInt($("#ext-v").value)||1));$("#ext-out").innerHTML=p+" + "+v+" = <b>"+(p+v)+"</b><br><span style='color:var(--muted);font-size:.85rem'>Bridge ID Priority "+(p+v)+" (priority "+p+" sys-id-ext "+v+")</span>";};
+  $("#ext-p").addEventListener("input",ext);$("#ext-v").addEventListener("input",ext);ext();
+}
+
+/* ---------- port state timeline ---------- */
+function initStates(){
+  const line=$("#st-line"); if(!line)return; const segs=$$("div",line); let timer=null;
+  function run(mode){
+    clearInterval(timer); segs.forEach(s=>s.classList.remove("on"));
+    if(mode==="r"){segs[3].classList.add("on");$("#st-clock").textContent="t = 0 s";$("#st-msg").textContent="Edge port (PortFast / RSTP edge): forwarding immediately. DHCP succeeds at once. RSTP non-edge links also converge in about a second via the proposal/agreement handshake.";return;}
+    let t=0; timer=setInterval(()=>{t+=0.5;const i=t<20?0:t<35?1:t<50?2:3;segs.forEach((s,j)=>s.classList.toggle("on",j===i));
+      $("#st-clock").textContent="t = "+Math.min(t,50).toFixed(0)+" s";
+      $("#st-msg").textContent=["Blocking: receiving BPDUs only, waiting for max age (20 s).","Listening: checking for loops, MAC table not populated (forward delay 15 s).","Learning: populating the MAC table, still not forwarding (forward delay 15 s).","Forwarding after about 50 s. A DHCP client may already have timed out."][i];
+      if(t>=50)clearInterval(timer);},100);
+  }
+  $$("[data-st]").forEach(b=>b.addEventListener("click",()=>run(b.dataset.st)));
+}
+
+/* ---------- 7.3 port security ---------- */
+function initPsec(){
+  if(!$("#w-psec"))return;
+  const DEV={enb:{mac:"00d0.ba12.3404",n:"eNB-01 O&M"},fe:{mac:"0050.56aa.0101",n:"field laptop"},rogue:{mac:"00e0.4c68.1234",n:"rogue PC"}};
+  let st;
+  const reset=()=>{st={macs:[],saved:[],status:"up",count:0,log:[]};};
+  reset();
+  const cfg=()=>({max:+$("#ps-max").value,learn:$("#ps-learn").value,mode:$("#ps-mode").value,age:+$("#ps-age").value,atype:$("#ps-atype").value});
+  const log=(s)=>{st.log.push(s);st.log=st.log.slice(-40);};
+  function render(){
+    const c=cfg();
+    const pill=$("#ps-status");pill.textContent=st.status==="up"?"Secure-up":"Secure-shutdown (err-disabled)";pill.className="pill "+(st.status==="up"?"up":"down");
+    $("#ps-count").textContent=st.count;
+    $("#ps-table").innerHTML=st.macs.length?st.macs.map(m=>"<tr><td style='font-family:var(--f-mono)'>"+m.mac+"</td><td>"+(m.type==="sticky"?"SecureSticky":"SecureDynamic")+"</td><td class='num'>"+(c.age?m.age+" min":"-")+"</td></tr>").join(""):"<tr><td colspan='3' style='color:var(--muted)'>No secure addresses yet. Send a frame.</td></tr>";
+    const L=$("#ps-log");L.textContent=st.log.join("\n")||"Log is empty.";L.scrollTop=L.scrollHeight;
+    const run=["interface FastEthernet0/8"," description eNB-01 O&M"," switchport access vlan 140"," switchport mode access"," switchport port-security"];
+    if(c.max!==1)run.push(" switchport port-security maximum "+c.max);
+    if(c.mode!=="shutdown")run.push(" switchport port-security violation "+c.mode);
+    if(c.learn==="sticky"){run.push(" switchport port-security mac-address sticky");st.macs.filter(m=>m.type==="sticky").forEach(m=>run.push(" switchport port-security mac-address sticky "+m.mac));}
+    if(c.age)run.push(" switchport port-security aging time "+c.age);
+    if(c.age&&c.atype==="inactivity")run.push(" switchport port-security aging type inactivity");
+    if(st.status!=="up")run.push(" ! port is err-disabled (psecure-violation)");
+    run.push("end");
+    const pre=$("#ps-run");pre.textContent=run.join("\n");highlight(pre);
+  }
+  function frame(k){
+    const c=cfg(),d=DEV[k];
+    if(st.status!=="up"){log("[sim] Fa0/8 is err-disabled; frame from "+d.n+" not received.");return render();}
+    const m=st.macs.find(x=>x.mac===d.mac);
+    if(m){m.idle=0;log("[sim] "+d.mac+" ("+d.n+") is secure: frame forwarded.");return render();}
+    if(st.macs.length<c.max){st.macs.push({mac:d.mac,type:c.learn,age:0,idle:0});log("[sim] learned "+d.mac+" ("+d.n+") as "+(c.learn==="sticky"?"sticky (added to running-config)":"dynamic (address table only)")+".");return render();}
+    if(c.mode==="shutdown"){st.count++;st.status="err";st.macs=st.macs.filter(x=>x.type==="sticky");
+      log("%PM-4-ERR_DISABLE: psecure-violation error detected on Fa0/8, putting Fa0/8 in err-disable state");
+      log("%PORT_SECURITY-2-PSECURE_VIOLATION: Security violation occurred, caused by MAC address "+d.mac+" on port FastEthernet0/8.");
+      log("%LINK-3-UPDOWN: Interface FastEthernet0/8, changed state to down");}
+    else if(c.mode==="restrict"){st.count++;log("%PORT_SECURITY-2-PSECURE_VIOLATION: Security violation occurred, caused by MAC address "+d.mac+" on port FastEthernet0/8.");log("[sim] frame dropped; port stays up; counter = "+st.count+".");}
+    else{log("[sim] protect: frame from "+d.mac+" silently dropped. No syslog, counter unchanged.");}
+    render();
+  }
+  $$("#w-psec [data-dev]").forEach(b=>b.addEventListener("click",()=>frame(b.dataset.dev)));
+  $("#ps-time").addEventListener("click",()=>{const c=cfg();
+    st.macs.forEach(m=>{m.age+=10;if(m.mac!==DEV.enb.mac)m.idle+=10;});
+    if(!c.age){log("[sim] 10 minutes pass. Aging is off, nothing expires.");return render();}
+    const keep=[];st.macs.forEach(m=>{const exp=m.type==="dynamic"&&(c.atype==="absolute"?m.age>=c.age:m.idle>=c.age);
+      if(exp)log("[sim] "+m.mac+" aged out ("+c.atype+", "+c.age+" min). A slot is free again.");else keep.push(m);});
+    if(st.macs.some(m=>m.type==="sticky"))log("[sim] Sticky entries are not aged here: on many Catalyst platforms sticky addresses do not age. Use dynamic learning or a static address + aging.");
+    st.macs=keep;render();});
+  $("#ps-save").addEventListener("click",()=>{st.saved=st.macs.filter(m=>m.type==="sticky").map(m=>m.mac);log("[sim] copy run start: "+st.saved.length+" sticky address(es) saved to startup-config.");render();});
+  $("#ps-reload").addEventListener("click",()=>{const lost=st.macs.filter(m=>m.type==="dynamic"||!st.saved.includes(m.mac));st.macs=st.saved.map(mac=>({mac,type:"sticky",age:0,idle:0}));st.status="up";
+    log("[sim] reload: "+(lost.length?lost.map(m=>m.mac).join(", ")+" lost (dynamic or unsaved sticky)":"nothing lost")+". "+st.macs.length+" address(es) restored from startup-config.");render();});
+  $("#ps-recover").addEventListener("click",()=>{if(st.status==="up"){log("[sim] port already up.");}else{st.status="up";log("%LINK-5-CHANGED: Interface FastEthernet0/8, changed state to administratively down");log("%LINK-3-UPDOWN: Interface FastEthernet0/8, changed state to up");}render();});
+  $("#ps-reset").addEventListener("click",()=>{reset();render();});
+  ["#ps-max","#ps-learn","#ps-mode","#ps-age","#ps-atype"].forEach(s=>$(s).addEventListener("change",()=>{const c=cfg();
+    if(st.macs.length>c.max){st.macs=st.macs.slice(0,c.max);log("[sim] maximum lowered: extra secure addresses removed.");}
+    if(s==="#ps-learn"){st.macs.forEach(m=>m.type=c.learn);}
+    render();}));
+  render();
+}
+
+/* ---------- 7.4 EtherChannel checker ---------- */
+function initEC(){
+  if(!$("#w-ec"))return;
+  const M=["active","passive","desirable","auto","on"];
+  const proto=m=>m==="active"||m==="passive"?"LACP":m==="on"?"static":"PAgP";
+  function forms(a,b){if(a==="on"||b==="on")return a==="on"&&b==="on"?"static":null;
+    if(proto(a)!==proto(b))return null;
+    if(proto(a)==="LACP")return (a==="active"||b==="active")?"LACP":null;
+    return (a==="desirable"||b==="desirable")?"PAgP":null;}
+  const mt=$("#ec-matrix");
+  function drawMatrix(a,b){
+    let h="<thead><tr><th>SW2 ↓ / SW3 →</th>"+M.map(m=>"<th>"+m+"</th>").join("")+"</tr></thead><tbody>";
+    M.forEach(r=>{h+="<tr><th>"+r+"</th>";M.forEach(c=>{const f=forms(r,c);h+="<td class='"+(f?"ok":"no")+(r===a&&c===b?" hl":"")+"'>"+(f||"none")+"</td>";});h+="</tr>";});
+    mt.innerHTML=h+"</tbody>";
+  }
+  function upd(){
+    const a=$("#ec-a").value,b=$("#ec-b").value,f=forms(a,b),mis=$("#ec-spd").value!=="1000"||$("#ec-vl").value!=="ok";
+    const head="Flags:  D - down        P - in port-channel\n        I - stand-alone s - suspended\n        R - Layer3      S - Layer2\n        U - in use\nGroup  Port-channel  Protocol    Ports\n------+-------------+-----------+------------------------\n";
+    let line,verdict,ok=false;
+    const pcol=f==="static"?"-":(proto(a)==="static"?"-":proto(a));
+    if(f){ if(mis){line="1      Po1(SU)         "+pcol.padEnd(10)+"Gig0/1(P) Gig0/2(s)";verdict="Bundle up on Gi0/1 only. Gi0/2 is suspended (s) because its "+($("#ec-spd").value!=="1000"?"speed":"allowed VLAN list")+" does not match. Members must match speed, duplex and VLAN settings.";}
+      else{line="1      Po1(SU)         "+pcol.padEnd(10)+"Gig0/1(P) Gig0/2(P)";verdict=(f==="static"?"Static bundle forms (on–on). No negotiation protects you from mistakes.":f+" bundle forms: "+a+" + "+b+". STP now sees one port, Po1.");ok=true;}}
+    else if(a==="on"||b==="on"){line="1      Po1(SD)         -         Gig0/1(D) Gig0/2(D)";verdict="No channel: 'on' does not negotiate, so it never forms with "+(a==="on"?b:a)+". The 'on' side may be err-disabled by EtherChannel misconfig guard.";}
+    else if(proto(a)!==proto(b)){line="1      Po1(SD)         "+proto(a).padEnd(10)+"Gig0/1(I) Gig0/2(I)";verdict="No channel: LACP and PAgP cannot be mixed. Ports run stand-alone (I) and STP blocks one of them.";}
+    else{line="1      Po1(SD)         "+proto(a).padEnd(10)+"Gig0/1(I) Gig0/2(I)";verdict="No channel: "+a+"–"+b+" means neither side initiates. Ports stand-alone (I); STP blocks one.";}
+    const pre=$("#ec-out");pre.textContent=head+line;highlight(pre);
+    const v=$("#ec-verdict");v.textContent=verdict;v.style.color=ok?"var(--ok)":(f?"var(--amber)":"var(--bad)");
+    drawMatrix(a,b);
+  }
+  ["#ec-a","#ec-b","#ec-spd","#ec-vl"].forEach(s=>$(s).addEventListener("change",upd));upd();
+}
+
+/* ---------- 7.5 command explorer ---------- */
+const CMDS=[
+ {c:"show spanning-tree vlan 110",d:"AGG-SW3",o:`AGG-SW3#show spanning-tree vlan 110
+VLAN0110
+  Spanning tree enabled protocol rstp
+  Root ID    Priority    24686
+             Address     0001.42A7.A603
+             Cost        19
+             Port        1(FastEthernet0/1)
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+  Bridge ID  Priority    32878  (priority 32768 sys-id-ext 110)
+             Address     000A.41D5.7937
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- --------
+Fa0/1            Root FWD 19        128.1    P2p
+Fa0/5            Desg FWD 19        128.5    P2p Edge
+Po1              Altn BLK 3         128.27   Shr`,tip:"Root ID ≠ Bridge ID, so SW3 is not root. Root is one Fast Ethernet hop away (cost 19) out Fa0/1. Po1 is Alternate/blocking for this VLAN. Fa0/5 shows Edge because PortFast is on."},
+ {c:"show spanning-tree summary",d:"CORE-SW1",o:`CORE-SW1#show spanning-tree summary
+Switch is in rapid-pvst mode
+Root bridge for: VLAN0099 VLAN0110 VLAN0120 VLAN0130 VLAN0140 VLAN0999
+Extended system ID           is enabled
+Portfast Default             is disabled
+PortFast BPDU Guard Default  is disabled
+Portfast BPDU Filter Default is disabled
+Loopguard Default            is disabled
+EtherChannel misconfig guard is disabled
+UplinkFast                   is disabled
+BackboneFast                 is disabled
+Configured Pathcost method used is short
+Name                   Blocking Listening Learning Forwarding STP Active
+---------------------- -------- --------- -------- ---------- ----------
+VLAN0110                     0         0        0          3          3
+VLAN0210                     1         0        0          2          3
+VLAN0310                     1         0        0          2          3`,tip:"Fastest way to list the VLANs this switch is root for. CORE-SW1 has a blocking port in the GSM/3G VLANs because AGG-SW2 is their root."},
+ {c:"show mac address-table",d:"AGG-SW3",o:`AGG-SW3#show mac address-table
+          Mac Address Table
+-------------------------------------------
+Vlan    Mac Address       Type        Ports
+----    -----------       --------    -----
+ 110    00d0.ba12.3401    STATIC      Fa0/5
+ 110    0060.2f84.1a01    DYNAMIC     Fa0/1
+ 120    00d0.ba12.3402    STATIC      Fa0/6
+ 130    00d0.ba12.3403    STATIC      Fa0/7
+ 130    0090.21a7.5c02    DYNAMIC     Fa0/1
+ 140    00d0.ba12.3404    STATIC      Fa0/8
+ 210    0002.16c4.9a10    STATIC      Fa0/10
+ 210    0001.63b0.2201    DYNAMIC     Po1
+Total Mac Addresses for this criterion: 8`,tip:"Sticky secure addresses appear as STATIC. The S-GW (VLAN 110) is learned on the uplink Fa0/1, but the BSC (VLAN 210) is learned on Po1, matching the per-VLAN STP design. eNB-02's X2 MAC arrives via Fa0/1: X2 is carried through the core."},
+ {c:"show mac address-table  (during a loop)",d:"CORE-SW1",o:`%SW_MATM-4-MACFLAP_NOTIF: Host 00d0.ba12.3403 in vlan 130 is flapping between port Fa0/2 and port Fa0/1
+%SW_MATM-4-MACFLAP_NOTIF: Host 00d0.ba12.3403 in vlan 130 is flapping between port Fa0/1 and port Fa0/2
+CORE-SW1#show mac address-table address 00d0.ba12.3403
+Vlan    Mac Address       Type        Ports
+----    -----------       --------    -----
+ 130    00d0.ba12.3403    DYNAMIC     Fa0/1
+CORE-SW1#show mac address-table address 00d0.ba12.3403
+ 130    00d0.ba12.3403    DYNAMIC     Fa0/2
+CORE-SW1#show spanning-tree vlan 130
+Spanning tree instance(s) for vlan 130 does not exist.`,tip:"The same MAC keeps moving between ports: a Layer 2 loop. STP has been disabled for VLAN 130 (no spanning-tree vlan 130). Re-enable it."},
+ {c:"show interfaces trunk",d:"CORE-SW1",o:`CORE-SW1#show interfaces trunk
+Port        Mode         Encapsulation  Status        Native vlan
+Fa0/1       on           802.1q         trunking      999
+Fa0/2       on           802.1q         trunking      999
+Port        Vlans allowed on trunk
+Fa0/1       99,110,120,130,140,210,310,320,999
+Fa0/2       99,120,130,140,210,310,320,999
+Port        Vlans allowed and active in management domain
+Fa0/1       99,110,120,130,140,210,310,320,999
+Fa0/2       99,120,130,140,210,310,320,999
+Port        Vlans in spanning tree forwarding state and not pruned
+Fa0/1       99,110,120,130,140,999
+Fa0/2       99,120,130,140,999`,tip:"VLAN 110 is missing on Fa0/2. 4G user traffic from Hub A still works, but via the long way round (SW3 → Po1 → SW2 → SW1). Redundancy hid the fault. Fix: switchport trunk allowed vlan add 110."},
+ {c:"show etherchannel summary",d:"AGG-SW2",o:`AGG-SW2#show etherchannel summary
+Flags:  D - down        P - in port-channel
+        I - stand-alone s - suspended
+        H - Hot-standby (LACP only)
+        R - Layer3      S - Layer2
+        U - in use      f - failed to allocate aggregator
+Number of channel-groups in use: 1
+Number of aggregators:           1
+Group  Port-channel  Protocol    Ports
+------+-------------+-----------+------------------------
+1      Po1(SD)         LACP      Gig0/1(I) Gig0/2(I)`,tip:"Po1 is down (D) and both members are stand-alone (I): LACP found no partner. Typical cause: both ends passive. Set one end to active."},
+ {c:"show port-security interface fa0/10",d:"AGG-SW3",o:`AGG-SW3#show port-security interface fa0/10
+Port Security              : Enabled
+Port Status                : Secure-shutdown
+Violation Mode             : Shutdown
+Aging Time                 : 0 mins
+Aging Type                 : Absolute
+SecureStatic Address Aging : Disabled
+Maximum MAC Addresses      : 1
+Total MAC Addresses        : 1
+Configured MAC Addresses   : 0
+Sticky MAC Addresses       : 1
+Last Source Address:Vlan   : 0002.16C4.77E1:210
+Security Violation Count   : 1`,tip:"BTS-01's port is Secure-shutdown. The last source MAC (…77E1) differs from the stored sticky MAC: the BTS transmission card was replaced. Remove the old sticky entry, then shutdown / no shutdown."},
+ {c:"show interfaces status err-disabled",d:"AGG-SW3",o:`AGG-SW3#show interfaces status err-disabled
+Port      Name               Status       Reason
+Fa0/10    BTS-01 Abis/O&M    err-disabled psecure-violation
+Fa0/9                        err-disabled bpduguard`,tip:"One command lists every port shut by protection features, with the reason: port security on Fa0/10, BPDU Guard on Fa0/9."},
+ {c:"show vlan brief",d:"AGG-SW2",o:`AGG-SW2#show vlan brief
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- ----------------------
+1    default                          active
+99   MGMT                             active
+110  LTE_S1U                          active    Fa0/5
+130  LTE_X2                           active    Fa0/6
+310  UMTS_IUB                         active    Fa0/7, Fa0/8
+320  UMTS_OAM                         active
+666  PARKING                          active    Fa0/2, Fa0/3, Fa0/4 ...`,tip:"Fa0/8 (NodeB-02 O&M) sits in VLAN 310 instead of 320, so NMS-UMTS cannot reach it. Trunks are not shown here."},
+ {c:"show vtp status",d:"AGG-SW3",o:`AGG-SW3#show vtp status
+VTP Version                     : 2
+Configuration Revision          : 0
+Maximum VLANs supported locally : 255
+Number of existing VLANs        : 15
+VTP Operating Mode              : Client
+VTP Domain Name                 : HIMAL-RAN
+VTP Pruning Mode                : Disabled
+AGG-SW3(config)#vlan 150
+VTP VLAN configuration not allowed when device is in CLIENT mode.`,tip:"A client cannot create, change or delete VLANs. The design uses transparent mode: vtp mode transparent."},
+ {c:"show cdp neighbors",d:"AGG-SW3",o:`AGG-SW3#show cdp neighbors
+Capability Codes: R - Router, T - Trans Bridge, B - Source Route Bridge
+                  S - Switch, H - Host, I - IGMP, r - Repeater, P - Phone
+Device ID    Local Intrfce   Holdtme    Capability   Platform    Port ID
+CORE-SW1     Fas 0/1         152        S            2960        Fas 0/2
+AGG-SW2      Gig 0/1         149        S            2960        Gig 0/1
+AGG-SW2      Gig 0/2         149        S            2960        Gig 0/2`,tip:"Use with show spanning-tree: the root port is Fa0/1, and CDP shows CORE-SW1 on Fa0/1, so CORE-SW1 is the root (or the next hop toward it)."}
+];
+function initCmd(){
+  const box=$("#cmd-btns"); if(!box)return;
+  CMDS.forEach((c,i)=>{const b=document.createElement("button");b.className="btn";b.type="button";b.textContent=c.c;b.addEventListener("click",()=>show(i));box.appendChild(b);});
+  function show(i){$$("button",box).forEach((b,j)=>b.classList.toggle("pri",j===i));const pre=$("#cmd-out");pre.textContent=CMDS[i].o;highlight(pre);
+    $("#cmd-out").closest(".cli").querySelector(".bar span").textContent=CMDS[i].d+" · output";$("#cmd-tip").innerHTML="<b>Read it like this:</b> "+esc(CMDS[i].tip);}
+  show(0);
+}
+
+/* ---------- quiz ---------- */
+const QUIZ=[
+ ["Ethernet frames keep looping forever in a Layer 2 loop because the frame header has no…",["Checksum","TTL field","Sequence number","VLAN tag"],1,"IP has a TTL that expires; Ethernet does not, which is why STP is required."],
+ ["Which Layer 2 protocol maintains a loop-free network?",["VTP","STP","RIP","CDP"],1,"STP (802.1D) and its variants. VTP shares VLANs, CDP discovers neighbours, RIP is Layer 3."],
+ ["In which circumstance are multiple copies of the same unicast frame likely?",["During high-traffic periods","After broken links are re-established","When upper layers need reliability","In an improperly implemented redundant topology"],3,"A loop without working STP duplicates frames."],
+ ["Default bridge priority on Cisco switches?",["4096","28672","32768","61440"],2,"32768, plus the VLAN ID with extended system ID."],
+ ["Two switches both use priority 32768. Which becomes root?",["Higher MAC","Lower MAC","The one with more ports","The one with faster links"],1,"Lowest bridge ID wins; with equal priority the lowest MAC breaks the tie."],
+ ["STP cost of a 1 Gb/s link?",["19","4","2","100"],1,"100 Mb/s = 19, 1 Gb/s = 4, 10 Gb/s = 2, 10 Mb/s = 100."],
+ ["Which 802.1D state populates the MAC table but does not forward data?",["Blocking","Listening","Learning","Forwarding"],2,"Learning lasts one forward delay (15 s)."],
+ ["Which statement describes a converged spanning-tree network?",["All ports forwarding","All ports root or designated","All ports forwarding or blocking","All ports blocking or looping"],2,"After convergence every port has settled in forwarding or blocking."],
+ ["How many bits is the sys-id-ext field?",["4","8","12","16"],2,"12 bits carry the VLAN ID; 4 bits remain for priority, hence steps of 4096."],
+ ["Which command enables 802.1w on a Cisco switch?",["Switch#spanning-tree mode rapid-pvst","Switch(config)#spanning-tree mode rapid-pvst","Switch(config)#spanning-tree mode 802.1w","Switch#spanning-tree mode 802.1w"],1,"It is a global configuration command applying to all VLANs."],
+ ["Which spanning tree is the Cisco IOS default?",["802.1D CST","PVST+","Rapid PVST+","MSTP"],1,"PVST+: one 802.1D instance per VLAN. Output shows protocol ieee."],
+ ["Which command guarantees your switch is root for VLAN 30 (assuming no other switch at 0 with a lower MAC)?",["spanning-tree vlan 30 priority 16384","spanning-tree vlan 30 root guarantee","spanning-tree vlan 30 priority 0","spanning-tree vlan 30 cost 0"],2,"Priority 0 is the lowest possible. root primary also works in practice but only relative to the current root."],
+ ["What does BPDU Guard do?",["Checks BPDUs come from the right switch","Lets only the root send BPDUs","Uses PortFast to shut the port","Shuts down a port if a BPDU is seen on it"],3,"The port goes err-disabled."],
+ ["Default port security violation mode?",["protect","restrict","shutdown","disable"],2,"shutdown err-disables the port, logs and counts."],
+ ["An eNodeB traffic port must stay in service but log intruders. Which mode?",["shutdown","restrict","protect","sticky"],1,"restrict drops, logs and counts but keeps the port up for the legitimate MAC."],
+ ["Sticky secure MAC addresses are stored in…",["The address table only","The running configuration","Flash vlan.dat","NVRAM automatically"],1,"They survive a reload only after copy running-config startup-config."],
+ ["Which modes enable LACP?",["on / auto","active / passive","desirable / auto","active / desirable"],1,"active initiates, passive responds. passive–passive never forms."],
+ ["Which modes enable PAgP?",["desirable / auto","active / passive","on / passive","auto / active"],0,"desirable initiates, auto responds. auto–auto never forms."],
+ ["For LACP, which must match on all member interfaces?",["Speed, duplex, VLAN information","Virtual MAC, PortFast, speed","Duplex, PortFast, description","Speed, CDP, description"],0,"Speed, duplex and VLAN/trunk settings must be identical."],
+ ["Four links between two RSTP PVST+ switches. How do you gain bandwidth without losing resiliency?",["PortFast + BPDU Guard","Unequal-cost load balancing","Bundle all four in one EtherChannel","PPP multilink"],2,"STP then sees one logical link; nothing is blocked inside it."],
+ ["In show etherchannel summary, a member flagged 's' is…",["Stand-alone","Suspended","Layer 2","In use"],1,"Suspended: settings do not match the bundle. I = stand-alone, S = Layer 2."],
+ ["Which command lists ports shut by BPDU Guard or port security?",["show interfaces trunk","show vlan brief","show interfaces status err-disabled","show etherchannel summary"],2,"It also shows the reason (bpduguard, psecure-violation)."]
+];
+function initQuiz(){
+  const box=$("#quiz"); if(!box)return; let tried=0,right=0;
+  QUIZ.forEach((q,qi)=>{const d=document.createElement("div");d.className="q";
+    d.innerHTML="<p class='qt'>"+(qi+1)+". "+esc(q[0])+"</p><div class='opts'></div><div class='why' hidden></div>";
+    const o=$(".opts",d);
+    q[1].forEach((t,i)=>{const b=document.createElement("button");b.type="button";b.textContent=String.fromCharCode(65+i)+". "+t;
+      b.addEventListener("click",()=>{if(d.dataset.done)return;d.dataset.done="1";tried++;
+        if(i===q[2]){b.classList.add("right");right++;}else{b.classList.add("wrong");o.children[q[2]].classList.add("right");}
+        const w=$(".why",d);w.hidden=false;w.textContent=(i===q[2]?"Correct. ":"Not quite. ")+q[3];
+        $("#qz-score").textContent=right+" / "+tried+" (of "+QUIZ.length+")";});
+      o.appendChild(b);});
+    box.appendChild(d);});
+  $("#qz-score").textContent="0 / 0 (of "+QUIZ.length+")";
+}
+
+/* ---------- lab topology ---------- */
+function initTopo(){
+  const svg=$("#topo"); if(!svg)return;
+  const SW={"CORE-SW1":{x:450,y:175},"AGG-SW3":{x:220,y:350},"AGG-SW2":{x:680,y:350}};
+  const tcol=v=>"var(--"+TECH[v]+")", tsoft=v=>"var(--"+TECH[v]+"-soft)";
+  const gL=el("g",{},svg),gN=el("g",{},svg);
+  el("text",{x:450,y:16,"text-anchor":"middle",class:"svg-m"},gN,"CORE / MSC-EPC SITE");
+  el("text",{x:220,y:546,"text-anchor":"middle",class:"svg-m"},gN,"HUB SITE A · 4G eNB-01 + GSM BTS-01");
+  el("text",{x:680,y:546,"text-anchor":"middle",class:"svg-m"},gN,"HUB SITE B · 4G eNB-02 + 3G NodeB-02");
+  const place=[];
+  const core=HOSTS.filter(h=>h.sw==="CORE-SW1"), a=HOSTS.filter(h=>h.sw==="AGG-SW3"), b=HOSTS.filter(h=>h.sw==="AGG-SW2");
+  core.forEach((h,i)=>place.push([h,105+i*138,48]));
+  a.forEach((h,i)=>place.push([h,48+i*86,470]));
+  b.forEach((h,i)=>place.push([h,550+i*90,470]));
+  // trunks
+  const trunk=(x1,y1,x2,y2,lbl,lx,ly)=>{el("line",{x1,y1,x2,y2,stroke:"var(--mg)","stroke-width":4},gL);if(lbl)el("text",{x:lx,y:ly,"text-anchor":"middle",class:"svg-m"},gL,lbl);};
+  trunk(450,175,680,350,"L1 · Fa0/1 – Fa0/1 · 100M",620,250);
+  trunk(450,175,220,350,"L2 · Fa0/2 – Fa0/1 · 100M",280,250);
+  el("line",{x1:220,y1:342,x2:680,y2:342,stroke:"var(--mg)","stroke-width":3},gL);
+  el("line",{x1:220,y1:358,x2:680,y2:358,stroke:"var(--mg)","stroke-width":3},gL);
+  el("ellipse",{cx:450,cy:350,rx:16,ry:20,fill:"none",stroke:"var(--accent)","stroke-width":1.5,"stroke-dasharray":"3 3"},gL);
+  el("text",{x:450,y:332,"text-anchor":"middle",class:"svg-m"},gL,"L3a/L3b · Gi0/1-2 · Po1 (Lab 5)");
+  const info=$("#devinfo");
+  place.forEach(([h,x,y])=>{const s=SW[h.sw];
+    el("line",{x1:x,y1:y+(y<100?18:-18),x2:s.x,y2:s.y,stroke:tcol(h.vlan),"stroke-width":1.5,opacity:.8},gL);
+    const g=el("g",{class:"topo-node",tabindex:0,role:"button","aria-label":h.name},gN);
+    const w=y<100?118:82;
+    el("rect",{x:x-w/2,y:y-18,width:w,height:36,rx:5,fill:tsoft(h.vlan),stroke:tcol(h.vlan),"stroke-width":1.5},g);
+    el("text",{x:x,y:y-3,"text-anchor":"middle",class:"svg-t","font-size":"10.5"},g,h.name);
+    el("text",{x:x,y:y+11,"text-anchor":"middle",class:"svg-m","font-size":"9.5"},g,"V"+h.vlan+" ."+h.ip.split(".")[3]+" "+h.port);
+    const act=()=>{info.innerHTML="<b>"+esc(h.name)+"</b> <span class='chip "+TECH[h.vlan]+"'>VLAN "+h.vlan+" "+VNAME[h.vlan]+"</span><br>"+esc(h.role)+"<br><span style='font-family:var(--f-mono)'>"+h.type+" · "+h.ip+"/24 · connected to "+h.sw+" "+h.port+"</span>";};
+    g.addEventListener("click",act);g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();act();}});
+  });
+  const SWINFO={
+    "CORE-SW1":"Core switch at the MSC/EPC site. Trunks Fa0/1 → AGG-SW2, Fa0/2 → AGG-SW3. Core elements on Fa0/5-10. SVI VLAN 99 10.99.0.1. Root for 4G + infra VLANs; secondary for GSM/3G.",
+    "AGG-SW2":"Hub site B aggregation. Uplink Fa0/1 → CORE-SW1; Gi0/1-2 → AGG-SW3 (Po1, LACP active). eNB-02 and NodeB-02 on Fa0/5-8. SVI 10.99.0.2. Root for GSM/3G VLANs; secondary for 4G.",
+    "AGG-SW3":"Hub site A aggregation. Uplink Fa0/1 → CORE-SW1 Fa0/2; Gi0/1-2 → AGG-SW2 (Po1, LACP passive). eNB-01 on Fa0/5-8, BTS-01 on Fa0/10. SVI 10.99.0.3. Never root by design."
+  };
+  Object.entries(SW).forEach(([n,p])=>{const g=el("g",{class:"topo-node",tabindex:0,role:"button","aria-label":n},gN);
+    el("rect",{x:p.x-62,y:p.y-22,width:124,height:44,rx:7,fill:"var(--surface)",stroke:"var(--ink)","stroke-width":2},g);
+    el("text",{x:p.x,y:p.y-2,"text-anchor":"middle",class:"svg-t","font-weight":"600"},g,n);
+    el("text",{x:p.x,y:p.y+13,"text-anchor":"middle",class:"svg-m"},g,"2960-24TT · 10.99.0."+(n==="CORE-SW1"?1:n==="AGG-SW2"?2:3));
+    const act=()=>{info.innerHTML="<b>"+n+"</b><br>"+SWINFO[n];};
+    g.addEventListener("click",act);g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();act();}});
+  });
+  // host table
+  $("#hosttable").innerHTML=HOSTS.map(h=>"<tr><td style='font-family:var(--f-mono)'>"+h.sw+" "+h.port+"</td><td>"+h.name+" <span style='color:var(--muted)'>("+h.type+")</span></td><td><span class='vl' style='background:var(--"+TECH[h.vlan]+")'></span>"+h.vlan+" "+VNAME[h.vlan]+"</td><td style='font-family:var(--f-mono)'>"+h.ip+" /24</td></tr>").join("")+
+    "<tr><td style='font-family:var(--f-mono)'>SVI VLAN 99</td><td>CORE-SW1 / AGG-SW2 / AGG-SW3</td><td>99 MGMT</td><td style='font-family:var(--f-mono)'>10.99.0.1 / .2 / .3 /24</td></tr>";
+}
+
+/* ---------- tickets ---------- */
+const TICKETS=[
+ {id:"INC-4G-101",sev:"P3",t:"4G traffic from Hub A arriving on the inter-hub link",s:"Capacity team reports VLAN 110 (S1-U) traffic from eNB-01 crossing Po1 and AGG-SW2 instead of the direct uplink. eNB-01 still works.",inj:"CORE-SW1(config)# interface fa0/2\nCORE-SW1(config-if)# switchport trunk allowed vlan remove 110",diag:"show spanning-tree vlan 110 on AGG-SW3: root port is now Po1 (cost 3 + 19 = 22) instead of Fa0/1. show interfaces trunk on CORE-SW1: VLAN 110 missing from Fa0/2's allowed list. STP has no VLAN 110 instance on that link, so it reroutes.",fix:"CORE-SW1(config)# interface fa0/2\nCORE-SW1(config-if)# switchport trunk allowed vlan add 110",lesson:"Redundancy can hide a fault. Always compare the actual path with the designed path."},
+ {id:"INC-CDP-102",sev:"P4",t:"Console flooded with CDP messages",s:"CORE-SW1 logs repeat every minute; management to 10.99.0.2 is intermittent.",inj:"AGG-SW2(config)# interface fa0/1\nAGG-SW2(config-if)# no switchport trunk native vlan",diag:"Log: %CDP-4-NATIVE_VLAN_MISMATCH: Native VLAN mismatch discovered on FastEthernet0/1 (999), with AGG-SW2 FastEthernet0/1 (1). show interfaces trunk on both ends shows native 999 vs 1. STP may also log %SPANTREE-2-BLOCK_PVID_LOCAL and block the port for the inconsistent VLANs.",fix:"AGG-SW2(config)# interface fa0/1\nAGG-SW2(config-if)# switchport trunk native vlan 999",lesson:"Native VLAN must match on both ends of every trunk."},
+ {id:"INC-STP-103",sev:"P2",t:"All services slow after a vendor visit at Hub A",s:"4G and 3G latency doubled; CORE-SW1 now shows blocked ports for 4G VLANs.",inj:"AGG-SW3(config)# interface fa0/9\nAGG-SW3(config-if)# switchport mode trunk\nAGG-SW3(config-if)# no shutdown\n! connect LAB-SW Fa0/1 to AGG-SW3 Fa0/9, and on LAB-SW:\nLAB-SW(config)# spanning-tree vlan 1-4094 priority 0",diag:"show spanning-tree vlan 110 on any switch: Root ID address is an unknown MAC with priority 110 (0 + 110). Follow root ports to AGG-SW3 Fa0/9; show cdp neighbors shows LAB-SW. A rogue switch has become root for every VLAN.",fix:"! remove LAB-SW, then\nAGG-SW3(config)# interface fa0/9\nAGG-SW3(config-if)# switchport mode access\nAGG-SW3(config-if)# switchport access vlan 666\nAGG-SW3(config-if)# shutdown",lesson:"Park and shut unused ports. BPDU Guard on access ports would have err-disabled Fa0/9 immediately."},
+ {id:"INC-2G-104",sev:"P2",t:"GSM site BTS-01 off air after hardware swap",s:"Field team replaced the BTS transmission card. BTS-01 cannot reach the BSC.",inj:"In PT: change BTS-01's MAC address (Config → FastEthernet0), then ping 10.21.0.1.",diag:"show interfaces status err-disabled: Fa0/10 psecure-violation. show port-security interface fa0/10: Secure-shutdown, count 1, last source MAC differs from the stored sticky MAC.",fix:"AGG-SW3(config)# interface fa0/10\nAGG-SW3(config-if)# no switchport port-security mac-address sticky 0002.16C4.9A10\nAGG-SW3(config-if)# shutdown\nAGG-SW3(config-if)# no shutdown\n! or: AGG-SW3# clear port-security sticky interface fa0/10\nAGG-SW3# copy running-config startup-config",lesson:"Hardware swaps on secured ports need a change ticket that includes clearing the old sticky MAC."},
+ {id:"INC-ETH-105",sev:"P3",t:"Po1 down after maintenance window",s:"Inter-hub bundle missing from monitoring; one Gi link shows blocked.",inj:"AGG-SW2(config)# interface range gi0/1 - 2\nAGG-SW2(config-if-range)# channel-group 1 mode passive",diag:"show etherchannel summary: Po1(SD), Gig0/1(I) Gig0/2(I). Both ends passive, so neither starts LACP negotiation.",fix:"AGG-SW2(config)# interface range gi0/1 - 2\nAGG-SW2(config-if-range)# channel-group 1 mode active",lesson:"LACP needs at least one active end; PAgP needs at least one desirable end."},
+ {id:"INC-ETH-106",sev:"P4",t:"Po1 running at half capacity",s:"Po1 is up but only 1 Gb/s is available.",inj:"AGG-SW3(config)# interface gi0/2\nAGG-SW3(config-if)# speed 100",diag:"show etherchannel summary: Gig0/2(s) suspended. show interfaces status shows Gi0/2 at a-100 / 100 while Gi0/1 is 1000.",fix:"AGG-SW3(config)# interface gi0/2\nAGG-SW3(config-if)# speed auto",lesson:"All members must match speed, duplex and VLAN settings."},
+ {id:"INC-3G-107",sev:"P3",t:"NodeB-02 unmanaged: NMS-UMTS alarm 'NE unreachable'",s:"3G calls through NodeB-02 are fine, but the OSS cannot reach its O&M address 10.32.0.12.",inj:"AGG-SW2(config)# interface fa0/8\nAGG-SW2(config-if)# switchport access vlan 310",diag:"show vlan brief on AGG-SW2: Fa0/8 listed under VLAN 310, not 320. show mac address-table interface fa0/8 shows its MAC in VLAN 310.",fix:"AGG-SW2(config)# interface fa0/8\nAGG-SW2(config-if)# switchport access vlan 320",lesson:"Service and O&M VLANs look alike in a port list. Verify against the port map."},
+ {id:"INC-LOOP-108",sev:"P1",t:"Network-wide outage, switches unresponsive",s:"All LEDs blinking fast, X2 handovers failing, consoles very slow.",inj:"! on all three switches\n(config)# no spanning-tree vlan 130",diag:"%SW_MATM-4-MACFLAP_NOTIF logs; the same MAC appears on different ports in show mac address-table. show spanning-tree vlan 130: instance does not exist. In a real network, CPU near 100 %.",fix:"(config)# spanning-tree vlan 130\n! if switches are unreachable: unplug redundant links first, then restore STP, then reconnect one by one",lesson:"Never disable STP on a VLAN that has redundant paths."},
+ {id:"INC-VTP-109",sev:"P4",t:"Cannot create new VLAN 150 for a 5G NSA trial",s:"Engineer gets an error when creating VLAN 150 on AGG-SW3.",inj:"AGG-SW3(config)# vtp mode client",diag:"show vtp status: VTP Operating Mode Client. vlan 150 returns 'VTP VLAN configuration not allowed when device is in CLIENT mode.'",fix:"AGG-SW3(config)# vtp mode transparent\nAGG-SW3(config)# vlan 150\nAGG-SW3(config-vlan)# name NR_TRIAL",lesson:"Clients cannot create VLANs. This network uses transparent mode so a wrong revision number cannot wipe the RAN VLANs."}
+];
+function initTickets(){
+  const box=$("#tickets"); if(!box)return;
+  box.innerHTML=TICKETS.map((k,i)=>"<div class='ticket'><div class='tid'>"+k.id+" · "+k.sev+"</div><h4>"+esc(k.t)+"</h4><p style='margin:.2rem 0'><b>Reported symptom:</b> "+esc(k.s)+"</p>"+
+    "<details class='tk'><summary>Instructor: fault to inject</summary><div class='cli' data-t='inject'><pre>"+esc(k.inj)+"</pre></div></details>"+
+    "<details class='tk'><summary>Diagnosis and fix</summary><p>"+esc(k.diag)+"</p><div class='cli' data-t='fix'><pre>"+esc(k.fix)+"</pre></div><p style='color:var(--muted);font-size:.9rem'><b>Lesson:</b> "+esc(k.lesson)+"</p></details>"+
+    "<label class='check'><input type='checkbox' id='tk-"+i+"'> Ticket resolved and logged</label></div>").join("");
+  $("#tk-reveal-all").addEventListener("click",()=>$$("details.tk").forEach(d=>d.open=true));
+  $("#tk-hide-all").addEventListener("click",()=>$$("details.tk").forEach(d=>d.open=false));
+}
+
+/* ---------- final configs ---------- */
+function buildConfigs(){
+  const ALLOWED="99,110,120,130,140,210,310,320,999";
+  const vlans=()=>[99,110,120,130,140,210,310,320,666,999].map(v=>"vlan "+v+"\n name "+VNAME[v]+"\n!").join("\n");
+  const head=(n,ip)=>["hostname "+n,"!","enable secret Himal@123","service password-encryption","no ip domain-lookup","!","vtp mode transparent","vtp domain HIMAL-RAN","!","spanning-tree mode rapid-pvst","spanning-tree extend system-id"];
+  const trunk=(ifs,desc)=>["interface "+ifs," description "+desc," switchport trunk native vlan 999"," switchport trunk allowed vlan "+ALLOWED," switchport mode trunk"," switchport nonegotiate","!"];
+  const access=(h,sec)=>{const L=["interface FastEthernet"+h.port.slice(2)," description "+h.name," switchport access vlan "+h.vlan," switchport mode access"];
+    if(sec==="traffic")L.push(" switchport port-security"," switchport port-security violation restrict"," switchport port-security mac-address sticky"," ! sticky MAC line appears here after traffic");
+    if(sec==="oam")L.push(" switchport port-security"," switchport port-security maximum 2"," switchport port-security mac-address <element MAC>"," switchport port-security aging time 30"," switchport port-security aging type inactivity");
+    if(sec==="bts")L.push(" switchport port-security"," switchport port-security mac-address sticky"," ! sticky MAC line appears here after traffic");
+    L.push(" spanning-tree portfast"," spanning-tree bpduguard enable","!");return L;};
+  const rng=(pfx,a,b)=>{const r=[];for(let i=a;i<=b;i++)r.push(pfx+i);return r;};
+  const unused=(list)=>list.map(i=>"interface "+i+"\n description UNUSED\n switchport access vlan 666\n switchport mode access\n shutdown\n!").join("\n");
+  const svi=ip=>["interface Vlan1","no ip address","shutdown","!","interface Vlan99"," ip address "+ip+" 255.255.255.0","!"];
+  const tail=["banner motd ^C HimalCell RAN aggregation - authorised staff only ^C","!","line con 0"," exec-timeout 30 0"," logging synchronous","!","end"];
+  const secType=h=>h.name.endsWith("OAM")?"oam":h.name.startsWith("BTS")?"bts":"traffic";
+  const out={};
+  // SW1
+  let L=head("CORE-SW1");
+  L.push("spanning-tree vlan 99,110,120,130,140,999 priority 24576","spanning-tree vlan 210,310,320 priority 28672","!",vlans());
+  L.push(...trunk("FastEthernet0/1","TRUNK to AGG-SW2 Fa0/1"),...trunk("FastEthernet0/2","TRUNK to AGG-SW3 Fa0/1"));
+  L.push(unused(["FastEthernet0/3","FastEthernet0/4"]));
+  HOSTS.filter(h=>h.sw==="CORE-SW1").forEach(h=>L.push(...access(h,null)));
+  L.push(unused([...rng("FastEthernet0/",11,24),"GigabitEthernet0/1","GigabitEthernet0/2"]));
+  L.push(...svi("10.99.0.1"),...tail); out[1]=L.join("\n");
+  // SW2
+  L=head("AGG-SW2");
+  L.push("spanning-tree vlan 210,310,320 priority 24576","spanning-tree vlan 99,110,120,130,140,999 priority 28672","!","errdisable recovery cause bpduguard","errdisable recovery cause psecure-violation","errdisable recovery interval 120","!",vlans());
+  L.push("interface Port-channel1"," description Po1 LACP to AGG-SW3"," switchport trunk native vlan 999"," switchport trunk allowed vlan "+ALLOWED," switchport mode trunk","!");
+  L.push(...trunk("FastEthernet0/1","TRUNK to CORE-SW1 Fa0/1"));
+  L.push(unused(["FastEthernet0/2","FastEthernet0/3","FastEthernet0/4"]));
+  HOSTS.filter(h=>h.sw==="AGG-SW2").forEach(h=>L.push(...access(h,secType(h))));
+  L.push(unused(rng("FastEthernet0/",9,24)));
+  ["GigabitEthernet0/1","GigabitEthernet0/2"].forEach(g=>L.push("interface "+g," description Po1 member to AGG-SW3"," switchport trunk native vlan 999"," switchport trunk allowed vlan "+ALLOWED," switchport mode trunk"," channel-group 1 mode active","!"));
+  L.push(...svi("10.99.0.2"),...tail); out[2]=L.join("\n");
+  // SW3
+  L=head("AGG-SW3");
+  L.push("!","errdisable recovery cause bpduguard","errdisable recovery cause psecure-violation","errdisable recovery interval 120","!",vlans());
+  L.push("interface Port-channel1"," description Po1 LACP to AGG-SW2"," switchport trunk native vlan 999"," switchport trunk allowed vlan "+ALLOWED," switchport mode trunk","!");
+  L.push(...trunk("FastEthernet0/1","TRUNK to CORE-SW1 Fa0/2"));
+  L.push(unused(["FastEthernet0/2","FastEthernet0/3","FastEthernet0/4"]));
+  HOSTS.filter(h=>h.sw==="AGG-SW3"&&h.port!=="Fa0/10").forEach(h=>L.push(...access(h,secType(h))));
+  L.push(unused(["FastEthernet0/9"]));
+  HOSTS.filter(h=>h.port==="Fa0/10"&&h.sw==="AGG-SW3").forEach(h=>L.push(...access(h,"bts")));
+  L.push(unused(rng("FastEthernet0/",11,24)));
+  ["GigabitEthernet0/1","GigabitEthernet0/2"].forEach(g=>L.push("interface "+g," description Po1 member to AGG-SW2"," switchport trunk native vlan 999"," switchport trunk allowed vlan "+ALLOWED," switchport mode trunk"," channel-group 1 mode passive","!"));
+  L.push(...svi("10.99.0.3"),...tail); out[3]=L.join("\n");
+  [1,2,3].forEach(i=>{const p=$("#fc-"+i);if(p){p.textContent=out[i];p.closest(".cli").setAttribute("data-plain","");}});
+}
+
+/* ---------- lab persistence ---------- */
+function initPersist(){
+  const data=store.get();
+  const fields=$$("#lab input[type=checkbox], #lab input[type=text]");
+  fields.forEach(f=>{if(!f.id)return;if(f.type==="checkbox")f.checked=!!data[f.id];else if(data[f.id])f.value=data[f.id];
+    f.addEventListener(f.type==="checkbox"?"change":"input",()=>{const d=store.get();d[f.id]=f.type==="checkbox"?f.checked:f.value;store.set(d);prog();});});
+  function prog(){const cb=$$("#lab input[type=checkbox]");const n=cb.filter(c=>c.checked).length;$("#progress").textContent="Lab tasks: "+n+" / "+cb.length+" done";}
+  prog();
+  $("#reset-checks").addEventListener("click",()=>{const b=$("#reset-checks");
+    if(b.dataset.arm!=="1"){b.dataset.arm="1";b.textContent="Click again to confirm";setTimeout(()=>{b.dataset.arm="";b.textContent="Clear my lab checkboxes and notes";},3000);return;}
+    store.set({});fields.forEach(f=>{if(f.type==="checkbox")f.checked=false;else f.value="";});b.dataset.arm="";b.textContent="Clear my lab checkboxes and notes";$("#reset-msg").textContent="Cleared.";prog();});
+}
+
+/* ---------- boot ---------- */
+initTopo(); initTickets(); buildConfigs();
+$$(".cli").forEach(decorateCli);
+initTabs(); initStorm(); initSTP(); initStates(); initPsec(); initEC(); initCmd(); initQuiz(); initPersist(); initRail();
+const h=(location.hash||"").slice(1);
+if(h==="lab"||h.startsWith("l-")){setMode("lab");if(h.startsWith("l-")){const t=document.getElementById(h);if(t)setTimeout(()=>t.scrollIntoView(),50);}}
+})();
+</script>
+
+</body></html>

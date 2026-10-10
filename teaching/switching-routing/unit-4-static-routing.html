@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unit 4: Static Routing (Compressed to 3 Hours)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0e1620;
+    --panel: #16212e;
+    --panel-2: #1c2938;
+    --ink: #e7edf3;
+    --ink-dim: #9db0c2;
+    --ink-faint: #6c8199;
+    --line: #2a3a4c;
+    --teal: #5fd0c0;
+    --teal-dim: #3a9186;
+    --amber: #e8b354;
+    --amber-dim: #a97e34;
+    --coral: #e0806b;
+    --font-display: 'Space Grotesk', system-ui, sans-serif;
+    --font-body: 'Source Serif 4', Georgia, serif;
+    --font-mono: 'JetBrains Mono', 'SFMono-Regular', Consolas, monospace;
+  }
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --bg: #f3f0e8;
+      --panel: #ffffff;
+      --panel-2: #ece7db;
+      --ink: #1b2530;
+      --ink-dim: #4c5c6c;
+      --ink-faint: #78889a;
+      --line: #d8d0bd;
+      --teal: #1f8a7a;
+      --teal-dim: #d6efe9;
+      --amber: #a8721f;
+      --amber-dim: #f3e2c2;
+      --coral: #b8492f;
+    }
+  }
+  :root[data-theme="light"]{
+    --bg: #f3f0e8;
+    --panel: #ffffff;
+    --panel-2: #ece7db;
+    --ink: #1b2530;
+    --ink-dim: #4c5c6c;
+    --ink-faint: #78889a;
+    --line: #d8d0bd;
+    --teal: #1f8a7a;
+    --teal-dim: #d6efe9;
+    --amber: #a8721f;
+    --amber-dim: #f3e2c2;
+    --coral: #b8492f;
+  }
+  :root[data-theme="dark"]{
+    --bg: #0e1620;
+    --panel: #16212e;
+    --panel-2: #1c2938;
+    --ink: #e7edf3;
+    --ink-dim: #9db0c2;
+    --ink-faint: #6c8199;
+    --line: #2a3a4c;
+    --teal: #5fd0c0;
+    --teal-dim: #3a9186;
+    --amber: #e8b354;
+    --amber-dim: #a97e34;
+    --coral: #e0806b;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--font-body);
+    font-size:17px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  img,svg{max-width:100%;height:auto;}
+
+  a{color:var(--teal);}
+
+  .wrap{
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 0 24px 120px;
+  }
+
+  /* ---------- Header / masthead ---------- */
+  header.masthead{
+    max-width: 920px;
+    margin: 48px auto 0;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 40px 24px 30px;
+    background:
+      linear-gradient(180deg, var(--panel) 0%, var(--bg) 100%);
+  }
+  .masthead-inner{
+    max-width: 100%;
+    margin: 0 auto;
+  }
+  .course-tag{
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    color: var(--teal);
+    display:flex;
+    gap: 10px;
+    align-items:center;
+    margin-bottom: 18px;
+  }
+  .course-tag .dot{width:6px;height:6px;border-radius:50%;background:var(--teal);display:inline-block;}
+  h1.title{
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(28px, 4.4vw, 46px);
+    line-height: 1.12;
+    margin: 0 0 14px;
+    color: var(--ink);
+    max-width: 16ch;
+  }
+  .subtitle{
+    font-family: var(--font-body);
+    font-style: italic;
+    color: var(--ink-dim);
+    font-size: 19px;
+    max-width: 56ch;
+    margin: 0 0 28px;
+  }
+  .meta-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap: 28px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--ink-faint);
+  }
+  .meta-row strong{color: var(--ink-dim); font-weight:500;}
+
+  /* ---------- Session clock ---------- */
+  .clock{
+    margin-top: 34px;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .clock-track{
+    display:flex;
+    width:100%;
+    height: 34px;
+  }
+  .clock-seg{
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--bg);
+    border-right: 1px solid var(--bg);
+  }
+  .clock-seg:last-child{border-right:none;}
+  .clock-legend{
+    display:flex;
+    flex-wrap:wrap;
+    gap: 16px 24px;
+    padding: 12px 16px 14px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-faint);
+    border-top: 1px solid var(--line);
+  }
+  .clock-legend span.sw{display:inline-block;width:9px;height:9px;margin-right:7px;border-radius:2px;position:relative;top:1px;}
+
+  /* ---------- Section scaffolding ---------- */
+  section.block{
+    padding: 54px 0 6px;
+    border-bottom: 1px solid var(--line);
+  }
+  section.block:last-of-type{border-bottom:none;}
+  .block-head{
+    display:flex;
+    align-items:baseline;
+    gap: 16px;
+    margin-bottom: 26px;
+  }
+  .block-num{
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--teal);
+    white-space:nowrap;
+  }
+  h2.block-title{
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(22px, 3vw, 30px);
+    margin: 0;
+    color: var(--ink);
+  }
+  h3.sub-title{
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 19px;
+    margin: 36px 0 12px;
+    color: var(--ink);
+  }
+  p{margin: 0 0 16px; color: var(--ink); max-width: 74ch; text-align: left;}
+  .lede{color: var(--ink-dim); text-align: left;}
+  ul, ol{margin: 0 0 18px; padding-left: 22px; max-width: 72ch;}
+  li{margin-bottom: 8px;}
+  strong{color: var(--ink); font-weight: 600;}
+  .callout-term{color: var(--teal); font-style: normal; font-weight: 600;}
+
+  /* ---------- Panels / diagrams ---------- */
+  .panel{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 26px 26px 22px;
+    margin: 22px 0 30px;
+  }
+  .panel-label{
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--ink-faint);
+    margin-bottom: 14px;
+  }
+  .diagram-wrap{width:100%; overflow-x:auto;}
+
+  /* ---------- CLI blocks ---------- */
+  .cli{
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--teal);
+    border-radius: 4px;
+    padding: 16px 18px;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--ink);
+    overflow-x: auto;
+    margin: 18px 0 24px;
+  }
+  .cli .prompt{color: var(--ink-faint);}
+  .cli .kw{color: var(--teal);}
+  .cli .val{color: var(--amber);}
+  .cli .comment{color: var(--ink-faint); font-style: italic;}
+
+  /* ---------- Tables ---------- */
+  .table-wrap{overflow-x:auto; margin: 18px 0 28px;}
+  table{
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 480px;
+    font-family: var(--font-mono);
+    font-size: 13.5px;
+  }
+  thead th{
+    text-align:left;
+    font-weight:500;
+    color: var(--ink-faint);
+    font-size: 11.5px;
+    letter-spacing: 0.02em;
+    padding: 0 14px 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  tbody td{
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--line);
+    color: var(--ink);
+  }
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background: var(--panel-2);}
+  td.hi{color: var(--teal); font-weight: 600;}
+  td.dim{color: var(--ink-faint);}
+
+  /* ---------- Definition grid ---------- */
+  .term-grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin: 22px 0 30px;
+  }
+  @media (max-width: 640px){ .term-grid{grid-template-columns:1fr;} }
+  .term{
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 16px 18px;
+    background: var(--panel);
+  }
+  .term h4{
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--teal);
+    margin: 0 0 8px;
+    font-weight: 600;
+  }
+  .term p{font-size: 15px; margin:0; color: var(--ink-dim);}
+
+  /* ---------- Objectives list ---------- */
+  .obj-list{
+    list-style: none;
+    padding:0;
+    margin: 0 0 8px;
+    display:grid;
+    gap: 10px;
+  }
+  .obj-list li{
+    display:flex;
+    gap: 12px;
+    align-items:flex-start;
+    color: var(--ink);
+    max-width: none;
+  }
+  .obj-list li::before{
+    content: "";
+    flex: 0 0 auto;
+    width: 7px; height:7px;
+    margin-top: 8px;
+    border-radius: 50%;
+    background: var(--teal);
+  }
+
+  /* ---------- Check-in / quiz ---------- */
+  .quiz{
+    display:grid;
+    gap: 14px;
+    margin: 20px 0 10px;
+  }
+  .q{
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 16px 20px;
+    background: var(--panel);
+  }
+  .q .qn{font-family: var(--font-mono); font-size:12px; color: var(--amber); margin-bottom:6px;}
+  .q p{margin:0; font-size: 15.5px;}
+  details.ans{margin-top:10px;}
+  details.ans summary{
+    cursor:pointer;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--teal);
+    list-style: none;
+  }
+  details.ans summary::-webkit-details-marker{display:none;}
+  details.ans summary::before{content: "▸ ";}
+  details.ans[open] summary::before{content: "▾ ";}
+  details.ans .a{margin-top: 8px; color: var(--ink-dim); font-size: 15px;}
+
+  /* ---------- Footer ---------- */
+  footer{
+    padding: 40px 24px 60px;
+    text-align:center;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-faint);
+  }
+
+  /* ---------- Legend swatches (fixed colors regardless of theme, for chart clarity) ---------- */
+  .sw-connected{background:#5fd0c0;}
+  .sw-static{background:#e8b354;}
+  .sw-eigrp{background:#8fb0e0;}
+  .sw-ospf{background:#c98fe0;}
+  .sw-rip{background:#e0806b;}
+  .sw-unknown{background:#57667a;}
+</style>
+</head>
+<body><div style="font:14px/1.4 Inter,-apple-system,Segoe UI,sans-serif;background:#0b1d3a;padding:10px 16px;"><a href="/teaching/switching-routing.html" style="color:#fbf9f3;text-decoration:none;">&larr; Switching &amp; Routing &middot; all units</a></div>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="course-tag"><span class="dot"></span>NCS 485 &middot; Routing and Switching</div>
+    <h1 class="title">Unit 4: Static Routing</h1>
+    <p class="subtitle">The full unit, front to back &mdash; how a router decides where a packet goes, how to point it there by hand, when that's the right call, and how to prove it's working.</p>
+    <div class="meta-row">
+      <div><strong>Sections</strong> 4.1 &ndash; 4.4</div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <section class="block" style="padding-top:44px;">
+    <div class="block-head">
+      <span class="block-num">&#8213;</span>
+      <h2 class="block-title">How this unit is paced</h2>
+    </div>
+    <p class="lede">The syllabus allocates four hours to this unit; taught back to back, it fits comfortably into three. 4.1 keeps its full hour since it lays down the vocabulary and mental model &mdash; routing table, longest prefix match, administrative distance &mdash; that every later section leans on. 4.2 through 4.4 are each trimmed to their essential worked example and one clean diagram, moving briskly from concept to hands-on practice.</p>
+  </section>
+</div>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="course-tag"><span class="dot"></span>NCS 485 &middot; Routing and Switching &middot; Unit 4: Static Routing</div>
+    <h1 class="title">Routing Principles, Routing Tables &amp; Static Routes</h1>
+    <p class="subtitle">How a router decides where a packet goes next, what it stores to make that decision, and how administrative distance settles disagreements between sources.</p>
+    <div class="meta-row">
+      <div><strong>Section</strong> 4.1</div>
+    </div>
+
+    
+  </div>
+</header>
+<div class="wrap">
+
+  <!-- 0. OBJECTIVES -->
+  <section class="block" style="padding-top:44px;">
+    <div class="block-head">
+      <span class="block-num">00</span>
+      <h2 class="block-title">By the end of this hour</h2>
+    </div>
+    <ul class="obj-list">
+      <li>Explain what a router's job actually is, in terms of the routing table it builds and consults.</li>
+      <li>Read a routing table entry and name each field: destination network, mask, next hop, exit interface, source, metric.</li>
+      <li>Explain <em>longest prefix match</em> and use it to predict which route a router will choose.</li>
+      <li>Write the <code style="font-family:var(--font-mono); color:var(--teal);">ip route</code> command correctly for a given topology.</li>
+      <li>Define administrative distance and explain why it exists, using it to resolve conflicts between routing sources.</li>
+    </ul>
+  </section>
+
+  <!-- MAP: how the pieces fit under "routing principles" -->
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">&#8213;</span>
+      <h2 class="block-title">How the pieces fit together</h2>
+    </div>
+    <p class="lede">"Routing principles" is the umbrella term for this whole hour &mdash; not a single rule. It breaks into three questions, asked in the order a router actually asks them. Everything below unpacks one branch at a time.</p>
+
+    <div class="panel">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 860 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Hierarchy diagram: Routing principles at the top, branching into three questions covered in sections 01 to 03 of the lecture">
+          <style>
+            .root-box{fill:var(--panel-2); stroke:var(--teal); stroke-width:1.6;}
+            .leaf-box{fill:var(--panel-2); stroke:var(--line); stroke-width:1.3;}
+            .root-text{font-family:'Space Grotesk',sans-serif; font-size:15px; fill:var(--ink); font-weight:600;}
+            .leaf-title{font-family:'Space Grotesk',sans-serif; font-size:13px; fill:var(--ink); font-weight:600;}
+            .leaf-sub{font-family:'JetBrains Mono',monospace; font-size:10.5px; fill:var(--ink-faint);}
+            .leaf-desc{font-family:'Source Serif 4',serif; font-size:11.5px; fill:var(--ink-dim);}
+            .branch{stroke:var(--ink-faint); stroke-width:1.3; fill:none;}
+          </style>
+
+          <!-- root -->
+          <rect x="310" y="10" width="240" height="46" rx="6" class="root-box"/>
+          <text x="430" y="38" text-anchor="middle" class="root-text">Routing principles</text>
+
+          <!-- branch lines -->
+          <path d="M 430,56 L 430,80 L 140,80 L 140,100" class="branch"/>
+          <path d="M 430,56 L 430,100" class="branch"/>
+          <path d="M 430,56 L 430,80 L 720,80 L 720,100" class="branch"/>
+
+          <!-- leaf 1 -->
+          <rect x="15" y="100" width="250" height="130" rx="6" class="leaf-box"/>
+          <text x="30" y="126" class="leaf-sub">01 &middot; FUNDAMENTALS</text>
+          <text x="30" y="148" class="leaf-title">What does a router know,</text>
+          <text x="30" y="165" class="leaf-title">and where from?</text>
+          <text x="30" y="190" class="leaf-desc">Connected, static, and</text>
+          <text x="30" y="205" class="leaf-desc">dynamic sources build one</text>
+          <text x="30" y="220" class="leaf-desc">routing table.</text>
+
+          <!-- leaf 2 -->
+          <rect x="305" y="100" width="250" height="130" rx="6" class="leaf-box"/>
+          <text x="320" y="126" class="leaf-sub">02 &middot; PATH SELECTION</text>
+          <text x="320" y="148" class="leaf-title">Which matching row</text>
+          <text x="320" y="165" class="leaf-title">does it pick?</text>
+          <text x="320" y="190" class="leaf-desc">Longest prefix match, checked</text>
+          <text x="320" y="205" class="leaf-desc">first &mdash; the most specific</text>
+          <text x="320" y="220" class="leaf-desc">network always wins.</text>
+
+          <!-- leaf 3 -->
+          <rect x="595" y="100" width="250" height="130" rx="6" class="leaf-box"/>
+          <text x="610" y="126" class="leaf-sub">03 &middot; ARBITRATION</text>
+          <text x="610" y="148" class="leaf-title">What if two sources tie</text>
+          <text x="610" y="165" class="leaf-title">on prefix length?</text>
+          <text x="610" y="190" class="leaf-desc">Administrative distance ranks</text>
+          <text x="610" y="205" class="leaf-desc">the source; metric only ranks</text>
+          <text x="610" y="220" class="leaf-desc">paths within one source.</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- 1. ROUTING PRINCIPLES -->
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">01</span>
+      <h2 class="block-title">Fundamentals: what a router actually does</h2>
+    </div>
+    <p class="lede">Strip away the configuration syntax and a router does one repeating job: for every packet it receives, decide which interface to send it out of next. It never sees the whole path to the destination &mdash; only the next hop. That decision, made fresh for every packet, is <span class="callout-term">routing</span>.</p>
+
+    <p>A router builds its decision-making reference &mdash; the <span class="callout-term">routing table</span> &mdash; from up to three kinds of information:</p>
+    <ul>
+      <li><strong>Directly connected networks</strong> &mdash; interfaces the router owns, learned automatically the moment an interface is up and addressed.</li>
+      <li><strong>Static routes</strong> &mdash; paths an administrator types in by hand.</li>
+      <li><strong>Dynamic routing protocols</strong> &mdash; paths routers learn from one another automatically (RIP, OSPF, EIGRP &mdash; covered in later units).</li>
+    </ul>
+    <p>Today's session covers the first two. Every route, however it's learned, ends up as one row in the same table, competing on equal footing whenever more than one source offers a path to the same place.</p>
+
+    <h3 class="sub-title">Anatomy of a routing table entry</h3>
+    <p>Below is a small internetwork and the routing table one of its routers builds from it. Each row answers the same question: <em>to reach this network, send the packet out this interface, toward this neighbor.</em></p>
+
+    <div class="panel">
+      <div class="panel-label">FIG 1 &middot; R1's view of its network and the table it builds</div>
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 860 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Topology diagram showing router R1 connected to a LAN, router R2, and router R2 connected to a further LAN, alongside R1's routing table">
+          <defs>
+            <marker id="arrow1" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 z" fill="var(--ink-faint)"/>
+            </marker>
+          </defs>
+          <style>
+            .lbl{font-family:'JetBrains Mono',monospace; font-size:12px; fill:var(--ink-dim);}
+            .lbl-hi{font-family:'JetBrains Mono',monospace; font-size:12px; fill:var(--teal); font-weight:600;}
+            .node-text{font-family:'Space Grotesk',sans-serif; font-size:13px; fill:var(--ink); font-weight:600;}
+            .link{stroke:var(--ink-faint); stroke-width:1.5;}
+            .devbox{fill:var(--panel-2); stroke:var(--line); stroke-width:1.3;}
+          </style>
+
+          <!-- LAN A -->
+          <rect x="10" y="110" width="70" height="46" rx="4" class="devbox"/>
+          <text x="45" y="138" text-anchor="middle" class="node-text">LAN A</text>
+          <text x="45" y="176" text-anchor="middle" class="lbl">10.0.1.0/24</text>
+
+          <line x1="80" y1="133" x2="150" y2="133" class="link"/>
+
+          <!-- R1 -->
+          <circle cx="185" cy="133" r="36" class="devbox"/>
+          <text x="185" y="130" text-anchor="middle" class="node-text">R1</text>
+          <text x="185" y="146" text-anchor="middle" class="lbl" style="font-size:10px;">g0/0 / g0/1</text>
+
+          <line x1="221" y1="133" x2="320" y2="133" class="link"/>
+          <text x="270" y="120" text-anchor="middle" class="lbl">10.0.12.0/30</text>
+
+          <!-- R2 -->
+          <circle cx="355" cy="133" r="36" class="devbox"/>
+          <text x="355" y="130" text-anchor="middle" class="node-text">R2</text>
+          <text x="355" y="146" text-anchor="middle" class="lbl" style="font-size:10px;">g0/1 / g0/0</text>
+
+          <line x1="391" y1="133" x2="460" y2="133" class="link"/>
+
+          <!-- LAN B -->
+          <rect x="461" y="110" width="70" height="46" rx="4" class="devbox"/>
+          <text x="496" y="138" text-anchor="middle" class="node-text">LAN B</text>
+          <text x="496" y="176" text-anchor="middle" class="lbl">10.0.2.0/24</text>
+
+          <!-- table -->
+          <g transform="translate(575,10)">
+            <rect x="0" y="0" width="275" height="270" rx="6" fill="var(--panel-2)" stroke="var(--line)"/>
+            <text x="14" y="26" class="lbl-hi" style="font-size:12.5px;">R1 # show ip route</text>
+            <line x1="14" y1="38" x2="261" y2="38" stroke="var(--line)"/>
+
+            <text x="14" y="60" class="lbl" style="fill:var(--ink);">C  10.0.1.0/24</text>
+            <text x="28" y="76" class="lbl" style="font-size:11px;">directly connected, g0/0</text>
+
+            <line x1="14" y1="90" x2="261" y2="90" stroke="var(--line)" stroke-dasharray="2 3"/>
+
+            <text x="14" y="112" class="lbl" style="fill:var(--ink);">C  10.0.12.0/30</text>
+            <text x="28" y="128" class="lbl" style="font-size:11px;">directly connected, g0/1</text>
+
+            <line x1="14" y1="142" x2="261" y2="142" stroke="var(--line)" stroke-dasharray="2 3"/>
+
+            <text x="14" y="164" class="lbl" style="fill:var(--amber);">S  10.0.2.0/24</text>
+            <text x="28" y="180" class="lbl" style="font-size:11px;">[1/0] via 10.0.12.2</text>
+
+            <line x1="14" y1="194" x2="261" y2="194" stroke="var(--line)" stroke-dasharray="2 3"/>
+
+            <text x="14" y="216" class="lbl" style="fill:var(--ink-faint);">Codes:</text>
+            <text x="14" y="232" class="lbl" style="font-size:11px;">C = connected</text>
+            <text x="14" y="248" class="lbl" style="font-size:11px;">S = static route</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <p>R1 knows about <code style="font-family:var(--font-mono);">10.0.1.0/24</code> and the point-to-point link automatically, because it owns those interfaces. It only knows how to reach <code style="font-family:var(--font-mono);">10.0.2.0/24</code> &mdash; LAN B, hanging off R2 &mdash; because someone typed a static route telling it to.</p>
+
+    <h3 class="sub-title">Reading each field</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Field</th><th>Meaning</th><th>In the example</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="hi">Code</td><td class="dim">Where the route came from</td><td>S = static, C = connected</td></tr>
+          <tr><td class="hi">Network / mask</td><td class="dim">Destination this row matches</td><td>10.0.2.0/24</td></tr>
+          <tr><td class="hi">[AD/metric]</td><td class="dim">Trust rank, then path cost</td><td>[1/0]</td></tr>
+          <tr><td class="hi">Next hop</td><td class="dim">The neighbor to hand the packet to</td><td>via 10.0.12.2</td></tr>
+          <tr><td class="hi">Exit interface</td><td class="dim">The router's own outgoing port</td><td>g0/1 (implied by next hop)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 2. PATH SELECTION -->
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">02</span>
+      <h2 class="block-title">Path selection: which matching row wins</h2>
+    </div>
+    <p class="lede">A destination address can match several rows in the table at once. Routers always resolve that with the same rule.</p>
+
+    <h3 class="sub-title">Longest prefix match</h3>
+    <p>Given several candidate routes that all cover a destination address, the router chooses the one with the <span class="callout-term">longest matching prefix</span> &mdash; the most specific network, i.e. the largest subnet mask. A more specific route always wins over a more general one, regardless of which source it came from or its administrative distance.</p>
+
+    <div class="panel">
+      <div class="panel-label">FIG 2 &middot; packet to 10.0.2.15 checked against three candidate rows</div>
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 780 190" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram showing a destination address matched against three routing table rows of different specificity, with the most specific one highlighted as the winner">
+          <style>
+            .r{font-family:'JetBrains Mono',monospace; font-size:13px; fill:var(--ink-dim);}
+            .rw{font-family:'JetBrains Mono',monospace; font-size:13px; fill:var(--teal); font-weight:600;}
+            .cap{font-family:'Space Grotesk',sans-serif; font-size:12px; fill:var(--ink-faint);}
+          </style>
+          <rect x="0" y="0" width="780" height="190" rx="6" fill="var(--panel)" stroke="var(--line)"/>
+          <text x="24" y="30" class="cap">Destination: 10.0.2.15</text>
+          <line x1="24" y1="42" x2="756" y2="42" stroke="var(--line)"/>
+
+          <rect x="24" y="56" width="732" height="30" rx="3" fill="none" stroke="var(--line)"/>
+          <text x="36" y="76" class="r">0.0.0.0/0 &nbsp;&rarr;&nbsp; matches (default route, /0 = least specific)</text>
+
+          <rect x="24" y="94" width="732" height="30" rx="3" fill="none" stroke="var(--line)"/>
+          <text x="36" y="114" class="r">10.0.0.0/16 &nbsp;&rarr;&nbsp; matches (/16)</text>
+
+          <rect x="24" y="132" width="732" height="34" rx="3" fill="var(--teal-dim)" stroke="var(--teal)" stroke-width="1.6"/>
+          <text x="36" y="154" class="rw">10.0.2.0/24 &nbsp;&rarr;&nbsp; matches AND longest prefix (/24) &nbsp;&mdash;&nbsp; WINS</text>
+        </svg>
+      </div>
+    </div>
+
+    <h3 class="sub-title">If the match is still tied</h3>
+    <p>If two or more sources offer a route with the <em>same</em> prefix length, the tie is broken by <span class="callout-term">administrative distance</span> first, and then, if the AD also matches, by the routing protocol's own <span class="callout-term">metric</span> (hop count, bandwidth, cost &mdash; depends on the protocol). We'll build the AD comparison in a moment.</p>
+
+    <div class="panel" style="border-left:3px solid var(--amber);">
+      <div class="panel-label">COMMON MIX-UP &middot; AD compares sources, not paths</div>
+      <p style="margin-bottom:14px;">A single routing protocol can learn <em>several paths</em> to the same network &mdash; that's not what AD is for. AD only activates when <strong>two different sources</strong> (e.g. a static route and OSPF) offer a route to the identical prefix and mask. Within one source, multiple paths are compared by that protocol's own <strong>metric</strong>, never by AD, because routes from the same source already carry the same AD and there's nothing left to break the tie with.</p>
+      <div class="table-wrap" style="margin:0;">
+        <table>
+          <thead>
+            <tr><th>Situation</th><th>Resolved by</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="hi">Different prefix lengths, any source</td><td class="dim">Longest prefix match &mdash; checked first, always</td></tr>
+            <tr><td class="hi">Same prefix, different sources</td><td class="dim">Administrative distance &mdash; lower wins</td></tr>
+            <tr><td class="hi">Same prefix, same source, multiple paths</td><td class="dim">The source's own metric (hop count, cost, bandwidth&hellip;)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. STATIC ROUTES + AD -->
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">03</span>
+      <h2 class="block-title">Arbitration: static routes and administrative distance</h2>
+    </div>
+
+    <h3 class="sub-title">Writing a static route</h3>
+    <p>A static route tells the router, in one line, how to reach a network it doesn't own. Using R1 from Figure 1:</p>
+
+    <div class="cli">
+<span class="prompt">R1(config)#</span> <span class="kw">ip route</span> <span class="val">10.0.2.0 255.255.255.0 10.0.12.2</span>
+<span class="comment">                 ^destination      ^mask           ^next-hop address</span>
+    </div>
+
+    <p>The same route can instead point out a local exit interface rather than a neighbor's address &mdash; useful on point-to-point links:</p>
+    <div class="cli">
+<span class="prompt">R1(config)#</span> <span class="kw">ip route</span> <span class="val">10.0.2.0 255.255.255.0 g0/1</span>
+    </div>
+
+    <p>A <span class="callout-term">default static route</span> covers "anything not otherwise matched" and is written with an all-zero network and mask:</p>
+    <div class="cli">
+<span class="prompt">R1(config)#</span> <span class="kw">ip route</span> <span class="val">0.0.0.0 0.0.0.0 10.0.12.2</span>
+    </div>
+
+    <h3 class="sub-title">Why administrative distance exists</h3>
+    <p>A router can learn a route to the same network from more than one source at once &mdash; say, a static route an admin typed and an OSPF advertisement from a neighbor, both for <code style="font-family:var(--font-mono);">10.0.2.0/24</code>. Both can't go in the table if their prefix length ties. <span class="callout-term">Administrative distance (AD)</span> is a per-source trust rating from 0&ndash;255 that a router uses to pick one: <strong>lower AD wins.</strong> It rates the <em>source</em>, not the path &mdash; it never compares two paths coming from the same protocol, only two competing sources claiming the same prefix. It is also purely local and never advertised to other routers &mdash; it only affects which source this one router trusts.</p>
+
+    <div class="panel">
+      <div class="panel-label">FIG 3 &middot; default administrative distances (lower = more trusted)</div>
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 780 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Horizontal bar chart of default administrative distance values: connected 0, static 1, EIGRP 90, OSPF 110, RIP 120, unknown or unreachable 255">
+          <style>
+            .barlabel{font-family:'Space Grotesk',sans-serif; font-size:13px; fill:var(--ink); font-weight:600;}
+            .barval{font-family:'JetBrains Mono',monospace; font-size:13px; fill:var(--ink-dim);}
+          </style>
+          <!-- scale: 255 -> 560px max bar width, starting x=170 -->
+          <!-- Connected: 0 -->
+          <text x="10" y="26" class="barlabel">Connected</text>
+          <rect x="170" y="12" width="4" height="18" rx="2" fill="#5fd0c0"/>
+          <text x="182" y="26" class="barval">0</text>
+
+          <!-- Static: 1 -->
+          <text x="10" y="66" class="barlabel">Static route</text>
+          <rect x="170" y="52" width="6" height="18" rx="2" fill="#e8b354"/>
+          <text x="184" y="66" class="barval">1</text>
+
+          <!-- EIGRP: 90 -->
+          <text x="10" y="106" class="barlabel">EIGRP</text>
+          <rect x="170" y="92" width="196" height="18" rx="2" fill="#8fb0e0"/>
+          <text x="374" y="106" class="barval">90</text>
+
+          <!-- OSPF: 110 -->
+          <text x="10" y="146" class="barlabel">OSPF</text>
+          <rect x="170" y="132" width="240" height="18" rx="2" fill="#c98fe0"/>
+          <text x="418" y="146" class="barval">110</text>
+
+          <!-- RIP: 120 -->
+          <text x="10" y="186" class="barlabel">RIP</text>
+          <rect x="170" y="172" width="261" height="18" rx="2" fill="#e0806b"/>
+          <text x="439" y="186" class="barval">120</text>
+
+          <!-- Unknown: 255 -->
+          <text x="10" y="226" class="barlabel">Unreachable / unusable</text>
+          <rect x="170" y="212" width="555" height="18" rx="2" fill="#57667a"/>
+          <text x="733" y="226" class="barval">255</text>
+
+          <line x1="170" y1="0" x2="170" y2="240" stroke="var(--line)"/>
+        </svg>
+      </div>
+    </div>
+
+    <p>Notice a static route (AD 1) beats every dynamic protocol by default. That's deliberate: if an administrator bothered to type a path by hand, IOS assumes it should override anything a routing protocol figures out on its own &mdash; unless the admin sets a higher AD on that static route on purpose (a <span class="callout-term">floating static route</span>, used as a backup path that only appears if the primary dynamic route disappears).</p>
+
+    <h3 class="sub-title">Worked conflict</h3>
+    <p>R1 has a static route to <code style="font-family:var(--font-mono);">10.0.2.0/24</code> (AD 1) and also receives an OSPF advertisement for the same <code style="font-family:var(--font-mono);">/24</code> (AD 110). Same prefix length, so it's not a longest-prefix-match case &mdash; it comes down to AD. <strong>The static route stays in the table</strong>; the OSPF route is discarded, even though the OSPF path might genuinely be shorter. This is the most common real-world reason a "clearly better" dynamic path gets ignored, and it's worth checking <code style="font-family:var(--font-mono);">show ip route</code> for stale static entries before blaming the routing protocol.</p>
+
+  </section>
+
+  <!-- 4. QUICK GLOSSARY -->
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">04</span>
+      <h2 class="block-title">Terms to lock in before the next class</h2>
+    </div>
+    <div class="term-grid">
+      <div class="term">
+        <h4>Routing table</h4>
+        <p>The list a router builds and consults to choose an exit interface and next hop for every packet.</p>
+      </div>
+      <div class="term">
+        <h4>Longest prefix match</h4>
+        <p>Among all matching routes, the router always prefers the one with the most specific (longest) subnet mask.</p>
+      </div>
+      <div class="term">
+        <h4>Administrative distance</h4>
+        <p>A local, per-source trust value (0&ndash;255) used to break ties when two sources offer routes with the same prefix length. Lower wins.</p>
+      </div>
+      <div class="term">
+        <h4>Floating static route</h4>
+        <p>A static route deliberately configured with a higher AD than the primary dynamic protocol, so it only activates as a backup.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. CHECK-IN -->
+  <section class="block" style="border-bottom:none;">
+    <div class="block-head">
+      <span class="block-num">05</span>
+      <h2 class="block-title">Check-in questions (last 10 minutes)</h2>
+    </div>
+    <p class="lede">Pose these to the class before showing the next unit's dynamic routing content &mdash; they surface the misconceptions worth catching now.</p>
+
+    <div class="quiz">
+      <div class="q">
+        <div class="qn">Q1</div>
+        <p>A router has two routes to the same destination network with the same subnet mask: one static (AD 1) and one learned via RIP (AD 120). Which one goes in the routing table, and why?</p>
+        <details class="ans"><summary>Reveal answer</summary><div class="a">The static route. Same prefix length means it's not a longest-prefix-match situation, so the router falls back to administrative distance, and lower AD (1 &lt; 120) wins.</div></details>
+      </div>
+      <div class="q">
+        <div class="qn">Q2</div>
+        <p>Why does a router never share its administrative distance values with neighboring routers?</p>
+        <details class="ans"><summary>Reveal answer</summary><div class="a">AD is a purely local preference a router uses to decide which of its own information sources to trust &mdash; it isn't a property of the route itself, so it has no meaning outside that one router and is never advertised.</div></details>
+      </div>
+      <div class="q">
+        <div class="qn">Q3</div>
+        <p>A packet's destination matches both a default route (0.0.0.0/0) and a specific static route (10.0.2.0/24). Which wins, and does AD even come into it?</p>
+        <details class="ans"><summary>Reveal answer</summary><div class="a">The specific /24 route wins on longest prefix match alone. AD is never consulted here, because the two routes don't tie on prefix length &mdash; AD only matters when prefix length is equal.</div></details>
+      </div>
+    </div>
+  </section>
+
+</div>
+</div>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="course-tag"><span class="dot"></span>NCS 485 &middot; Routing and Switching &middot; Unit 4: Static Routing</div>
+    <h1 class="title">Default Routes &amp; Stub Networks</h1>
+    <p class="subtitle">Why a router with only one way out doesn't need a routing table at all &mdash; and how one line covers "everything else."</p>
+    <div class="meta-row">
+      <div><strong>Section</strong> 4.2</div>
+    </div>
+
+    
+  </div>
+</header>
+<div class="wrap">
+
+  <!-- 0. OBJECTIVES -->
+  <section class="block" style="padding-top:44px;">
+    <div class="block-head">
+      <span class="block-num">00</span>
+      <h2 class="block-title">By the end of this session</h2>
+    </div>
+    <ul class="obj-list">
+      <li>Define a default route, recognize its <code style="font-family:var(--font-mono); color:var(--teal);">0.0.0.0/0</code> notation, and explain why it always matches.</li>
+      <li>Write a default static route using either a next-hop address or an exit interface.</li>
+      <li>Define a stub network and explain why a router at the edge of one never needs a full routing table.</li>
+      <li>Identify the <em>gateway of last resort</em> in a given <code style="font-family:var(--font-mono); color:var(--teal);">show ip route</code> output.</li>
+      <li>Predict what happens to an unmatched packet with and without a default route present.</li>
+    </ul>
+  </section>
+
+  <!-- 1. DEFAULT ROUTES -->
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">01</span>
+      <h2 class="block-title">The route that matches everything</h2>
+    </div>
+    <p class="lede">Every route in a table covers some slice of address space. A <span class="callout-term">default route</span> is the one exception written to cover <em>all</em> of it &mdash; the catch-all a router falls back on when nothing more specific applies.</p>
+
+    <p>It is written with an all-zero network and an all-zero mask, which is why it's often called the <span class="callout-term">quad-zero route</span>:</p>
+    <div class="cli">
+<span class="prompt">R3(config)#</span> <span class="kw">ip route</span> <span class="val">0.0.0.0 0.0.0.0 10.0.13.1</span>
+<span class="comment">                 ^covers every network   ^next-hop toward the rest of the internetwork</span>
+    </div>
+    <p>Because the mask is <code style="font-family:var(--font-mono);">/0</code>, it is the <em>least specific</em> route that could ever exist &mdash; from Unit 4.1's longest-prefix-match rule, it always loses to any more specific route, and only gets used when nothing else in the table matches the destination at all.</p>
+
+    <div class="panel">
+      <div class="panel-label">FIG 1 &middot; where the default route sits in the match order</div>
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 780 150" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram showing a packet checked first against specific routes, and only falling through to the default route if nothing else matches">
+          <style>
+            .r{font-family:'JetBrains Mono',monospace; font-size:13px; fill:var(--ink-dim);}
+            .rw{font-family:'JetBrains Mono',monospace; font-size:13px; fill:var(--teal); font-weight:600;}
+            .cap{font-family:'Space Grotesk',sans-serif; font-size:12px; fill:var(--ink-faint);}
+          </style>
+          <rect x="0" y="0" width="780" height="150" rx="6" fill="var(--panel)" stroke="var(--line)"/>
+          <text x="24" y="30" class="cap">Destination: 172.16.44.9 (not otherwise in the table)</text>
+          <line x1="24" y1="42" x2="756" y2="42" stroke="var(--line)"/>
+
+          <rect x="24" y="56" width="732" height="28" rx="3" fill="none" stroke="var(--line)"/>
+          <text x="36" y="75" class="r">10.0.3.0/24  &nbsp;&rarr;&nbsp;  no match</text>
+
+          <rect x="24" y="92" width="732" height="28" rx="3" fill="none" stroke="var(--line)"/>
+          <text x="36" y="111" class="r">10.0.13.0/30  &nbsp;&rarr;&nbsp;  no match</text>
+
+          <rect x="24" y="128" width="732" height="16" rx="3" fill="var(--teal-dim)" stroke="var(--teal)" stroke-width="1.6"/>
+          <text x="36" y="140" class="rw" style="font-size:11.5px;">0.0.0.0/0  &nbsp;&rarr;&nbsp;  last resort &mdash; matches, since nothing else did</text>
+        </svg>
+      </div>
+    </div>
+
+    <p>When a router installs a default route, <code style="font-family:var(--font-mono);">show ip route</code> reports it as the <span class="callout-term">gateway of last resort</span> and marks the source line with <code style="font-family:var(--font-mono);">S*</code> (or the appropriate code) rather than plain <code style="font-family:var(--font-mono);">S</code>.</p>
+
+    <div class="cli">
+<span class="prompt">R3#</span> <span class="kw">show ip route</span>
+Gateway of last resort is 10.0.13.1 to network 0.0.0.0
+
+<span class="val">S*</span>    0.0.0.0/0 [1/0] via 10.0.13.1
+<span class="val">C</span>     10.0.3.0/24 is directly connected, GigabitEthernet0/0
+<span class="val">C</span>     10.0.13.0/30 is directly connected, GigabitEthernet0/1
+    </div>
+  </section>
+
+  <!-- 2. STUB NETWORKS -->
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">02</span>
+      <h2 class="block-title">Stub networks: when one route is enough</h2>
+    </div>
+    <p class="lede">A <span class="callout-term">stub network</span> is one with exactly one way in and out &mdash; a single uplink connecting it to the rest of the internetwork. A branch office, a small campus building, or a customer edge site are typical examples.</p>
+
+    <p>A router sitting at the edge of a stub network never needs to know the individual identity of every remote network beyond its uplink &mdash; there's only one direction "away" could ever mean. So instead of learning (or being manually configured with) dozens of specific routes, it needs exactly one: a default route pointing out its single exit.</p>
+
+    <div class="panel">
+      <div class="panel-label">FIG 2 &middot; a branch router with one uplink needs no routing table beyond a default</div>
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 860 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Topology diagram of a stub network: branch router R3 with a local LAN, connected by a single uplink to hub router R1, which reaches the rest of the enterprise network">
+          <defs>
+            <marker id="arrow2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 z" fill="var(--ink-faint)"/>
+            </marker>
+          </defs>
+          <style>
+            .lbl{font-family:'JetBrains Mono',monospace; font-size:12px; fill:var(--ink-dim);}
+            .node-text{font-family:'Space Grotesk',sans-serif; font-size:13px; fill:var(--ink); font-weight:600;}
+            .link{stroke:var(--ink-faint); stroke-width:1.5;}
+            .devbox{fill:var(--panel-2); stroke:var(--line); stroke-width:1.3;}
+            .cloudbox{fill:var(--panel-2); stroke:var(--teal); stroke-width:1.4; stroke-dasharray:4 3;}
+          </style>
+
+          <!-- Branch LAN -->
+          <rect x="10" y="105" width="90" height="46" rx="4" class="devbox"/>
+          <text x="55" y="133" text-anchor="middle" class="node-text">LAN C</text>
+          <text x="55" y="171" text-anchor="middle" class="lbl">10.0.3.0/24</text>
+
+          <line x1="100" y1="128" x2="165" y2="128" class="link"/>
+
+          <!-- R3 stub router -->
+          <circle cx="200" cy="128" r="36" class="devbox"/>
+          <text x="200" y="125" text-anchor="middle" class="node-text">R3</text>
+          <text x="200" y="141" text-anchor="middle" class="lbl" style="font-size:10px;">stub edge</text>
+
+          <line x1="236" y1="128" x2="335" y2="128" class="link" marker-end="url(#arrow2)"/>
+          <text x="285" y="115" text-anchor="middle" class="lbl">10.0.13.0/30</text>
+          <text x="285" y="150" text-anchor="middle" class="lbl" style="fill:var(--teal);">only exit</text>
+
+          <!-- R1 hub -->
+          <circle cx="370" cy="128" r="36" class="devbox"/>
+          <text x="370" y="125" text-anchor="middle" class="node-text">R1</text>
+          <text x="370" y="141" text-anchor="middle" class="lbl" style="font-size:10px;">hub</text>
+
+          <line x1="406" y1="128" x2="470" y2="128" class="link"/>
+
+          <!-- rest of network cloud -->
+          <rect x="471" y="80" width="360" height="96" rx="48" class="cloudbox"/>
+          <text x="651" y="122" text-anchor="middle" class="node-text">Rest of the enterprise network</text>
+          <text x="651" y="144" text-anchor="middle" class="lbl">dozens of subnets R3 never needs to name individually</text>
+
+          <!-- R3 table -->
+          <g transform="translate(30,190)">
+            <rect x="0" y="0" width="330" height="60" rx="6" fill="var(--panel-2)" stroke="var(--line)"/>
+            <text x="14" y="22" class="lbl" style="fill:var(--ink);">R3's entire routing table:</text>
+            <text x="14" y="42" class="lbl" style="fill:var(--amber);">S*  0.0.0.0/0 [1/0] via 10.0.13.1</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <p>That single line replaces what would otherwise be a full, constantly-updated table of every remote subnet &mdash; and it never goes stale, because "everything not local" doesn't change even as the rest of the network grows.</p>
+
+    <div class="panel" style="border-left:3px solid var(--amber);">
+      <div class="panel-label">COMMON MIX-UP &middot; stub network vs. stub router vs. stub area</div>
+      <p style="margin-bottom:0;">This unit's "stub network" is a topology description &mdash; a site with one uplink &mdash; solved with a plain default static route. Later, in dynamic routing units, you'll meet OSPF's formal <em>stub area</em>, a related but distinct configuration where a router still runs OSPF but is told to accept a summarized default instead of full external routes. Don't conflate the two yet; today's stub networks need no routing protocol at all.</p>
+    </div>
+  </section>
+
+  <!-- 3. WORKED EXAMPLE -->
+  <section class="block" style="border-bottom:none;">
+    <div class="block-head">
+      <span class="block-num">03</span>
+      <h2 class="block-title">Worked example: configuring the branch router</h2>
+    </div>
+    <p>Using R3 from Figure 2, the branch has one local LAN and one uplink to headquarters. The full configuration needed to make LAN C fully reachable to and from the rest of the enterprise is just:</p>
+    <div class="cli">
+<span class="prompt">R3(config)#</span> <span class="kw">ip route</span> <span class="val">0.0.0.0 0.0.0.0 10.0.13.1</span>
+    </div>
+    <p>Two things still have to be true for this to work end-to-end, and both are worth checking explicitly in a lab:</p>
+    <ul>
+      <li><strong>R1 (the hub) must have a specific route back to <code style="font-family:var(--font-mono);">10.0.3.0/24</code></strong> &mdash; either static or learned dynamically. A default route only solves the outbound half; the hub still needs to know how to send replies back to the branch.</li>
+      <li><strong>The hub's own default or upstream route</strong> handles anything beyond it, so the default-route pattern often repeats hop by hop toward the network's actual edge (e.g. an internet-facing router).</li>
+    </ul>
+
+    <div class="term-grid">
+      <div class="term">
+        <h4>Default route</h4>
+        <p>A route with network and mask both 0.0.0.0, matching any destination not covered by a more specific entry.</p>
+      </div>
+      <div class="term">
+        <h4>Gateway of last resort</h4>
+        <p>The next hop a router uses when no other route matches; shown at the top of <code style="font-family:var(--font-mono);">show ip route</code> output when a default route is installed.</p>
+      </div>
+      <div class="term">
+        <h4>Stub network</h4>
+        <p>A network reachable through exactly one exit path, so a single default route fully describes how to leave it.</p>
+      </div>
+      <div class="term">
+        <h4>Quad-zero route</h4>
+        <p>Informal name for the default route, from its <code style="font-family:var(--font-mono); font-size:12px;">0.0.0.0 0.0.0.0</code> notation.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHECK-IN -->
+  <section class="block" style="border-bottom:none;">
+    <div class="block-head">
+      <span class="block-num">04</span>
+      <h2 class="block-title">Check-in questions (last 5 minutes)</h2>
+    </div>
+    <div class="quiz">
+      <div class="q">
+        <div class="qn">Q1</div>
+        <p>Why does a default route never win a match if a more specific route also matches the same destination?</p>
+        <details class="ans"><summary>Reveal answer</summary><div class="a">Its mask is /0 &mdash; the least specific possible &mdash; so under longest-prefix-match (4.1), any route with a longer mask that also matches is always preferred over it.</div></details>
+      </div>
+      <div class="q">
+        <div class="qn">Q2</div>
+        <p>A stub router's LAN can reach headquarters, but replies never come back. The stub's default route is configured correctly. What's the most likely cause?</p>
+        <details class="ans"><summary>Reveal answer</summary><div class="a">Headquarters is missing a route back to the stub's LAN. A default route only solves outbound routing at the stub; the far end still needs a specific (or its own default) route home.</div></details>
+      </div>
+      <div class="q">
+        <div class="qn">Q3</div>
+        <p>Why doesn't a stub network's routing need to be updated when new subnets are added elsewhere in the enterprise?</p>
+        <details class="ans"><summary>Reveal answer</summary><div class="a">The stub router's only route is "everything else, out this one exit" &mdash; that statement stays true no matter how many subnets exist beyond it, so nothing at the stub needs to change.</div></details>
+      </div>
+    </div>
+  </section>
+
+</div>
+</div>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="course-tag"><span class="dot"></span>NCS 485 &middot; Routing and Switching &middot; Unit 4: Static Routing</div>
+    <h1 class="title">Advantages &amp; Disadvantages of Static Routing</h1>
+    <p class="subtitle">Static routing isn't a lesser version of dynamic routing &mdash; it's a different trade-off, and the right choice depends entirely on what the network needs to do.</p>
+    <div class="meta-row">
+      <div><strong>Section</strong> 4.3</div>
+    </div>
+
+    
+  </div>
+</header>
+<div class="wrap">
+
+  <!-- 0. OBJECTIVES -->
+  <section class="block" style="padding-top:44px;">
+    <div class="block-head">
+      <span class="block-num">00</span>
+      <h2 class="block-title">By the end of this session</h2>
+    </div>
+    <ul class="obj-list">
+      <li>List the main advantages of static routing and explain the mechanism behind each one.</li>
+      <li>List the main disadvantages of static routing and explain why they get worse as a network grows.</li>
+      <li>Given a short network scenario, judge whether static or dynamic routing is the better fit, and justify the choice.</li>
+    </ul>
+  </section>
+
+  <!-- 1. ADVANTAGES -->
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">01</span>
+      <h2 class="block-title">What static routing gets you</h2>
+    </div>
+    <p class="lede">Every advantage of static routing comes from the same root cause: nothing is being computed or exchanged at runtime. The path was decided once, by a human, and the router simply obeys it.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Advantage</th><th>Why it happens</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="hi">Predictable path</td><td class="dim">The route never changes on its own, so traffic always takes the exact path the administrator chose &mdash; useful when a specific link must carry specific traffic.</td></tr>
+          <tr><td class="hi">No routing protocol overhead</td><td class="dim">No periodic updates, no neighbor relationships, no CPU spent recalculating paths &mdash; every cycle a dynamic protocol would use is saved.</td></tr>
+          <tr><td class="hi">Lower bandwidth use</td><td class="dim">Nothing is advertised between routers, so links carry only actual traffic, not routing-protocol chatter.</td></tr>
+          <tr><td class="hi">Tighter security posture</td><td class="dim">With no routing protocol running, there's no protocol to spoof, inject false routes into, or eavesdrop on.</td></tr>
+          <tr><td class="hi">Simple to configure at small scale</td><td class="dim">A handful of <code style="font-family:var(--font-mono);">ip route</code> lines is easier to write, read, and audit than tuning a routing protocol, when the topology is small.</td></tr>
+          <tr><td class="hi">Works with any adjacent device</td><td class="dim">The next-hop router doesn't need to speak the same routing protocol &mdash; it doesn't need to run one at all.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 2. DISADVANTAGES -->
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">02</span>
+      <h2 class="block-title">What it costs you</h2>
+    </div>
+    <p class="lede">The same lack of automation that makes static routing lean also makes it brittle. Every disadvantage below is the flip side of an advantage above.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Disadvantage</th><th>Why it happens</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="hi">Doesn't scale</td><td class="dim">Every reachable network needs its own manually typed line; a network with hundreds of subnets means hundreds of routes to write and keep correct.</td></tr>
+          <tr><td class="hi">No automatic failover</td><td class="dim">If the configured next hop or link goes down, the static route stays in the table pointing at a dead path until a human fixes it &mdash; there's no protocol reconverging around the failure.</td></tr>
+          <tr><td class="hi">Manual maintenance on every topology change</td><td class="dim">Adding a subnet, removing a link, or renumbering anything means visiting every router whose table referenced it.</td></tr>
+          <tr><td class="hi">Error-prone at scale</td><td class="dim">Hand-typed configuration invites typos in addresses and masks &mdash; mistakes a dynamic protocol would never make, because it computes the routes itself.</td></tr>
+          <tr><td class="hi">No load-aware path choice</td><td class="dim">A static route can't shift traffic based on current link utilization or congestion; it always sends packets the one way it was told, regardless of conditions.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="panel" style="border-left:3px solid var(--amber);">
+      <div class="panel-label">WORTH REMEMBERING &middot; the failure mode is silent</div>
+      <p style="margin-bottom:0;">A dynamic routing protocol fails loudly &mdash; a neighbor relationship drops, and the table updates within seconds. A static route fails <em>silently</em>: the entry stays in the table, looking perfectly valid, pointing at a next hop that may no longer exist. This is why static-heavy networks lean so heavily on the troubleshooting tools in 4.4 &mdash; nothing will tell you a static route is wrong except checking it yourself.</p>
+    </div>
+  </section>
+
+  <!-- 3. WHEN TO USE WHICH -->
+  <section class="block" style="border-bottom:none;">
+    <div class="block-head">
+      <span class="block-num">03</span>
+      <h2 class="block-title">Choosing between static and dynamic</h2>
+    </div>
+    <p>Neither approach is universally "better" &mdash; each fits different network shapes. In practice, most real networks use both together: static routes at the stable, simple edges, and a dynamic protocol in the complex, changeable core.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Scenario</th><th>Better fit</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="hi">Small network, few routers, topology rarely changes</td><td class="dim">Static &mdash; the overhead of a routing protocol isn't justified</td></tr>
+          <tr><td class="hi">Stub network with exactly one exit (4.2)</td><td class="dim">Static &mdash; a single default route is simpler and never goes stale</td></tr>
+          <tr><td class="hi">Backup path, only used if the primary fails</td><td class="dim">Static (floating static, from 4.1) &mdash; deliberately controlled, predictable fallback</td></tr>
+          <tr><td class="hi">Large network, many routers, frequent changes</td><td class="dim">Dynamic &mdash; manual maintenance would be constant and error-prone</td></tr>
+          <tr><td class="hi">Network needs automatic rerouting around failures</td><td class="dim">Dynamic &mdash; only a routing protocol reconverges without human intervention</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="lede" style="margin-top:8px;">Hold onto that last row for the units ahead: dynamic protocols exist specifically to solve the two problems static routing can't &mdash; scale and automatic failover.</p>
+  </section>
+
+  <!-- CHECK-IN -->
+  <section class="block" style="border-bottom:none;">
+    <div class="block-head">
+      <span class="block-num">04</span>
+      <h2 class="block-title">Check-in questions (last 5 minutes)</h2>
+    </div>
+    <div class="quiz">
+      <div class="q">
+        <div class="qn">Q1</div>
+        <p>A static route's next hop goes down. What does the routing table show, and what actually happens to traffic?</p>
+        <details class="ans"><summary>Reveal answer</summary><div class="a">The static route stays in the table exactly as configured &mdash; nothing removes it automatically &mdash; but traffic sent toward that dead next hop is dropped, since the path no longer exists.</div></details>
+      </div>
+      <div class="q">
+        <div class="qn">Q2</div>
+        <p>Why is static routing described as having "no routing protocol overhead" &mdash; what specifically is being saved?</p>
+        <details class="ans"><summary>Reveal answer</summary><div class="a">CPU cycles that would otherwise go to running a protocol and recalculating paths, and bandwidth that would otherwise carry periodic route advertisements between routers.</div></details>
+      </div>
+      <div class="q">
+        <div class="qn">Q3</div>
+        <p>A company is adding a new subnet every week to a fast-growing data center core. Would you recommend static or dynamic routing there, and why?</p>
+        <details class="ans"><summary>Reveal answer</summary><div class="a">Dynamic. Frequent topology changes mean constant manual updates under static routing, which doesn't scale and invites configuration errors; a dynamic protocol adapts to the changes automatically.</div></details>
+      </div>
+    </div>
+  </section>
+
+</div>
+</div>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="course-tag"><span class="dot"></span>NCS 485 &middot; Routing and Switching &middot; Unit 4: Static Routing</div>
+    <h1 class="title">Troubleshooting Static Routing</h1>
+    <p class="subtitle">Three tools, used in order &mdash; check what the router believes, check whether the path actually works, then find exactly where it breaks.</p>
+    <div class="meta-row">
+      <div><strong>Section</strong> 4.4</div>
+    </div>
+
+    
+  </div>
+</header>
+<div class="wrap">
+
+  <!-- 0. OBJECTIVES -->
+  <section class="block" style="padding-top:44px;">
+    <div class="block-head">
+      <span class="block-num">00</span>
+      <h2 class="block-title">By the end of this session</h2>
+    </div>
+    <ul class="obj-list">
+      <li>Use <code style="font-family:var(--font-mono); color:var(--teal);">show ip route</code> to confirm whether a static route is present and installed as expected.</li>
+      <li>Use <code style="font-family:var(--font-mono); color:var(--teal);">ping</code> to test end-to-end reachability and correctly interpret success, timeout, and unreachable results.</li>
+      <li>Use <code style="font-family:var(--font-mono); color:var(--teal);">traceroute</code> to isolate the exact hop where a path breaks down.</li>
+      <li>Diagnose the most common static-routing faults: missing route, wrong next hop, and missing return path.</li>
+    </ul>
+  </section>
+
+  <!-- 1. SHOW IP ROUTE -->
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">01</span>
+      <h2 class="block-title">Start with what the router believes</h2>
+    </div>
+    <p class="lede">Before testing anything on the wire, check the router's own understanding of the network. If the route isn't in the table, no amount of pinging will explain why traffic fails &mdash; the router was never going to send it the right way.</p>
+
+    <div class="cli">
+<span class="prompt">R1#</span> <span class="kw">show ip route</span>
+Gateway of last resort is not set
+
+<span class="val">C</span>     10.0.1.0/24 is directly connected, GigabitEthernet0/0
+<span class="val">C</span>     10.0.12.0/30 is directly connected, GigabitEthernet0/1
+    </div>
+    <p>Compare that against what's expected: if a static route to <code style="font-family:var(--font-mono);">10.0.2.0/24</code> was configured but doesn't appear here at all, the configuration itself is the fault &mdash; commonly a typo in the network, mask, or next hop that IOS silently refused to install.</p>
+
+    <div class="panel">
+      <div class="panel-label">FIG 1 &middot; three things to check in the output, in order</div>
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 780 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Checklist diagram: is the route present, is the code and AD what you expect, is the next hop correct">
+          <style>
+            .stepnum{font-family:'JetBrains Mono',monospace; font-size:13px; fill:var(--bg); font-weight:600;}
+            .stept{font-family:'Space Grotesk',sans-serif; font-size:14px; fill:var(--ink); font-weight:600;}
+            .stepd{font-family:'Source Serif 4',serif; font-size:12.5px; fill:var(--ink-dim);}
+          </style>
+          <circle cx="30" cy="26" r="14" fill="var(--teal)"/>
+          <text x="30" y="31" text-anchor="middle" class="stepnum">1</text>
+          <text x="54" y="22" class="stept">Is the route there at all?</text>
+          <text x="54" y="42" class="stepd">Missing entirely &rarr; a configuration or typo problem, not a network problem.</text>
+
+          <circle cx="30" cy="80" r="14" fill="var(--teal)"/>
+          <text x="30" y="85" text-anchor="middle" class="stepnum">2</text>
+          <text x="54" y="76" class="stept">Is the source code and AD what you expect?</text>
+          <text x="54" y="96" class="stepd">An unexpected S, C, or dynamic code winning means another source is beating your static route (4.1).</text>
+
+          <circle cx="30" cy="134" r="14" fill="var(--teal)"/>
+          <text x="30" y="139" text-anchor="middle" class="stepnum">3</text>
+          <text x="54" y="130" class="stept">Is the next hop or exit interface correct?</text>
+          <text x="54" y="150" class="stepd">Present but pointing at the wrong neighbor or a down interface &mdash; the classic silent static-route fault.</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. PING -->
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">02</span>
+      <h2 class="block-title">ping: does the path work end to end?</h2>
+    </div>
+    <p class="lede"><code style="font-family:var(--font-mono);">ping</code> sends an ICMP echo request and waits for an echo reply. It answers one question &mdash; can a packet make the full round trip? &mdash; and nothing about where a failure happens along the way.</p>
+
+    <div class="cli">
+<span class="prompt">R1#</span> <span class="kw">ping</span> <span class="val">10.0.2.15</span>
+Sending 5, 100-byte ICMP Echos to 10.0.2.15, timeout is 2 seconds:
+<span class="comment">!!!!!</span>
+Success rate is 100 percent (5/5)
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Result</th><th>What it means</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="hi">! ! ! ! !</td><td class="dim">Full round trip succeeded &mdash; forward and return paths both work.</td></tr>
+          <tr><td class="hi">. . . . .</td><td class="dim">Request timed out &mdash; the packet went somewhere but no reply came back in time. Common cause: the return path is missing (see the panel below).</td></tr>
+          <tr><td class="hi">U U U U U</td><td class="dim">Destination unreachable &mdash; a router along the path has no route at all and said so explicitly, rather than just going silent.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="panel" style="border-left:3px solid var(--amber);">
+      <div class="panel-label">CLASSIC STATIC-ROUTING GOTCHA &middot; asymmetric routing</div>
+      <p style="margin-bottom:0;">A ping can fail even when the static route you just configured is perfect. If R1 has a static route to R2's LAN but R2 has no route back to R1's LAN, R1's echo requests arrive fine &mdash; but R2 has nowhere to send the replies. The symptom is a full set of timeouts (<code style="font-family:var(--font-mono);">. . . . .</code>), and the fix is always to check <code style="font-family:var(--font-mono);">show ip route</code> on <em>both</em> ends, not just the one you're testing from.</p>
+    </div>
+  </section>
+
+  <!-- 3. TRACEROUTE -->
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">03</span>
+      <h2 class="block-title">traceroute: where exactly does it stop?</h2>
+    </div>
+    <p class="lede">Where <code style="font-family:var(--font-mono);">ping</code> gives a yes/no answer, <code style="font-family:var(--font-mono);">traceroute</code> shows the whole path, hop by hop &mdash; by sending packets with an increasing TTL and reading the "TTL expired" message each router sends back on its way through.</p>
+
+    <div class="cli">
+<span class="prompt">R1#</span> <span class="kw">traceroute</span> <span class="val">10.0.2.15</span>
+Tracing the route to 10.0.2.15
+
+  1   10.0.12.2   4 msec   4 msec   4 msec
+  2   *   *   *
+  3   *   *   *
+    </div>
+    <p>Reading this: hop 1 (R2, the next-hop router) responded normally, so the link between R1 and R2 is fine and R2 has a route back to R1's side. Everything past hop 1 times out &mdash; the break is <em>beyond</em> R2, so that's exactly where the investigation should continue, not back at R1.</p>
+
+    <div class="panel">
+      <div class="panel-label">FIG 2 &middot; ping vs. traceroute &mdash; what each tool actually tells you</div>
+      <div class="table-wrap" style="margin:0;">
+        <table>
+          <thead>
+            <tr><th>Question</th><th>ping</th><th>traceroute</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="hi">Does the full path work?</td><td class="dim">Yes / no</td><td class="dim">Yes, plus every hop along the way</td></tr>
+            <tr><td class="hi">Where does it break?</td><td class="dim">Not shown</td><td class="dim">The exact hop after the last responder</td></tr>
+            <tr><td class="hi">Best used when</td><td class="dim">Confirming reachability quickly</td><td class="dim">A ping already failed and you need to localize the fault</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. WORKED SCENARIO -->
+  <section class="block" style="border-bottom:none;">
+    <div class="block-head">
+      <span class="block-num">04</span>
+      <h2 class="block-title">Worked scenario: putting the three together</h2>
+    </div>
+    <p><strong>Symptom:</strong> a user on LAN A can't reach a server on LAN B. Walk it in order:</p>
+    <ol>
+      <li><strong>show ip route on R1</strong> &mdash; the static route to LAN B's subnet is present, correct network, correct mask, next hop <code style="font-family:var(--font-mono);">10.0.12.2</code>. Configuration looks right, so the fault is somewhere on the path, not in this line.</li>
+      <li><strong>ping from R1 to the server</strong> &mdash; five timeouts. The path isn't fully working, but this alone doesn't say where.</li>
+      <li><strong>traceroute from R1</strong> &mdash; hop 1 (R2) responds; nothing beyond it does. The break is past R2.</li>
+      <li><strong>show ip route on R2</strong> &mdash; no route back to LAN A's subnet at all. Found it: R2 can receive the request but has nowhere to send the reply.</li>
+      <li><strong>Fix:</strong> add the missing static route on R2, then re-run the ping to confirm five replies instead of five timeouts.</li>
+    </ol>
+    <p>Notice the order was never arbitrary: check the configuration first (cheap, instant), confirm there's a real symptom second (ping), then localize it third (traceroute) &mdash; only then start changing configuration.</p>
+
+    <div class="term-grid">
+      <div class="term">
+        <h4>Gateway of last resort not set</h4>
+        <p>Appears in <code style="font-family:var(--font-mono); font-size:12px;">show ip route</code> when no default route is installed &mdash; unmatched destinations will be dropped, not forwarded anywhere.</p>
+      </div>
+      <div class="term">
+        <h4>Destination unreachable (U)</h4>
+        <p>A router explicitly reported it has no route to the destination, distinct from a silent timeout.</p>
+      </div>
+      <div class="term">
+        <h4>TTL expired</h4>
+        <p>The message a router sends back when a packet's time-to-live hits zero at that hop &mdash; the mechanism traceroute exploits to map the path.</p>
+      </div>
+      <div class="term">
+        <h4>Asymmetric routing fault</h4>
+        <p>Forward path works but the return path is missing a route &mdash; the single most common static-routing troubleshooting scenario.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHECK-IN -->
+  <section class="block" style="border-bottom:none;">
+    <div class="block-head">
+      <span class="block-num">05</span>
+      <h2 class="block-title">Check-in questions (last 5 minutes)</h2>
+    </div>
+    <div class="quiz">
+      <div class="q">
+        <div class="qn">Q1</div>
+        <p>A ping returns five timeouts (. . . . .) rather than five successes. What does that specifically tell you, and what doesn't it tell you?</p>
+        <details class="ans"><summary>Reveal answer</summary><div class="a">It tells you the round trip didn't complete in time &mdash; something failed somewhere. It does not tell you where; that requires traceroute or checking routes hop by hop.</div></details>
+      </div>
+      <div class="q">
+        <div class="qn">Q2</div>
+        <p>traceroute shows a reply from hop 1 but nothing from hop 2 onward. Which router should you investigate first?</p>
+        <details class="ans"><summary>Reveal answer</summary><div class="a">Hop 2 (and its own routing table/next hop) &mdash; hop 1 responded, so the path and routing up to that router are confirmed working; the fault is between hop 1 and hop 2.</div></details>
+      </div>
+      <div class="q">
+        <div class="qn">Q3</div>
+        <p>A static route looks perfectly correct in show ip route, yet ping still fails. Why should you check the far router's routing table next, not the near one's?</p>
+        <details class="ans"><summary>Reveal answer</summary><div class="a">Because the near router's route only covers the outbound half of the trip; if the far router has no route back, replies never return, and the failure is on the far end, not the one you already verified.</div></details>
+      </div>
+    </div>
+  </section>
+
+</div>
+</div>
+
+<footer>
+  NCS 485 &middot; Routing and Switching &middot; Unit 4 (4.1&ndash;4.4) &middot; Static Routing &middot; Pokhara University, BCSIT
+</footer>
+
+</body>
+</html>

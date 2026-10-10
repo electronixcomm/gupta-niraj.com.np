@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2.4 Managing and Verifying Switch Configuration — Routing & Switching</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Slab:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#eef0e7;
+    --panel:#f6f7f1;
+    --ink:#1b2430;
+    --ink-soft:#576072;
+    --wire:#b8722f;
+    --wire-soft:#e9d3b1;
+    --cut:#2f7d74;
+    --cut-soft:#cfe4e1;
+    --danger:#a5372f;
+    --danger-soft:#f0d7d3;
+    --unicast:#3a5a8c;
+    --unicast-soft:#d3ddec;
+    --learn:#2f7d74;
+    --learn-soft:#cfe4e1;
+    --tip:#8a6d3b;
+    --tip-soft:#f2e9d8;
+    --line:#c8cbba;
+    --line-strong:#9ea283;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    font-size:16px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:'IBM Plex Mono', monospace;}
+  .wrap{max-width:900px; margin:0 auto; padding:0 28px;}
+
+  header.hero{padding:64px 0 40px; border-bottom:1px solid var(--line-strong);}
+  .kicker{font-family:'IBM Plex Mono', monospace; font-size:13px; color:var(--ink-soft); margin:0 0 18px;}
+  .kicker .dot{color:var(--wire);}
+  h1.title{font-family:'IBM Plex Slab', serif; font-weight:600; font-size:40px; line-height:1.15; margin:0 0 16px; max-width:19ch;}
+  .dek{font-size:18px; color:var(--ink-soft); max-width:60ch; margin:0 0 36px;}
+
+  /* nav pills */
+  .toc{display:flex; flex-wrap:wrap; gap:8px;}
+  .toc a{
+    font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--ink-soft);
+    border:1px solid var(--line-strong); padding:6px 12px; text-decoration:none;
+    background:var(--panel);
+  }
+  .toc a:hover{border-color:var(--ink); color:var(--ink);}
+
+  section{padding:52px 0;}
+  section + section{border-top:1px solid var(--line);}
+  h2.sec-title{font-family:'IBM Plex Slab', serif; font-size:28px; font-weight:600; margin:0 0 8px;}
+  .sec-sub{color:var(--ink-soft); max-width:64ch; margin:0 0 30px;}
+  p{max-width:70ch;}
+
+  /* ============ lifecycle diagram ============ */
+  .lifecycle{background:var(--panel); border:1px solid var(--line-strong); padding:28px 24px;}
+  .lc-row{display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap;}
+  .lc-box{
+    border:2px solid var(--ink); background:#fff; padding:14px 18px; text-align:center;
+    font-family:'IBM Plex Slab', serif; font-weight:600; font-size:14px; min-width:150px;
+  }
+  .lc-box.ext{border-style:dashed; border-color:var(--ink-soft); font-weight:500; color:var(--ink-soft);}
+  .lc-box small{display:block; font-family:'IBM Plex Mono', monospace; font-weight:400; font-size:11px; color:var(--ink-soft); margin-top:4px;}
+  .lc-arrow{display:flex; flex-direction:column; align-items:center; font-family:'IBM Plex Mono', monospace; font-size:10.5px; color:var(--ink-soft); gap:2px;}
+  .lc-arrow .arr{font-size:16px; color:var(--ink);}
+
+  /* ============ command table ============ */
+  table.cmdtable{width:100%; border-collapse:collapse; font-size:14px; margin-top:6px;}
+  table.cmdtable th, table.cmdtable td{border:1px solid var(--line-strong); padding:9px 11px; text-align:left; vertical-align:top;}
+  table.cmdtable thead th{background:var(--ink); color:var(--paper); font-family:'IBM Plex Mono', monospace; font-weight:500; font-size:12px;}
+  table.cmdtable td.cmd{font-family:'IBM Plex Mono', monospace; font-size:12.5px; white-space:nowrap; color:var(--wire); background:var(--panel);}
+
+  /* ============ step accordion (shared) ============ */
+  .steps{border-top:1px solid var(--line-strong); margin-top:10px;}
+  .step{border-bottom:1px solid var(--line-strong);}
+  .step-head{
+    display:flex; align-items:center; gap:16px; padding:18px 4px; cursor:pointer;
+    background:none; border:none; width:100%; text-align:left; font-family:'IBM Plex Sans', sans-serif;
+  }
+  .step-head .num{
+    font-family:'IBM Plex Mono', monospace; color:var(--wire); font-size:13px;
+    border:1px solid var(--wire); width:28px; height:28px; flex:0 0 28px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .step-head .label{font-size:15.5px; font-weight:600; flex:1;}
+  .step-head .chev{font-family:'IBM Plex Mono', monospace; color:var(--ink-soft); transition:transform .15s ease;}
+  .step.open .step-head .chev{transform:rotate(90deg);}
+  .step-body{max-height:0; overflow:hidden; transition:max-height .2s ease;}
+  .step.open .step-body{max-height:700px;}
+  .step-body-inner{padding:0 4px 22px 44px;}
+  pre.code{
+    background:#1b2430; color:#eef0e7; border:1px solid var(--ink);
+    padding:14px 16px; font-family:'IBM Plex Mono', monospace; font-size:12.5px;
+    line-height:1.65; overflow-x:auto; margin:0 0 12px;
+  }
+  .step-note{font-size:14.5px; margin:0; max-width:62ch;}
+
+  /* ============ callouts ============ */
+  .callout{border:1px solid var(--wire); background:var(--wire-soft); padding:16px 18px; margin:18px 0; font-size:14.5px;}
+  .callout strong{display:block; margin-bottom:4px; font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--ink);}
+  .callout.danger{border-color:var(--danger); background:var(--danger-soft);}
+  .callout.tip{border-color:var(--tip); background:var(--tip-soft);}
+  .callout.good{border-color:var(--learn); background:var(--learn-soft);}
+
+  .caution-grid{display:grid; grid-template-columns:1fr; gap:14px;}
+  .caution-card{border:1px solid var(--danger); background:var(--danger-soft); padding:16px 18px;}
+  .caution-card .head{display:flex; align-items:center; gap:10px; margin-bottom:6px;}
+  .caution-card .mark{font-family:'IBM Plex Mono', monospace; font-weight:600; color:var(--danger); border:1px solid var(--danger); width:24px; height:24px; display:flex; align-items:center; justify-content:center; flex:0 0 24px; font-size:13px;}
+  .caution-card h4{margin:0; font-family:'IBM Plex Slab', serif; font-size:16px;}
+  .caution-card p{margin:0; font-size:14.5px; max-width:66ch;}
+
+  .tips-grid{display:grid; grid-template-columns:1fr; gap:14px;}
+  @media (min-width:700px){ .tips-grid{grid-template-columns:1fr 1fr;} }
+  .tip-card{border:1px solid var(--tip); background:var(--tip-soft); padding:16px 18px;}
+  .tip-card h4{margin:0 0 6px; font-family:'IBM Plex Slab', serif; font-size:15.5px;}
+  .tip-card p{margin:0; font-size:14px; max-width:100%;}
+  .tip-card .mono{display:block; margin-top:8px; font-size:12.5px; color:var(--ink-soft);}
+
+  .convention{border-top:1px solid var(--line-strong); margin-top:10px;}
+  .conv-row{display:grid; grid-template-columns:180px 1fr; gap:16px; padding:14px 4px; border-bottom:1px solid var(--line-strong);}
+  .conv-row .label{font-family:'IBM Plex Slab', serif; font-weight:600; font-size:14.5px; color:var(--ink);}
+  .conv-row p{margin:0; font-size:14.5px;}
+
+  /* ============ recap ============ */
+  .recap{display:grid; grid-template-columns:1fr; gap:10px;}
+  .recap .item{display:flex; gap:12px; padding:12px 0; border-bottom:1px solid var(--line); font-size:15px;}
+  .recap .item:last-child{border-bottom:none;}
+  .recap .q{font-family:'IBM Plex Mono', monospace; color:var(--wire); flex:0 0 22px;}
+
+  footer{padding:36px 0 60px; color:var(--ink-soft); font-size:13px; border-top:1px solid var(--line-strong);}
+
+  @media (max-width:600px){
+    h1.title{font-size:28px;}
+    .rung{grid-template-columns:1fr;}
+    .step-body-inner{padding-left:16px;}
+    .conv-row{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body><div style="font:14px/1.4 Inter,-apple-system,Segoe UI,sans-serif;background:#0b1d3a;padding:10px 16px;"><a href="/teaching/switching-routing.html" style="color:#fbf9f3;text-decoration:none;">&larr; Switching &amp; Routing &middot; all units</a></div>
+
+<div class="wrap">
+  <header class="hero">
+    <p class="kicker">NCS 485 · Routing &amp; Switching <span class="dot">·</span> Unit 2.4</p>
+    <h1 class="title">Managing and verifying switch configuration</h1>
+    <p class="dek">Building a config (Unit 2.3) is only half the job. This unit is about the other half: confirming the switch is actually doing what we configured, moving configuration safely between memory and storage, the specific ways a password or privilege level goes wrong, and what our real options are if every login credential is lost at once.</p>
+
+    <div class="toc">
+      <a href="#access">Console/Telnet/SSH</a>
+      <a href="#verify">Verifying</a>
+      <a href="#lifecycle">Config lifecycle</a>
+      <a href="#managing">Managing</a>
+      <a href="#caution">Caution</a>
+      <a href="#privilege">Privilege &amp; password mistakes</a>
+      <a href="#lockout">Total lockout: is it still usable?</a>
+      <a href="#tips">Tips</a>
+      <a href="#convention">Industry convention</a>
+    </div>
+  </header>
+
+  <!-- ============ ACCESS METHODS ============ -->
+  <section id="access">
+    <h2 class="sec-title">Console, Telnet, and SSH: how you're actually connecting</h2>
+    <p class="sec-sub">Before verifying or managing anything, it's worth being precise about what kind of connection is in use — because one of the three has properties the other two simply don't have.</p>
+
+    <table class="cmdtable">
+      <thead><tr><th>Method</th><th>Medium</th><th>Security</th><th>Baud rate applies?</th></tr></thead>
+      <tbody>
+        <tr><td class="cmd">Console</td><td>Physical RS-232 serial cable (or USB-to-serial) direct to the device</td><td>Not encrypted — security comes from requiring physical presence, not from the protocol</td><td><strong>Yes</strong> — it's a genuine serial link with a configurable line speed</td></tr>
+        <tr><td class="cmd">Telnet</td><td>TCP/IP network, TCP port 23</td><td>Unencrypted — usernames, passwords, and commands travel in clear text</td><td>No — it rides over Ethernet/IP, not a serial line</td></tr>
+        <tr><td class="cmd">SSH</td><td>TCP/IP network, TCP port 22</td><td>Encrypted (the RSA-key setup from Unit 2.3)</td><td>No — same reason as Telnet</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout tip">
+      <strong>"Baud rate" is a console-only concept</strong>
+      Telnet and SSH sessions travel over an Ethernet/IP link, which is measured in bits per second at the interface (10/100/1000 Mbps etc.), not baud. 
+    </div>
+
+    <p style="max-width:70ch; margin:20px 0 10px;">On the console line itself, the default and minimum matter for different reasons:</p>
+    <table class="cmdtable">
+      <thead><tr><th>Baud rate</th><th>Note</th></tr></thead>
+      <tbody>
+        <tr><td class="cmd">9600 bps</td><td>The factory default on essentially every Cisco IOS device — this is what a terminal program should be set to before a console cable is even plugged in for the first time.</td></tr>
+        <tr><td class="cmd">300 bps</td><td>The lowest speed most platforms allow via <span class="mono">line console 0</span> → <span class="mono">speed 300</span> (some newer platforms floor at 1200 bps instead). Essentially never used in practice — only relevant to know it's the floor, not the default.</td></tr>
+        <tr><td class="cmd">19200 / 38400 / 57600 / 115200 bps</td><td>Higher speeds sometimes set on purpose when console logging is very verbose (e.g. <span class="mono">debug</span> output), so the terminal isn't the bottleneck — both ends must be changed to match, or the session turns to garbled text.</td></tr>
+      </tbody>
+    </table>
+
+    <p style="max-width:70ch; margin:20px 0 10px;">Terminal software used to reach a device, by which of the three methods it supports:</p>
+    <table class="cmdtable">
+      <thead><tr><th>Software</th><th>Console</th><th>Telnet</th><th>SSH</th><th>Platform</th></tr></thead>
+      <tbody>
+        <tr><td class="cmd">PuTTY</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Windows (also via Wine on Linux)</td></tr>
+        <tr><td class="cmd">Tera Term</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Windows</td></tr>
+        <tr><td class="cmd">SecureCRT</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Windows / macOS / Linux (commercial)</td></tr>
+        <tr><td class="cmd">MobaXterm</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Windows</td></tr>
+        <tr><td class="cmd">Termius</td><td>No</td><td>Limited</td><td>Yes</td><td>Windows / macOS / Linux / mobile</td></tr>
+        <tr><td class="cmd">minicom</td><td>Yes</td><td>No</td><td>No</td><td>Linux</td></tr>
+        <tr><td class="cmd">screen / cu</td><td>Yes</td><td>No</td><td>No</td><td>Linux / macOS (built in)</td></tr>
+        <tr><td class="cmd">Native <span class="mono">telnet</span> / <span class="mono">ssh</span></td><td>No</td><td>Yes</td><td>Yes</td><td>Linux / macOS / Windows 10+ (built in)</td></tr>
+      </tbody>
+    </table>
+    <p class="step-note" style="margin-top:10px;">Packet Tracer and GNS3, used for this course's labs, provide their own built-in terminal for console access to simulated devices — a separate program like PuTTY is normally only needed once a real or simulated device is reachable over the network for Telnet or SSH.</p>
+  </section>
+
+  <!-- ============ VERIFYING ============ -->
+  <section id="verify">
+    <h2 class="sec-title">Verifying: how do you know it actually worked?</h2>
+    <p class="sec-sub">A command being accepted at the prompt is not the same as the feature behind it actually functioning — the SSH example from Unit 2.3 is exactly this problem. Verification is a separate, deliberate step, not something to assume.</p>
+
+    <table class="cmdtable">
+      <thead><tr><th>Command</th><th>What it confirms</th></tr></thead>
+      <tbody>
+        <tr><td class="cmd">show running-config</td><td>The full active configuration in RAM right now — what the switch is actually enforcing.</td></tr>
+        <tr><td class="cmd">show startup-config</td><td>What will load on the next reboot — compare this against running-config to see unsaved changes.</td></tr>
+        <tr><td class="cmd">show version</td><td>IOS version, uptime, hardware/model, and the config register — useful before assuming a feature exists on this platform.</td></tr>
+        <tr><td class="cmd">show ip interface brief</td><td>A one-line-per-interface summary of IP address and up/down status — the fastest first check on any device.</td></tr>
+        <tr><td class="cmd">show interfaces status</td><td>Per-port link state, speed/duplex, and VLAN assignment — good for spotting a cable or negotiation problem at a glance.</td></tr>
+        <tr><td class="cmd">show mac address-table</td><td>The live, learned MAC-to-port table — confirms which devices the switch has actually seen, covered in Unit 2.3.</td></tr>
+        <tr><td class="cmd">show vlan brief</td><td>VLANs defined and which ports belong to each — verification for Unit 3 work, useful here as a baseline.</td></tr>
+        <tr><td class="cmd">show ip ssh</td><td>Whether SSH is genuinely enabled and which version — the direct follow-up to the RSA-key gap from Unit 2.3.</td></tr>
+        <tr><td class="cmd">show privilege</td><td>The privilege level of the current session — confirms whether a login actually landed at EXEC (level 1) or privileged (level 15), which matters once custom privilege levels are in play (see below).</td></tr>
+        <tr><td class="cmd">show users</td><td>Who is logged in right now, on which line (con, vty 0–4), and from where — useful for spotting a stray session before making an access-affecting change.</td></tr>
+        <tr><td class="cmd">show cdp neighbors</td><td>Directly connected Cisco devices — a quick sanity check that the topology matches what's on the diagram.</td></tr>
+        <tr><td class="cmd">dir flash: / show flash</td><td>Files actually stored on the switch — IOS images, backup configs, anything saved locally.</td></tr>
+      </tbody>
+    </table>
+
+    <h3 style="font-family:'IBM Plex Slab', serif; font-size:19px; font-weight:600; margin:34px 0 6px;">Interface status vs. line protocol: two separate layers</h3>
+    <p style="max-width:70ch; margin:0 0 18px;"><span class="mono">show interfaces</span> and <span class="mono">show ip interface brief</span> report interface health as <strong>two independent states</strong>— thus conflating them as one of the most common early troubleshooting mistakes:</p>
+    <ul style="max-width:70ch; margin:0 0 20px; padding-left:20px; font-size:15px;">
+      <li style="margin-bottom:6px;"><strong>Status (Layer 1 / physical)</strong> — is there a working electrical or optical signal on the wire right now? Controlled by the cable, the NIC/transceiver on both ends, and whether the port has been administratively shut down.</li>
+      <li><strong>Line protocol (Layer 2 / data-link)</strong> — are the two ends actually exchanging and agreeing on data-link control traffic (keepalives, encapsulation, negotiation)? This can only come up once Layer 1 is already up — it depends on it.</li>
+    </ul>
+
+    <table class="cmdtable">
+      <thead><tr><th>Status / Protocol</th><th>What it means</th><th>Typical cause</th></tr></thead>
+      <tbody>
+        <tr><td class="cmd">up / up</td><td>Fully operational at both layers.</td><td>Normal working link — nothing to do.</td></tr>
+        <tr><td class="cmd">administratively down / down</td><td>The interface has been manually disabled.</td><td>Someone ran <span class="mono">shutdown</span> on it — <span class="mono">no shutdown</span> re-enables it.</td></tr>
+        <tr><td class="cmd">down / down</td><td>No usable physical signal at all.</td><td>Unplugged or bad cable, dead port/transceiver on either end, or the remote device is powered off.</td></tr>
+        <tr><td class="cmd">up / down</td><td>Layer 1 is fine, but the two ends aren't agreeing at Layer 2. The interface can sense a signal but nothing useful is being exchanged.</td><td>Encapsulation mismatch, keepalives disabled on one side, duplex/speed mismatch, a WAN clocking issue, or (on switch trunks) a VLAN/native-VLAN mismatch.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout danger">
+      <strong>up / down is the diagnostic case, not a random combination</strong>
+      Because line protocol depends on Layer 1 already being up, <span class="mono">up / down</span> is the one state that specifically says "the cable is fine, the problem is in how the two ends are configured to talk to each other" — not a wiring issue. It's the single most useful state to recognize on sight, since it immediately rules out half of the usual suspects (bad cable, dead port, remote device down).
+    </div>
+
+    <p style="max-width:70ch; margin:20px 0 10px;"><span class="mono">show interfaces status</span> reports the same underlying reality, but on Catalyst switches it collapses both layers into one combined <span class="mono">Status</span> column instead of two separate fields — worth knowing so the two commands aren't read as contradicting each other:</p>
+
+    <table class="cmdtable">
+      <thead><tr><th>Status value</th><th>Layer 1 / Layer 2 equivalent</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td class="cmd">connected</td><td>up / up</td><td>Link is up and passing traffic normally.</td></tr>
+        <tr><td class="cmd">notconnect</td><td>down / down</td><td>No cable, or nothing responding on the other end.</td></tr>
+        <tr><td class="cmd">disabled</td><td>administratively down / down</td><td>The port has been shut down in software.</td></tr>
+        <tr><td class="cmd">err-disabled</td><td>up (was) / down, forced off</td><td>The switch shut the port down itself after detecting a violation — most often port security, a BPDU guard trigger, or a storm-control threshold. Recovers with <span class="mono">shutdown</span> / <span class="mono">no shutdown</span> once the cause is fixed, or automatically if errdisable recovery is configured.</td></tr>
+        <tr><td class="cmd">inactive</td><td>administratively reachable, logically excluded</td><td>The port is assigned to a VLAN that doesn't exist (or has been deleted) on this switch — a config problem, not a cabling one.</td></tr>
+        <tr><td class="cmd">monitoring</td><td>—</td><td>The port is a SPAN/monitor session destination, so it doesn't participate in normal switching.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ LIFECYCLE ============ -->
+  <section id="lifecycle">
+    <h2 class="sec-title">The configuration lifecycle</h2>
+    <p class="sec-sub">Three places a configuration can live, and the commands that move it between them.</p>
+
+    <div class="lifecycle">
+      <div class="lc-row">
+        <div class="lc-box">running-config<small>RAM · active now · volatile</small></div>
+        <div class="lc-arrow"><span class="arr">&#8646;</span><span>copy run start /<br>copy start run</span></div>
+        <div class="lc-box">startup-config<small>NVRAM · loads on boot</small></div>
+        <div class="lc-arrow"><span class="arr">&#8646;</span><span>copy run tftp: /<br>copy tftp: start</span></div>
+        <div class="lc-box ext">TFTP/SCP server<small>off-device backup</small></div>
+      </div>
+    </div>
+    <p style="margin-top:22px;">Everything configured lives in <span class="mono">running-config</span> first. <span class="mono">copy running-config startup-config</span> (Unit 2.3's <span class="mono">write memory</span>) commits it to survive a reboot. Backing up to an external TFTP/SCP server is the step most labs skip and most real networks cannot skip — it's the only copy that survives the device itself failing.</p>
+  </section>
+
+  <!-- ============ MANAGING ============ -->
+  <section id="managing">
+    <h2 class="sec-title">Managing configuration: the commands</h2>
+    <p class="sec-sub">Click a step to expand it.</p>
+
+    <div class="steps" id="stepsAccordion">
+      <div class="step open">
+        <button class="step-head"><span class="num">1</span><span class="label">Save, and restore from a save</span><span class="chev">&rsaquo;</span></button>
+        <div class="step-body"><div class="step-body-inner">
+          <pre class="code">copy running-config startup-config
+copy startup-config running-config</pre>
+          <p class="step-note">The first commits current work so it survives a reboot. The second is used far less often, and behaves differently than most people expect — see the caution section below before relying on it.</p>
+        </div></div>
+      </div>
+
+      <div class="step">
+        <button class="step-head"><span class="num">2</span><span class="label">Back up off the device</span><span class="chev">&rsaquo;</span></button>
+        <div class="step-body"><div class="step-body-inner">
+          <pre class="code">copy running-config tftp:
+copy startup-config tftp:
+copy running-config flash:backup-2082-06-01.cfg</pre>
+          <p class="step-note">Sends a copy of the config to a TFTP server (prompts for server IP and filename), or snapshots it locally to flash under a distinct filename. A local flash copy is better than nothing, but it's still on the same physical device — it doesn't help if the switch itself is lost or bricked.</p>
+        </div></div>
+      </div>
+
+      <div class="step">
+        <button class="step-head"><span class="num">3</span><span class="label">Wipe and start over</span><span class="chev">&rsaquo;</span></button>
+        <div class="step-body"><div class="step-body-inner">
+          <pre class="code">erase startup-config
+delete vlan.dat
+reload</pre>
+          <p class="step-note">Used to return a lab switch to factory defaults between exercises. All three lines matter — see the caution section for why <span class="mono">erase startup-config</span> alone is a common trap.</p>
+        </div></div>
+      </div>
+
+      <div class="step">
+        <button class="step-head"><span class="num">4</span><span class="label">Compare before committing</span><span class="chev">&rsaquo;</span></button>
+        <div class="step-body"><div class="step-body-inner">
+          <pre class="code">show running-config
+show startup-config</pre>
+          <p class="step-note">Run both, side by side, before saving. If they already match, there's nothing new to lose; if they differ, that difference is exactly what a reload would discard. This ten-second habit is the direct fix for the <span class="mono">save</span>-typo scenario from Unit 2.3.</p>
+        </div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CAUTION ============ -->
+  <section id="caution">
+    <h2 class="sec-title">Caution</h2>
+    <p class="sec-sub">A short list of the specific mistakes that turn a routine maintenance task into an outage — each one easy to avoid once you know it's there.</p>
+
+    <div class="caution-grid">
+      <div class="caution-card">
+        <div class="head"><span class="mark">!</span><h4><span class="mono">copy startup-config running-config</span> merges, it does not replace</h4></div>
+        <p>This command layers the saved config on top of what's already running — it does not clear the current running-config first. Any interface or line you configured since the last save, but never intended to keep, stays active. If the goal is "throw away my unsaved changes and go back to the last save," a <span class="mono">reload</span> is the reliable way to do it, not this command.</p>
+      </div>
+      <div class="caution-card">
+        <div class="head"><span class="mark">!</span><h4><span class="mono">erase startup-config</span> does not touch the VLAN database</h4></div>
+        <p>On most Catalyst switches, VLAN information is stored separately, in <span class="mono">vlan.dat</span> on flash — not inside <span class="mono">startup-config</span>. Erasing startup-config and reloading can still leave old VLANs in place, which is confusing when the goal was a clean factory-default switch. <span class="mono">delete vlan.dat</span> is the extra step that actually clears it.</p>
+      </div>
+      <div class="caution-card">
+        <div class="head"><span class="mark">!</span><h4>A <span class="mono">reload</span> discards everything unsaved, instantly and without a second prompt in scripts</h4></div>
+        <p>If a session is run non-interactively or piped from a script, <span class="mono">reload</span> can execute past a confirmation prompt. Get in the habit of running <span class="mono">show running-config</span> vs <span class="mono">show startup-config</span> immediately before any reload, exactly as in Step 4 above.</p>
+      </div>
+      <div class="caution-card">
+        <div class="head"><span class="mark">!</span><h4>Changing VTY or SSH settings from a remote SSH session can lock you out</h4></div>
+        <p>If a change to <span class="mono">line vty</span> or the SSH configuration is made over a remote session, and it's wrong, the session can drop before it's possible to fix — and if there's no working console access, the only recovery path is a password-recovery procedure that typically needs physical access and a reboot. Test access-affecting changes from the console when possible, or keep a second session open until the new settings are confirmed working.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PRIVILEGE & PASSWORD MISTAKES ============ -->
+  <section id="privilege">
+    <h2 class="sec-title">When the password or privilege level is configured wrong</h2>
+    <p class="sec-sub">Cisco IOS has 16 privilege levels (0–15). Level 1 is ordinary user EXEC, level 15 is full privileged EXEC, and 2–14 exist but sit empty until an administrator deliberately assigns commands to them. Most of the trouble here isn't exotic — it's a handful of specific, well-known traps that produce either an unintended open door or an unintended lockout.</p>
+
+    <div class="lifecycle" style="margin-bottom:26px;">
+      <div class="lc-row">
+        <div class="lc-box"><span class="mono">0</span><small>disabled &amp; a few basics</small></div>
+        <div class="lc-arrow"><span class="arr">&rarr;</span><span>default line<br>login</span></div>
+        <div class="lc-box"><span class="mono">1</span><small>user EXEC · show only</small></div>
+        <div class="lc-arrow"><span class="arr">&rarr;</span><span>enable /<br>enable secret</span></div>
+        <div class="lc-box"><span class="mono">15</span><small>privileged EXEC · full config</small></div>
+      </div>
+      <p style="margin:18px 4px 0; font-size:14.5px; max-width:66ch;">Levels 2–14 are real but inert by default — nothing runs there until commands are explicitly moved down with <span class="mono">privilege exec level &lt;n&gt; &lt;command&gt;</span>. A login that lands at level 5 with nothing assigned to level 5 isn't broken; it's just an empty room.</p>
+    </div>
+
+    <div class="callout danger">
+      <strong>enable secret always wins over enable password</strong>
+      If both are configured, IOS uses <span class="mono">enable secret</span> (MD5, or type 8/9 on newer platforms) and silently ignores <span class="mono">enable password</span>. Typing the old enable password after someone has since set an enable secret will simply fail — the account isn't broken, the wrong credential is being tried. <span class="mono">service password-encryption</span> is worth mentioning here too: it only obfuscates the weak, reversible <span class="mono">enable password</span> and line passwords with a trivial Vigenère-style cipher — it is not real encryption and should never be treated as a security control on its own.
+    </div>
+
+    <div class="caution-grid">
+      <div class="caution-card">
+        <div class="head"><span class="mark">!</span><h4>A line <span class="mono">password</span> without <span class="mono">login</span> prompts for nothing</h4></div>
+        <p>Setting <span class="mono">password cisco123</span> under a line does nothing on its own — IOS only enforces it once <span class="mono">login</span> (or <span class="mono">login local</span>) is also configured on that line. Forgetting the second command is a genuine open door, not a minor oversight: anyone reaching that line gets straight in, no prompt, no password.</p>
+      </div>
+      <div class="caution-card">
+        <div class="head"><span class="mark">!</span><h4><span class="mono">login local</span> with no local usernames locks the line, not just the wrong password</h4></div>
+        <p>Switching a line to <span class="mono">login local</span> before any <span class="mono">username ... secret ...</span> account exists doesn't fall back to a line password — it rejects every login attempt outright, because there's no local database to check against. Applied to vty lines from a remote session, this is an instant, self-inflicted lockout of remote access.</p>
+      </div>
+      <div class="caution-card">
+        <div class="head"><span class="mark">!</span><h4>Assigning <span class="mono">privilege level 15</span> directly to a line skips authentication entirely</h4></div>
+        <p><span class="mono">privilege level 15</span> configured on a line (console or vty) means anyone who reaches that line lands in full privileged EXEC the moment login succeeds — or, combined with the mistake above, the moment they connect at all. It's a common misreading of "give this user full access" that actually means "give this connection point full access, regardless of who uses it."</p>
+      </div>
+      <div class="caution-card">
+        <div class="head"><span class="mark">!</span><h4>Forgetting <span class="mono">enable secret</span> is not the same as forgetting a line password</h4></div>
+        <p>If the console/line password is known but the enable secret isn't, the switch is still reachable and still usable at user EXEC — <span class="mono">show</span> commands, <span class="mono">ping</span>, basic diagnostics all work. What's lost is the ability to enter configuration mode. Because <span class="mono">enable secret</span> is a one-way hash, it cannot be recovered or decrypted from the config file — it can only be reset, and that requires the password-recovery procedure below.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TOTAL LOCKOUT ============ -->
+  <section id="lockout">
+    <h2 class="sec-title">Forgot console <em>and</em> SSH credentials entirely — is the hardware still usable?</h2>
+    <p class="sec-sub">Short answer: yes. Losing every login credential is a configuration and access problem, not a hardware failure — nothing about the switch itself is damaged, and Cisco's password-recovery procedure exists specifically for this situation. The real constraint isn't the hardware, it's physical access.</p>
+
+    <div class="callout good">
+      <strong>The catch is physical access, not the hardware</strong>
+      Password recovery on Cisco IOS switches works through the console port and a reboot — it cannot be done over SSH or Telnet, precisely because if it could, it wouldn't be much of a security boundary. So the real question is never "is the switch dead," it's "can someone get a console cable to it." A switch sitting in a locked, unreachable rack in another city is unmanageable until someone is physically present — but the moment console access exists again, the device is fully recoverable.
+    </div>
+
+    <div class="steps" id="recoverySteps">
+      <div class="step open">
+        <button class="step-head"><span class="num">1</span><span class="label">Get a console session and reboot the switch</span><span class="chev">&rsaquo;</span></button>
+        <div class="step-body"><div class="step-body-inner">
+          <p class="step-note">Connect a console cable, open a terminal session, then power-cycle the switch. Watch the boot output closely — the next step has a narrow window.</p>
+        </div></div>
+      </div>
+      <div class="step">
+        <button class="step-head"><span class="num">2</span><span class="label">Interrupt the boot into ROMMON</span><span class="chev">&rsaquo;</span></button>
+        <div class="step-body"><div class="step-body-inner">
+          <pre class="code">(hold the Mode button, or send a break signal,
+within the first ~15–60 seconds of boot,
+depending on the platform)</pre>
+          <p class="step-note">This drops the switch into ROMMON (or a bootloader "switch:" prompt on newer Catalyst platforms) before it loads any saved configuration — the exact key sequence is platform-specific, so check the model's recovery guide.</p>
+        </div></div>
+      </div>
+      <div class="step">
+        <button class="step-head"><span class="num">3</span><span class="label">Boot while bypassing the startup config</span><span class="chev">&rsaquo;</span></button>
+        <div class="step-body"><div class="step-body-inner">
+          <pre class="code">flash_init
+rename flash:config.text flash:config.text.old
+boot</pre>
+          <p class="step-note">On routers, the equivalent is changing the config register to <span class="mono">0x2142</span> before booting. Either way, the goal is the same: start IOS without loading the saved passwords, landing in enable mode with no credential required.</p>
+        </div></div>
+      </div>
+      <div class="step">
+        <button class="step-head"><span class="num">4</span><span class="label">Restore the config and reset the passwords</span><span class="chev">&rsaquo;</span></button>
+        <div class="step-body"><div class="step-body-inner">
+          <pre class="code">rename flash:config.text.old flash:config.text
+copy flash:config.text running-config
+enable secret &lt;new-secret&gt;
+line con 0
+ password &lt;new-password&gt;
+ login
+line vty 0 4
+ login local
+username &lt;admin&gt; secret &lt;new-secret&gt;</pre>
+          <p class="step-note">Bring the original configuration back into running-config first — otherwise VLANs, interface settings, and everything else configured is lost, not just the passwords — then overwrite only the credentials.</p>
+        </div></div>
+      </div>
+      <div class="step">
+        <button class="step-head"><span class="num">5</span><span class="label">Save and reload to confirm</span><span class="chev">&rsaquo;</span></button>
+        <div class="step-body"><div class="step-body-inner">
+          <pre class="code">copy running-config startup-config
+reload</pre>
+          <p class="step-note">Confirm login works with the new credentials before walking away — exactly the "verify before you trust it" habit from earlier in this unit.</p>
+        </div></div>
+      </div>
+    </div>
+
+    <div class="caution-grid" style="margin-top:22px;">
+      <div class="caution-card">
+        <div class="head"><span class="mark">!</span><h4><span class="mono">no service password-recovery</span> blocks this on purpose</h4></div>
+        <p>Some organizations deliberately disable the ROMMON bypass with <span class="mono">no service password-recovery</span>, so that physical theft of a switch doesn't also hand over its configuration. If that command was set, the standard procedure above is blocked by design — recovery still exists, but it typically means erasing the entire configuration and reloading from factory defaults, rather than a clean password reset. The hardware still isn't damaged; the accumulated configuration is what's sacrificed.</p>
+      </div>
+      <div class="caution-card">
+        <div class="head"><span class="mark">!</span><h4>The switch keeps forwarding traffic the whole time</h4></div>
+        <p>Losing every login credential doesn't stop the switch from doing its job — the data plane keeps switching frames based on whatever configuration is already running. What's lost is the ability to <em>manage</em> it: no new VLANs, no config changes, no visibility, until access is recovered. That's an availability risk for administrators, not for the traffic already flowing through it.</p>
+      </div>
+    </div>
+
+    <div class="tip-card" style="margin-top:22px; max-width:100%;">
+      <h4>How production networks avoid ever reaching this point</h4>
+      <p style="max-width:70ch;">Centralized AAA (TACACS+/RADIUS) means one lost or forgotten credential doesn't lock out the whole device — a break-glass local account is kept for exactly this case. Out-of-band console servers give remote console access without anyone driving to a site. And configs are backed up off-box (per the lifecycle diagram above) so that even a full factory-reset recovery restores the device in minutes rather than starting from a blank switch.</p>
+    </div>
+  </section>
+
+  <!-- ============ TIPS ============ -->
+  <section id="tips">
+    <h2 class="sec-title">Tips</h2>
+    <p class="sec-sub">Small habits that make the commands above faster and less error-prone day to day.</p>
+
+    <div class="tips-grid">
+      <div class="tip-card">
+        <h4>Filter long output instead of scrolling</h4>
+        <p>Pipe any <span class="mono">show</span> command through <span class="mono">| include</span>, <span class="mono">| section</span>, or <span class="mono">| begin</span> to jump straight to the relevant lines.</p>
+        <span class="mono">show running-config | section line vty</span>
+      </div>
+      <div class="tip-card">
+        <h4>Stop pagination during long output</h4>
+        <p><span class="mono">terminal length 0</span> disables the <span class="mono">--More--</span> prompt for the current session — useful before a long <span class="mono">show tech-support</span> or when logging a session to a file.</p>
+        <span class="mono">terminal length 0</span>
+      </div>
+      <div class="tip-card">
+        <h4>Timestamp your own backups</h4>
+        <p>A flash or TFTP filename like <span class="mono">sw1-2082-06-01.cfg</span> is far easier to reason about later than an unlabelled <span class="mono">startup-config</span> copy from an unknown date.</p>
+      </div>
+      <div class="tip-card">
+        <h4>Save immediately after a change is confirmed working</h4>
+        <p>Don't batch several changes and save once at the end — verify, then save, per change where practical. It keeps the gap between "known good" and "current" as small as possible.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ INDUSTRY CONVENTION ============ -->
+  <section id="convention">
+    <h2 class="sec-title">Industry convention</h2>
+    <p class="sec-sub">How the same commands above tend to be used differently once a network is someone's actual job, not a lab exercise.</p>
+
+    <div class="convention">
+      <div class="conv-row">
+        <div class="label">Hostname naming</div>
+        <p>Real networks rarely use ad-hoc names like <span class="mono">UniGlobe_Main_Switch_1</span>. A common pattern encodes site, role, and number — e.g. <span class="mono">KTM-DC-SW01</span> for the first data-center switch in a Kathmandu site — so a hostname alone tells an engineer roughly what the device is and where.</p>
+      </div>
+      <div class="conv-row">
+        <div class="label">Legal banner</div>
+        <p><span class="mono">banner motd</span> is configured on essentially every production device to display an authorized-access-only warning before login — a legal and organizational expectation, not just a lab nicety.</p>
+      </div>
+      <div class="conv-row">
+        <div class="label">Off-box backups, on a schedule</div>
+        <p>Manually running <span class="mono">copy running-config tftp:</span> after a change doesn't scale. Production networks typically automate this with tools like RANCID or Oxidized, or push configs into version control (git), so every change has a timestamped, diffable history independent of the device itself.</p>
+      </div>
+      <div class="conv-row">
+        <div class="label">Change management</div>
+        <p>Access-affecting changes (VTY, ACLs, routing) are scheduled in a maintenance window, with the previous known-good config backed up and a rollback plan written down before the change is made — not improvised afterward if something breaks.</p>
+      </div>
+      <div class="conv-row">
+        <div class="label">Centralized authentication</div>
+        <p>The local <span class="mono">username ... secret</span> account from Unit 2.3 is standard for a small lab, but production environments generally authenticate against a central AAA server (TACACS+ or RADIUS) instead, so access can be revoked for one person without touching every device's local config.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ RECAP ============ -->
+  <section id="recap-section">
+    <h2 class="sec-title">Recap</h2>
+    <div class="recap">
+      <div class="item"><span class="q">1</span><span>Verifying is a distinct step from configuring — an accepted command doesn't guarantee the feature behind it is actually active. Interface health specifically splits into two independent layers: physical status and line protocol, with <span class="mono">up / down</span> pointing squarely at a Layer 2 problem rather than a bad cable.</span></div>
+      <div class="item"><span class="q">2</span><span>Configuration moves between three places: running-config (RAM), startup-config (NVRAM), and an external backup — only the third survives losing the device itself.</span></div>
+      <div class="item"><span class="q">3</span><span><span class="mono">copy startup-config running-config</span> merges rather than replaces; <span class="mono">erase startup-config</span> doesn't clear the VLAN database on its own.</span></div>
+      <div class="item"><span class="q">4</span><span>Compare running-config against startup-config before any reload — it's the direct habit that prevents losing unsaved work.</span></div>
+      <div class="item"><span class="q">5</span><span>A wrong password or privilege setting usually fails in one of two directions: an unintended open door (<span class="mono">password</span> without <span class="mono">login</span>, <span class="mono">privilege level 15</span> on a line) or an unintended lockout (<span class="mono">login local</span> with no local users) — both come from a handful of well-known, learnable traps.</span></div>
+      <div class="item"><span class="q">6</span><span>Losing every credential doesn't damage the hardware or stop it forwarding traffic — the password-recovery procedure regains management access, provided physical console access is available. Physical access, not the hardware, is the real constraint.</span></div>
+      <div class="item"><span class="q">7</span><span>Naming conventions, legal banners, off-box backups, change windows, and centralized authentication are what the same commands look like once they're running in production rather than a lab.</span></div>
+    <div class="item">
+  <span class="q">8</span>
+  <span>
+    Command auto-completion (Tab) and context-sensitive help (?) are what muscle memory and syntax lookup look like when operating across multi-vendor production networks rather than a single lab OS.
+  </span>
+</div></div>
+  </section>
+
+  <footer>
+    NCS 485 · Routing and Switching — Unit 2: Switching Concepts and Basic Configuration (2.4, managing and verifying)
+  </footer>
+</div>
+
+<script>
+(function(){
+  document.querySelectorAll('.step-head').forEach(function(head){
+    head.addEventListener('click', function(){
+      head.parentElement.classList.toggle('open');
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

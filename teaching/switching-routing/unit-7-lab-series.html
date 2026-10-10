@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Unit 7 Switching Labs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: NOC-console teaching tool — sticky top bar with Theory/Lab mode switch, left index rail, single reading column with embedded simulators. */
+:root{
+  --bg:#F3F5F6; --surface:#FFFFFF; --surface-2:#E9EEF1; --ink:#13212A; --muted:#566874; --line:#D3DCE1;
+  --accent:#0A6A8F; --accent-soft:#DCEEF5; --amber:#A85A06; --amber-soft:#FBEBD6;
+  --ok:#23784A; --ok-soft:#DDF1E5; --bad:#B3261E; --bad-soft:#FBE1DE;
+  --t4g:#2459B0; --t4g-soft:#E0E9F8; --t3g:#1D7E54; --t3g-soft:#DDF2E7; --t2g:#7340AA; --t2g-soft:#EEE5F8; --mg:#5F6E78; --mg-soft:#E7ECEF;
+  --code-bg:#0F1C24; --code-fg:#D3E1E8; --code-dim:#7F97A4; --code-prompt:#6FC3E4; --code-cmt:#E0A458; --code-out:#A9C4B5;
+  --f-display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --f-body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+  --r:8px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0D151A; --surface:#141F26; --surface-2:#1B2831; --ink:#E2EAEE; --muted:#93A4AE; --line:#27363F;
+  --accent:#58B6DB; --accent-soft:#16313D; --amber:#E7A04F; --amber-soft:#3A2A16;
+  --ok:#62C48F; --ok-soft:#173226; --bad:#F27A6F; --bad-soft:#3D1D1A;
+  --t4g:#78A6EC; --t4g-soft:#1A2943; --t3g:#62C99A; --t3g-soft:#163327; --t2g:#B694E2; --t2g-soft:#2A2040; --mg:#9AA8B1; --mg-soft:#222E35;
+  --code-bg:#091116; --code-fg:#D3E1E8; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0D151A; --surface:#141F26; --surface-2:#1B2831; --ink:#E2EAEE; --muted:#93A4AE; --line:#27363F;
+  --accent:#58B6DB; --accent-soft:#16313D; --amber:#E7A04F; --amber-soft:#3A2A16;
+  --ok:#62C48F; --ok-soft:#173226; --bad:#F27A6F; --bad-soft:#3D1D1A;
+  --t4g:#78A6EC; --t4g-soft:#1A2943; --t3g:#62C99A; --t3g-soft:#163327; --t2g:#B694E2; --t2g-soft:#2A2040; --mg:#9AA8B1; --mg-soft:#222E35;
+  --code-bg:#091116; --code-fg:#D3E1E8; color-scheme:dark;}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.6}
+a{color:var(--accent)}
+h1,h2,h3,h4{font-family:var(--f-display);line-height:1.2;text-wrap:balance;margin:0}
+h2{font-size:1.75rem;font-weight:800;letter-spacing:-.01em}
+h3{font-size:1.2rem;font-weight:700;margin-top:2rem}
+h4{font-size:1rem;font-weight:700;margin-top:1.25rem}
+p{margin:.6rem 0}
+code{font-family:var(--f-mono);font-size:.88em;background:var(--surface-2);padding:.08em .35em;border-radius:4px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* top bar */
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
+.topbar-in{max-width:1280px;margin:0 auto;padding:.6rem 16px;display:flex;flex-wrap:wrap;gap:.6rem 1.2rem;align-items:center}
+.brand{display:flex;flex-direction:column;min-width:0;flex:1 1 260px}
+.brand .eyebrow{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.brand strong{font-family:var(--f-display);font-size:1.15rem;font-weight:800}
+.modes{display:flex;background:var(--surface-2);border-radius:999px;padding:3px;gap:3px}
+.modes button{border:0;background:transparent;color:var(--muted);font:600 .92rem var(--f-body);padding:.42rem 1.1rem;border-radius:999px;cursor:pointer}
+.modes button[aria-selected="true"]{background:var(--ink);color:var(--surface)}
+.progress{font-family:var(--f-mono);font-size:.78rem;color:var(--muted);white-space:nowrap}
+
+/* shell */
+.shell{max-width:1280px;margin:0 auto;padding-inline:16px;padding-block:1.5rem 4rem;display:grid;grid-template-columns:230px minmax(0,1fr);gap:2.5rem}
+.rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px);align-self:start;max-height:calc(100vh - 100px);overflow:auto}
+.rail nav{display:flex;flex-direction:column;gap:2px}
+.rail .rh{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:.2rem 0 .5rem}
+.rail a{display:block;text-decoration:none;color:var(--ink);font-size:.9rem;padding:.38rem .6rem;border-radius:6px;border-left:3px solid transparent}
+.rail a:hover{background:var(--surface-2)}
+.rail a.on{border-left-color:var(--accent);background:var(--accent-soft);font-weight:600}
+.rail a .n{font-family:var(--f-mono);font-size:.78rem;color:var(--muted);margin-right:.35rem}
+main{min-width:0}
+section.unit{padding-block:.5rem 2.5rem;border-bottom:1px solid var(--line);margin-bottom:2rem;scroll-margin-top:90px}
+section.unit:last-child{border-bottom:0}
+.sec-label{font-family:var(--f-mono);font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:.35rem}
+.lead{font-size:1.06rem;color:var(--muted);max-width:68ch}
+.prose{max-width:72ch}
+.hero{padding:1.2rem 0 1.6rem;border-bottom:1px solid var(--line);margin-bottom:2rem}
+.hero h1{font-size:clamp(1.8rem,4vw,2.6rem);font-weight:800;letter-spacing:-.02em}
+.hero .meta{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.9rem}
+.chip{display:inline-flex;align-items:center;gap:.35rem;font:500 .78rem var(--f-mono);padding:.2rem .6rem;border-radius:999px;background:var(--surface-2);color:var(--ink);border:1px solid var(--line)}
+.chip.t4g{background:var(--t4g-soft);color:var(--t4g);border-color:transparent}
+.chip.t3g{background:var(--t3g-soft);color:var(--t3g);border-color:transparent}
+.chip.t2g{background:var(--t2g-soft);color:var(--t2g);border-color:transparent}
+.chip.mg{background:var(--mg-soft);color:var(--mg);border-color:transparent}
+.outcomes{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:.8rem;margin-top:1.2rem}
+.outcomes div{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:.8rem .9rem;font-size:.92rem}
+.outcomes b{display:block;font-family:var(--f-mono);font-size:.72rem;color:var(--accent);letter-spacing:.06em;text-transform:uppercase;margin-bottom:.2rem}
+
+/* tables */
+.tw{overflow-x:auto;margin:1rem 0;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{text-align:left;padding:.5rem .7rem;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--f-mono);font-size:.74rem;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);background:var(--surface-2);font-weight:600}
+tr:last-child td{border-bottom:0}
+td.num,th.num{font-variant-numeric:tabular-nums;text-align:right}
+.y{color:var(--ok);font-weight:600}.n{color:var(--bad);font-weight:600}
+
+/* callouts */
+.note{border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:.8rem 1rem;margin:1rem 0;font-size:.94rem}
+.note.key{background:var(--accent-soft);border-color:transparent}
+.note.warn{background:var(--amber-soft);border-color:transparent}
+.note.bad{background:var(--bad-soft);border-color:transparent}
+.note.tel{background:var(--surface);border-left:4px solid var(--t4g)}
+.note > b:first-child{display:block;font-family:var(--f-mono);font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.2rem}
+
+/* code */
+.cli{position:relative;background:var(--code-bg);color:var(--code-fg);border-radius:var(--r);margin:1rem 0;overflow:hidden}
+.cli .bar{display:flex;justify-content:space-between;align-items:center;gap:.5rem;padding:.35rem .5rem .35rem .8rem;background:rgba(255,255,255,.05);font:500 .72rem var(--f-mono);color:var(--code-dim);letter-spacing:.05em;text-transform:uppercase}
+.cli pre{margin:0;padding:.8rem 1rem;overflow-x:auto;font:400 .84rem/1.55 var(--f-mono);white-space:pre}
+.cli .p{color:var(--code-prompt)} .cli .c{color:var(--code-cmt)} .cli .o{color:var(--code-out)}
+.copy{border:1px solid rgba(255,255,255,.18);background:transparent;color:var(--code-fg);font:500 .72rem var(--f-mono);padding:.2rem .55rem;border-radius:4px;cursor:pointer}
+.copy:hover{background:rgba(255,255,255,.1)}
+.tabs{display:flex;flex-wrap:wrap;gap:4px;margin-top:1rem}
+.tabs button{border:1px solid var(--line);background:var(--surface);color:var(--muted);font:600 .8rem var(--f-mono);padding:.3rem .7rem;border-radius:6px 6px 0 0;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--code-bg);color:var(--code-fg);border-color:var(--code-bg)}
+.tabs + .tabpanes .cli{margin-top:0;border-top-left-radius:0}
+
+/* widgets */
+.widget{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:1rem;margin:1.4rem 0}
+.widget-h{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:.4rem 1rem;margin-bottom:.7rem}
+.widget-h h4{margin:0;font-size:1.02rem}
+.widget-h span{font:500 .72rem var(--f-mono);color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.ctl{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin:.5rem 0}
+.btn{border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font:600 .85rem var(--f-body);padding:.42rem .8rem;border-radius:6px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.btn.danger{background:var(--bad-soft);border-color:transparent;color:var(--bad)}
+select,input[type=text],input[type=number]{font:500 .86rem var(--f-mono);padding:.35rem .5rem;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);min-width:0}
+label.f{display:flex;flex-direction:column;gap:.2rem;font-size:.78rem;color:var(--muted);font-family:var(--f-mono)}
+.svgwrap{overflow-x:auto}
+.svgwrap svg{display:block;max-width:100%;height:auto;margin:0 auto}
+.svg-t{fill:var(--ink);font-family:var(--f-mono);font-size:12px}
+.svg-m{fill:var(--muted);font-family:var(--f-mono);font-size:10.5px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;align-items:start}
+.grid2 > *{min-width:0}
+.stat{display:flex;gap:1.2rem;flex-wrap:wrap;font-family:var(--f-mono);font-size:.82rem}
+.stat b{font-size:1.15rem;font-variant-numeric:tabular-nums;display:block;color:var(--ink)}
+.meter{height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden;margin-top:.25rem;width:140px}
+.meter i{display:block;height:100%;background:var(--ok);width:5%;transition:width .3s}
+.log{background:var(--code-bg);color:var(--code-out);font:400 .78rem/1.5 var(--f-mono);padding:.6rem .8rem;border-radius:6px;height:150px;overflow:auto;white-space:pre-wrap}
+.pill{display:inline-block;font:600 .74rem var(--f-mono);padding:.15rem .55rem;border-radius:999px}
+.pill.up{background:var(--ok-soft);color:var(--ok)} .pill.down{background:var(--bad-soft);color:var(--bad)} .pill.mid{background:var(--amber-soft);color:var(--amber)}
+.timeline{display:flex;height:34px;border-radius:6px;overflow:hidden;border:1px solid var(--line);margin:.5rem 0}
+.timeline div{display:flex;align-items:center;justify-content:center;font:600 .7rem var(--f-mono);color:var(--ink);transition:opacity .3s;opacity:.3;white-space:nowrap;overflow:hidden}
+.timeline div.on{opacity:1}
+.matrix td,.matrix th{text-align:center}
+.matrix td.ok{background:var(--ok-soft);color:var(--ok);font-weight:600}
+.matrix td.no{background:var(--bad-soft);color:var(--bad)}
+.matrix td.hl{outline:3px solid var(--accent);outline-offset:-3px}
+
+/* quiz */
+.q{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:.8rem 1rem;margin:.7rem 0}
+.q p.qt{font-weight:600;margin:.1rem 0 .5rem}
+.q .opts{display:grid;gap:.35rem}
+.q .opts button{text-align:left;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font:400 .9rem var(--f-body);padding:.45rem .7rem;border-radius:6px;cursor:pointer}
+.q .opts button.right{background:var(--ok-soft);border-color:var(--ok);color:var(--ok);font-weight:600}
+.q .opts button.wrong{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.q .why{font-size:.88rem;color:var(--muted);margin-top:.5rem}
+details{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:.55rem .9rem;margin:.6rem 0}
+details summary{cursor:pointer;font-weight:600}
+details[open] summary{margin-bottom:.4rem}
+
+/* lab specifics */
+.lab-head{display:flex;flex-wrap:wrap;gap:.5rem 1rem;align-items:baseline;justify-content:space-between}
+.lab-meta{display:flex;gap:.4rem;flex-wrap:wrap}
+.ticket{border:1px solid var(--line);border-left:4px solid var(--amber);background:var(--surface);border-radius:var(--r);padding:.8rem 1rem;margin:1rem 0}
+.ticket .tid{font:600 .76rem var(--f-mono);color:var(--amber);letter-spacing:.05em}
+.ticket h4{margin:.15rem 0 .3rem}
+.steps{counter-reset:s;list-style:none;padding:0;margin:1rem 0}
+.steps > li{counter-increment:s;position:relative;padding:.1rem 0 .9rem 2.6rem}
+.steps > li::before{content:counter(s);position:absolute;left:0;top:.05rem;width:1.8rem;height:1.8rem;border-radius:50%;background:var(--surface-2);border:1px solid var(--line);font:600 .8rem/1.8rem var(--f-mono);text-align:center;color:var(--ink)}
+.check{display:flex;gap:.55rem;align-items:flex-start;padding:.35rem 0;font-size:.93rem}
+.check input{margin-top:.3rem;accent-color:var(--accent);width:1rem;height:1rem;flex:none}
+.checklist{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:.6rem 1rem;margin:1rem 0}
+.checklist h4{margin:.2rem 0 .3rem;font-size:.86rem;font-family:var(--f-mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.vl{display:inline-block;width:.7rem;height:.7rem;border-radius:2px;vertical-align:middle;margin-right:.3rem}
+.legend{display:flex;flex-wrap:wrap;gap:.4rem 1rem;font:500 .78rem var(--f-mono);color:var(--muted);margin:.4rem 0}
+.devinfo{min-height:4.5rem;font-size:.9rem;background:var(--surface-2);border-radius:6px;padding:.6rem .8rem;margin-top:.6rem}
+.topo-node{cursor:pointer}
+.topo-node:hover rect{stroke:var(--accent);stroke-width:2.5}
+@media (max-width:900px){
+  .shell{grid-template-columns:minmax(0,1fr);gap:1rem}
+  .rail{position:static;max-height:none}
+  .rail nav{flex-direction:row;flex-wrap:nowrap;overflow-x:auto;gap:4px;padding-bottom:4px}
+  .rail a{white-space:nowrap;border-left:0;border-bottom:3px solid transparent;font-size:.84rem}
+  .rail a.on{border-bottom-color:var(--accent)}
+  .rail .rh{display:none}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+</head>
+<body>
+<div style="font:14px/1.4 Inter,-apple-system,Segoe UI,sans-serif;background:#0b1d3a;padding:10px 16px;"><a href="/teaching/switching-routing.html" style="color:#fbf9f3;text-decoration:none;">&larr; Switching &amp; Routing &middot; all units</a></div>
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand"><span class="eyebrow">Computer Networks · Unit 7 · Lab series</span><strong>Advanced Switching Labs</strong></div>
+    <span class="progress" id="progress">Lab tasks: 0 done</span>
+  </div>
+</header>
+
+<!-- ======================= LAB (simplified) ======================= -->
+<div class="shell" id="lab">
+  <aside class="rail">
+    <div class="rh">Lab index</div>
+    <nav>
+      <a href="#l-0"><span class="n">00</span>Scenario</a>
+      <a href="#l-1"><span class="n">01</span>VLANs &amp; trunks</a>
+      <a href="#l-2"><span class="n">02</span>STP &amp; root bridge</a>
+      <a href="#l-3"><span class="n">03</span>RSTP, PortFast, BPDU Guard</a>
+      <a href="#l-4"><span class="n">04</span>Port security</a>
+      <a href="#l-5"><span class="n">05</span>EtherChannel</a>
+      <a href="#l-6"><span class="n">06</span>Troubleshooting</a>
+      <a href="#l-final"><span class="n">FC</span>Final configs</a>
+      <a href="#l-report"><span class="n">RP</span>Lab report</a>
+    </nav>
+  </aside>
+  <main>
+    <section class="unit hero" id="l-0">
+      <div class="sec-label">Unit 7 · Lab series · 6 short labs · about 4 hours</div>
+      <h1>Mini mobile network: one core, two cell sites</h1>
+      <p class="lead">A small mobile operator connects two cell sites to its core with three switches. The network carries 4G, 3G and GSM traffic in separate VLANs. You will build it, make it loop-free, secure the cell-site ports, bundle two links, and fix faults. Only <b>6 end devices</b> and <b>3 ping tests</b> are needed.</p>
+      <div class="meta">
+        <span class="chip t4g">4G · 4 VLANs</span>
+        <span class="chip t3g">3G · 2 VLANs</span>
+        <span class="chip t2g">GSM · 1 VLAN</span>
+        <span class="chip mg">MGMT 99 · NATIVE 999</span>
+        <span class="chip">Packet Tracer · 3 × 2960 · 3 PCs · 3 Servers</span>
+      </div>
+
+      <h3>Topology</h3>
+      <div class="legend">
+        <span><i class="vl" style="background:var(--t4g)"></i>4G</span>
+        <span><i class="vl" style="background:var(--t3g)"></i>3G</span>
+        <span><i class="vl" style="background:var(--t2g)"></i>GSM</span>
+        <span><i class="vl" style="background:var(--mg)"></i>Trunk</span>
+      </div>
+      <div class="svgwrap"><svg id="topo" viewBox="0 0 760 470" width="760" role="img" aria-label="Lab topology: CORE-SW1 at the top with S-GW, BSC and RNC; SITE-A switch bottom left with eNB-01 and BTS-01; SITE-B switch bottom right with NodeB-01; two gigabit links between the site switches"></svg></div>
+      <div class="devinfo" id="devinfo">Click a switch or device in the diagram to see its port and address.</div>
+
+      <h3>VLAN plan</h3>
+      <p class="prose">Create all VLANs on every switch. Only one VLAN per technology has a test device; the others exist so the design is complete.</p>
+      <div class="tw"><table>
+        <thead><tr><th>VLAN</th><th>Name</th><th>Service</th><th>Test device?</th></tr></thead>
+        <tbody>
+          <tr><td><span class="vl" style="background:var(--t4g)"></span>110</td><td>LTE_DATA</td><td>4G user traffic (eNodeB ↔ S-GW)</td><td class="y">Yes · 10.11.0.0/24</td></tr>
+          <tr><td><span class="vl" style="background:var(--t4g)"></span>120</td><td>LTE_SIGNAL</td><td>4G signalling (eNodeB ↔ MME)</td><td>No</td></tr>
+          <tr><td><span class="vl" style="background:var(--t4g)"></span>130</td><td>LTE_X2</td><td>4G eNodeB-to-eNodeB handover</td><td>No</td></tr>
+          <tr><td><span class="vl" style="background:var(--t4g)"></span>140</td><td>LTE_OAM</td><td>4G operation &amp; maintenance</td><td>No</td></tr>
+          <tr><td><span class="vl" style="background:var(--t2g)"></span>210</td><td>GSM_ABIS</td><td>GSM traffic + O&amp;M (BTS ↔ BSC)</td><td class="y">Yes · 10.21.0.0/24</td></tr>
+          <tr><td><span class="vl" style="background:var(--t3g)"></span>310</td><td>UMTS_IUB</td><td>3G traffic (NodeB ↔ RNC)</td><td class="y">Yes · 10.31.0.0/24</td></tr>
+          <tr><td><span class="vl" style="background:var(--t3g)"></span>320</td><td>UMTS_OAM</td><td>3G operation &amp; maintenance</td><td>No</td></tr>
+          <tr><td>99</td><td>MGMT</td><td>Switch management</td><td>Switch SVIs · 10.99.0.0/24</td></tr>
+          <tr><td>999</td><td>NATIVE</td><td>Native VLAN on trunks (no devices)</td><td>No</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>Devices and cabling</h3>
+      <div class="tw"><table>
+        <thead><tr><th>Switch · port</th><th>Device</th><th>VLAN</th><th>IP / mask</th></tr></thead>
+        <tbody id="hosttable"></tbody>
+      </table></div>
+      <div class="tw"><table>
+        <thead><tr><th>Link</th><th>Ports</th><th class="num">STP cost</th></tr></thead>
+        <tbody>
+          <tr><td>CORE-SW1 ↔ SITE-B</td><td>Fa0/1 ↔ Fa0/1</td><td class="num">19</td></tr>
+          <tr><td>CORE-SW1 ↔ SITE-A</td><td>Fa0/2 ↔ Fa0/1</td><td class="num">19</td></tr>
+          <tr><td>SITE-B ↔ SITE-A</td><td>Gi0/1 ↔ Gi0/1 and Gi0/2 ↔ Gi0/2</td><td class="num">4 each</td></tr>
+        </tbody>
+      </table></div>
+      <div class="note"><b>Build in Packet Tracer (10 min)</b>Place three 2960-24TT switches named CORE-SW1, SITE-B, SITE-A. Add 3 PCs (eNB-01, BTS-01, NodeB-01) and 3 Servers (S-GW, BSC, RNC). Use straight-through cables for devices and cross-over cables between switches. Give each device its IP and mask (no gateway needed).</div>
+    </section>
+
+    <!-- LAB 1 -->
+    <section class="unit" id="l-1">
+      <div class="lab-head"><div><div class="sec-label">Lab 1 · 40 min</div><h2>VLANs, trunks and access ports</h2></div><div class="lab-meta"><span class="chip">Foundation</span></div></div>
+      <div class="ticket"><div class="tid">TASK</div><h4>Get all three services working end to end</h4>Create the VLANs, trunk the switch links with native VLAN 999, and put each device in its VLAN.</div>
+      <h3>Step 1 · On all three switches</h3>
+      <div class="cli" data-t="Every switch (change the hostname)"><pre>Switch(config)# hostname CORE-SW1          ! SITE-A / SITE-B on the others
+CORE-SW1(config)# no ip domain-lookup
+CORE-SW1(config)# vtp mode transparent
+CORE-SW1(config)# vlan 110
+CORE-SW1(config-vlan)# name LTE_DATA
+CORE-SW1(config-vlan)# vlan 120
+CORE-SW1(config-vlan)# name LTE_SIGNAL
+CORE-SW1(config-vlan)# vlan 130
+CORE-SW1(config-vlan)# name LTE_X2
+CORE-SW1(config-vlan)# vlan 140
+CORE-SW1(config-vlan)# name LTE_OAM
+CORE-SW1(config-vlan)# vlan 210
+CORE-SW1(config-vlan)# name GSM_ABIS
+CORE-SW1(config-vlan)# vlan 310
+CORE-SW1(config-vlan)# name UMTS_IUB
+CORE-SW1(config-vlan)# vlan 320
+CORE-SW1(config-vlan)# name UMTS_OAM
+CORE-SW1(config-vlan)# vlan 99
+CORE-SW1(config-vlan)# name MGMT
+CORE-SW1(config-vlan)# vlan 999
+CORE-SW1(config-vlan)# name NATIVE</pre></div>
+
+      <h3>Step 2 · Trunks, access ports, management IP</h3>
+      <div class="tabs" role="tablist" data-group="l1"><button aria-selected="true">CORE-SW1</button><button aria-selected="false">SITE-A</button><button aria-selected="false">SITE-B</button></div>
+      <div class="tabpanes" data-group="l1">
+<div class="cli" data-t="CORE-SW1"><pre>CORE-SW1(config)# interface range fa0/1 - 2
+CORE-SW1(config-if-range)# switchport mode trunk
+CORE-SW1(config-if-range)# switchport trunk native vlan 999
+CORE-SW1(config-if-range)# interface fa0/5
+CORE-SW1(config-if)# switchport mode access
+CORE-SW1(config-if)# switchport access vlan 110
+CORE-SW1(config-if)# interface fa0/6
+CORE-SW1(config-if)# switchport mode access
+CORE-SW1(config-if)# switchport access vlan 210
+CORE-SW1(config-if)# interface fa0/7
+CORE-SW1(config-if)# switchport mode access
+CORE-SW1(config-if)# switchport access vlan 310
+CORE-SW1(config-if)# interface vlan 99
+CORE-SW1(config-if)# ip address 10.99.0.1 255.255.255.0
+CORE-SW1(config-if)# no shutdown</pre></div>
+<div class="cli" data-t="SITE-A (eNB-01, BTS-01)" hidden><pre>SITE-A(config)# interface range fa0/1 , gi0/1 - 2
+SITE-A(config-if-range)# switchport mode trunk
+SITE-A(config-if-range)# switchport trunk native vlan 999
+SITE-A(config-if-range)# interface fa0/5
+SITE-A(config-if)# switchport mode access
+SITE-A(config-if)# switchport access vlan 110
+SITE-A(config-if)# interface fa0/6
+SITE-A(config-if)# switchport mode access
+SITE-A(config-if)# switchport access vlan 210
+SITE-A(config-if)# interface vlan 99
+SITE-A(config-if)# ip address 10.99.0.3 255.255.255.0
+SITE-A(config-if)# no shutdown</pre></div>
+<div class="cli" data-t="SITE-B (NodeB-01)" hidden><pre>SITE-B(config)# interface range fa0/1 , gi0/1 - 2
+SITE-B(config-if-range)# switchport mode trunk
+SITE-B(config-if-range)# switchport trunk native vlan 999
+SITE-B(config-if-range)# interface fa0/5
+SITE-B(config-if)# switchport mode access
+SITE-B(config-if)# switchport access vlan 310
+SITE-B(config-if)# interface vlan 99
+SITE-B(config-if)# ip address 10.99.0.2 255.255.255.0
+SITE-B(config-if)# no shutdown</pre></div>
+      </div>
+      <div class="note warn"><b>Normal while configuring</b><code>%CDP-4-NATIVE_VLAN_MISMATCH</code> appears until both ends of a trunk use VLAN 999.</div>
+
+      <h3>Step 3 · Verify</h3>
+      <div class="cli" data-t="Verification"><pre>SITE-A# show vlan brief           ! Fa0/5 in VLAN 110, Fa0/6 in VLAN 210
+SITE-A# show interfaces trunk     ! Fa0/1, Gi0/1, Gi0/2 trunking, native 999</pre></div>
+      <div class="tw"><table>
+        <thead><tr><th>Ping from</th><th>To</th><th>Service</th></tr></thead>
+        <tbody>
+          <tr><td>eNB-01 10.11.0.11</td><td>S-GW 10.11.0.1</td><td>4G</td></tr>
+          <tr><td>BTS-01 10.21.0.11</td><td>BSC 10.21.0.1</td><td>GSM</td></tr>
+          <tr><td>NodeB-01 10.31.0.11</td><td>RNC 10.31.0.1</td><td>3G</td></tr>
+        </tbody>
+      </table></div>
+      <div class="checklist" data-lab="1"><h4>Lab 1 done when</h4>
+        <label class="check"><input type="checkbox" id="c1-1"> All 9 VLANs exist on all three switches</label>
+        <label class="check"><input type="checkbox" id="c1-2"> All trunks show native VLAN 999, no mismatch messages</label>
+        <label class="check"><input type="checkbox" id="c1-3"> All three pings succeed</label>
+      </div>
+    </section>
+
+    <!-- LAB 2 -->
+    <section class="unit" id="l-2">
+      <div class="lab-head"><div><div class="sec-label">Lab 2 · 45 min</div><h2>Observe STP and choose the root bridge</h2></div><div class="lab-meta"><span class="chip">7.1 · 7.2</span></div></div>
+      <div class="ticket"><div class="tid">TASK</div><h4>The core switch must be the root</h4>Today the root is chosen by chance (lowest MAC). Make CORE-SW1 the root for all VLANs and SITE-B the backup.</div>
+      <h3>Part A · Predict, then check</h3>
+      <p class="prose">All switches are at priority 32768. Example MACs (yours will differ): CORE-SW1 <code>0001.42A7.A603</code>, SITE-B <code>0030.F222.2794</code>, SITE-A <code>000A.41D5.7937</code>. For VLAN 110, which switch is root and which ports block?</p>
+      <div class="ctl"><label class="f">Root bridge<input type="text" id="pr-1" placeholder="your answer"></label><label class="f">Blocked port(s)<input type="text" id="pr-2" placeholder="your answer"></label></div>
+      <details><summary>Reveal</summary><p><b>CORE-SW1</b> is root (lowest MAC). SITE-A and SITE-B both use their Fa0/1 as root port (cost 19; the other way is 4 + 19 = 23). On the gigabit links both have cost 19, so the lower bridge ID wins: SITE-A (000A…) beats SITE-B (0030…), so <b>SITE-B Gi0/1 and Gi0/2 block</b>.</p></details>
+      <div class="cli" data-t="Check on each switch"><pre>CORE-SW1# show spanning-tree vlan 110   ! look for "This bridge is the root"
+SITE-A# show spanning-tree vlan 110     ! Root ID vs Bridge ID, root port, Altn BLK ports
+SITE-A# show cdp neighbors              ! which switch is on the root port?</pre></div>
+
+      <h3>Part B · Set the root</h3>
+      <div class="cli" data-t="CORE-SW1 and SITE-B"><pre>CORE-SW1(config)# spanning-tree vlan 99,110,120,130,140,210,310,320,999 root primary
+SITE-B(config)# spanning-tree vlan 99,110,120,130,140,210,310,320,999 root secondary</pre></div>
+      <div class="cli" data-t="SITE-A# show spanning-tree vlan 110 (expected)"><pre>VLAN0110
+  Spanning tree enabled protocol ieee
+  Root ID    Priority    24686
+             Address     0001.42A7.A603
+             Cost        19
+             Port        1(FastEthernet0/1)
+  Bridge ID  Priority    32878  (priority 32768 sys-id-ext 110)
+             Address     000A.41D5.7937
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- ------
+Fa0/1            Root FWD 19        128.1    P2p
+Fa0/5            Desg FWD 19        128.5    P2p
+Gi0/1            Altn BLK 4         128.25   P2p
+Gi0/2            Altn BLK 4         128.26   P2p</pre></div>
+      <p class="prose">Now SITE-B (28672 + 110 = 28782) beats SITE-A, so <b>SITE-A's Gi ports block</b>. CORE-SW1's priority is 24576 + 110 = <b>24686</b>. Confirm with <code>show spanning-tree summary</code> on CORE-SW1: "Root bridge for: VLAN0099 VLAN0110 …".</p>
+
+      <h3>Part C · Failure test</h3>
+      <ol class="steps">
+        <li>On eNB-01 run <code>ping -t 10.11.0.1</code>.</li>
+        <li>On CORE-SW1, <code>shutdown</code> Fa0/2. SITE-A must now reach the root through SITE-B.</li>
+        <li>Count lost pings. With PVST+ (802.1D) expect about 30 s (listening 15 s + learning 15 s).</li>
+        <li><code>no shutdown</code> Fa0/2.</li>
+      </ol>
+      <details><summary>Optional challenge: a different root per VLAN (PVST+)</summary><p>Make SITE-B root for the GSM and 3G VLANs so the gigabit links carry them:</p>
+        <div class="cli" data-t="Optional"><pre>SITE-B(config)# spanning-tree vlan 210,310,320 root primary
+CORE-SW1(config)# spanning-tree vlan 210,310,320 root secondary</pre></div>
+        <p>Check <code>show spanning-tree vlan 210</code> on SITE-A: the root port becomes Gi0/1 (cost 4), and CORE-SW1 Fa0/2 now blocks for VLAN 210. Each VLAN has its own tree. Undo it before Lab 3 so the expected outputs match.</p></details>
+      <div class="checklist" data-lab="2"><h4>Lab 2 done when</h4>
+        <label class="check"><input type="checkbox" id="c2-1"> Prediction made and checked</label>
+        <label class="check"><input type="checkbox" id="c2-2"> CORE-SW1 is root, SITE-B is backup</label>
+        <label class="check"><input type="checkbox" id="c2-3"> Outage time with PVST+ recorded</label>
+      </div>
+    </section>
+
+    <!-- LAB 3 -->
+    <section class="unit" id="l-3">
+      <div class="lab-head"><div><div class="sec-label">Lab 3 · 35 min</div><h2>Rapid PVST+, PortFast and BPDU Guard</h2></div><div class="lab-meta"><span class="chip">7.2</span></div></div>
+      <div class="ticket"><div class="tid">TASK</div><h4>Faster recovery and protected cell-site ports</h4>A 30 s outage drops calls. Switch to Rapid PVST+. Make device ports come up instantly, and shut any device port where someone plugs in a switch.</div>
+      <div class="cli" data-t="All switches: Rapid PVST+"><pre>CORE-SW1(config)# spanning-tree mode rapid-pvst
+CORE-SW1# show spanning-tree vlan 110        ! protocol rstp</pre></div>
+      <p class="prose">Repeat the Lab 2 failure test. Expect to lose about one ping instead of about 30.</p>
+      <div class="cli" data-t="Device ports: CORE-SW1 Fa0/5-7, SITE-A Fa0/5-6, SITE-B Fa0/5"><pre>SITE-A(config)# interface range fa0/5 - 6
+SITE-A(config-if-range)# spanning-tree portfast
+SITE-A(config-if-range)# spanning-tree bpduguard enable</pre></div>
+      <h3>Test BPDU Guard</h3>
+      <ol class="steps">
+        <li>Unplug BTS-01 from SITE-A Fa0/6 and plug a spare switch into that port.</li>
+        <li>The console shows <code>%SPANTREE-2-BLOCK_BPDUGUARD … Disabling port</code>. Check with <code>show interfaces status err-disabled</code>.</li>
+        <li>Remove the spare switch, reconnect BTS-01, then <code>shutdown</code> and <code>no shutdown</code> on Fa0/6. Ping BSC again.</li>
+      </ol>
+      <div class="checklist" data-lab="3"><h4>Lab 3 done when</h4>
+        <label class="check"><input type="checkbox" id="c3-1"> All switches in rapid-pvst mode; outage now about 1 ping</label>
+        <label class="check"><input type="checkbox" id="c3-2"> PortFast + BPDU Guard on all 6 device ports (not on trunks)</label>
+        <label class="check"><input type="checkbox" id="c3-3"> BPDU Guard triggered and port recovered</label>
+      </div>
+    </section>
+
+    <!-- LAB 4 -->
+    <section class="unit" id="l-4">
+      <div class="lab-head"><div><div class="sec-label">Lab 4 · 40 min</div><h2>Port security on the eNodeB port</h2></div><div class="lab-meta"><span class="chip">7.3</span></div></div>
+      <div class="ticket"><div class="tid">TASK</div><h4>Only the eNodeB may use its port</h4>Lock SITE-A Fa0/5 to eNB-01 with a sticky MAC, then test what each violation mode does when another device connects.</div>
+      <h3>Part A · Sticky MAC</h3>
+      <div class="cli" data-t="SITE-A Fa0/5"><pre>SITE-A(config)# interface fa0/5
+SITE-A(config-if)# switchport port-security
+SITE-A(config-if)# switchport port-security maximum 1
+SITE-A(config-if)# switchport port-security mac-address sticky
+SITE-A(config-if)# switchport port-security violation shutdown
+! ping 10.11.0.1 from eNB-01 so its MAC is learned
+SITE-A# show port-security interface fa0/5
+SITE-A# show running-config interface fa0/5   ! sticky MAC line is now there
+SITE-A# copy running-config startup-config</pre></div>
+      <h3>Part B · Cause a violation and compare modes</h3>
+      <ol class="steps">
+        <li>On eNB-01 open Config → FastEthernet0 and change the MAC (for example <code>0001.1111.2222</code>). Ping again.</li>
+        <li><b>shutdown:</b> port goes err-disabled, status <i>Secure-shutdown</i>, violation count 1. Restore the MAC, then <code>shutdown</code> / <code>no shutdown</code>.</li>
+        <li>Set <code>switchport port-security violation restrict</code> and repeat: port stays up, wrong MAC is dropped, a log message appears and the counter goes up.</li>
+        <li>Set <code>switchport port-security violation protect</code> and repeat: port stays up, wrong MAC dropped silently, no log, no counter.</li>
+      </ol>
+      <div class="tw"><table>
+        <thead><tr><th>Mode</th><th>Port after violation</th><th>Log</th><th>Counter</th><th>What you saw</th></tr></thead>
+        <tbody>
+          <tr><td>shutdown</td><td>err-disabled</td><td class="y">Yes</td><td class="y">Yes</td><td><input type="text" id="obs-sh" aria-label="shutdown result"></td></tr>
+          <tr><td>restrict</td><td>Up</td><td class="y">Yes</td><td class="y">Yes</td><td><input type="text" id="obs-re" aria-label="restrict result"></td></tr>
+          <tr><td>protect</td><td>Up</td><td class="n">No</td><td class="n">No</td><td><input type="text" id="obs-pr" aria-label="protect result"></td></tr>
+        </tbody>
+      </table></div>
+      <h3>Part C · Aging (BTS port)</h3>
+      <p class="prose">A field engineer sometimes connects a laptop alongside BTS-01. Allow 2 dynamically learned addresses and remove any address that is idle for 10 minutes.</p>
+      <div class="cli" data-t="SITE-A Fa0/6"><pre>SITE-A(config)# interface fa0/6
+SITE-A(config-if)# switchport port-security
+SITE-A(config-if)# switchport port-security maximum 2
+SITE-A(config-if)# switchport port-security aging time 10
+SITE-A(config-if)# switchport port-security aging type inactivity
+SITE-A# show port-security address</pre></div>
+      <div class="checklist" data-lab="4"><h4>Lab 4 done when</h4>
+        <label class="check"><input type="checkbox" id="c4-1"> Sticky MAC appears in running config and is saved</label>
+        <label class="check"><input type="checkbox" id="c4-2"> All three violation modes tested and table filled</label>
+        <label class="check"><input type="checkbox" id="c4-3"> Aging configured on Fa0/6</label>
+      </div>
+    </section>
+
+    <!-- LAB 5 -->
+    <section class="unit" id="l-5">
+      <div class="lab-head"><div><div class="sec-label">Lab 5 · 40 min</div><h2>EtherChannel between the cell sites</h2></div><div class="lab-meta"><span class="chip">7.4</span></div></div>
+      <div class="ticket"><div class="tid">TASK</div><h4>Make two gigabit links act as one</h4>STP blocks one of the two links between SITE-A and SITE-B. Bundle them into Port-channel 1 with LACP.</div>
+      <div class="tabs" role="tablist" data-group="l5"><button aria-selected="true">SITE-B (active)</button><button aria-selected="false">SITE-A (passive)</button></div>
+      <div class="tabpanes" data-group="l5">
+<div class="cli" data-t="SITE-B"><pre>SITE-B(config)# interface range gi0/1 - 2
+SITE-B(config-if-range)# channel-group 1 mode active
+SITE-B(config-if-range)# interface port-channel 1
+SITE-B(config-if)# switchport mode trunk
+SITE-B(config-if)# switchport trunk native vlan 999</pre></div>
+<div class="cli" data-t="SITE-A" hidden><pre>SITE-A(config)# interface range gi0/1 - 2
+SITE-A(config-if-range)# channel-group 1 mode passive
+SITE-A(config-if-range)# interface port-channel 1
+SITE-A(config-if)# switchport mode trunk
+SITE-A(config-if)# switchport trunk native vlan 999</pre></div>
+      </div>
+      <div class="cli" data-t="Verify (expected)"><pre>SITE-B# show etherchannel summary
+Group  Port-channel  Protocol    Ports
+------+-------------+-----------+------------------------
+1      Po1(SU)         LACP      Gig0/1(P) Gig0/2(P)
+SITE-A# show spanning-tree vlan 110
+Fa0/1            Root FWD 19        128.1    P2p
+Po1              Altn BLK 3         128.27   Shr</pre></div>
+      <p class="prose">STP now sees <b>one port, Po1</b>, not two. Po1 is still blocked at SITE-A because the direct uplink to the root is cheaper (19 vs 3 + 19). EtherChannel removes blocking <i>inside</i> the bundle, not between different paths. (Packet Tracer may show a different cost for Po1.)</p>
+      <h3>Tests</h3>
+      <ol class="steps">
+        <li><b>Use the bundle:</b> shut CORE-SW1 Fa0/2 so SITE-A must use Po1. Start <code>ping -t 10.11.0.1</code> on eNB-01, then shut SITE-B Gi0/1. No pings are lost: Po1 stays up on Gi0/2. Restore both ports.</li>
+        <li><b>Wrong modes:</b> set SITE-B to <code>passive</code> too. The channel fails and the ports show <b>(I)</b> stand-alone. Set it back to <code>active</code>.</li>
+        <li><b>PAgP:</b> <code>no interface port-channel 1</code> on both, then <code>channel-group 1 mode desirable</code> on SITE-B and <code>auto</code> on SITE-A. Protocol shows PAgP.</li>
+        <li><b>Mismatch:</b> on SITE-A Gi0/2 set <code>speed 100</code>. That member shows <b>(s)</b> suspended. Undo with <code>speed auto</code>.</li>
+      </ol>
+      <details><summary>Optional: Layer 3 EtherChannel (router ↔ 3560)</summary>
+        <p>The IP address goes on the port-channel, not on the member ports.</p>
+        <div class="cli" data-t="Router"><pre>Router(config)# interface port-channel 1
+Router(config-if)# ip address 10.200.0.1 255.255.255.252
+Router(config-if)# interface range g0/0 - 1
+Router(config-if-range)# channel-group 1</pre></div>
+        <p>On the 3560: <code>no switchport</code> on the members and on Po1, then <code>ip address 10.200.0.2 255.255.255.252</code> on Po1. <code>show etherchannel summary</code> shows Po1(RU), where R means Layer 3.</p></details>
+      <div class="checklist" data-lab="5"><h4>Lab 5 done when</h4>
+        <label class="check"><input type="checkbox" id="c5-1"> Po1(SU) with LACP and both members (P)</label>
+        <label class="check"><input type="checkbox" id="c5-2"> Member link failure caused no lost pings</label>
+        <label class="check"><input type="checkbox" id="c5-3"> Saw (I) with passive/passive and (s) with a speed mismatch</label>
+      </div>
+    </section>
+
+    <!-- LAB 6 -->
+    <section class="unit" id="l-6">
+      <div class="lab-head"><div><div class="sec-label">Lab 6 · 45 min</div><h2>Troubleshooting: six trouble tickets</h2></div><div class="lab-meta"><span class="chip">7.5</span></div></div>
+      <p class="prose">Work in pairs. One student secretly injects a fault; the other gets only the ticket and finds the cause with <b>show commands first</b>. Record: symptom → command → finding → fix.</p>
+      <div class="ctl"><button class="btn" id="tk-reveal-all">Reveal all solutions (instructor)</button><button class="btn" id="tk-hide-all">Hide all</button></div>
+      <div id="tickets"></div>
+      <div class="cli" data-t="Key commands for this lab"><pre>SITE-A# show spanning-tree vlan 110
+SITE-A# show spanning-tree summary
+SITE-A# show mac address-table
+SITE-A# show mac address-table interface fa0/5
+SITE-A# show vlan brief
+SITE-A# show interfaces trunk
+SITE-A# show etherchannel summary
+SITE-A# show port-security interface fa0/5
+SITE-A# show interfaces status err-disabled</pre></div>
+      <div class="checklist" data-lab="6"><h4>Lab 6 done when</h4>
+        <label class="check"><input type="checkbox" id="c6-1"> All six tickets solved and logged</label>
+        <label class="check"><input type="checkbox" id="c6-2"> Final network: CORE-SW1 root, Rapid PVST+, PortFast/BPDU Guard, port security, Po1 up, all 3 pings OK, configs saved</label>
+      </div>
+    </section>
+
+    <section class="unit" id="l-final">
+      <div class="sec-label">Reference</div>
+      <h2>Final configurations</h2>
+      <p class="lead">End state after Labs 1–5 (LACP). Use it to check your work.</p>
+      <div class="tabs" role="tablist" data-group="fc"><button aria-selected="true">CORE-SW1</button><button aria-selected="false">SITE-A</button><button aria-selected="false">SITE-B</button></div>
+      <div class="tabpanes" data-group="fc">
+        <div class="cli" data-t="CORE-SW1"><pre id="fc-1"></pre></div>
+        <div class="cli" data-t="SITE-A" hidden><pre id="fc-3"></pre></div>
+        <div class="cli" data-t="SITE-B" hidden><pre id="fc-2"></pre></div>
+      </div>
+    </section>
+
+    <section class="unit" id="l-report">
+      <div class="sec-label">Assessment</div>
+      <h2>Lab report questions</h2>
+      <ol class="prose">
+        <li>Why does a root switch never have a root port?</li>
+        <li>Why must PortFast ports also use BPDU Guard?</li>
+        <li>When would you choose <code>restrict</code> instead of <code>shutdown</code> on an eNodeB port?</li>
+        <li>How does EtherChannel change STP's view of the topology? Why is Po1 still blocked at SITE-A?</li>
+        <li>Compare the outage you measured with PVST+ and with Rapid PVST+. What does each mean for calls on the cell site?</li>
+      </ol>
+      <div class="tw"><table>
+        <thead><tr><th>Criterion</th><th class="num">Marks</th></tr></thead>
+        <tbody>
+          <tr><td>Labs 1–5 working, with show-command screenshots</td><td class="num">50</td></tr>
+          <tr><td>STP prediction and port security table</td><td class="num">15</td></tr>
+          <tr><td>Troubleshooting log (Lab 6)</td><td class="num">20</td></tr>
+          <tr><td>Report questions</td><td class="num">15</td></tr>
+          <tr><td><b>Total</b></td><td class="num"><b>100</b></td></tr>
+        </tbody>
+      </table></div>
+      <div class="ctl"><button class="btn danger" id="reset-checks">Clear my lab checkboxes and notes</button><span id="reset-msg" style="font-size:.85rem;color:var(--muted)"></span></div>
+    </section>
+  </main>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const SVGNS="http://www.w3.org/2000/svg";
+function el(tag,attrs,parent,text){const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(text!=null)e.textContent=text;if(parent)parent.appendChild(e);return e;}
+const store={get(){try{return JSON.parse(localStorage.getItem("u7lab")||"{}")}catch(e){return{}}},set(o){try{localStorage.setItem("u7lab",JSON.stringify(o))}catch(e){}}};
+
+/* ---------- shared data ---------- */
+const TECH={110:"t4g",120:"t4g",130:"t4g",140:"t4g",210:"t2g",310:"t3g",320:"t3g"};
+const VNAME={99:"MGMT",110:"LTE_DATA",120:"LTE_SIGNAL",130:"LTE_X2",140:"LTE_OAM",210:"GSM_ABIS",310:"UMTS_IUB",320:"UMTS_OAM",999:"NATIVE"};
+const HOSTS=[
+ {sw:"CORE-SW1",port:"Fa0/5",name:"S-GW",type:"Server",vlan:110,ip:"10.11.0.1",role:"4G core gateway: receives user traffic from the eNodeB"},
+ {sw:"CORE-SW1",port:"Fa0/6",name:"BSC",type:"Server",vlan:210,ip:"10.21.0.1",role:"GSM Base Station Controller"},
+ {sw:"CORE-SW1",port:"Fa0/7",name:"RNC",type:"Server",vlan:310,ip:"10.31.0.1",role:"3G Radio Network Controller"},
+ {sw:"SITE-A",port:"Fa0/5",name:"eNB-01",type:"PC",vlan:110,ip:"10.11.0.11",role:"4G base station at cell site A"},
+ {sw:"SITE-A",port:"Fa0/6",name:"BTS-01",type:"PC",vlan:210,ip:"10.21.0.11",role:"GSM base station at cell site A"},
+ {sw:"SITE-B",port:"Fa0/5",name:"NodeB-01",type:"PC",vlan:310,ip:"10.31.0.11",role:"3G base station at cell site B"}
+];
+
+/* ---------- CLI blocks ---------- */
+const PROMPT=/^([A-Za-z][\w-]*(\([\w-]+\))?[#>])\s?(.*)$/;
+function decorateCli(box){
+  if(box.dataset.done)return; box.dataset.done="1";
+  const pre=$("pre",box); if(!pre)return;
+  const bar=document.createElement("div"); bar.className="bar";
+  const t=document.createElement("span"); t.textContent=box.dataset.t||"CLI"; bar.appendChild(t);
+  const b=document.createElement("button"); b.className="copy"; b.type="button"; b.textContent="Copy";
+  b.addEventListener("click",()=>{
+    const lines=pre.textContent.split("\n"); const cmds=[];
+    let hasPrompt=false;
+    lines.forEach(l=>{const m=l.match(PROMPT); if(m){hasPrompt=true; let c=m[3]; const i=c.indexOf(" !"); if(i>=0)c=c.slice(0,i); c=c.trimEnd(); if(c&&!c.endsWith("?"))cmds.push(c);}});
+    const txt=hasPrompt?cmds.join("\n"):pre.textContent;
+    const done=()=>{b.textContent="Copied";setTimeout(()=>b.textContent="Copy",1400)};
+    const fallback=()=>{const r=document.createRange();r.selectNodeContents(pre);const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent="Selected";setTimeout(()=>b.textContent="Copy",1400)};
+    try{navigator.clipboard.writeText(txt).then(done,fallback)}catch(e){fallback()}
+  });
+  bar.appendChild(b); box.insertBefore(bar,pre);
+  highlight(pre);
+}
+function highlight(pre){
+  const plain=pre.closest(".cli").hasAttribute("data-plain");
+  const out=pre.textContent.split("\n").map(l=>{
+    if(/^\s*!/.test(l))return '<span class="c">'+esc(l)+'</span>';
+    const m=l.match(PROMPT);
+    if(m){let rest=m[3],cm="";const i=rest.indexOf(" !");if(i>=0){cm=rest.slice(i);rest=rest.slice(0,i);}
+      return '<span class="p">'+esc(m[1])+'</span> '+esc(rest)+(cm?'<span class="c">'+esc(cm)+'</span>':"");}
+    if(plain)return esc(l);
+    const j=l.indexOf("   ! ");
+    if(j>=0)return '<span class="o">'+esc(l.slice(0,j))+'</span><span class="c">'+esc(l.slice(j))+'</span>';
+    return l.trim()?'<span class="o">'+esc(l)+'</span>':"";
+  });
+  pre.innerHTML=out.join("\n");
+}
+
+/* ---------- tabs ---------- */
+function initTabs(){
+  $$(".tabs[data-group]").forEach(tabs=>{
+    const panes=$('.tabpanes[data-group="'+tabs.dataset.group+'"]'); if(!panes)return;
+    const btns=$$("button",tabs), items=Array.from(panes.children);
+    btns.forEach((b,i)=>{b.type="button";b.setAttribute("role","tab");b.addEventListener("click",()=>{
+      btns.forEach((x,j)=>x.setAttribute("aria-selected",j===i?"true":"false"));
+      items.forEach((p,j)=>p.hidden=j!==i);
+    });});
+  });
+}
+
+/* ---------- mode switch + rail ---------- */
+function setMode(m,scroll){
+  if($("#theory"))$("#theory").hidden=m!=="theory"; if($("#lab"))$("#lab").hidden=m!=="lab";
+  $$(".modes button").forEach(b=>b.setAttribute("aria-selected",b.dataset.mode===m?"true":"false"));
+  if(scroll)window.scrollTo({top:0});
+}
+$$(".modes button").forEach(b=>b.addEventListener("click",()=>{setMode(b.dataset.mode,true);try{history.replaceState(null,"","#"+b.dataset.mode)}catch(e){}}));
+function initRail(){
+  const links=$$(".rail a");
+  const map=new Map(); links.forEach(a=>{const id=a.getAttribute("href").slice(1);map.set(id,a);});
+  if(!("IntersectionObserver" in window))return;
+  const io=new IntersectionObserver(ents=>{ents.forEach(en=>{if(en.isIntersecting){const a=map.get(en.target.id);if(!a)return;$$("a",a.parentNode).forEach(x=>x.classList.remove("on"));a.classList.add("on");}});},{rootMargin:"-20% 0px -70% 0px"});
+  $$("section.unit[id]").forEach(s=>io.observe(s));
+}
+
+/* ---------- 7.1 storm simulator ---------- */
+function initStorm(){
+  const svg=$("#storm-svg"); if(!svg)return;
+  const N={1:{x:210,y:48,l:"SW1"},2:{x:350,y:205,l:"SW2"},3:{x:70,y:205,l:"SW3"}};
+  const E=[{id:"12",a:1,b:2,off:0,pa:"Fa0/1",pb:"Fa0/1"},{id:"13",a:1,b:3,off:0,pa:"Fa0/2",pb:"Fa0/1"},{id:"23a",a:2,b:3,off:-9,pa:"Gi0/1",pb:"Gi0/1"},{id:"23b",a:2,b:3,off:9,pa:"Gi0/2",pb:"Gi0/2"}];
+  let stp=false,dots=[],total=0,last=0,running=false,lastPort=null,macLines=[];
+  const pts=e=>{const A=N[e.a],B=N[e.b];const dx=B.x-A.x,dy=B.y-A.y,len=Math.hypot(dx,dy);const ox=-dy/len*e.off,oy=dx/len*e.off;return{ax:A.x+ox,ay:A.y+oy,bx:B.x+ox,by:B.y+oy};};
+  const gE=el("g",{},svg), gD=el("g",{},svg), gN=el("g",{},svg);
+  const lines={};
+  function drawStatic(){
+    gE.innerHTML="";gN.innerHTML="";
+    E.forEach(e=>{const p=pts(e);const blocked=stp&&e.id.startsWith("23");
+      lines[e.id]=el("line",{x1:p.ax,y1:p.ay,x2:p.bx,y2:p.by,stroke:blocked?"var(--bad)":"var(--mg)","stroke-width":3,"stroke-dasharray":blocked?"6 5":"none"},gE);
+      if(blocked){const x=p.ax+(p.bx-p.ax)*.2,y=p.ay+(p.by-p.ay)*.2;el("circle",{cx:x,cy:y,r:6,fill:"var(--bad)"},gE);}
+    });
+    el("line",{x1:70,y1:205,x2:70,y2:268,stroke:"var(--t4g)","stroke-width":2},gE);
+    el("rect",{x:30,y:262,width:80,height:26,rx:4,fill:"var(--t4g-soft)",stroke:"var(--t4g)"},gN);
+    el("text",{x:70,y:279,"text-anchor":"middle",class:"svg-t"},gN,"eNB-01");
+    Object.values(N).forEach(n=>{el("rect",{x:n.x-30,y:n.y-16,width:60,height:32,rx:5,fill:"var(--surface)",stroke:"var(--ink)","stroke-width":1.5},gN);el("text",{x:n.x,y:n.y+4,"text-anchor":"middle",class:"svg-t"},gN,n.l);});
+    el("text",{x:280,y:126,class:"svg-m"},gN,"Fa 100 Mb/s");
+    el("text",{x:210,y:240,"text-anchor":"middle",class:"svg-m"},gN,"2 × Gi 1 Gb/s");
+    if(stp)el("text",{x:330,y:252,"text-anchor":"middle",class:"svg-m",fill:"var(--bad)"},gN,"SW2 Gi0/1-2 BLK");
+  }
+  function macLog(port){
+    if(port===lastPort)return;
+    macLines.push(lastPort?("00d0.ba12.3401 moved "+lastPort+" → "+port):("00d0.ba12.3401 learned on "+port));
+    if(lastPort)macLines.push("%SW_MATM-4-MACFLAP_NOTIF: Host 00d0.ba12.3401 in vlan 110 is flapping between "+lastPort+" and "+port);
+    lastPort=port; macLines=macLines.slice(-10); $("#st-mac").textContent=macLines.join("\n");
+  }
+  function frame(ts){
+    const dt=last?Math.min(.05,(ts-last)/1000):0; last=ts;
+    const next=[];
+    dots.forEach(d=>{d.t+=dt*1.1;
+      if(d.t>=1){ if(stp&&d.e.id.startsWith("23"))return; if(d.to===1)macLog(d.e.id==="12"?"Fa0/1":"Fa0/2"); spawnInto(next,d.to,d.e);} else next.push(d);});
+    dots=next; render();
+    if(dots.length){requestAnimationFrame(frame);}else{running=false;last=0;}
+  }
+  function spawnInto(arr,at,via){
+    if(at===3)total++;
+    E.forEach(e=>{if(e===via)return;if(e.a!==at&&e.b!==at)return;if(stp&&e.id.startsWith("23"))return;
+      total++; if(arr.length<260)arr.push({e,from:at,to:e.a===at?e.b:e.a,t:0});});
+  }
+  function render(){
+    gD.innerHTML="";
+    dots.forEach(d=>{const p=pts(d.e);const fwd=d.from===d.e.a;const sx=fwd?p.ax:p.bx,sy=fwd?p.ay:p.by,ex=fwd?p.bx:p.ax,ey=fwd?p.by:p.ay;
+      el("circle",{cx:sx+(ex-sx)*d.t,cy:sy+(ey-sy)*d.t,r:4,fill:"var(--amber)"},gD);});
+    $("#st-frames").textContent=dots.length>=260?"260+ (capped)":dots.length;
+    $("#st-total").textContent=total.toLocaleString();
+    const cpu=Math.min(100,Math.round(3+dots.length/2.2)); $("#st-cpu").textContent=cpu+" %";
+    const m=$("#st-meter"); m.style.width=cpu+"%"; m.style.background=cpu>80?"var(--bad)":cpu>40?"var(--amber)":"var(--ok)";
+  }
+  $("#storm-send").addEventListener("click",()=>{
+    E.forEach(e=>{if(e.a===3||e.b===3){if(stp&&e.id.startsWith("23"))return;total++;dots.push({e,from:3,to:e.a===3?e.b:e.a,t:0});}});
+    if(!running){running=true;requestAnimationFrame(frame);}
+  });
+  $("#storm-stp").addEventListener("click",ev=>{stp=!stp;ev.currentTarget.textContent="STP: "+(stp?"ON":"OFF");ev.currentTarget.setAttribute("aria-pressed",stp);ev.currentTarget.classList.toggle("pri",stp);drawStatic();});
+  $("#storm-reset").addEventListener("click",()=>{dots=[];total=0;lastPort=null;macLines=[];$("#st-mac").textContent="Waiting for traffic…";render();});
+  drawStatic(); render();
+}
+
+/* ---------- 7.2 STP calculator ---------- */
+function prioOptions(sel,def){for(let p=0;p<=61440;p+=4096){const o=document.createElement("option");o.value=p;o.textContent=p;if(p===def)o.selected=true;sel.appendChild(o);}}
+function speedOptions(sel,def){[["10 Mb/s",100],["100 Mb/s",19],["1 Gb/s",4],["10 Gb/s",2]].forEach(([l,c])=>{const o=document.createElement("option");o.value=c;o.textContent=l+" (cost "+c+")";if(c===def)o.selected=true;sel.appendChild(o);});}
+function initSTP(){
+  if(!$("#w-stp"))return;
+  prioOptions($("#p1"),32768);prioOptions($("#p2"),32768);prioOptions($("#p3"),32768);
+  speedOptions($("#l12"),19);speedOptions($("#l13"),19);speedOptions($("#l23"),4);
+  const PORT={1:{2:"Fa0/1",3:"Fa0/2"},2:{1:"Fa0/1",3:"Gi0/1"},3:{1:"Fa0/1",2:"Gi0/1"}};
+  const POS={1:{x:220,y:50},2:{x:380,y:270},3:{x:60,y:270}};
+  const svg=$("#stp-svg");
+  function calc(){
+    const v=Math.max(1,Math.min(4094,parseInt($("#vl").value)||1));
+    const S={};for(const i of[1,2,3]){const mac=($("#m"+i).value||"").replace(/[^0-9a-f]/gi,"").toLowerCase().padStart(12,"0").slice(-12);S[i]={p:+$("#p"+i).value,eff:+$("#p"+i).value+v,mac};}
+    const cmp=(a,b)=>S[a].eff!==S[b].eff?S[a].eff-S[b].eff:(S[a].mac<S[b].mac?-1:S[a].mac>S[b].mac?1:0);
+    const cost=(a,b)=>{const k=[a,b].sort().join("");return +$("#l"+k).value;};
+    const ids=[1,2,3].sort(cmp), r=ids[0];
+    const lines=[];const fmt=m=>m.replace(/(.{4})(.{4})(.{4})/,"$1.$2.$3");
+    lines.push("<b>1. Root bridge: SW"+r+"</b>. Effective priorities (priority + VLAN "+v+"): "+[1,2,3].map(i=>"SW"+i+" "+S[i].eff).join(", ")+"."+(S[ids[0]].eff===S[ids[1]].eff?" Tie on priority, so the lowest MAC ("+fmt(S[r].mac)+") wins.":""));
+    const RP={},RPC={};
+    [1,2,3].filter(x=>x!==r).forEach(x=>{const y=[1,2,3].find(z=>z!==r&&z!==x);
+      const d=cost(x,r),via=cost(x,y)+cost(y,r);
+      if(d<=via){RP[x]=r;RPC[x]=d;}else{RP[x]=y;RPC[x]=via;}
+      lines.push("<b>2. SW"+x+" root port: "+PORT[x][RP[x]]+"</b> (direct to root "+d+" vs via SW"+y+" "+cost(x,y)+" + "+cost(y,r)+" = "+via+(d===via?"; tie broken by lower sender BID, the root":"")+"). Root path cost "+RPC[x]+".");
+    });
+    RPC[r]=0;
+    const role={1:{},2:{},3:{}};
+    [[1,2],[1,3],[2,3]].forEach(([a,b])=>{
+      if(a===r||b===r){const o=a===r?b:a;role[r][o]="DP";role[o][r]=RP[o]===r?"RP":"BLK";
+        if(role[o][r]==="BLK")lines.push("<b>3. Segment SW"+a+"–SW"+b+"</b>: root port side is SW"+r+" (designated); SW"+o+" "+PORT[o][r]+" blocks.");
+        return;}
+      if(RP[a]===b){role[a][b]="RP";role[b][a]="DP";return;}
+      if(RP[b]===a){role[b][a]="RP";role[a][b]="DP";return;}
+      let w,why;
+      if(RPC[a]!==RPC[b]){w=RPC[a]<RPC[b]?a:b;why="lower root path cost ("+RPC[a]+" vs "+RPC[b]+")";}
+      else{w=cmp(a,b)<0?a:b;why="equal cost "+RPC[a]+", lower bridge ID";}
+      const l=w===a?b:a; role[w][l]="DP"; role[l][w]="BLK";
+      lines.push("<b>3. Segment SW"+a+"–SW"+b+"</b>: SW"+w+" "+PORT[w][l]+" is designated ("+why+"); <span style='color:var(--bad)'>SW"+l+" "+PORT[l][w]+" blocks</span>.");
+    });
+    // draw
+    svg.innerHTML="";
+    const col={RP:"var(--accent)",DP:"var(--ok)",BLK:"var(--bad)"};
+    [[1,2],[1,3],[2,3]].forEach(([a,b])=>{const A=POS[a],B=POS[b];const blk=role[a][b]==="BLK"||role[b][a]==="BLK";
+      el("line",{x1:A.x,y1:A.y,x2:B.x,y2:B.y,stroke:blk?"var(--bad)":"var(--mg)","stroke-width":3,"stroke-dasharray":blk?"7 6":"none"},svg);
+      const mx=(A.x+B.x)/2,my=(A.y+B.y)/2;el("text",{x:mx+(a===1&&b===3?-28:a===1?28:0),y:my+(a===2?18:0),"text-anchor":"middle",class:"svg-m"},svg,"cost "+cost(a,b));
+      [[a,b],[b,a]].forEach(([s,t])=>{const P=POS[s],Q=POS[t];const x=P.x+(Q.x-P.x)*.33,y=P.y+(Q.y-P.y)*.33;const rl=role[s][t];
+        el("rect",{x:x-24,y:y-11,width:48,height:22,rx:11,fill:col[rl]},svg);
+        el("text",{x:x,y:y+4,"text-anchor":"middle","font-family":"IBM Plex Mono, monospace","font-size":"11","font-weight":"600",fill:"var(--surface)"},svg,rl);
+        el("text",{x:x,y:y+(s===1?-15:24),"text-anchor":"middle",class:"svg-m"},svg,PORT[s][t]);});
+    });
+    [1,2,3].forEach(i=>{const P=POS[i];el("rect",{x:P.x-44,y:P.y-22,width:88,height:44,rx:6,fill:i===r?"var(--accent-soft)":"var(--surface)",stroke:i===r?"var(--accent)":"var(--ink)","stroke-width":i===r?2.5:1.5},svg);
+      el("text",{x:P.x,y:P.y-4,"text-anchor":"middle",class:"svg-t","font-weight":"600"},svg,"SW"+i+(i===r?" · ROOT":""));
+      el("text",{x:P.x,y:P.y+12,"text-anchor":"middle",class:"svg-m"},svg,S[i].eff+" / "+fmt(S[i].mac).slice(-9));});
+    $("#stp-out").innerHTML="<div class='legend'><span><i class='vl' style='background:var(--accent)'></i>RP root port</span><span><i class='vl' style='background:var(--ok)'></i>DP designated</span><span><i class='vl' style='background:var(--bad)'></i>BLK blocked</span></div>"+lines.map(l=>"<p style='margin:.35rem 0'>"+l+"</p>").join("");
+  }
+  $$("#w-stp select, #w-stp input").forEach(i=>i.addEventListener("input",calc));
+  calc();
+  // ext id
+  prioOptions($("#ext-p"),8192);
+  const ext=()=>{const p=+$("#ext-p").value,v=Math.max(1,Math.min(4094,parseInt($("#ext-v").value)||1));$("#ext-out").innerHTML=p+" + "+v+" = <b>"+(p+v)+"</b><br><span style='color:var(--muted);font-size:.85rem'>Bridge ID Priority "+(p+v)+" (priority "+p+" sys-id-ext "+v+")</span>";};
+  $("#ext-p").addEventListener("input",ext);$("#ext-v").addEventListener("input",ext);ext();
+}
+
+/* ---------- port state timeline ---------- */
+function initStates(){
+  const line=$("#st-line"); if(!line)return; const segs=$$("div",line); let timer=null;
+  function run(mode){
+    clearInterval(timer); segs.forEach(s=>s.classList.remove("on"));
+    if(mode==="r"){segs[3].classList.add("on");$("#st-clock").textContent="t = 0 s";$("#st-msg").textContent="Edge port (PortFast / RSTP edge): forwarding immediately. DHCP succeeds at once. RSTP non-edge links also converge in about a second via the proposal/agreement handshake.";return;}
+    let t=0; timer=setInterval(()=>{t+=0.5;const i=t<20?0:t<35?1:t<50?2:3;segs.forEach((s,j)=>s.classList.toggle("on",j===i));
+      $("#st-clock").textContent="t = "+Math.min(t,50).toFixed(0)+" s";
+      $("#st-msg").textContent=["Blocking: receiving BPDUs only, waiting for max age (20 s).","Listening: checking for loops, MAC table not populated (forward delay 15 s).","Learning: populating the MAC table, still not forwarding (forward delay 15 s).","Forwarding after about 50 s. A DHCP client may already have timed out."][i];
+      if(t>=50)clearInterval(timer);},100);
+  }
+  $$("[data-st]").forEach(b=>b.addEventListener("click",()=>run(b.dataset.st)));
+}
+
+/* ---------- 7.3 port security ---------- */
+function initPsec(){
+  if(!$("#w-psec"))return;
+  const DEV={enb:{mac:"00d0.ba12.3404",n:"eNB-01"},fe:{mac:"0050.56aa.0101",n:"field laptop"},rogue:{mac:"00e0.4c68.1234",n:"rogue PC"}};
+  let st;
+  const reset=()=>{st={macs:[],saved:[],status:"up",count:0,log:[]};};
+  reset();
+  const cfg=()=>({max:+$("#ps-max").value,learn:$("#ps-learn").value,mode:$("#ps-mode").value,age:+$("#ps-age").value,atype:$("#ps-atype").value});
+  const log=(s)=>{st.log.push(s);st.log=st.log.slice(-40);};
+  function render(){
+    const c=cfg();
+    const pill=$("#ps-status");pill.textContent=st.status==="up"?"Secure-up":"Secure-shutdown (err-disabled)";pill.className="pill "+(st.status==="up"?"up":"down");
+    $("#ps-count").textContent=st.count;
+    $("#ps-table").innerHTML=st.macs.length?st.macs.map(m=>"<tr><td style='font-family:var(--f-mono)'>"+m.mac+"</td><td>"+(m.type==="sticky"?"SecureSticky":"SecureDynamic")+"</td><td class='num'>"+(c.age?m.age+" min":"-")+"</td></tr>").join(""):"<tr><td colspan='3' style='color:var(--muted)'>No secure addresses yet. Send a frame.</td></tr>";
+    const L=$("#ps-log");L.textContent=st.log.join("\n")||"Log is empty.";L.scrollTop=L.scrollHeight;
+    const run=["interface FastEthernet0/5"," description eNB-01"," switchport access vlan 110"," switchport mode access"," switchport port-security"];
+    if(c.max!==1)run.push(" switchport port-security maximum "+c.max);
+    if(c.mode!=="shutdown")run.push(" switchport port-security violation "+c.mode);
+    if(c.learn==="sticky"){run.push(" switchport port-security mac-address sticky");st.macs.filter(m=>m.type==="sticky").forEach(m=>run.push(" switchport port-security mac-address sticky "+m.mac));}
+    if(c.age)run.push(" switchport port-security aging time "+c.age);
+    if(c.age&&c.atype==="inactivity")run.push(" switchport port-security aging type inactivity");
+    if(st.status!=="up")run.push(" ! port is err-disabled (psecure-violation)");
+    run.push("end");
+    const pre=$("#ps-run");pre.textContent=run.join("\n");highlight(pre);
+  }
+  function frame(k){
+    const c=cfg(),d=DEV[k];
+    if(st.status!=="up"){log("[sim] Fa0/5 is err-disabled; frame from "+d.n+" not received.");return render();}
+    const m=st.macs.find(x=>x.mac===d.mac);
+    if(m){m.idle=0;log("[sim] "+d.mac+" ("+d.n+") is secure: frame forwarded.");return render();}
+    if(st.macs.length<c.max){st.macs.push({mac:d.mac,type:c.learn,age:0,idle:0});log("[sim] learned "+d.mac+" ("+d.n+") as "+(c.learn==="sticky"?"sticky (added to running-config)":"dynamic (address table only)")+".");return render();}
+    if(c.mode==="shutdown"){st.count++;st.status="err";st.macs=st.macs.filter(x=>x.type==="sticky");
+      log("%PM-4-ERR_DISABLE: psecure-violation error detected on Fa0/5, putting Fa0/5 in err-disable state");
+      log("%PORT_SECURITY-2-PSECURE_VIOLATION: Security violation occurred, caused by MAC address "+d.mac+" on port FastEthernet0/5.");
+      log("%LINK-3-UPDOWN: Interface FastEthernet0/5, changed state to down");}
+    else if(c.mode==="restrict"){st.count++;log("%PORT_SECURITY-2-PSECURE_VIOLATION: Security violation occurred, caused by MAC address "+d.mac+" on port FastEthernet0/5.");log("[sim] frame dropped; port stays up; counter = "+st.count+".");}
+    else{log("[sim] protect: frame from "+d.mac+" silently dropped. No syslog, counter unchanged.");}
+    render();
+  }
+  $$("#w-psec [data-dev]").forEach(b=>b.addEventListener("click",()=>frame(b.dataset.dev)));
+  $("#ps-time").addEventListener("click",()=>{const c=cfg();
+    st.macs.forEach(m=>{m.age+=10;if(m.mac!==DEV.enb.mac)m.idle+=10;});
+    if(!c.age){log("[sim] 10 minutes pass. Aging is off, nothing expires.");return render();}
+    const keep=[];st.macs.forEach(m=>{const exp=m.type==="dynamic"&&(c.atype==="absolute"?m.age>=c.age:m.idle>=c.age);
+      if(exp)log("[sim] "+m.mac+" aged out ("+c.atype+", "+c.age+" min). A slot is free again.");else keep.push(m);});
+    if(st.macs.some(m=>m.type==="sticky"))log("[sim] Sticky entries are not aged here: on many Catalyst platforms sticky addresses do not age. Use dynamic learning or a static address + aging.");
+    st.macs=keep;render();});
+  $("#ps-save").addEventListener("click",()=>{st.saved=st.macs.filter(m=>m.type==="sticky").map(m=>m.mac);log("[sim] copy run start: "+st.saved.length+" sticky address(es) saved to startup-config.");render();});
+  $("#ps-reload").addEventListener("click",()=>{const lost=st.macs.filter(m=>m.type==="dynamic"||!st.saved.includes(m.mac));st.macs=st.saved.map(mac=>({mac,type:"sticky",age:0,idle:0}));st.status="up";
+    log("[sim] reload: "+(lost.length?lost.map(m=>m.mac).join(", ")+" lost (dynamic or unsaved sticky)":"nothing lost")+". "+st.macs.length+" address(es) restored from startup-config.");render();});
+  $("#ps-recover").addEventListener("click",()=>{if(st.status==="up"){log("[sim] port already up.");}else{st.status="up";log("%LINK-5-CHANGED: Interface FastEthernet0/5, changed state to administratively down");log("%LINK-3-UPDOWN: Interface FastEthernet0/5, changed state to up");}render();});
+  $("#ps-reset").addEventListener("click",()=>{reset();render();});
+  ["#ps-max","#ps-learn","#ps-mode","#ps-age","#ps-atype"].forEach(s=>$(s).addEventListener("change",()=>{const c=cfg();
+    if(st.macs.length>c.max){st.macs=st.macs.slice(0,c.max);log("[sim] maximum lowered: extra secure addresses removed.");}
+    if(s==="#ps-learn"){st.macs.forEach(m=>m.type=c.learn);}
+    render();}));
+  render();
+}
+
+/* ---------- 7.4 EtherChannel checker ---------- */
+function initEC(){
+  if(!$("#w-ec"))return;
+  const M=["active","passive","desirable","auto","on"];
+  const proto=m=>m==="active"||m==="passive"?"LACP":m==="on"?"static":"PAgP";
+  function forms(a,b){if(a==="on"||b==="on")return a==="on"&&b==="on"?"static":null;
+    if(proto(a)!==proto(b))return null;
+    if(proto(a)==="LACP")return (a==="active"||b==="active")?"LACP":null;
+    return (a==="desirable"||b==="desirable")?"PAgP":null;}
+  const mt=$("#ec-matrix");
+  function drawMatrix(a,b){
+    let h="<thead><tr><th>SW2 ↓ / SW3 →</th>"+M.map(m=>"<th>"+m+"</th>").join("")+"</tr></thead><tbody>";
+    M.forEach(r=>{h+="<tr><th>"+r+"</th>";M.forEach(c=>{const f=forms(r,c);h+="<td class='"+(f?"ok":"no")+(r===a&&c===b?" hl":"")+"'>"+(f||"none")+"</td>";});h+="</tr>";});
+    mt.innerHTML=h+"</tbody>";
+  }
+  function upd(){
+    const a=$("#ec-a").value,b=$("#ec-b").value,f=forms(a,b),mis=$("#ec-spd").value!=="1000"||$("#ec-vl").value!=="ok";
+    const head="Flags:  D - down        P - in port-channel\n        I - stand-alone s - suspended\n        R - Layer3      S - Layer2\n        U - in use\nGroup  Port-channel  Protocol    Ports\n------+-------------+-----------+------------------------\n";
+    let line,verdict,ok=false;
+    const pcol=f==="static"?"-":(proto(a)==="static"?"-":proto(a));
+    if(f){ if(mis){line="1      Po1(SU)         "+pcol.padEnd(10)+"Gig0/1(P) Gig0/2(s)";verdict="Bundle up on Gi0/1 only. Gi0/2 is suspended (s) because its "+($("#ec-spd").value!=="1000"?"speed":"allowed VLAN list")+" does not match. Members must match speed, duplex and VLAN settings.";}
+      else{line="1      Po1(SU)         "+pcol.padEnd(10)+"Gig0/1(P) Gig0/2(P)";verdict=(f==="static"?"Static bundle forms (on–on). No negotiation protects you from mistakes.":f+" bundle forms: "+a+" + "+b+". STP now sees one port, Po1.");ok=true;}}
+    else if(a==="on"||b==="on"){line="1      Po1(SD)         -         Gig0/1(D) Gig0/2(D)";verdict="No channel: 'on' does not negotiate, so it never forms with "+(a==="on"?b:a)+". The 'on' side may be err-disabled by EtherChannel misconfig guard.";}
+    else if(proto(a)!==proto(b)){line="1      Po1(SD)         "+proto(a).padEnd(10)+"Gig0/1(I) Gig0/2(I)";verdict="No channel: LACP and PAgP cannot be mixed. Ports run stand-alone (I) and STP blocks one of them.";}
+    else{line="1      Po1(SD)         "+proto(a).padEnd(10)+"Gig0/1(I) Gig0/2(I)";verdict="No channel: "+a+"–"+b+" means neither side initiates. Ports stand-alone (I); STP blocks one.";}
+    const pre=$("#ec-out");pre.textContent=head+line;highlight(pre);
+    const v=$("#ec-verdict");v.textContent=verdict;v.style.color=ok?"var(--ok)":(f?"var(--amber)":"var(--bad)");
+    drawMatrix(a,b);
+  }
+  ["#ec-a","#ec-b","#ec-spd","#ec-vl"].forEach(s=>$(s).addEventListener("change",upd));upd();
+}
+
+/* ---------- 7.5 command explorer ---------- */
+const CMDS=[
+ {c:"show spanning-tree vlan 110",d:"SITE-A",o:`SITE-A#show spanning-tree vlan 110
+VLAN0110
+  Spanning tree enabled protocol rstp
+  Root ID    Priority    24686
+             Address     0001.42A7.A603
+             Cost        19
+             Port        1(FastEthernet0/1)
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+  Bridge ID  Priority    32878  (priority 32768 sys-id-ext 110)
+             Address     000A.41D5.7937
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- --------
+Fa0/1            Root FWD 19        128.1    P2p
+Fa0/5            Desg FWD 19        128.5    P2p Edge
+Po1              Altn BLK 3         128.27   Shr`,tip:"Root ID differs from Bridge ID, so SITE-A is not root. The root is one Fast Ethernet hop away (cost 19) out Fa0/1. Po1 is Alternate/blocking. Fa0/5 shows Edge because PortFast is on."},
+ {c:"show spanning-tree summary",d:"CORE-SW1",o:`CORE-SW1#show spanning-tree summary
+Switch is in rapid-pvst mode
+Root bridge for: VLAN0099 VLAN0110 VLAN0120 VLAN0130 VLAN0140 VLAN0210 VLAN0310 VLAN0320 VLAN0999
+Extended system ID           is enabled
+Portfast Default             is disabled
+PortFast BPDU Guard Default  is disabled
+Loopguard Default            is disabled
+EtherChannel misconfig guard is disabled
+Configured Pathcost method used is short`,tip:"The fastest way to list the VLANs a switch is root for, and to see the STP mode."},
+ {c:"show mac address-table",d:"SITE-A",o:`SITE-A#show mac address-table
+          Mac Address Table
+-------------------------------------------
+Vlan    Mac Address       Type        Ports
+----    -----------       --------    -----
+ 110    00d0.ba12.3401    STATIC      Fa0/5
+ 110    0060.2f84.1a01    DYNAMIC     Fa0/1
+ 210    0002.16c4.9a10    DYNAMIC     Fa0/6
+ 210    0001.63b0.2201    DYNAMIC     Fa0/1
+Total Mac Addresses for this criterion: 4`,tip:"eNB-01's sticky secure MAC shows as STATIC. The S-GW and BSC are learned on the uplink Fa0/1, the root port."},
+ {c:"show mac address-table  (during a loop)",d:"CORE-SW1",o:`%SW_MATM-4-MACFLAP_NOTIF: Host 00d0.ba12.3401 in vlan 110 is flapping between port Fa0/2 and port Fa0/1
+%SW_MATM-4-MACFLAP_NOTIF: Host 00d0.ba12.3401 in vlan 110 is flapping between port Fa0/1 and port Fa0/2
+CORE-SW1#show mac address-table address 00d0.ba12.3401
+ 110    00d0.ba12.3401    DYNAMIC     Fa0/1
+CORE-SW1#show mac address-table address 00d0.ba12.3401
+ 110    00d0.ba12.3401    DYNAMIC     Fa0/2
+CORE-SW1#show spanning-tree vlan 110
+Spanning tree instance(s) for vlan 110 does not exist.`,tip:"The same MAC keeps moving between ports: a Layer 2 loop. STP was disabled for VLAN 110 (no spanning-tree vlan 110). Re-enable it."},
+ {c:"show interfaces trunk",d:"CORE-SW1",o:`CORE-SW1#show interfaces trunk
+Port        Mode         Encapsulation  Status        Native vlan
+Fa0/1       on           802.1q         trunking      999
+Fa0/2       on           802.1q         trunking      999
+Port        Vlans allowed on trunk
+Fa0/1       1-4094
+Fa0/2       1-4094
+Port        Vlans in spanning tree forwarding state and not pruned
+Fa0/1       1,99,110,120,130,140,210,310,320,999
+Fa0/2       1,99,110,120,130,140,210,310,320,999`,tip:"Both trunks up with native VLAN 999 and all VLANs allowed. If a VLAN is missing from 'allowed' or 'forwarding', traffic for it cannot cross."},
+ {c:"show etherchannel summary",d:"SITE-B",o:`SITE-B#show etherchannel summary
+Flags:  D - down        P - in port-channel
+        I - stand-alone s - suspended
+        H - Hot-standby (LACP only)
+        R - Layer3      S - Layer2
+        U - in use      f - failed to allocate aggregator
+Number of channel-groups in use: 1
+Number of aggregators:           1
+Group  Port-channel  Protocol    Ports
+------+-------------+-----------+------------------------
+1      Po1(SD)         LACP      Gig0/1(I) Gig0/2(I)`,tip:"Po1 is down (D) and both members are stand-alone (I): LACP found no partner. Typical cause: both ends passive."},
+ {c:"show port-security interface fa0/5",d:"SITE-A",o:`SITE-A#show port-security interface fa0/5
+Port Security              : Enabled
+Port Status                : Secure-shutdown
+Violation Mode             : Shutdown
+Aging Time                 : 0 mins
+Aging Type                 : Absolute
+SecureStatic Address Aging : Disabled
+Maximum MAC Addresses      : 1
+Total MAC Addresses        : 1
+Configured MAC Addresses   : 0
+Sticky MAC Addresses       : 1
+Last Source Address:Vlan   : 0001.1111.2222:110
+Security Violation Count   : 1`,tip:"The eNodeB port is Secure-shutdown. The last source MAC differs from the stored sticky MAC, so a different device (or new card) was connected."},
+ {c:"show interfaces status err-disabled",d:"SITE-A",o:`SITE-A#show interfaces status err-disabled
+Port      Name               Status       Reason
+Fa0/5     eNB-01             err-disabled psecure-violation
+Fa0/6     BTS-01             err-disabled bpduguard`,tip:"One command lists every port shut by protection features, with the reason."},
+ {c:"show vlan brief",d:"SITE-B",o:`SITE-B#show vlan brief
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- ----------------------
+1    default                          active    Fa0/2, Fa0/3, Fa0/4 ...
+99   MGMT                             active
+110  LTE_DATA                         active
+310  UMTS_IUB                         active
+320  UMTS_OAM                         active    Fa0/5
+999  NATIVE                           active`,tip:"NodeB-01 on Fa0/5 sits in VLAN 320 instead of 310, so it cannot reach the RNC. Trunk ports are never listed here."},
+ {c:"show vtp status",d:"SITE-A",o:`SITE-A#show vtp status
+VTP Version                     : 2
+Configuration Revision          : 0
+Number of existing VLANs        : 14
+VTP Operating Mode              : Client
+SITE-A(config)#vlan 150
+VTP VLAN configuration not allowed when device is in CLIENT mode.`,tip:"A VTP client cannot create VLANs. The lab uses transparent mode: vtp mode transparent."},
+ {c:"show cdp neighbors",d:"SITE-A",o:`SITE-A#show cdp neighbors
+Device ID    Local Intrfce   Holdtme    Capability   Platform    Port ID
+CORE-SW1     Fas 0/1         152        S            2960        Fas 0/2
+SITE-B       Gig 0/1         149        S            2960        Gig 0/1
+SITE-B       Gig 0/2         149        S            2960        Gig 0/2`,tip:"Combine with show spanning-tree: the root port is Fa0/1, and CDP shows CORE-SW1 there, so CORE-SW1 is the root."}
+];
+
+function initCmd(){
+  const box=$("#cmd-btns"); if(!box)return;
+  CMDS.forEach((c,i)=>{const b=document.createElement("button");b.className="btn";b.type="button";b.textContent=c.c;b.addEventListener("click",()=>show(i));box.appendChild(b);});
+  function show(i){$$("button",box).forEach((b,j)=>b.classList.toggle("pri",j===i));const pre=$("#cmd-out");pre.textContent=CMDS[i].o;highlight(pre);
+    $("#cmd-out").closest(".cli").querySelector(".bar span").textContent=CMDS[i].d+" · output";$("#cmd-tip").innerHTML="<b>Read it like this:</b> "+esc(CMDS[i].tip);}
+  show(0);
+}
+
+/* ---------- quiz ---------- */
+const QUIZ=[
+ ["Ethernet frames keep looping forever in a Layer 2 loop because the frame header has no…",["Checksum","TTL field","Sequence number","VLAN tag"],1,"IP has a TTL that expires; Ethernet does not, which is why STP is required."],
+ ["Which Layer 2 protocol maintains a loop-free network?",["VTP","STP","RIP","CDP"],1,"STP (802.1D) and its variants. VTP shares VLANs, CDP discovers neighbours, RIP is Layer 3."],
+ ["In which circumstance are multiple copies of the same unicast frame likely?",["During high-traffic periods","After broken links are re-established","When upper layers need reliability","In an improperly implemented redundant topology"],3,"A loop without working STP duplicates frames."],
+ ["Default bridge priority on Cisco switches?",["4096","28672","32768","61440"],2,"32768, plus the VLAN ID with extended system ID."],
+ ["Two switches both use priority 32768. Which becomes root?",["Higher MAC","Lower MAC","The one with more ports","The one with faster links"],1,"Lowest bridge ID wins; with equal priority the lowest MAC breaks the tie."],
+ ["STP cost of a 1 Gb/s link?",["19","4","2","100"],1,"100 Mb/s = 19, 1 Gb/s = 4, 10 Gb/s = 2, 10 Mb/s = 100."],
+ ["Which 802.1D state populates the MAC table but does not forward data?",["Blocking","Listening","Learning","Forwarding"],2,"Learning lasts one forward delay (15 s)."],
+ ["Which statement describes a converged spanning-tree network?",["All ports forwarding","All ports root or designated","All ports forwarding or blocking","All ports blocking or looping"],2,"After convergence every port has settled in forwarding or blocking."],
+ ["How many bits is the sys-id-ext field?",["4","8","12","16"],2,"12 bits carry the VLAN ID; 4 bits remain for priority, hence steps of 4096."],
+ ["Which command enables 802.1w on a Cisco switch?",["Switch#spanning-tree mode rapid-pvst","Switch(config)#spanning-tree mode rapid-pvst","Switch(config)#spanning-tree mode 802.1w","Switch#spanning-tree mode 802.1w"],1,"It is a global configuration command applying to all VLANs."],
+ ["Which spanning tree is the Cisco IOS default?",["802.1D CST","PVST+","Rapid PVST+","MSTP"],1,"PVST+: one 802.1D instance per VLAN. Output shows protocol ieee."],
+ ["Which command guarantees your switch is root for VLAN 30 (assuming no other switch at 0 with a lower MAC)?",["spanning-tree vlan 30 priority 16384","spanning-tree vlan 30 root guarantee","spanning-tree vlan 30 priority 0","spanning-tree vlan 30 cost 0"],2,"Priority 0 is the lowest possible. root primary also works in practice but only relative to the current root."],
+ ["What does BPDU Guard do?",["Checks BPDUs come from the right switch","Lets only the root send BPDUs","Uses PortFast to shut the port","Shuts down a port if a BPDU is seen on it"],3,"The port goes err-disabled."],
+ ["Default port security violation mode?",["protect","restrict","shutdown","disable"],2,"shutdown err-disables the port, logs and counts."],
+ ["An eNodeB traffic port must stay in service but log intruders. Which mode?",["shutdown","restrict","protect","sticky"],1,"restrict drops, logs and counts but keeps the port up for the legitimate MAC."],
+ ["Sticky secure MAC addresses are stored in…",["The address table only","The running configuration","Flash vlan.dat","NVRAM automatically"],1,"They survive a reload only after copy running-config startup-config."],
+ ["Which modes enable LACP?",["on / auto","active / passive","desirable / auto","active / desirable"],1,"active initiates, passive responds. passive–passive never forms."],
+ ["Which modes enable PAgP?",["desirable / auto","active / passive","on / passive","auto / active"],0,"desirable initiates, auto responds. auto–auto never forms."],
+ ["For LACP, which must match on all member interfaces?",["Speed, duplex, VLAN information","Virtual MAC, PortFast, speed","Duplex, PortFast, description","Speed, CDP, description"],0,"Speed, duplex and VLAN/trunk settings must be identical."],
+ ["Four links between two RSTP PVST+ switches. How do you gain bandwidth without losing resiliency?",["PortFast + BPDU Guard","Unequal-cost load balancing","Bundle all four in one EtherChannel","PPP multilink"],2,"STP then sees one logical link; nothing is blocked inside it."],
+ ["In show etherchannel summary, a member flagged 's' is…",["Stand-alone","Suspended","Layer 2","In use"],1,"Suspended: settings do not match the bundle. I = stand-alone, S = Layer 2."],
+ ["Which command lists ports shut by BPDU Guard or port security?",["show interfaces trunk","show vlan brief","show interfaces status err-disabled","show etherchannel summary"],2,"It also shows the reason (bpduguard, psecure-violation)."]
+];
+function initQuiz(){
+  const box=$("#quiz"); if(!box)return; let tried=0,right=0;
+  QUIZ.forEach((q,qi)=>{const d=document.createElement("div");d.className="q";
+    d.innerHTML="<p class='qt'>"+(qi+1)+". "+esc(q[0])+"</p><div class='opts'></div><div class='why' hidden></div>";
+    const o=$(".opts",d);
+    q[1].forEach((t,i)=>{const b=document.createElement("button");b.type="button";b.textContent=String.fromCharCode(65+i)+". "+t;
+      b.addEventListener("click",()=>{if(d.dataset.done)return;d.dataset.done="1";tried++;
+        if(i===q[2]){b.classList.add("right");right++;}else{b.classList.add("wrong");o.children[q[2]].classList.add("right");}
+        const w=$(".why",d);w.hidden=false;w.textContent=(i===q[2]?"Correct. ":"Not quite. ")+q[3];
+        $("#qz-score").textContent=right+" / "+tried+" (of "+QUIZ.length+")";});
+      o.appendChild(b);});
+    box.appendChild(d);});
+  $("#qz-score").textContent="0 / 0 (of "+QUIZ.length+")";
+}
+
+/* ---------- lab topology ---------- */
+function initTopo(){
+  const svg=$("#topo"); if(!svg)return;
+  const SW={"CORE-SW1":{x:380,y:150},"SITE-A":{x:180,y:330},"SITE-B":{x:580,y:330}};
+  const POS={"S-GW":[230,45],"BSC":[380,45],"RNC":[530,45],"eNB-01":[100,430],"BTS-01":[250,430],"NodeB-01":[580,430]};
+  const tcol=v=>"var(--"+TECH[v]+")", tsoft=v=>"var(--"+TECH[v]+"-soft)";
+  const gL=el("g",{},svg),gN=el("g",{},svg);
+  el("text",{x:380,y:14,"text-anchor":"middle",class:"svg-m"},gN,"CORE SITE");
+  el("text",{x:180,y:466,"text-anchor":"middle",class:"svg-m"},gN,"CELL SITE A");
+  el("text",{x:580,y:466,"text-anchor":"middle",class:"svg-m"},gN,"CELL SITE B");
+  const ln=(x1,y1,x2,y2,w)=>el("line",{x1,y1,x2,y2,stroke:"var(--mg)","stroke-width":w},gL);
+  ln(380,150,580,330,4); ln(380,150,180,330,4); ln(180,322,580,322,3); ln(180,338,580,338,3);
+  el("text",{x:530,y:232,"text-anchor":"start",class:"svg-m"},gL,"Fa0/1 – Fa0/1");
+  el("text",{x:230,y:232,"text-anchor":"end",class:"svg-m"},gL,"Fa0/2 – Fa0/1");
+  el("text",{x:380,y:312,"text-anchor":"middle",class:"svg-m"},gL,"Gi0/1-2 (Po1 in Lab 5)");
+  const info=$("#devinfo");
+  HOSTS.forEach(h=>{const [x,y]=POS[h.name],s=SW[h.sw];
+    el("line",{x1:x,y1:y+(y<100?18:-18),x2:s.x,y2:s.y,stroke:tcol(h.vlan),"stroke-width":2},gL);
+    const g=el("g",{class:"topo-node",tabindex:0,role:"button","aria-label":h.name},gN);
+    el("rect",{x:x-58,y:y-18,width:116,height:36,rx:5,fill:tsoft(h.vlan),stroke:tcol(h.vlan),"stroke-width":1.5},g);
+    el("text",{x:x,y:y-3,"text-anchor":"middle",class:"svg-t"},g,h.name);
+    el("text",{x:x,y:y+12,"text-anchor":"middle",class:"svg-m"},g,"VLAN "+h.vlan+" · "+h.port);
+    const act=()=>{info.innerHTML="<b>"+esc(h.name)+"</b> <span class='chip "+TECH[h.vlan]+"'>VLAN "+h.vlan+" "+VNAME[h.vlan]+"</span><br>"+esc(h.role)+"<br><span style='font-family:var(--f-mono)'>"+h.type+" · "+h.ip+"/24 · "+h.sw+" "+h.port+"</span>";};
+    g.addEventListener("click",act);g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();act();}});
+  });
+  const SWINFO={
+    "CORE-SW1":"Core switch. Fa0/1 → SITE-B, Fa0/2 → SITE-A. S-GW, BSC, RNC on Fa0/5-7. Management 10.99.0.1. Root bridge from Lab 2.",
+    "SITE-A":"Cell site A. Uplink Fa0/1 → CORE-SW1 Fa0/2; Gi0/1-2 → SITE-B. eNB-01 on Fa0/5, BTS-01 on Fa0/6. Management 10.99.0.3.",
+    "SITE-B":"Cell site B. Uplink Fa0/1 → CORE-SW1 Fa0/1; Gi0/1-2 → SITE-A. NodeB-01 on Fa0/5. Management 10.99.0.2. Backup root."
+  };
+  Object.entries(SW).forEach(([n,p])=>{const g=el("g",{class:"topo-node",tabindex:0,role:"button","aria-label":n},gN);
+    el("rect",{x:p.x-60,y:p.y-22,width:120,height:44,rx:7,fill:"var(--surface)",stroke:"var(--ink)","stroke-width":2},g);
+    el("text",{x:p.x,y:p.y-2,"text-anchor":"middle",class:"svg-t","font-weight":"600"},g,n);
+    el("text",{x:p.x,y:p.y+13,"text-anchor":"middle",class:"svg-m"},g,"2960 · 10.99.0."+(n==="CORE-SW1"?1:n==="SITE-B"?2:3));
+    const act=()=>{info.innerHTML="<b>"+n+"</b><br>"+SWINFO[n];};
+    g.addEventListener("click",act);g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();act();}});
+  });
+  $("#hosttable").innerHTML=HOSTS.map(h=>"<tr><td style='font-family:var(--f-mono)'>"+h.sw+" "+h.port+"</td><td>"+h.name+" <span style='color:var(--muted)'>("+h.type+")</span></td><td><span class='vl' style='background:var(--"+TECH[h.vlan]+")'></span>"+h.vlan+" "+VNAME[h.vlan]+"</td><td style='font-family:var(--f-mono)'>"+h.ip+" /24</td></tr>").join("")+
+    "<tr><td style='font-family:var(--f-mono)'>VLAN 99 SVI</td><td>CORE-SW1 / SITE-B / SITE-A</td><td>99 MGMT</td><td style='font-family:var(--f-mono)'>10.99.0.1 / .2 / .3 /24</td></tr>";
+}
+
+/* ---------- tickets ---------- */
+const TICKETS=[
+ {id:"TICKET 1",sev:"GSM down",t:"BTS-01 cannot reach the BSC",s:"4G and 3G are fine. Only GSM at cell site A has failed.",inj:"SITE-A(config)# no vlan 210",diag:"show vlan brief on SITE-A: VLAN 210 is missing, so Fa0/6 is in an inactive VLAN and does not appear in the list. A port cannot forward in a VLAN that does not exist on the switch.",fix:"SITE-A(config)# vlan 210\nSITE-A(config-vlan)# name GSM_ABIS",lesson:"In VTP transparent mode every switch needs every VLAN it carries."},
+ {id:"TICKET 2",sev:"Warning",t:"Console flooded with CDP messages",s:"CORE-SW1 keeps printing a message about SITE-B every minute.",inj:"SITE-B(config)# interface fa0/1\nSITE-B(config-if)# no switchport trunk native vlan",diag:"%CDP-4-NATIVE_VLAN_MISMATCH. show interfaces trunk on both ends: CORE-SW1 Fa0/1 native 999, SITE-B Fa0/1 native 1.",fix:"SITE-B(config)# interface fa0/1\nSITE-B(config-if)# switchport trunk native vlan 999",lesson:"Both ends of a trunk must use the same native VLAN."},
+ {id:"TICKET 3",sev:"Slow 4G",t:"4G traffic taking a strange path",s:"CORE-SW1 now shows a blocked port for VLAN 110; 4G pings still work.",inj:"SITE-A(config)# spanning-tree vlan 110 priority 0",diag:"show spanning-tree vlan 110 on CORE-SW1: Root ID is no longer CORE-SW1 (priority 110 = 0 + 110). Follow the root port and use show cdp neighbors: SITE-A has become root.",fix:"SITE-A(config)# no spanning-tree vlan 110 priority 0",lesson:"The switch with the lowest priority wins, wherever it is. Control the root deliberately."},
+ {id:"TICKET 4",sev:"4G down",t:"eNB-01 off air after a hardware change",s:"Field team replaced the eNodeB network card. It cannot reach the S-GW.",inj:"In PT: change eNB-01's MAC address (Config → FastEthernet0), then ping 10.11.0.1.",diag:"show interfaces status err-disabled: Fa0/5 psecure-violation. show port-security interface fa0/5: Secure-shutdown, violation count 1, last source MAC is the new card.",fix:"SITE-A(config)# interface fa0/5\nSITE-A(config-if)# no switchport port-security mac-address sticky <old MAC>\nSITE-A(config-if)# shutdown\nSITE-A(config-if)# no shutdown\nSITE-A# copy running-config startup-config",lesson:"After a hardware swap on a secured port, clear the old sticky MAC."},
+ {id:"TICKET 5",sev:"Capacity",t:"Port-channel 1 missing",s:"Po1 is down after maintenance and one Gi link is blocked again.",inj:"SITE-B(config)# interface range gi0/1 - 2\nSITE-B(config-if-range)# channel-group 1 mode passive",diag:"show etherchannel summary: Po1(SD), Gig0/1(I) Gig0/2(I). Both ends passive, so nobody starts LACP.",fix:"SITE-B(config)# interface range gi0/1 - 2\nSITE-B(config-if-range)# channel-group 1 mode active",lesson:"LACP needs at least one active end; PAgP needs at least one desirable end."},
+ {id:"TICKET 6",sev:"3G down",t:"NodeB-01 cannot reach the RNC",s:"Only 3G at cell site B has failed.",inj:"SITE-B(config)# interface fa0/5\nSITE-B(config-if)# switchport access vlan 320",diag:"show vlan brief on SITE-B: Fa0/5 is in VLAN 320 (3G O&M) instead of 310 (3G traffic). show mac address-table interface fa0/5 shows the NodeB MAC in VLAN 320.",fix:"SITE-B(config)# interface fa0/5\nSITE-B(config-if)# switchport access vlan 310",lesson:"Service and O&M VLANs look alike. Check the port against the plan."}
+];
+
+function initTickets(){
+  const box=$("#tickets"); if(!box)return;
+  box.innerHTML=TICKETS.map((k,i)=>"<div class='ticket'><div class='tid'>"+k.id+" · "+k.sev+"</div><h4>"+esc(k.t)+"</h4><p style='margin:.2rem 0'><b>Reported symptom:</b> "+esc(k.s)+"</p>"+
+    "<details class='tk'><summary>Instructor: fault to inject</summary><div class='cli' data-t='inject'><pre>"+esc(k.inj)+"</pre></div></details>"+
+    "<details class='tk'><summary>Diagnosis and fix</summary><p>"+esc(k.diag)+"</p><div class='cli' data-t='fix'><pre>"+esc(k.fix)+"</pre></div><p style='color:var(--muted);font-size:.9rem'><b>Lesson:</b> "+esc(k.lesson)+"</p></details>"+
+    "<label class='check'><input type='checkbox' id='tk-"+i+"'> Ticket resolved and logged</label></div>").join("");
+  $("#tk-reveal-all").addEventListener("click",()=>$$("details.tk").forEach(d=>d.open=true));
+  $("#tk-hide-all").addEventListener("click",()=>$$("details.tk").forEach(d=>d.open=false));
+}
+
+/* ---------- final configs ---------- */
+function buildConfigs(){
+  const ALLV="99,110,120,130,140,210,310,320,999";
+  const vlans=[110,120,130,140,210,310,320,99,999].map(v=>"vlan "+v+"\n name "+VNAME[v]+"\n!").join("\n");
+  const head=n=>["hostname "+n,"!","no ip domain-lookup","vtp mode transparent","spanning-tree mode rapid-pvst","spanning-tree extend system-id"];
+  const trunk=(i,d)=>["interface "+i," description "+d," switchport trunk native vlan 999"," switchport mode trunk","!"];
+  const access=(h,extra)=>["interface FastEthernet"+h.port.slice(2)," description "+h.name," switchport access vlan "+h.vlan," switchport mode access",...(extra||[])," spanning-tree portfast"," spanning-tree bpduguard enable","!"];
+  const member=(g,d,m)=>["interface "+g," description "+d," switchport trunk native vlan 999"," switchport mode trunk"," channel-group 1 mode "+m,"!"];
+  const po=d=>["interface Port-channel1"," description "+d," switchport trunk native vlan 999"," switchport mode trunk","!"];
+  const svi=ip=>["interface Vlan99"," ip address "+ip+" 255.255.255.0","!","end"];
+  const H=n=>HOSTS.find(h=>h.name===n);
+  const out={};
+  out[1]=[...head("CORE-SW1"),"spanning-tree vlan "+ALLV+" priority 24576","!",vlans,...trunk("FastEthernet0/1","to SITE-B"),...trunk("FastEthernet0/2","to SITE-A"),
+    ...access(H("S-GW")),...access(H("BSC")),...access(H("RNC")),...svi("10.99.0.1")].join("\n");
+  out[2]=[...head("SITE-B"),"spanning-tree vlan "+ALLV+" priority 28672","!",vlans,...po("Po1 to SITE-A"),...trunk("FastEthernet0/1","to CORE-SW1"),
+    ...access(H("NodeB-01")),...member("GigabitEthernet0/1","Po1 member","active"),...member("GigabitEthernet0/2","Po1 member","active"),...svi("10.99.0.2")].join("\n");
+  out[3]=[...head("SITE-A"),"!",vlans,...po("Po1 to SITE-B"),...trunk("FastEthernet0/1","to CORE-SW1"),
+    ...access(H("eNB-01"),[" switchport port-security"," switchport port-security mac-address sticky"," switchport port-security mac-address sticky <eNB-01 MAC>"]),
+    ...access(H("BTS-01"),[" switchport port-security"," switchport port-security maximum 2"," switchport port-security aging time 10"," switchport port-security aging type inactivity"]),
+    ...member("GigabitEthernet0/1","Po1 member","passive"),...member("GigabitEthernet0/2","Po1 member","passive"),...svi("10.99.0.3")].join("\n");
+  [1,2,3].forEach(i=>{const p=$("#fc-"+i);if(p){p.textContent=out[i];p.closest(".cli").setAttribute("data-plain","");}});
+}
+
+/* ---------- lab persistence ---------- */
+function initPersist(){
+  const data=store.get();
+  const fields=$$("#lab input[type=checkbox], #lab input[type=text]");
+  fields.forEach(f=>{if(!f.id)return;if(f.type==="checkbox")f.checked=!!data[f.id];else if(data[f.id])f.value=data[f.id];
+    f.addEventListener(f.type==="checkbox"?"change":"input",()=>{const d=store.get();d[f.id]=f.type==="checkbox"?f.checked:f.value;store.set(d);prog();});});
+  function prog(){const cb=$$("#lab input[type=checkbox]");const n=cb.filter(c=>c.checked).length;$("#progress").textContent="Lab tasks: "+n+" / "+cb.length+" done";}
+  prog();
+  $("#reset-checks").addEventListener("click",()=>{const b=$("#reset-checks");
+    if(b.dataset.arm!=="1"){b.dataset.arm="1";b.textContent="Click again to confirm";setTimeout(()=>{b.dataset.arm="";b.textContent="Clear my lab checkboxes and notes";},3000);return;}
+    store.set({});fields.forEach(f=>{if(f.type==="checkbox")f.checked=false;else f.value="";});b.dataset.arm="";b.textContent="Clear my lab checkboxes and notes";$("#reset-msg").textContent="Cleared.";prog();});
+}
+
+/* ---------- boot ---------- */
+initTopo(); initTickets(); buildConfigs();
+$$(".cli").forEach(decorateCli);
+initTabs(); initStorm(); initSTP(); initStates(); initPsec(); initEC(); initCmd(); initQuiz(); initPersist(); initRail();
+const h=(location.hash||"").slice(1);
+if(h==="lab"||h.startsWith("l-")){setMode("lab");if(h.startsWith("l-")){const t=document.getElementById(h);if(t)setTimeout(()=>t.scrollIntoView(),50);}}
+})();
+</script>
+</body>
+</html>

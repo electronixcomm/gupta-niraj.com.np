@@ -1,0 +1,1642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unit 5: Distance Vector Routing (RIP)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0e1620;
+    --panel: #16212e;
+    --panel-2: #1c2938;
+    --ink: #e7edf3;
+    --ink-dim: #9db0c2;
+    --ink-faint: #6c8199;
+    --line: #2a3a4c;
+    --teal: #5fd0c0;
+    --teal-dim: #3a9186;
+    --amber: #e8b354;
+    --amber-dim: #a97e34;
+    --coral: #e0806b;
+    --font-display: 'Space Grotesk', system-ui, sans-serif;
+    --font-body: 'Source Serif 4', Georgia, serif;
+    --font-mono: 'JetBrains Mono', 'SFMono-Regular', Consolas, monospace;
+  }
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --bg: #f3f0e8;
+      --panel: #ffffff;
+      --panel-2: #ece7db;
+      --ink: #1b2530;
+      --ink-dim: #4c5c6c;
+      --ink-faint: #78889a;
+      --line: #d8d0bd;
+      --teal: #1f8a7a;
+      --teal-dim: #d6efe9;
+      --amber: #a8721f;
+      --amber-dim: #f3e2c2;
+      --coral: #b8492f;
+    }
+  }
+  :root[data-theme="light"]{
+    --bg: #f3f0e8;
+    --panel: #ffffff;
+    --panel-2: #ece7db;
+    --ink: #1b2530;
+    --ink-dim: #4c5c6c;
+    --ink-faint: #78889a;
+    --line: #d8d0bd;
+    --teal: #1f8a7a;
+    --teal-dim: #d6efe9;
+    --amber: #a8721f;
+    --amber-dim: #f3e2c2;
+    --coral: #b8492f;
+  }
+  :root[data-theme="dark"]{
+    --bg: #0e1620;
+    --panel: #16212e;
+    --panel-2: #1c2938;
+    --ink: #e7edf3;
+    --ink-dim: #9db0c2;
+    --ink-faint: #6c8199;
+    --line: #2a3a4c;
+    --teal: #5fd0c0;
+    --teal-dim: #3a9186;
+    --amber: #e8b354;
+    --amber-dim: #a97e34;
+    --coral: #e0806b;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--font-body);
+    font-size:17px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  img,svg{max-width:100%;height:auto;}
+
+  a{color:var(--teal);}
+
+  .wrap{
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 0 24px 120px;
+  }
+
+  /* ---------- Header / masthead ---------- */
+  header.masthead{
+    max-width: 920px;
+    margin: 48px auto 0;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 40px 24px 30px;
+    background:
+      linear-gradient(180deg, var(--panel) 0%, var(--bg) 100%);
+  }
+  .masthead-inner{
+    max-width: 100%;
+    margin: 0 auto;
+  }
+  .course-tag{
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    color: var(--teal);
+    display:flex;
+    gap: 10px;
+    align-items:center;
+    margin-bottom: 18px;
+  }
+  .course-tag .dot{width:6px;height:6px;border-radius:50%;background:var(--teal);display:inline-block;}
+  h1.title{
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(28px, 4.4vw, 46px);
+    line-height: 1.12;
+    margin: 0 0 14px;
+    color: var(--ink);
+    max-width: 16ch;
+  }
+  .subtitle{
+    font-family: var(--font-body);
+    font-style: italic;
+    color: var(--ink-dim);
+    font-size: 19px;
+    max-width: 56ch;
+    margin: 0 0 28px;
+  }
+  .meta-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap: 28px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--ink-faint);
+  }
+  .meta-row strong{color: var(--ink-dim); font-weight:500;}
+
+  /* ---------- Session clock ---------- */
+  .clock{
+    margin-top: 34px;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .clock-track{
+    display:flex;
+    width:100%;
+    height: 34px;
+  }
+  .clock-seg{
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--bg);
+    border-right: 1px solid var(--bg);
+  }
+  .clock-seg:last-child{border-right:none;}
+  .clock-legend{
+    display:flex;
+    flex-wrap:wrap;
+    gap: 16px 24px;
+    padding: 12px 16px 14px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-faint);
+    border-top: 1px solid var(--line);
+  }
+  .clock-legend span.sw{display:inline-block;width:9px;height:9px;margin-right:7px;border-radius:2px;position:relative;top:1px;}
+
+  /* ---------- Section scaffolding ---------- */
+  section.block{
+    padding: 54px 0 6px;
+    border-bottom: 1px solid var(--line);
+  }
+  section.block:last-of-type{border-bottom:none;}
+  .block-head{
+    display:flex;
+    align-items:baseline;
+    gap: 16px;
+    margin-bottom: 26px;
+  }
+  .block-num{
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--teal);
+    white-space:nowrap;
+  }
+  h2.block-title{
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(22px, 3vw, 30px);
+    margin: 0;
+    color: var(--ink);
+  }
+  h3.sub-title{
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 19px;
+    margin: 36px 0 12px;
+    color: var(--ink);
+  }
+  p{margin: 0 0 16px; color: var(--ink); max-width: 74ch; text-align: left;}
+  .lede{color: var(--ink-dim); text-align: left;}
+  ul, ol{margin: 0 0 18px; padding-left: 22px; max-width: 72ch;}
+  li{margin-bottom: 8px;}
+  strong{color: var(--ink); font-weight: 600;}
+  .callout-term{color: var(--teal); font-style: normal; font-weight: 600;}
+
+  /* ---------- Panels / diagrams ---------- */
+  .panel{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 26px 26px 22px;
+    margin: 22px 0 30px;
+  }
+  .panel-label{
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--ink-faint);
+    margin-bottom: 14px;
+  }
+  .diagram-wrap{width:100%; overflow-x:auto;}
+
+  /* ---------- CLI blocks ---------- */
+  .cli{
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--teal);
+    border-radius: 4px;
+    padding: 16px 18px;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--ink);
+    overflow-x: auto;
+    margin: 18px 0 24px;
+  }
+  .cli .prompt{color: var(--ink-faint);}
+  .cli .kw{color: var(--teal);}
+  .cli .val{color: var(--amber);}
+  .cli .comment{color: var(--ink-faint); font-style: italic;}
+
+  /* ---------- Tables ---------- */
+  .table-wrap{overflow-x:auto; margin: 18px 0 28px;}
+  table{
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 480px;
+    font-family: var(--font-mono);
+    font-size: 13.5px;
+  }
+  thead th{
+    text-align:left;
+    font-weight:500;
+    color: var(--ink-faint);
+    font-size: 11.5px;
+    letter-spacing: 0.02em;
+    padding: 0 14px 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  tbody td{
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--line);
+    color: var(--ink);
+  }
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background: var(--panel-2);}
+  td.hi{color: var(--teal); font-weight: 600;}
+  td.dim{color: var(--ink-faint);}
+
+  /* ---------- Definition grid ---------- */
+  .term-grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin: 22px 0 30px;
+  }
+  @media (max-width: 640px){ .term-grid{grid-template-columns:1fr;} }
+  .term{
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 16px 18px;
+    background: var(--panel);
+  }
+  .term h4{
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--teal);
+    margin: 0 0 8px;
+    font-weight: 600;
+  }
+  .term p{font-size: 15px; margin:0; color: var(--ink-dim);}
+
+  /* ---------- Objectives list ---------- */
+  .obj-list{
+    list-style: none;
+    padding:0;
+    margin: 0 0 8px;
+    display:grid;
+    gap: 10px;
+  }
+  .obj-list li{
+    display:flex;
+    gap: 12px;
+    align-items:flex-start;
+    color: var(--ink);
+    max-width: none;
+  }
+  .obj-list li::before{
+    content: "";
+    flex: 0 0 auto;
+    width: 7px; height:7px;
+    margin-top: 8px;
+    border-radius: 50%;
+    background: var(--teal);
+  }
+
+  /* ---------- Check-in / quiz ---------- */
+  .quiz{
+    display:grid;
+    gap: 14px;
+    margin: 20px 0 10px;
+  }
+  .q{
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 16px 20px;
+    background: var(--panel);
+  }
+  .q .qn{font-family: var(--font-mono); font-size:12px; color: var(--amber); margin-bottom:6px;}
+  .q p{margin:0; font-size: 15.5px;}
+  details.ans{margin-top:10px;}
+  details.ans summary{
+    cursor:pointer;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--teal);
+    list-style: none;
+  }
+  details.ans summary::-webkit-details-marker{display:none;}
+  details.ans summary::before{content: "▸ ";}
+  details.ans[open] summary::before{content: "▾ ";}
+  details.ans .a{margin-top: 8px; color: var(--ink-dim); font-size: 15px;}
+
+  /* ---------- Footer ---------- */
+  footer{
+    padding: 40px 24px 60px;
+    text-align:center;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-faint);
+  }
+
+  /* ---------- Legend swatches (fixed colors regardless of theme, for chart clarity) ---------- */
+  .sw-connected{background:#5fd0c0;}
+  .sw-static{background:#e8b354;}
+  .sw-eigrp{background:#8fb0e0;}
+  .sw-ospf{background:#c98fe0;}
+  .sw-rip{background:#e0806b;}
+  .sw-unknown{background:#57667a;}
+
+  /* ================= Additions for Unit 5 (same tokens as the template) ================= */
+
+  /* The template's .cli had no white-space rule, so multi-line output collapsed. */
+  .cli{white-space:pre;}
+  code.ic{font-family:var(--font-mono); color:var(--teal); font-size:0.9em;}
+  :focus-visible{outline:2px solid var(--teal); outline-offset:2px;}
+
+  /* Shared SVG classes (defined once, used by every figure) */
+  svg .s-lbl{font-family:var(--font-mono); font-size:12px; fill:var(--ink-dim);}
+  svg .s-lbl-hi{font-family:var(--font-mono); font-size:12px; fill:var(--teal); font-weight:600;}
+  svg .s-lbl-am{font-family:var(--font-mono); font-size:12px; fill:var(--amber); font-weight:600;}
+  svg .s-lbl-co{font-family:var(--font-mono); font-size:12px; fill:var(--coral); font-weight:600;}
+  svg .s-node{font-family:var(--font-display); font-size:13px; fill:var(--ink); font-weight:600;}
+  svg .s-cap{font-family:var(--font-display); font-size:12px; fill:var(--ink-faint);}
+  svg .s-title{font-family:var(--font-display); font-size:14px; fill:var(--ink); font-weight:600;}
+  svg .s-link{stroke:var(--ink-faint); stroke-width:1.5; fill:none;}
+  svg .s-dev{fill:var(--panel-2); stroke:var(--line); stroke-width:1.3;}
+  svg .s-field{fill:var(--panel-2); stroke:var(--line); stroke-width:1.2;}
+  svg .s-field-new{fill:var(--teal); fill-opacity:0.16; stroke:var(--teal); stroke-width:1.5;}
+  svg .s-field-zero{fill:none; stroke:var(--ink-faint); stroke-width:1.1; stroke-dasharray:4 3;}
+  svg .root-box{fill:var(--panel-2); stroke:var(--teal); stroke-width:1.6;}
+  svg .leaf-box{fill:var(--panel-2); stroke:var(--line); stroke-width:1.3;}
+  svg .root-text{font-family:var(--font-display); font-size:15px; fill:var(--ink); font-weight:600;}
+  svg .leaf-title{font-family:var(--font-display); font-size:13px; fill:var(--ink); font-weight:600;}
+  svg .leaf-sub{font-family:var(--font-mono); font-size:10.5px; fill:var(--ink-faint);}
+  svg .leaf-desc{font-family:var(--font-body); font-size:11.5px; fill:var(--ink-dim);}
+  svg .branch{stroke:var(--ink-faint); stroke-width:1.3; fill:none;}
+
+  /* Hop-count bar (5.3) */
+  .hopbar{display:flex; flex-wrap:wrap; gap:4px; margin:14px 0 6px;}
+  .hopbar span{
+    font-family:var(--font-mono); font-size:12px; min-width:36px; text-align:center;
+    padding:7px 0; border:1px solid var(--line); border-radius:3px;
+    background:var(--panel-2); color:var(--ink-dim);
+  }
+  .hopbar span.warn{border-color:var(--amber); color:var(--amber);}
+  .hopbar span.bad{background:var(--coral); border-color:var(--coral); color:var(--bg); font-weight:600;}
+
+  /* Count-to-infinity stepper (5.2) */
+  .demo-modes{display:flex; flex-wrap:wrap; gap:10px; margin-bottom:18px; font-family:var(--font-mono); font-size:12.5px;}
+  .demo-modes label{
+    display:inline-flex; align-items:center; gap:8px; padding:8px 12px;
+    border:1px solid var(--line); border-radius:4px; cursor:pointer;
+    color:var(--ink-dim); background:var(--panel-2);
+  }
+  .demo-modes label:has(input:checked){border-color:var(--teal); color:var(--ink);}
+  .demo-modes label:has(input:focus-visible){outline:2px solid var(--teal); outline-offset:2px;}
+  .demo-modes input{accent-color:var(--teal);}
+  .demo-topo{display:grid; grid-template-columns:1fr 34px 1.2fr 34px 1.2fr; align-items:center; gap:6px; margin-bottom:16px;}
+  .demo-node{border:1px solid var(--line); border-radius:6px; padding:12px 8px 10px; text-align:center; background:var(--panel-2); min-width:0;}
+  .demo-node.net{border-style:dashed;}
+  .demo-node .nm{font-family:var(--font-display); font-weight:600; font-size:15px;}
+  .demo-node .mt{font-family:var(--font-mono); font-size:30px; font-weight:600; line-height:1.2; color:var(--teal);}
+  .demo-node .vi{font-family:var(--font-mono); font-size:11.5px; color:var(--ink-faint); min-height:1.4em;}
+  .demo-node.dead{border-color:var(--coral);}
+  .demo-node.dead .mt{color:var(--coral);}
+  .demo-link{height:0; border-top:2px solid var(--ink-faint);}
+  .demo-link.broken{border-top:2px dashed var(--coral);}
+  .demo-meter{height:6px; background:var(--line); border-radius:3px; margin:6px 6px 6px; overflow:hidden;}
+  .demo-meter span{display:block; height:100%; width:0; background:var(--teal);}
+  .demo-node.dead .demo-meter span{background:var(--coral);}
+  .demo-log{
+    min-height:78px; padding:12px 14px; border:1px solid var(--line); border-left:3px solid var(--amber);
+    border-radius:4px; background:var(--panel-2); font-size:15px; color:var(--ink-dim); margin-bottom:14px;
+  }
+  .demo-controls{display:flex; flex-wrap:wrap; gap:10px; align-items:center; font-family:var(--font-mono); font-size:12.5px;}
+  .demo-controls button{
+    font:inherit; padding:8px 14px; border:1px solid var(--line); border-radius:4px;
+    background:var(--panel-2); color:var(--ink); cursor:pointer;
+  }
+  .demo-controls button.go{border-color:var(--teal); color:var(--teal);}
+  .demo-controls button:disabled{opacity:0.4; cursor:not-allowed;}
+  .demo-controls .count{margin-left:auto; color:var(--ink-faint);}
+  @media (max-width:560px){
+    .demo-node .mt{font-size:24px;}
+    .demo-topo{grid-template-columns:1fr 18px 1.2fr 18px 1.2fr;}
+  }
+  @media (prefers-reduced-motion:reduce){ html{scroll-behavior:auto;} }
+</style>
+</head>
+<body><div style="font:14px/1.4 Inter,-apple-system,Segoe UI,sans-serif;background:#0b1d3a;padding:10px 16px;"><a href="/teaching/switching-routing.html" style="color:#fbf9f3;text-decoration:none;">&larr; Switching &amp; Routing &middot; all units</a></div>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="course-tag"><span class="dot"></span>NCS 485 &middot; Routing and Switching</div>
+    <h1 class="title">Unit 5: Distance Vector Routing</h1>
+    <p class="subtitle">The full unit, front to back &mdash; how routers share what they know with their neighbors, how RIP puts that idea to work, why the idea creates loops, and where it runs out of room.</p>
+    <div class="meta-row">
+      <div><strong>Sections</strong> 5.1 &ndash; 5.3</div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <section class="block" style="padding-top:44px;">
+    <div class="block-head">
+      <span class="block-num">&#8213;</span>
+      <h2 class="block-title">How this unit is paced</h2>
+    </div>
+    <p class="lede">The syllabus allocates six hours to this unit. 5.1 takes two: it introduces the distance-vector idea and the three members of the RIP family, and every later section leans on its vocabulary &mdash; metric, next hop, update. 5.2 is the longest at three hours, because it holds the timers, the failure behavior and the loop-prevention rules, and it is where the RIPv2 lab (configure, verify updates, debug) belongs. 5.3 fits in one hour: it draws on the first two to explain why RIP stops being the right tool as a network grows, then hands off to link-state routing in Unit 6.</p>
+  </section>
+</div>
+
+<!-- =====================================================================
+     5.1
+     ===================================================================== -->
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="course-tag"><span class="dot"></span>NCS 485 &middot; Routing and Switching &middot; Unit 5: Distance Vector Protocols</div>
+    <h1 class="title">Distance Vector Basics &amp; the RIP Family</h1>
+    <p class="subtitle">What a router knows when it learns routes from its neighbors, how RIP implements that idea, and how RIPv1, RIPv2 and RIPng differ.</p>
+    <div class="meta-row">
+      <div><strong>Section</strong> 5.1</div>
+    </div>
+  </div>
+</header>
+<div class="wrap">
+
+  <!-- 0. OBJECTIVES -->
+  <section class="block" style="padding-top:44px;">
+    <div class="block-head">
+      <span class="block-num">00</span>
+      <h2 class="block-title">By the end of these two hours</h2>
+    </div>
+    <ul class="obj-list">
+      <li>Explain <em>distance</em> and <em>vector</em>, and why a distance-vector router is said to route &ldquo;by rumor&rdquo;.</li>
+      <li>List the characteristics shared by every distance-vector protocol.</li>
+      <li>Work out the metric a router installs after receiving a neighbor&rsquo;s update.</li>
+      <li>State RIP&rsquo;s core facts: hop-count metric, 15-hop limit, administrative distance 120, UDP port 520, 30-second updates.</li>
+      <li>Compare RIPv1, RIPv2 and RIPng &mdash; and explain why there is no RIPv3.</li>
+      <li>Configure RIPv2 on a router and confirm it works with <code class="ic">show ip route</code> and <code class="ic">show ip protocols</code>.</li>
+    </ul>
+  </section>
+
+  <!-- MAP -->
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">&#8213;</span>
+      <h2 class="block-title">How the pieces fit together</h2>
+    </div>
+    <p class="lede">This section moves from the general idea to one specific protocol to that protocol&rsquo;s versions. Each branch below is one block of the lecture.</p>
+
+    <div class="panel">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 860 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Hierarchy diagram: Distance vector routing at the top, branching into three questions covered in blocks 01 to 04 of this section">
+          <rect x="310" y="10" width="240" height="46" rx="6" class="root-box"/>
+          <text x="430" y="38" text-anchor="middle" class="root-text">Distance vector routing</text>
+
+          <path d="M 430,56 L 430,80 L 140,80 L 140,100" class="branch"/>
+          <path d="M 430,56 L 430,100" class="branch"/>
+          <path d="M 430,56 L 430,80 L 720,80 L 720,100" class="branch"/>
+
+          <rect x="15" y="100" width="250" height="130" rx="6" class="leaf-box"/>
+          <text x="30" y="126" class="leaf-sub">01 &ndash; 02 &middot; THE IDEA</text>
+          <text x="30" y="148" class="leaf-title">What does a router know,</text>
+          <text x="30" y="165" class="leaf-title">and who told it?</text>
+          <text x="30" y="190" class="leaf-desc">A distance and a direction for</text>
+          <text x="30" y="205" class="leaf-desc">each network, passed along</text>
+          <text x="30" y="220" class="leaf-desc">from neighbor to neighbor.</text>
+
+          <rect x="305" y="100" width="250" height="130" rx="6" class="leaf-box"/>
+          <text x="320" y="126" class="leaf-sub">03 &middot; THE PROTOCOL</text>
+          <text x="320" y="148" class="leaf-title">How does RIP do it?</text>
+          <text x="320" y="190" class="leaf-desc">Hop count as the metric, 16 as</text>
+          <text x="320" y="205" class="leaf-desc">infinity, updates every 30 s,</text>
+          <text x="320" y="220" class="leaf-desc">administrative distance 120.</text>
+
+          <rect x="595" y="100" width="250" height="130" rx="6" class="leaf-box"/>
+          <text x="610" y="126" class="leaf-sub">04 &ndash; 05 &middot; THE FAMILY</text>
+          <text x="610" y="148" class="leaf-title">What changed from v1</text>
+          <text x="610" y="165" class="leaf-title">to v2 to RIPng?</text>
+          <text x="610" y="190" class="leaf-desc">Masks, multicast, authentication,</text>
+          <text x="610" y="205" class="leaf-desc">and IPv6 &mdash; then configuring it</text>
+          <text x="610" y="220" class="leaf-desc">in practice.</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- 1. THE IDEA -->
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">01</span>
+      <h2 class="block-title">Distance and vector: what a router really knows</h2>
+    </div>
+    <p class="lede">Every routing protocol has to answer one question: how does a router find out about networks it isn&rsquo;t attached to? A <span class="callout-term">distance-vector</span> protocol answers by asking its neighbors. Each router tells its directly connected neighbors what it can reach and how far away it is; those neighbors add their own distance and pass it on.</p>
+
+    <p>Two facts travel with every route, and they give the family its name. The <span class="callout-term">distance</span> is the metric &mdash; hop count, in RIP. The <span class="callout-term">vector</span> is the direction: which neighbor to hand the packet to. That is all a router ever learns about a remote network.</p>
+
+    <div class="panel">
+      <div class="panel-label">FIG 1 &middot; three routers in a line, and what each one actually knows</div>
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 860 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Three routers R1, R2, R3 in a line, with Net A on the left and Net C on the right. Below each router is a small table showing only a hop count and a next hop for each network">
+          <!-- Net A -->
+          <rect x="10" y="60" width="70" height="46" rx="4" class="s-dev"/>
+          <text x="45" y="88" text-anchor="middle" class="s-node">Net A</text>
+          <line x1="80" y1="83" x2="164" y2="83" class="s-link"/>
+
+          <!-- R1 -->
+          <circle cx="200" cy="83" r="36" class="s-dev"/>
+          <text x="200" y="88" text-anchor="middle" class="s-node">R1</text>
+          <line x1="236" y1="83" x2="394" y2="83" class="s-link"/>
+          <text x="315" y="70" text-anchor="middle" class="s-lbl">&harr; updates</text>
+
+          <!-- R2 -->
+          <circle cx="430" cy="83" r="36" class="s-dev"/>
+          <text x="430" y="88" text-anchor="middle" class="s-node">R2</text>
+          <line x1="466" y1="83" x2="624" y2="83" class="s-link"/>
+          <text x="545" y="70" text-anchor="middle" class="s-lbl">&harr; updates</text>
+
+          <!-- R3 -->
+          <circle cx="660" cy="83" r="36" class="s-dev"/>
+          <text x="660" y="88" text-anchor="middle" class="s-node">R3</text>
+          <line x1="696" y1="83" x2="780" y2="83" class="s-link"/>
+
+          <!-- Net C -->
+          <rect x="780" y="60" width="70" height="46" rx="4" class="s-dev"/>
+          <text x="815" y="88" text-anchor="middle" class="s-node">Net C</text>
+
+          <!-- connectors -->
+          <line x1="200" y1="119" x2="200" y2="150" class="s-link" stroke-dasharray="3 3"/>
+          <line x1="430" y1="119" x2="430" y2="150" class="s-link" stroke-dasharray="3 3"/>
+          <line x1="660" y1="119" x2="660" y2="150" class="s-link" stroke-dasharray="3 3"/>
+
+          <!-- R1 table -->
+          <rect x="95" y="150" width="210" height="104" rx="6" class="s-dev"/>
+          <text x="109" y="174" class="s-lbl-hi">R1 knows</text>
+          <text x="109" y="196" class="s-cap">network</text><text x="171" y="196" class="s-cap">hops</text><text x="211" y="196" class="s-cap">next hop</text>
+          <text x="109" y="217" class="s-lbl">Net A</text><text x="171" y="217" class="s-lbl">0</text><text x="211" y="217" class="s-lbl">connected</text>
+          <text x="109" y="238" class="s-lbl-am">Net C</text><text x="171" y="238" class="s-lbl-am">2</text><text x="211" y="238" class="s-lbl-am">via R2</text>
+
+          <!-- R2 table -->
+          <rect x="325" y="150" width="210" height="104" rx="6" class="s-dev"/>
+          <text x="339" y="174" class="s-lbl-hi">R2 knows</text>
+          <text x="339" y="196" class="s-cap">network</text><text x="401" y="196" class="s-cap">hops</text><text x="441" y="196" class="s-cap">next hop</text>
+          <text x="339" y="217" class="s-lbl">Net A</text><text x="401" y="217" class="s-lbl">1</text><text x="441" y="217" class="s-lbl">via R1</text>
+          <text x="339" y="238" class="s-lbl">Net C</text><text x="401" y="238" class="s-lbl">1</text><text x="441" y="238" class="s-lbl">via R3</text>
+
+          <!-- R3 table -->
+          <rect x="555" y="150" width="210" height="104" rx="6" class="s-dev"/>
+          <text x="569" y="174" class="s-lbl-hi">R3 knows</text>
+          <text x="569" y="196" class="s-cap">network</text><text x="631" y="196" class="s-cap">hops</text><text x="671" y="196" class="s-cap">next hop</text>
+          <text x="569" y="217" class="s-lbl-am">Net A</text><text x="631" y="217" class="s-lbl-am">2</text><text x="671" y="217" class="s-lbl-am">via R2</text>
+          <text x="569" y="238" class="s-lbl">Net C</text><text x="631" y="238" class="s-lbl">0</text><text x="671" y="238" class="s-lbl">connected</text>
+
+          <text x="430" y="278" text-anchor="middle" class="s-cap">Amber rows are second-hand: R1 has never seen R3, only heard that Net C lies two hops away through R2.</text>
+        </svg>
+      </div>
+    </div>
+
+    <p>That is why distance-vector routing is nicknamed <em>routing by rumor</em>. Each router believes its neighbor&rsquo;s summary and has no way to check it against the real topology &mdash; the root of both the protocol&rsquo;s simplicity and its problems.</p>
+
+    <h3 class="sub-title">What every distance-vector protocol has in common</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Characteristic</th><th>What it means in practice</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="hi">Bellman-Ford algorithm</td><td class="dim">Add the link cost to the neighbor&rsquo;s advertised distance; keep the smallest total</td></tr>
+          <tr><td class="hi">Periodic updates</td><td class="dim">The whole routing table is sent on a timer, changed or not</td></tr>
+          <tr><td class="hi">Neighbors only</td><td class="dim">Updates go to directly connected routers, never flooded across the network</td></tr>
+          <tr><td class="hi">Simple metric</td><td class="dim">One number per route (hop count in RIP)</td></tr>
+          <tr><td class="hi">Slow convergence</td><td class="dim">News of a change moves one hop per update cycle</td></tr>
+          <tr><td class="hi">Light on resources</td><td class="dim">Little CPU and memory, easy to configure</td></tr>
+          <tr><td class="hi">Loop-prone</td><td class="dim">Routers can&rsquo;t verify each other&rsquo;s claims &mdash; the subject of 5.2</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>RIP (all three versions) and the obsolete IGRP are classic distance-vector protocols. EIGRP is often called <em>advanced</em> distance vector: it keeps the neighbor-based view but uses a much smarter update process, and belongs to Unit 6.</p>
+  </section>
+
+  <!-- 2. USING AN UPDATE -->
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">02</span>
+      <h2 class="block-title">Using an update: add the link cost, then compare</h2>
+    </div>
+    <p class="lede">The rule a router applies to every route it hears is short enough to memorize. Take the neighbor&rsquo;s distance, add the cost of the link to that neighbor &mdash; in RIP, always 1 &mdash; and compare the total with what the routing table already holds.</p>
+
+    <div class="cli">
+<span class="comment">R2 tells R1: "Net C is 1 hop from me."</span>
+<span class="prompt">R1:</span> <span class="kw">1 hop (R2's distance)</span> + <span class="kw">1 hop (link R1&ndash;R2)</span> = <span class="val">2 hops</span>
+<span class="prompt">R1:</span> installs <span class="val">Net C, metric 2, next hop R2</span>
+    </div>
+
+    <p>Implementations differ on whether that extra hop is added by the sender or the receiver, but the result is identical. The comparison that follows has four cases:</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Situation</th><th>What the router does</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="hi">Network not in the table</td><td class="dim">Install it, with the sender as next hop</td></tr>
+          <tr><td class="hi">In the table, new metric is better</td><td class="dim">Replace the old route</td></tr>
+          <tr><td class="hi">In the table, same metric, different neighbor</td><td class="dim">Keep both as equal-cost paths &mdash; RIP load-balances across up to 4 by default</td></tr>
+          <tr><td class="hi">Update comes from the current next hop</td><td class="dim">Always accept it, even if the metric got worse &mdash; that neighbor knows its own path best</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>If the resulting metric reaches 16, the route is treated as unreachable. That rule is what keeps RIP from counting forever, and Section 5.2 shows exactly why it is needed.</p>
+  </section>
+
+  <!-- 3. RIP AT A GLANCE -->
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">03</span>
+      <h2 class="block-title">RIP at a glance</h2>
+    </div>
+    <p class="lede"><span class="callout-term">RIP</span> &mdash; the Routing Information Protocol &mdash; is the oldest distance-vector protocol still in use. It is simple and nearly universal, which is why it is the first dynamic protocol most students meet.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Property</th><th>Value</th><th>Note</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="hi">Metric</td><td>Hop count</td><td class="dim">One per router crossed; ignores bandwidth and delay</td></tr>
+          <tr><td class="hi">Usable range</td><td>1 &ndash; 15</td><td class="dim">16 means unreachable</td></tr>
+          <tr><td class="hi">Administrative distance</td><td>120</td><td class="dim">Less trusted than static (1), EIGRP (90) and OSPF (110) &mdash; recall Unit 4, Fig 3</td></tr>
+          <tr><td class="hi">Transport</td><td>UDP 520</td><td class="dim">RIPng uses UDP 521</td></tr>
+          <tr><td class="hi">Update timer</td><td>30 seconds</td><td class="dim">Full table, every RIP interface</td></tr>
+          <tr><td class="hi">Load balancing</td><td>Equal-cost only</td><td class="dim">4 paths by default, 6 at most on Cisco</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>RIP speaks with just two message types. A <span class="callout-term">Request</span> asks a neighbor for its routes; a <span class="callout-term">Response</span> carries them. When a RIP router starts, it sends a Request out every RIP interface, then begins advertising its own routes. Ordinary periodic updates are Responses that nobody asked for.</p>
+  </section>
+
+  <!-- 4. VERSIONS -->
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">04</span>
+      <h2 class="block-title">Three versions, one family</h2>
+    </div>
+    <p class="lede">RIPv1 (RFC 1058, 1988) is the original. RIPv2 (RFC 2453) keeps the same mechanism and adds the fields RIPv1 was missing. RIPng (RFC 2080) is the same protocol logic re-fitted for IPv6.</p>
+
+    <div class="table-wrap">
+      <table style="min-width:640px;">
+        <thead>
+          <tr><th>Feature</th><th>RIPv1</th><th>RIPv2</th><th>RIPng</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="hi">Carries</td><td>IPv4</td><td>IPv4</td><td>IPv6</td></tr>
+          <tr><td class="hi">Addressing</td><td>Classful</td><td>Classless</td><td class="dim">Prefix length in every entry</td></tr>
+          <tr><td class="hi">Mask in update</td><td>No</td><td>Yes</td><td>Yes</td></tr>
+          <tr><td class="hi">VLSM / CIDR</td><td>No</td><td>Yes</td><td>Yes</td></tr>
+          <tr><td class="hi">Update sent to</td><td>Broadcast 255.255.255.255</td><td>Multicast 224.0.0.9</td><td>Multicast FF02::9</td></tr>
+          <tr><td class="hi">UDP port</td><td>520</td><td>520</td><td>521</td></tr>
+          <tr><td class="hi">Authentication</td><td>None</td><td>Plain text or MD5</td><td class="dim">None of its own; uses IPv6 IPsec</td></tr>
+          <tr><td class="hi">Next-hop field</td><td>No</td><td>Yes</td><td>Yes</td></tr>
+          <tr><td class="hi">Route tag</td><td>No</td><td>Yes</td><td>Yes</td></tr>
+          <tr><td class="hi">Metric &middot; max hops &middot; AD</td><td colspan="3" class="dim">Hop count &middot; 15 &middot; 120 (same in all three)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Multicast is the quiet improvement. A broadcast is processed by every host on the segment; a multicast to 224.0.0.9 is picked up only by routers running RIPv2, so hosts are no longer interrupted by routing chatter.</p>
+
+    <h3 class="sub-title">What RIPv2 actually added</h3>
+    <p>RIPv1 sends each route as a 20-byte entry with three fields left at zero. RIPv2 uses that spare space, and the change explains almost every difference in the table above.</p>
+
+    <div class="panel">
+      <div class="panel-label">FIG 2 &middot; a RIP route entry, RIPv1 vs. RIPv2 (teal = new in v2)</div>
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 860 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Side-by-side layout of a RIP route entry. RIPv1 has address family, IP address, metric, and three fields that must be zero. RIPv2 replaces the zero fields with route tag, subnet mask and next hop">
+          <text x="20" y="24" class="s-title">RIPv1 route entry &middot; 20 bytes</text>
+          <text x="450" y="24" class="s-title">RIPv2 route entry &middot; 20 bytes</text>
+
+          <!-- v1 -->
+          <rect x="20" y="40" width="190" height="40" class="s-field"/>
+          <text x="115" y="65" text-anchor="middle" class="s-lbl">Address family (2 B)</text>
+          <rect x="210" y="40" width="190" height="40" class="s-field-zero"/>
+          <text x="305" y="65" text-anchor="middle" class="s-cap">Must be zero (2 B)</text>
+
+          <rect x="20" y="80" width="380" height="40" class="s-field"/>
+          <text x="210" y="105" text-anchor="middle" class="s-lbl">IP address (4 B)</text>
+
+          <rect x="20" y="120" width="380" height="40" class="s-field-zero"/>
+          <text x="210" y="145" text-anchor="middle" class="s-cap">Must be zero (4 B)</text>
+
+          <rect x="20" y="160" width="380" height="40" class="s-field-zero"/>
+          <text x="210" y="185" text-anchor="middle" class="s-cap">Must be zero (4 B)</text>
+
+          <rect x="20" y="200" width="380" height="40" class="s-field"/>
+          <text x="210" y="225" text-anchor="middle" class="s-lbl">Metric (4 B)</text>
+
+          <!-- v2 -->
+          <rect x="450" y="40" width="190" height="40" class="s-field"/>
+          <text x="545" y="65" text-anchor="middle" class="s-lbl">Address family (2 B)</text>
+          <rect x="640" y="40" width="190" height="40" class="s-field-new"/>
+          <text x="735" y="65" text-anchor="middle" class="s-lbl-hi">Route tag (2 B)</text>
+
+          <rect x="450" y="80" width="380" height="40" class="s-field"/>
+          <text x="640" y="105" text-anchor="middle" class="s-lbl">IP address (4 B)</text>
+
+          <rect x="450" y="120" width="380" height="40" class="s-field-new"/>
+          <text x="640" y="145" text-anchor="middle" class="s-lbl-hi">Subnet mask (4 B)</text>
+
+          <rect x="450" y="160" width="380" height="40" class="s-field-new"/>
+          <text x="640" y="185" text-anchor="middle" class="s-lbl-hi">Next hop (4 B)</text>
+
+          <rect x="450" y="200" width="380" height="40" class="s-field"/>
+          <text x="640" y="225" text-anchor="middle" class="s-lbl">Metric (4 B)</text>
+
+          <text x="430" y="272" text-anchor="middle" class="s-cap">A message is a 4-byte header plus up to 25 entries &mdash; 504 bytes, or 512 with the UDP header.</text>
+        </svg>
+      </div>
+    </div>
+
+    <p>The <strong>subnet mask</strong> is what makes RIPv2 classless. The <strong>next hop</strong> lets a router point neighbors at a better gateway on a shared segment, and the <strong>route tag</strong> marks where a route originated (for example, redistributed from another protocol). RIPv2 authentication borrows the first entry slot, so an authenticated message carries 24 routes instead of 25.</p>
+
+    <div class="panel" style="border-left:3px solid var(--amber);">
+      <div class="panel-label">COMMON MIX-UP &middot; there is no RIPv3</div>
+      <p style="margin-bottom:0;">The RIP family has exactly three members: <strong>RIPv1</strong>, <strong>RIPv2</strong> and <strong>RIPng</strong>. If a colleague, a question paper or a tool says &ldquo;RIPv3&rdquo;, they almost certainly mean RIPng, the IPv6 version &mdash; or the name is a mistake. Write RIPng in an exam.</p>
+    </div>
+
+    <div class="panel" style="border-left:3px solid var(--amber);">
+      <div class="panel-label">WHY THE MASK MATTERS &middot; how RIPv1 guesses</div>
+      <p style="margin-bottom:0;">RIPv1 updates carry no mask, so the receiver has to guess. If the advertised network is in the same classful network as the interface it arrived on, it applies that interface&rsquo;s mask; otherwise it assumes the default class mask (/8, /16 or /24). That guess is right only when every subnet of a network uses one mask and all subnets sit together &mdash; which is why RIPv1 cannot handle VLSM or discontiguous networks.</p>
+    </div>
+
+    <h3 class="sub-title">RIPng in brief</h3>
+    <ul>
+      <li>It is the smallest change to RIP that works over IPv6: same hop-count metric, same 30-second timer, same infinity of 16.</li>
+      <li>Updates are sent from the router&rsquo;s <strong>link-local</strong> address to <code class="ic">FF02::9</code>, so neighbors use that link-local address as the next hop.</li>
+      <li>Each entry holds a 128-bit prefix, a route tag, a prefix length and a metric. The entries per message depend on the interface MTU, not a fixed 25.</li>
+      <li>RIPng is a separate process from IPv4 RIP. A dual-stack router needs both configured.</li>
+    </ul>
+  </section>
+
+  <!-- 5. WORKED EXAMPLE -->
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">05</span>
+      <h2 class="block-title">Worked example: configuring RIPv2</h2>
+    </div>
+    <p class="lede">Two routers, two LANs and one link between them. The goal: each LAN can reach the other with no static routes typed anywhere.</p>
+
+    <div class="panel">
+      <div class="panel-label">FIG 3 &middot; the lab topology</div>
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 860 190" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Topology: LAN A 192.168.1.0/24 connects to router R1, which connects over 192.168.12.0/24 to router R2, which connects to LAN B 192.168.2.0/24. Both LAN-facing interfaces are passive; the link between routers carries RIPv2 updates">
+          <rect x="60" y="62" width="70" height="46" rx="4" class="s-dev"/>
+          <text x="95" y="90" text-anchor="middle" class="s-node">LAN A</text>
+          <text x="95" y="132" text-anchor="middle" class="s-lbl">192.168.1.0/24</text>
+          <line x1="130" y1="85" x2="214" y2="85" class="s-link"/>
+          <text x="172" y="76" text-anchor="middle" class="s-cap">g0/0 &middot; passive</text>
+
+          <circle cx="250" cy="85" r="36" class="s-dev"/>
+          <text x="250" y="82" text-anchor="middle" class="s-node">R1</text>
+          <text x="250" y="98" text-anchor="middle" class="s-lbl" style="font-size:10px;">g0/0 / g0/1</text>
+
+          <line x1="286" y1="85" x2="524" y2="85" class="s-link"/>
+          <text x="405" y="70" text-anchor="middle" class="s-lbl">192.168.12.0/24</text>
+          <text x="308" y="106" text-anchor="middle" class="s-cap">.1</text>
+          <text x="502" y="106" text-anchor="middle" class="s-cap">.2</text>
+          <text x="405" y="112" text-anchor="middle" class="s-lbl-hi">&harr; RIPv2 to 224.0.0.9</text>
+
+          <circle cx="560" cy="85" r="36" class="s-dev"/>
+          <text x="560" y="82" text-anchor="middle" class="s-node">R2</text>
+          <text x="560" y="98" text-anchor="middle" class="s-lbl" style="font-size:10px;">g0/1 / g0/0</text>
+
+          <line x1="596" y1="85" x2="680" y2="85" class="s-link"/>
+          <text x="638" y="76" text-anchor="middle" class="s-cap">g0/0 &middot; passive</text>
+          <rect x="680" y="62" width="70" height="46" rx="4" class="s-dev"/>
+          <text x="715" y="90" text-anchor="middle" class="s-node">LAN B</text>
+          <text x="715" y="132" text-anchor="middle" class="s-lbl">192.168.2.0/24</text>
+        </svg>
+      </div>
+    </div>
+
+    <h3 class="sub-title">Configuration</h3>
+    <div class="cli">
+<span class="prompt">R1(config)#</span> <span class="kw">router rip</span>
+<span class="prompt">R1(config-router)#</span> <span class="kw">version 2</span>
+<span class="prompt">R1(config-router)#</span> <span class="kw">network</span> <span class="val">192.168.1.0</span>
+<span class="prompt">R1(config-router)#</span> <span class="kw">network</span> <span class="val">192.168.12.0</span>
+<span class="prompt">R1(config-router)#</span> <span class="kw">no auto-summary</span>
+<span class="prompt">R1(config-router)#</span> <span class="kw">passive-interface</span> <span class="val">g0/0</span>
+    </div>
+    <div class="cli">
+<span class="prompt">R2(config)#</span> <span class="kw">router rip</span>
+<span class="prompt">R2(config-router)#</span> <span class="kw">version 2</span>
+<span class="prompt">R2(config-router)#</span> <span class="kw">network</span> <span class="val">192.168.12.0</span>
+<span class="prompt">R2(config-router)#</span> <span class="kw">network</span> <span class="val">192.168.2.0</span>
+<span class="prompt">R2(config-router)#</span> <span class="kw">no auto-summary</span>
+<span class="prompt">R2(config-router)#</span> <span class="kw">passive-interface</span> <span class="val">g0/0</span>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Command</th><th>What it does</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="hi">version 2</td><td class="dim">Send and receive RIPv2 only. Without it, IOS sends v1 and accepts both.</td></tr>
+          <tr><td class="hi">network &lt;classful net&gt;</td><td class="dim">Turns RIP on for every interface inside that classful network and advertises that network. It takes classful addresses, not masks.</td></tr>
+          <tr><td class="hi">no auto-summary</td><td class="dim">Stops summarizing at classful boundaries. Many IOS versions have it on by default, so always state it.</td></tr>
+          <tr><td class="hi">passive-interface</td><td class="dim">Stops updates leaving that interface, while its network is still advertised. Ideal for a LAN with no other routers on it.</td></tr>
+          <tr><td class="hi">default-information originate</td><td class="dim">Advertises a default route to RIP neighbors (used on the router with the internet link).</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="sub-title">Verification</h3>
+    <div class="cli">
+<span class="prompt">R1#</span> <span class="kw">show ip route</span>
+Codes: C - connected, S - static, <span class="val">R - RIP</span>
+
+<span class="val">C</span>     192.168.1.0/24 is directly connected, GigabitEthernet0/0
+<span class="val">C</span>     192.168.12.0/24 is directly connected, GigabitEthernet0/1
+<span class="val">R</span>     192.168.2.0/24 [120/1] via 192.168.12.2, 00:00:14, GigabitEthernet0/1
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Piece of the R line</th><th>Meaning</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="hi">R</td><td class="dim">Learned from RIP</td></tr>
+          <tr><td class="hi">[120/1]</td><td class="dim">Administrative distance 120, metric 1 hop</td></tr>
+          <tr><td class="hi">via 192.168.12.2</td><td class="dim">The next hop &mdash; R2&rsquo;s address on the shared link</td></tr>
+          <tr><td class="hi">00:00:14</td><td class="dim">Seconds since the last update for this route. The timers in 5.2 watch this clock.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Other checks: <code class="ic">show ip protocols</code> lists the timers, the networks RIP is routing for and the passive interfaces; <code class="ic">show ip rip database</code> lists RIP&rsquo;s own table; <code class="ic">debug ip rip</code> shows updates as they are sent and received.</p>
+
+    <h3 class="sub-title">The same idea in RIPng</h3>
+    <div class="cli">
+<span class="prompt">R1(config)#</span> <span class="kw">ipv6 unicast-routing</span>
+<span class="prompt">R1(config)#</span> <span class="kw">ipv6 router rip</span> <span class="val">LAB</span>
+<span class="prompt">R1(config)#</span> <span class="kw">interface</span> <span class="val">g0/0</span>
+<span class="prompt">R1(config-if)#</span> <span class="kw">ipv6 rip</span> <span class="val">LAB</span> <span class="kw">enable</span>
+<span class="prompt">R1(config)#</span> <span class="kw">interface</span> <span class="val">g0/1</span>
+<span class="prompt">R1(config-if)#</span> <span class="kw">ipv6 rip</span> <span class="val">LAB</span> <span class="kw">enable</span>
+    </div>
+    <p>There is no <code class="ic">network</code> command in RIPng. It is switched on <em>per interface</em>, and <code class="ic">LAB</code> is just a locally significant process name. Check it with <code class="ic">show ipv6 route rip</code> and <code class="ic">show ipv6 rip</code>.</p>
+  </section>
+
+  <!-- 6. GLOSSARY -->
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">06</span>
+      <h2 class="block-title">Terms to lock in before the next class</h2>
+    </div>
+    <div class="term-grid">
+      <div class="term">
+        <h4>Distance vector</h4>
+        <p>A routing approach in which each router knows only a distance and a next-hop direction for each network, learned from neighbors.</p>
+      </div>
+      <div class="term">
+        <h4>Hop count</h4>
+        <p>RIP&rsquo;s metric: the number of routers a packet crosses to reach a network. 16 means unreachable.</p>
+      </div>
+      <div class="term">
+        <h4>Classless (RIPv2)</h4>
+        <p>Updates carry the subnet mask, so VLSM, CIDR and discontiguous networks work.</p>
+      </div>
+      <div class="term">
+        <h4>Passive interface</h4>
+        <p>An interface that receives but does not send RIP updates, while its network is still advertised.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. CHECK-IN -->
+  <section class="block" style="border-bottom:none;">
+    <div class="block-head">
+      <span class="block-num">07</span>
+      <h2 class="block-title">Check-in questions (last 10 minutes)</h2>
+    </div>
+    <div class="quiz">
+      <div class="q">
+        <div class="qn">Q1</div>
+        <p>R2 advertises Net C to R1 as 3 hops away. What metric and next hop does R1 install, assuming it had no route to Net C before?</p>
+        <details class="ans"><summary>Reveal answer</summary><div class="a">Metric 4, next hop R2. R1 adds 1 for the link to R2 (3 + 1 = 4), and the neighbor that told it about the route becomes the next hop.</div></details>
+      </div>
+      <div class="q">
+        <div class="qn">Q2</div>
+        <p>A network uses 172.16.1.0/24 and 172.16.2.0/26 on different links, and you want routing updates that only routers process. Which RIP version, and which two features justify it?</p>
+        <details class="ans"><summary>Reveal answer</summary><div class="a">RIPv2. It carries the subnet mask in every entry, so the mixed /24 and /26 subnets (VLSM) are understood, and it sends to multicast 224.0.0.9, so hosts don&rsquo;t process the updates.</div></details>
+      </div>
+      <div class="q">
+        <div class="qn">Q3</div>
+        <p>A colleague says, &ldquo;We&rsquo;re moving to RIPv3 so we can run RIP over IPv6.&rdquo; What is wrong with that sentence?</p>
+        <details class="ans"><summary>Reveal answer</summary><div class="a">There is no RIPv3. The IPv6 version of RIP is RIPng (RFC 2080), which uses UDP 521 and multicast FF02::9 and is enabled per interface rather than with a network command.</div></details>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- =====================================================================
+     5.2
+     ===================================================================== -->
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="course-tag"><span class="dot"></span>NCS 485 &middot; Routing and Switching &middot; Unit 5: Distance Vector Protocols</div>
+    <h1 class="title">RIP Timers, Updates &amp; Loop Prevention</h1>
+    <p class="subtitle">What a RIP router does every 30 seconds, what happens when a route goes quiet, and how a protocol built on rumor stops itself from counting to infinity.</p>
+    <div class="meta-row">
+      <div><strong>Section</strong> 5.2</div>
+    </div>
+  </div>
+</header>
+<div class="wrap">
+
+  <!-- 0. OBJECTIVES -->
+  <section class="block" style="padding-top:44px;">
+    <div class="block-head">
+      <span class="block-num">00</span>
+      <h2 class="block-title">By the end of these three hours</h2>
+    </div>
+    <ul class="obj-list">
+      <li>State the four RIP timers, their default values, and what each one controls.</li>
+      <li>Distinguish periodic updates from triggered updates.</li>
+      <li>Trace a route from its last update to its removal from the routing table.</li>
+      <li>Explain how count-to-infinity develops, and why 16 is the point where it stops.</li>
+      <li>Explain split horizon, route poisoning, poison reverse and hold-down, and say which problem each one solves.</li>
+      <li>Read <code class="ic">show ip protocols</code> and <code class="ic">debug ip rip</code> output to confirm the timers and split horizon are working.</li>
+    </ul>
+  </section>
+
+  <!-- 1. UPDATE CYCLE -->
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">01</span>
+      <h2 class="block-title">The update cycle and the four timers</h2>
+    </div>
+    <p class="lede">A RIP router never asks &ldquo;has anything changed?&rdquo; It sends its whole table on a fixed schedule, and it judges its neighbors by whether they keep sending. Four timers run that schedule.</p>
+
+    <div class="table-wrap">
+      <table style="min-width:640px;">
+        <thead>
+          <tr><th>Timer</th><th>Default</th><th>Restarts when</th><th>At expiry</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="hi">Update</td><td>30 s</td><td class="dim">It fires</td><td class="dim">The full routing table goes out every RIP interface</td></tr>
+          <tr><td class="hi">Invalid</td><td>180 s</td><td class="dim">An update for that route arrives</td><td class="dim">The route is marked invalid: metric 16, advertised as unreachable</td></tr>
+          <tr><td class="hi">Hold-down</td><td>180 s</td><td class="dim">Starts once a route is declared unreachable</td><td class="dim">Until it ends, worse information about the route is ignored</td></tr>
+          <tr><td class="hi">Flush</td><td>240 s</td><td class="dim">An update for that route arrives</td><td class="dim">The route is removed from the routing table</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="cli">
+<span class="prompt">R1(config)#</span> <span class="kw">router rip</span>
+<span class="prompt">R1(config-router)#</span> <span class="kw">timers basic</span> <span class="val">30 180 180 240</span>
+<span class="comment">                          ^update ^invalid ^hold-down ^flush &mdash; keep identical on every router</span>
+    </div>
+
+    <h3 class="sub-title">One route&rsquo;s life, from its last update</h3>
+    <p>The timers make sense when you follow a single route after its neighbor stops advertising it. Every arriving update resets the clock; silence lets it run out.</p>
+
+    <div class="panel">
+      <div class="panel-label">FIG 1 &middot; a route whose neighbor has gone quiet</div>
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 860 190" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Timeline in seconds from 0 to 240. From 0 to 180 the route is valid. At 180 the invalid timer expires and the route is marked invalid with metric 16. At 240 the flush timer expires and the route is removed">
+          <!-- event labels -->
+          <text x="820" y="32" text-anchor="end" class="s-lbl-co">flush timer expires (240 s): route removed</text>
+          <line x1="820" y1="40" x2="820" y2="80" stroke="var(--coral)" stroke-width="1.4"/>
+          <text x="625" y="58" text-anchor="middle" class="s-lbl-am">invalid timer expires (180 s)</text>
+          <line x1="625" y1="64" x2="625" y2="80" stroke="var(--amber)" stroke-width="1.4"/>
+          <text x="40" y="58" class="s-lbl-hi">last update heard</text>
+          <line x1="40" y1="64" x2="40" y2="80" stroke="var(--teal)" stroke-width="1.4"/>
+
+          <!-- bar -->
+          <rect x="40" y="80" width="585" height="30" fill="var(--teal)" fill-opacity="0.18" stroke="var(--teal)" stroke-width="1.3"/>
+          <rect x="625" y="80" width="195" height="30" fill="var(--coral)" fill-opacity="0.22" stroke="var(--coral)" stroke-width="1.3"/>
+          <text x="332" y="100" text-anchor="middle" class="s-lbl">valid &middot; each update restarts the clock</text>
+          <text x="722" y="100" text-anchor="middle" class="s-lbl-co">invalid &middot; metric 16</text>
+
+          <!-- ticks -->
+          <g stroke="var(--ink-faint)" stroke-width="1">
+            <line x1="40" y1="110" x2="40" y2="118"/>
+            <line x1="137.5" y1="110" x2="137.5" y2="118"/>
+            <line x1="235" y1="110" x2="235" y2="118"/>
+            <line x1="332.5" y1="110" x2="332.5" y2="118"/>
+            <line x1="430" y1="110" x2="430" y2="118"/>
+            <line x1="527.5" y1="110" x2="527.5" y2="118"/>
+            <line x1="625" y1="110" x2="625" y2="118"/>
+            <line x1="820" y1="110" x2="820" y2="118"/>
+          </g>
+          <g text-anchor="middle" class="s-lbl">
+            <text x="40" y="134">0</text>
+            <text x="137.5" y="134">30</text>
+            <text x="235" y="134">60</text>
+            <text x="332.5" y="134">90</text>
+            <text x="430" y="134">120</text>
+            <text x="527.5" y="134">150</text>
+            <text x="625" y="134">180</text>
+            <text x="820" y="134">240</text>
+          </g>
+          <text x="430" y="166" text-anchor="middle" class="s-cap">seconds since the last update for this route &middot; hold-down begins at the same moment the route goes invalid</text>
+        </svg>
+      </div>
+    </div>
+
+    <p>While the route sits between 180 and 240 seconds it is still in the table, marked with metric 16, and the router keeps telling its neighbors it is unreachable. That is deliberate: it is how the bad news spreads.</p>
+
+    <h3 class="sub-title">Checking the timers on a live router</h3>
+    <div class="cli">
+<span class="prompt">R1#</span> <span class="kw">show ip protocols</span>
+Routing Protocol is "rip"
+  Sending updates every <span class="val">30</span> seconds, next due in 21 seconds
+  Invalid after <span class="val">180</span> seconds, hold down <span class="val">180</span>, flushed after <span class="val">240</span>
+  Default version control: send version 2, receive version 2
+  Automatic network summarization is not in effect
+  Maximum path: 4
+  Routing for Networks:
+    192.168.1.0
+    192.168.12.0
+  Passive Interface(s):
+    GigabitEthernet0/0
+  Routing Information Sources:
+    Gateway         Distance      Last Update
+    192.168.12.2         120      00:00:09
+    </div>
+
+    <h3 class="sub-title">Periodic and triggered updates</h3>
+    <p><span class="callout-term">Periodic updates</span> are the 30-second heartbeat. <span class="callout-term">Triggered updates</span> are sent immediately when a route changes &mdash; a link goes down, a metric changes &mdash; without waiting for the timer. They matter because waiting up to 30 seconds at every hop would make bad news travel painfully slowly. A triggered update carries only the routes that changed.</p>
+  </section>
+
+  <!-- 2. COUNT TO INFINITY -->
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">02</span>
+      <h2 class="block-title">Why loops form: count-to-infinity</h2>
+    </div>
+    <p class="lede">A distance-vector router cannot tell whether a neighbor&rsquo;s route to a network passes back through itself. When a link fails, that blind spot lets two routers trade the same stale route back and forth, raising the metric each time.</p>
+
+    <p>Take two routers, with Net N attached to R1. R1 is 0 hops from N and R2 is 1. The link between R1 and N fails.</p>
+    <ol>
+      <li>R1 knows immediately and marks N unreachable.</li>
+      <li>Before R1 can tell anyone, R2&rsquo;s regular update arrives: &ldquo;I can reach N in 1 hop.&rdquo;</li>
+      <li>R1 believes it and installs N at 2 hops via R2 &mdash; although R2&rsquo;s route runs back through R1.</li>
+      <li>R1 advertises 2, so R2 changes to 3 via R1. R2 advertises 3, so R1 changes to 4. And so on.</li>
+    </ol>
+    <p>The metric climbs until it reaches 16, RIP&rsquo;s definition of infinity. Only then is N declared unreachable. Until then packets for N bounce between the two routers until their TTL runs out, and reconvergence takes minutes.</p>
+
+    <div class="panel">
+      <div class="panel-label">FIG 2 &middot; step through the failure yourself</div>
+      <p style="font-size:15px; color:var(--ink-dim);">Each press of <em>Next update</em> is one router advertising to the other. Compare the two modes to see what split horizon and route poisoning change.</p>
+
+      <div class="demo-modes" role="radiogroup" aria-label="Loop protection mode">
+        <label><input type="radio" name="ctimode" value="plain" checked> No protection (plain distance vector)</label>
+        <label><input type="radio" name="ctimode" value="split"> Split horizon + route poisoning</label>
+      </div>
+
+      <div class="demo-topo">
+        <div class="demo-node net">
+          <div class="nm">Net N</div>
+          <div class="vi" id="cti-nstate">up</div>
+        </div>
+        <div class="demo-link" id="cti-link1"></div>
+        <div class="demo-node" id="cti-n1">
+          <div class="nm">R1</div>
+          <div class="mt" id="cti-m1">0</div>
+          <div class="demo-meter"><span id="cti-b1"></span></div>
+          <div class="vi" id="cti-v1">connected</div>
+        </div>
+        <div class="demo-link"></div>
+        <div class="demo-node" id="cti-n2">
+          <div class="nm">R2</div>
+          <div class="mt" id="cti-m2">1</div>
+          <div class="demo-meter"><span id="cti-b2"></span></div>
+          <div class="vi" id="cti-v2">via R1</div>
+        </div>
+      </div>
+
+      <div class="demo-log" id="cti-log" aria-live="polite"></div>
+      <div class="demo-controls">
+        <button class="go" id="cti-next" type="button">Next update</button>
+        <button id="cti-play" type="button">Auto-play</button>
+        <button id="cti-reset" type="button">Reset</button>
+        <span class="count" id="cti-count"></span>
+      </div>
+    </div>
+
+    <p>The numbers on each router are its metric for Net N. In the unprotected run they climb 2, 3, 4 &hellip; up to 16 &mdash; sixteen updates, roughly eight minutes at 30 seconds apiece. With the protections on, the loop never begins.</p>
+  </section>
+
+  <!-- 3. LOOP PREVENTION -->
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">03</span>
+      <h2 class="block-title">Loop prevention: six mechanisms, six jobs</h2>
+    </div>
+    <p class="lede">No single fix covers every case, so RIP stacks several. Each one closes a different gap in the failure sequence above.</p>
+
+    <h3 class="sub-title">Split horizon</h3>
+    <p>A router does not advertise a route out of the interface it learned that route from. In the example, R2 learned N from R1, so it must never tell R1 about N &mdash; and the step-3 mistake cannot happen.</p>
+
+    <div class="panel">
+      <div class="panel-label">FIG 3 &middot; what R2 may and may not advertise</div>
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 860 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="R1 is attached to Net N. R2 learned Net N from R1, so under split horizon R2 advertises Net N toward R3 but not back toward R1; with poison reverse it sends it back with metric 16">
+          <defs>
+            <marker id="ah-teal" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 z" fill="var(--teal)"/>
+            </marker>
+            <marker id="ah-coral" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 z" fill="var(--coral)"/>
+            </marker>
+          </defs>
+
+          <rect x="10" y="95" width="70" height="46" rx="4" class="s-dev"/>
+          <text x="45" y="123" text-anchor="middle" class="s-node">Net N</text>
+          <line x1="80" y1="118" x2="164" y2="118" class="s-link"/>
+
+          <circle cx="200" cy="118" r="36" class="s-dev"/>
+          <text x="200" y="123" text-anchor="middle" class="s-node">R1</text>
+          <line x1="236" y1="118" x2="394" y2="118" class="s-link"/>
+
+          <circle cx="430" cy="118" r="36" class="s-dev"/>
+          <text x="430" y="123" text-anchor="middle" class="s-node">R2</text>
+          <line x1="466" y1="118" x2="624" y2="118" class="s-link"/>
+
+          <circle cx="660" cy="118" r="36" class="s-dev"/>
+          <text x="660" y="123" text-anchor="middle" class="s-node">R3</text>
+
+          <!-- allowed: R2 -> R3 -->
+          <line x1="474" y1="100" x2="622" y2="100" stroke="var(--teal)" stroke-width="2" marker-end="url(#ah-teal)"/>
+          <text x="548" y="88" text-anchor="middle" class="s-lbl-hi">advertises Net N</text>
+
+          <!-- blocked: R2 -> R1 -->
+          <line x1="388" y1="100" x2="242" y2="100" stroke="var(--coral)" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#ah-coral)"/>
+          <line x1="307" y1="93" x2="323" y2="109" stroke="var(--coral)" stroke-width="2.6"/>
+          <line x1="323" y1="93" x2="307" y2="109" stroke="var(--coral)" stroke-width="2.6"/>
+          <text x="315" y="82" text-anchor="middle" class="s-lbl-co">not sent back</text>
+          <text x="315" y="142" text-anchor="middle" class="s-lbl">poison reverse: 16</text>
+
+          <text x="430" y="176" text-anchor="middle" class="s-lbl">R2: &ldquo;learned Net N from R1&rdquo;</text>
+          <text x="430" y="206" text-anchor="middle" class="s-cap">The interface toward R1 never carries Net N back. R3 has no other way to Net N, so it hears about it.</text>
+        </svg>
+      </div>
+    </div>
+
+    <h3 class="sub-title">All six mechanisms</h3>
+    <div class="table-wrap">
+      <table style="min-width:640px;">
+        <thead>
+          <tr><th>Mechanism</th><th>What it does</th><th>What it prevents</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="hi">Infinity = 16</td><td class="dim">Puts an upper bound on the metric</td><td class="dim">Counting forever (at the cost of the 15-hop limit)</td></tr>
+          <tr><td class="hi">Split horizon</td><td class="dim">Never advertises a route out of the interface it was learned on</td><td class="dim">Simple two-router loops. On by default on Cisco.</td></tr>
+          <tr><td class="hi">Route poisoning</td><td class="dim">Advertises a failed route with metric 16</td><td class="dim">Neighbors continuing to trust a dead route</td></tr>
+          <tr><td class="hi">Poison reverse</td><td class="dim">Advertises a route back out its learned interface, at metric 16</td><td class="dim">A neighbor mistakenly routing back through you</td></tr>
+          <tr><td class="hi">Hold-down</td><td class="dim">For 180 s after a route is unreachable, ignores worse information about it</td><td class="dim">Stale updates reinstating a dead route</td></tr>
+          <tr><td class="hi">Triggered updates</td><td class="dim">Sends changes at once, not on the next 30 s tick</td><td class="dim">Bad news crawling hop by hop</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="panel" style="border-left:3px solid var(--amber);">
+      <div class="panel-label">COMMON MIX-UP &middot; split horizon is not a complete cure</div>
+      <p style="margin-bottom:0;">Split horizon stops the two-router loop in FIG 2. A loop that runs through three or more routers can still form, because no single router sees itself being advertised its own route. That is why poisoning, hold-down and triggered updates exist alongside it &mdash; each covers a case the others miss.</p>
+    </div>
+
+    <h3 class="sub-title">Seeing split horizon in a debug</h3>
+    <p>Using the lab from 5.1: R1 learns LAN B (192.168.2.0/24) from R2 on g0/1. Watch what it leaves out when it sends back on that same interface.</p>
+    <div class="cli">
+<span class="prompt">R1#</span> <span class="kw">debug ip rip</span>
+RIP protocol debugging is on
+RIP: received v2 update from <span class="val">192.168.12.2</span> on GigabitEthernet0/1
+      <span class="val">192.168.2.0/24</span> via 0.0.0.0 in 1 hops
+RIP: sending v2 update to 224.0.0.9 via GigabitEthernet0/1 (192.168.12.1)
+RIP: build update entries
+        <span class="val">192.168.1.0/24</span> via 0.0.0.0, metric 1, tag 0
+<span class="comment">192.168.2.0/24 is missing from the update sent out g0/1 &mdash; R1 learned it there.</span>
+<span class="comment">(Cisco adds the hop when sending, so a connected network goes out with metric 1.)</span>
+    </div>
+    <p>To turn the behavior off on an interface for a lab experiment, use <code class="ic">no ip split-horizon</code>; <code class="ic">ip split-horizon</code> turns it back on. Do this on a lab router only.</p>
+  </section>
+
+  <!-- 4. GLOSSARY -->
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">04</span>
+      <h2 class="block-title">Terms to lock in before the next class</h2>
+    </div>
+    <div class="term-grid">
+      <div class="term">
+        <h4>Invalid timer</h4>
+        <p>180 s without an update marks a route unreachable (metric 16). The route stays in the table, and is advertised as down, until the flush timer ends.</p>
+      </div>
+      <div class="term">
+        <h4>Hold-down</h4>
+        <p>A period after a route is declared unreachable in which the router ignores worse information about it.</p>
+      </div>
+      <div class="term">
+        <h4>Split horizon</h4>
+        <p>A route is never advertised out of the interface it was learned on.</p>
+      </div>
+      <div class="term">
+        <h4>Poison reverse</h4>
+        <p>A route <em>is</em> advertised back out its learned interface, but with metric 16 so the neighbor won&rsquo;t use it.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. CHECK-IN -->
+  <section class="block" style="border-bottom:none;">
+    <div class="block-head">
+      <span class="block-num">05</span>
+      <h2 class="block-title">Check-in questions (last 10 minutes)</h2>
+    </div>
+    <div class="quiz">
+      <div class="q">
+        <div class="qn">Q1</div>
+        <p>On default timers, R1 last heard about 192.168.2.0/24 exactly 200 seconds ago. What state is the route in?</p>
+        <details class="ans"><summary>Reveal answer</summary><div class="a">Invalid. The 180-second invalid timer has expired, so the route is marked with metric 16 and advertised as unreachable. It is not yet flushed, because the 240-second flush timer has not expired.</div></details>
+      </div>
+      <div class="q">
+        <div class="qn">Q2</div>
+        <p>What is the difference between split horizon and poison reverse?</p>
+        <details class="ans"><summary>Reveal answer</summary><div class="a">Split horizon stays silent: the route is simply left out of updates sent on the interface it was learned from. Poison reverse speaks up: the route is included, but with metric 16, so the neighbor is explicitly told not to use it.</div></details>
+      </div>
+      <div class="q">
+        <div class="qn">Q3</div>
+        <p>If split horizon is on, why are hold-down timers and triggered updates still needed?</p>
+        <details class="ans"><summary>Reveal answer</summary><div class="a">Split horizon only prevents loops between directly connected pairs. A loop through three or more routers can still form, and bad news still has to spread quickly. Hold-down blocks stale information from reinstating a dead route, and triggered updates spread the failure at once.</div></details>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- =====================================================================
+     5.3
+     ===================================================================== -->
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="course-tag"><span class="dot"></span>NCS 485 &middot; Routing and Switching &middot; Unit 5: Distance Vector Protocols</div>
+    <h1 class="title">Limitations of RIP in Large Networks</h1>
+    <p class="subtitle">Everything that makes RIP easy to run &mdash; a simple metric, a hard ceiling, a blunt update schedule &mdash; becomes a cost as the network grows.</p>
+    <div class="meta-row">
+      <div><strong>Section</strong> 5.3</div>
+    </div>
+  </div>
+</header>
+<div class="wrap">
+
+  <!-- 0. OBJECTIVES -->
+  <section class="block" style="padding-top:44px;">
+    <div class="block-head">
+      <span class="block-num">00</span>
+      <h2 class="block-title">By the end of this hour</h2>
+    </div>
+    <ul class="obj-list">
+      <li>Explain why hop count can select a poor path, using bandwidth as the counter-example.</li>
+      <li>Explain the 15-hop ceiling and why it exists.</li>
+      <li>Estimate how slowly RIP detects and spreads a failure.</li>
+      <li>Calculate the periodic update load created by a large routing table.</li>
+      <li>Name RIP&rsquo;s design and security limits, and say when RIP is still a sensible choice.</li>
+    </ul>
+  </section>
+
+  <!-- 1. HOP COUNT -->
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">01</span>
+      <h2 class="block-title">Hop count is not cost</h2>
+    </div>
+    <p class="lede">RIP counts routers. It does not know whether a link is a gigabit fiber run or a 128 kbps serial line, how busy it is, or how long a packet takes to cross it. Every link is worth exactly one hop.</p>
+
+    <div class="panel">
+      <div class="panel-label">FIG 1 &middot; two paths to the same network</div>
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 860 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Router R1 reaches Net Z behind router R3 by two paths: a direct 128 kbps serial link that RIP counts as 1 hop, or a path through R2 and R4 over three 1 Gbps links that RIP counts as 3 hops. RIP chooses the slow direct link">
+          <text x="430" y="26" text-anchor="middle" class="s-cap">Same destination, two paths</text>
+
+          <!-- routers -->
+          <circle cx="90" cy="120" r="32" class="s-dev"/>
+          <text x="90" y="125" text-anchor="middle" class="s-node">R1</text>
+          <circle cx="770" cy="120" r="32" class="s-dev"/>
+          <text x="770" y="125" text-anchor="middle" class="s-node">R3</text>
+          <text x="770" y="172" text-anchor="middle" class="s-lbl">Net Z behind R3</text>
+          <circle cx="330" cy="230" r="28" class="s-dev"/>
+          <text x="330" y="235" text-anchor="middle" class="s-node">R2</text>
+          <circle cx="530" cy="230" r="28" class="s-dev"/>
+          <text x="530" y="235" text-anchor="middle" class="s-node">R4</text>
+
+          <!-- path A: direct, slow -->
+          <line x1="122" y1="120" x2="738" y2="120" stroke="var(--coral)" stroke-width="4"/>
+          <text x="430" y="100" text-anchor="middle" class="s-lbl-co">Serial &middot; 128 kbps &middot; 1 hop</text>
+          <text x="430" y="142" text-anchor="middle" class="s-lbl-co">RIP metric 1 &mdash; RIP chooses this path</text>
+
+          <!-- path B: three fast links -->
+          <line x1="119" y1="133" x2="304" y2="218" stroke="var(--teal)" stroke-width="2.5"/>
+          <line x1="358" y1="230" x2="502" y2="230" stroke="var(--teal)" stroke-width="2.5"/>
+          <line x1="556" y1="218" x2="741" y2="133" stroke="var(--teal)" stroke-width="2.5"/>
+          <text x="180" y="192" text-anchor="middle" class="s-lbl-hi">1 Gbps</text>
+          <text x="430" y="220" text-anchor="middle" class="s-lbl-hi">1 Gbps</text>
+          <text x="680" y="192" text-anchor="middle" class="s-lbl-hi">1 Gbps</text>
+          <text x="430" y="278" text-anchor="middle" class="s-lbl-hi">3 hops &middot; RIP metric 3 &mdash; ignored, despite being thousands of times faster</text>
+        </svg>
+      </div>
+    </div>
+
+    <p>Bandwidth, delay, load and reliability all go unseen. RIP will send bulk traffic down the serial line, congesting it, while the fast path sits idle. Protocols with richer metrics (OSPF uses link cost; EIGRP combines bandwidth and delay) avoid this &mdash; Unit 6.</p>
+  </section>
+
+  <!-- 2. CEILING -->
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">02</span>
+      <h2 class="block-title">The 15-hop ceiling</h2>
+    </div>
+    <p class="lede">A metric of 16 means unreachable, so a RIP network can be at most 15 routers across. Any destination further away simply does not exist as far as RIP is concerned.</p>
+
+    <div class="panel">
+      <div class="panel-label">FIG 2 &middot; every value a RIP metric can take</div>
+      <div class="hopbar" aria-label="Hop counts from 1 to 16; 16 is unreachable">
+        <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span><span>11</span><span>12</span><span>13</span><span>14</span><span class="warn">15</span><span class="bad">16</span>
+      </div>
+      <p style="font-size:14px; color:var(--ink-dim); margin:8px 0 0;">15 is the last usable hop. 16 (coral) means unreachable.</p>
+    </div>
+
+    <p>The ceiling is not an arbitrary choice. It is the price of stopping count-to-infinity (5.2): the metric has to end somewhere, and it has to end soon enough that the counting finishes within minutes. A larger infinity would make loops last longer.</p>
+  </section>
+
+  <!-- 3. CONVERGENCE AND OVERHEAD -->
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">03</span>
+      <h2 class="block-title">Slow to converge, heavy to run</h2>
+    </div>
+    <p class="lede">RIP&rsquo;s timers were chosen for simplicity, not speed. That shows up in two ways: how long a failure takes to notice and spread, and how much bandwidth the routine updates consume.</p>
+
+    <div class="table-wrap">
+      <table style="min-width:640px;">
+        <thead>
+          <tr><th>Problem</th><th>Cause</th><th>Consequence</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="hi">Slow failure detection</td><td class="dim">Invalid timer of 180 s</td><td class="dim">If a neighbor dies silently, a route can stay usable in the table for up to 3 minutes</td></tr>
+          <tr><td class="hi">Slow spread of news</td><td class="dim">One hop per 30 s update</td><td class="dim">Across a 15-hop chain without triggered updates: 15 &times; 30 s = 450 s, about 7.5 minutes</td></tr>
+          <tr><td class="hi">Loops during convergence</td><td class="dim">Count-to-infinity</td><td class="dim">Packets bounce between routers until TTL expires</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="sub-title">The cost of sending everything, every time</h3>
+    <p>Because the entire table goes out every 30 seconds, update traffic grows in step with table size &mdash; whether or not anything changed. Each message holds at most 25 routes.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Routes in table</th><th>Messages per update</th><th>Data every 30 s, per interface</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="hi">100</td><td>4</td><td class="dim">about 2 KB</td></tr>
+          <tr><td class="hi">500</td><td>20</td><td class="dim">about 10 KB</td></tr>
+          <tr><td class="hi">1,000</td><td>40</td><td class="dim">about 20 KB &mdash; roughly 5.4 kbps, over 8% of a 64 kbps link</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Those figures ignore IP and UDP headers, and every RIP interface pays them. On a modern LAN this is small; on a slow WAN link, most of it is repeating information the neighbor already has.</p>
+  </section>
+
+  <!-- 4. DESIGN & SECURITY -->
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">04</span>
+      <h2 class="block-title">Design and security limits</h2>
+    </div>
+    <ul>
+      <li><strong>Flat design.</strong> RIP has no areas or hierarchy, and its only summarization is at classful boundaries, so every router carries every route.</li>
+      <li><strong>RIPv1 is classful.</strong> No VLSM, and it fails on discontiguous networks.</li>
+      <li><strong>Weak security.</strong> RIPv1 has no authentication at all, so anyone on the segment can inject routes. RIPv2 offers plain-text or MD5 authentication, and RIPng leaves it entirely to IPsec.</li>
+      <li><strong>Equal-cost balancing only.</strong> Unequal paths cannot be shared, so a spare, slower path sits idle.</li>
+    </ul>
+
+    <div class="panel" style="border-left:3px solid var(--amber);">
+      <div class="panel-label">COMMON MIX-UP &middot; why auto-summary breaks discontiguous networks</div>
+      <p style="margin-bottom:0;">Suppose 10.1.0.0/16 and 10.2.0.0/16 sit at opposite ends of a network, separated by a 172.16.0.0 link. With auto-summary on, each end advertises the classful summary <strong>10.0.0.0/8</strong> across the 172.16 link. The middle routers now see two equal routes to &ldquo;10.0.0.0/8&rdquo; from opposite directions, and traffic is split unpredictably. The fix is RIPv2 with <code class="ic">no auto-summary</code>.</p>
+    </div>
+
+    <p>RIPv2 MD5 authentication takes a key chain and one command per interface:</p>
+    <div class="cli">
+<span class="prompt">R1(config)#</span> <span class="kw">key chain</span> <span class="val">RIPKEY</span>
+<span class="prompt">R1(config-keychain)#</span> <span class="kw">key</span> <span class="val">1</span>
+<span class="prompt">R1(config-keychain-key)#</span> <span class="kw">key-string</span> <span class="val">S3cretKey</span>
+<span class="prompt">R1(config)#</span> <span class="kw">interface</span> <span class="val">g0/1</span>
+<span class="prompt">R1(config-if)#</span> <span class="kw">ip rip authentication mode md5</span>
+<span class="prompt">R1(config-if)#</span> <span class="kw">ip rip authentication key-chain</span> <span class="val">RIPKEY</span>
+    </div>
+    <p>Both ends of the link must use the same key, or the routers will silently ignore each other&rsquo;s updates.</p>
+  </section>
+
+  <!-- 5. WHEN RIP FITS -->
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">05</span>
+      <h2 class="block-title">When RIP is still the right tool</h2>
+    </div>
+    <p class="lede">These limits do not make RIP useless. They define where it is a sensible choice and where another protocol should take over.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Scenario</th><th>Better fit</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="hi">Small lab or classroom network, a handful of routers</td><td class="dim">RIPv2 &mdash; quick to configure, easy to observe and debug</td></tr>
+          <tr><td class="hi">Small office, one path between sites, no redundancy</td><td class="dim">RIPv2 &mdash; the simplicity is worth more than the missing features</td></tr>
+          <tr><td class="hi">Older equipment that only speaks RIP</td><td class="dim">RIP &mdash; near-universal support</td></tr>
+          <tr><td class="hi">More than 15 hops between any two points</td><td class="dim">OSPF or EIGRP &mdash; RIP cannot reach that far</td></tr>
+          <tr><td class="hi">Mixed link speeds where path quality matters</td><td class="dim">OSPF or EIGRP &mdash; metrics that reflect bandwidth</td></tr>
+          <tr><td class="hi">Large, changing network needing fast failover</td><td class="dim">OSPF or EIGRP &mdash; faster convergence, less update traffic</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="lede" style="margin-top:8px;">Hold onto that last row for Unit 6: link-state protocols exist precisely to give every router the full map, so they converge faster and do not depend on rumor.</p>
+  </section>
+
+  <!-- 6. GLOSSARY -->
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">06</span>
+      <h2 class="block-title">Terms to lock in</h2>
+    </div>
+    <div class="term-grid">
+      <div class="term">
+        <h4>Convergence</h4>
+        <p>The state in which every router in the network has a consistent, correct routing table.</p>
+      </div>
+      <div class="term">
+        <h4>Auto-summary</h4>
+        <p>Summarizing routes to their classful boundary when advertising across a different major network.</p>
+      </div>
+      <div class="term">
+        <h4>Discontiguous network</h4>
+        <p>Subnets of one major network separated by a different major network.</p>
+      </div>
+      <div class="term">
+        <h4>Infinity (16)</h4>
+        <p>RIP&rsquo;s unreachable metric, which caps count-to-infinity and limits usable paths to 15 hops.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. CHECK-IN -->
+  <section class="block" style="border-bottom:none;">
+    <div class="block-head">
+      <span class="block-num">07</span>
+      <h2 class="block-title">Check-in questions (last 10 minutes)</h2>
+    </div>
+    <div class="quiz">
+      <div class="q">
+        <div class="qn">Q1</div>
+        <p>RIP prefers a 1-hop 128 kbps link over a 3-hop path made of gigabit links. Which limitation is this, and what kind of protocol avoids it?</p>
+        <details class="ans"><summary>Reveal answer</summary><div class="a">RIP&rsquo;s hop-count metric, which ignores bandwidth and delay. A protocol whose metric reflects link speed &mdash; OSPF (cost) or EIGRP (bandwidth and delay) &mdash; would choose the fast path.</div></details>
+      </div>
+      <div class="q">
+        <div class="qn">Q2</div>
+        <p>A campus has 20 routers in a straight line. Can RIP carry routes from one end to the other? Why or why not?</p>
+        <details class="ans"><summary>Reveal answer</summary><div class="a">No. The far end is 19 hops away, past the 15-hop limit. A metric of 16 means unreachable, so routers beyond hop 15 are never learned.</div></details>
+      </div>
+      <div class="q">
+        <div class="qn">Q3</div>
+        <p>A router holds 500 RIP routes. How many messages does it send on each RIP interface every 30 seconds, and why is that wasteful?</p>
+        <details class="ans"><summary>Reveal answer</summary><div class="a">20 messages (500 &divide; 25). It is wasteful because the whole table is sent every time, even when nothing has changed, so on a slow link most of the traffic repeats information the neighbor already has.</div></details>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  NCS 485 &middot; Routing and Switching &middot; Unit 5 (5.1&ndash;5.3) &middot; Distance Vector Protocols &middot; Pokhara University, BCSIT
+</footer>
+
+<script>
+(function () {
+  var MAX = 16;
+  var radios = document.querySelectorAll('input[name="ctimode"]');
+  var $ = function (id) { return document.getElementById(id); };
+  var m1 = $('cti-m1'), m2 = $('cti-m2'), b1 = $('cti-b1'), b2 = $('cti-b2');
+  var v1 = $('cti-v1'), v2 = $('cti-v2'), n1 = $('cti-n1'), n2 = $('cti-n2');
+  var link = $('cti-link1'), nstate = $('cti-nstate'), log = $('cti-log'), count = $('cti-count');
+  var next = $('cti-next'), play = $('cti-play'), reset = $('cti-reset');
+  var seq = [], idx = 0, timer = null;
+
+  function build(mode) {
+    var s = [];
+    s.push({ r1: 0, r2: 1, v1: 'connected', v2: 'via R1', down: false,
+      log: 'Before the failure: R1 is directly connected to N (0 hops). R2 reaches N through R1 (1 hop).' });
+    s.push({ r1: MAX, r2: 1, v1: 'unreachable', v2: 'via R1', down: true,
+      log: 'The link between R1 and N fails. R1 marks N unreachable. R2 has not heard yet and still believes N is 1 hop away.' });
+    if (mode === 'split') {
+      s.push({ r1: MAX, r2: MAX, v1: 'unreachable', v2: 'unreachable', down: true,
+        log: 'Split horizon: R2 learned N from R1, so it never advertised N back to R1. R1 sends a triggered update with N at metric 16 (route poisoning), and R2 marks N unreachable straight away. No loop forms.' });
+      return s;
+    }
+    var r1 = MAX, r2 = 1, turn = 1;
+    while (!(r1 >= MAX && r2 >= MAX)) {
+      if (turn === 1) {
+        var a = Math.min(MAX, r2 + 1);
+        s.push({ r1: a, r2: r2, v1: a >= MAX ? 'unreachable' : 'via R2', v2: 'via R1', down: true,
+          log: a >= MAX
+            ? 'R2 advertises N at ' + r2 + '. R1 adds 1 and reaches 16 (infinity), so R1 finally marks N unreachable.'
+            : 'R2 advertises N at ' + r2 + '. R1 adds 1 and installs N at ' + a + ' via R2, although R2\u2019s route runs back through R1.' });
+        r1 = a;
+      } else {
+        var b = Math.min(MAX, r1 + 1);
+        s.push({ r1: r1, r2: b, v1: r1 >= MAX ? 'unreachable' : 'via R2', v2: b >= MAX ? 'unreachable' : 'via R1', down: true,
+          log: b >= MAX
+            ? 'R1 advertises N at ' + r1 + '. R2 adds 1 and reaches 16. Both routers now agree N is unreachable \u2014 ' + (s.length - 1) + ' updates after the failure, roughly 8 minutes at 30 s each.'
+            : 'R1 advertises N at ' + r1 + '. R2 adds 1 and changes N to ' + b + ' via R1. Packets for N now loop between the two routers.' });
+        r2 = b;
+      }
+      turn = 3 - turn;
+    }
+    return s;
+  }
+
+  function mode() {
+    for (var i = 0; i < radios.length; i++) if (radios[i].checked) return radios[i].value;
+    return 'plain';
+  }
+
+  function render() {
+    var st = seq[idx];
+    m1.textContent = st.r1; m2.textContent = st.r2;
+    b1.style.width = (st.r1 / MAX * 100) + '%';
+    b2.style.width = (st.r2 / MAX * 100) + '%';
+    v1.textContent = st.v1; v2.textContent = st.v2;
+    n1.classList.toggle('dead', st.r1 >= MAX);
+    n2.classList.toggle('dead', st.r2 >= MAX);
+    link.classList.toggle('broken', st.down);
+    nstate.textContent = st.down ? 'down' : 'up';
+    log.textContent = st.log;
+    var last = idx === seq.length - 1;
+    next.disabled = last;
+    if (last) stop();
+    count.textContent = idx === 0 ? 'before failure' : 'step ' + idx + ' of ' + (seq.length - 1);
+  }
+
+  function stop() { if (timer) { clearInterval(timer); timer = null; } play.textContent = 'Auto-play'; }
+  function step() { if (idx < seq.length - 1) { idx++; render(); } }
+  function restart() { stop(); seq = build(mode()); idx = 0; render(); }
+
+  next.addEventListener('click', function () { stop(); step(); });
+  reset.addEventListener('click', restart);
+  play.addEventListener('click', function () {
+    if (timer) { stop(); return; }
+    if (idx === seq.length - 1) { idx = 0; render(); }
+    play.textContent = 'Pause';
+    timer = setInterval(step, 700);
+  });
+  for (var i = 0; i < radios.length; i++) radios[i].addEventListener('change', restart);
+
+  restart();
+})();
+</script>
+
+</body>
+</html>

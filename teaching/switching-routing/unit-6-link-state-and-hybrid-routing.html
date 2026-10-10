@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Unit 6 · Link-State and Hybrid Routing Protocols</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2F5F7; --paper:#FFFFFF; --ink:#18222F; --muted:#556275; --line:#D5DDE5;
+  --aqua:#1E9C9A;   /* OM3 fiber jacket: 6.1 */
+  --orange:#D9731A; /* OM1 fiber jacket: 6.2 */
+  --yellow:#B98D00; /* single-mode jacket: 6.3 */
+  --tag:#FFF6D6; --tag-ink:#4A3A00; --code-bg:#1B2533; --code-ink:#DDE6F0; --prompt:#8FC7FF;
+  --ok:#2E8B57; --warn:#B4442C;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121821; --paper:#19212C; --ink:#E4EAF1; --muted:#9AA8B8; --line:#2C3847;
+    --aqua:#3CC4C1; --orange:#F0914A; --yellow:#E2B92E;
+    --tag:#2B2616; --tag-ink:#F2E3AE; --code-bg:#0E141C; --code-ink:#DDE6F0; --prompt:#8FC7FF;
+    --ok:#5BC38A; --warn:#E5775F;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121821; --paper:#19212C; --ink:#E4EAF1; --muted:#9AA8B8; --line:#2C3847;
+  --aqua:#3CC4C1; --orange:#F0914A; --yellow:#E2B92E;
+  --tag:#2B2616; --tag-ink:#F2E3AE; --code-bg:#0E141C; --code-ink:#DDE6F0; --prompt:#8FC7FF;
+  --ok:#5BC38A; --warn:#E5775F;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 16px);scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+  font-size:1.0625rem;line-height:1.6}
+h1,h2,h3,h4{font-family:"Bricolage Grotesque","Atkinson Hyperlegible",system-ui,sans-serif;line-height:1.15;margin:0 0 .5em}
+h2{font-size:clamp(1.6rem,3.5vw,2.2rem);font-weight:800}
+h3{font-size:1.3rem;font-weight:700;margin-top:1.8em}
+h4{font-size:1.05rem;font-weight:700;margin-top:1.3em}
+p{margin:0 0 1em}
+a{color:inherit}
+code,pre,kbd{font-family:"JetBrains Mono",ui-monospace,Consolas,monospace;font-size:.88em}
+:not(pre)>code{background:color-mix(in srgb,var(--line) 55%,transparent);padding:.1em .35em;border-radius:4px}
+img,svg{max-width:100%}
+:focus-visible{outline:3px solid var(--orange);outline-offset:2px}
+
+/* layout */
+.shell{display:grid;grid-template-columns:240px minmax(0,1fr);gap:48px;max-width:1180px;margin:0 auto;padding:0 24px}
+nav.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 24px);align-self:start;padding:28px 0;font-size:.95rem}
+nav.toc p{font-weight:700;margin-bottom:.4em}
+nav.toc ol{list-style:none;margin:0;padding:0}
+nav.toc li{margin:.15em 0}
+nav.toc a{display:block;text-decoration:none;padding:.3em .6em;border-left:4px solid var(--line);color:var(--muted)}
+nav.toc a:hover{color:var(--ink)}
+nav.toc a[data-c="aqua"]{border-color:var(--aqua)}
+nav.toc a[data-c="orange"]{border-color:var(--orange)}
+nav.toc a[data-c="yellow"]{border-color:var(--yellow)}
+nav.toc .sub a{padding-left:1.4em;font-size:.9rem}
+main{max-width:76ch;padding-bottom:80px}
+@media (max-width:900px){.shell{grid-template-columns:1fr;gap:0}nav.toc{display:none}}
+
+/* hero */
+.hero{padding:40px 0 24px}
+.hero h1{font-size:clamp(2.2rem,6vw,3.6rem);font-weight:800;letter-spacing:-.02em;margin-bottom:.2em}
+.hero .unit{color:var(--muted);font-size:1.05rem;margin-bottom:.8em}
+.topo{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:12px;margin:18px 0 8px}
+.topo svg{display:block;width:100%;height:auto}
+.topo text{font-family:"JetBrains Mono",monospace;font-size:11px;fill:var(--muted)}
+.topo .rname{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:14px;fill:var(--ink)}
+.topo figcaption{font-size:.9rem;color:var(--muted);padding:4px 8px 2px}
+@media (prefers-reduced-motion: reduce){.pkt{display:none}}
+
+.objectives{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px 22px;margin:22px 0}
+.objectives h3{margin-top:0}
+.objectives ul{margin:0;padding-left:1.2em}
+
+/* sections */
+section.unit-part{padding-top:48px;margin-top:24px;border-top:6px solid var(--c)}
+section.unit-part > .num{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;color:var(--c);font-size:1rem;margin-bottom:.2em}
+ul,ol{padding-left:1.3em}
+li{margin:.25em 0}
+
+/* mnemonic "cable tag" */
+.tag{position:relative;background:var(--tag);color:var(--tag-ink);border-radius:6px 14px 14px 6px;padding:16px 20px 16px 44px;margin:1.4em 0;
+  border:1px dashed color-mix(in srgb,var(--tag-ink) 35%,transparent)}
+.tag::before{content:"";position:absolute;left:16px;top:20px;width:12px;height:12px;border-radius:50%;border:3px solid var(--tag-ink);opacity:.55}
+.tag .t{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:1.15rem;margin-bottom:.35em}
+.tag ul{margin:.3em 0 0}
+.tag b.l{font-size:1.15em}
+
+/* tables */
+.tw{overflow-x:auto;margin:1em 0 1.4em;border:1px solid var(--line);border-radius:10px;background:var(--paper)}
+table{border-collapse:collapse;width:100%;font-size:.95rem;min-width:520px}
+th,td{padding:.55em .8em;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+thead th{font-family:"Bricolage Grotesque",sans-serif;background:color-mix(in srgb,var(--line) 40%,var(--paper))}
+tbody tr:last-child td{border-bottom:0}
+td:first-child{font-weight:700}
+
+/* code */
+pre{background:var(--code-bg);color:var(--code-ink);padding:14px 16px;border-radius:10px;overflow-x:auto;line-height:1.5;margin:1em 0 1.3em}
+pre .p{color:var(--prompt)} pre .c{color:#8A9BB0;font-style:italic}
+
+/* side-by-side */
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:1em 0}
+.duo > div{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.duo h4{margin-top:0}
+.duo ul{margin:0}
+@media (max-width:620px){.duo{grid-template-columns:1fr}}
+
+.note{border-left:4px solid var(--c,var(--orange));padding:.4em 0 .4em 1em;margin:1.2em 0;color:var(--ink)}
+.note strong{font-family:"Bricolage Grotesque",sans-serif}
+
+/* steps (true sequence) */
+ol.steps{counter-reset:s;list-style:none;padding:0}
+ol.steps>li{counter-increment:s;position:relative;padding-left:2.6em;margin:.8em 0}
+ol.steps>li::before{content:counter(s);position:absolute;left:0;top:0;width:1.8em;height:1.8em;border-radius:50%;
+  background:var(--c);color:var(--paper);font-weight:700;display:grid;place-items:center;font-size:.9rem}
+
+/* labs */
+.lab{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:1.5em 0}
+.lab h4{margin-top:0}
+.lab label{display:block;font-weight:700;margin:.6em 0 .25em;font-size:.95rem}
+.lab input{font:inherit;font-family:"JetBrains Mono",monospace;width:100%;max-width:340px;padding:.5em .7em;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.lab .out{margin-top:.9em;font-family:"JetBrains Mono",monospace;font-size:.9rem;white-space:pre-wrap;background:var(--bg);border-radius:8px;padding:.7em .9em;min-height:2.5em}
+.lab .err{color:var(--warn)}
+
+/* quiz */
+details.q{background:var(--paper);border:1px solid var(--line);border-radius:10px;margin:.6em 0;padding:0}
+details.q summary{cursor:pointer;padding:.8em 1em;font-weight:700;list-style:none}
+details.q summary::-webkit-details-marker{display:none}
+details.q summary::after{content:"Show answer";float:right;font-weight:400;font-size:.85rem;color:var(--muted)}
+details.q[open] summary::after{content:"Hide"}
+details.q .a{padding:0 1em .9em;border-top:1px dashed var(--line);padding-top:.7em}
+.theme-btn{font:inherit;font-size:.85rem;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:.35em .9em;cursor:pointer;margin-top:1em}
+footer{color:var(--muted);font-size:.9rem;margin-top:3em}
+</style>
+</head>
+<body><div style="font:14px/1.4 Inter,-apple-system,Segoe UI,sans-serif;background:#0b1d3a;padding:10px 16px;"><a href="/teaching/switching-routing.html" style="color:#fbf9f3;text-decoration:none;">&larr; Switching &amp; Routing &middot; all units</a></div>
+<div class="shell">
+<nav class="toc" aria-label="Contents">
+  <p>Contents</p>
+  <ol>
+    <li><a href="#top">Overview & objectives</a></li>
+    <li><a href="#ls" data-c="aqua">6.1 Link-state protocols</a></li>
+    <li><a href="#ospf" data-c="orange">6.2 OSPF fundamentals</a></li>
+    <li class="sub"><a href="#terms">Key terms</a></li>
+    <li class="sub"><a href="#nvadj">Neighbour vs adjacency</a></li>
+    <li class="sub"><a href="#operation">How OSPF works</a></li>
+    <li class="sub"><a href="#cost">Cost metric</a></li>
+    <li class="sub"><a href="#config">Configuration</a></li>
+    <li class="sub"><a href="#rid">Router ID & loopbacks</a></li>
+    <li class="sub"><a href="#verify">Verification</a></li>
+    <li><a href="#eigrp" data-c="yellow">6.3 EIGRP & comparison</a></li>
+    <li><a href="#mnemonics">All mnemonics</a></li>
+    <li><a href="#check">Self-check quiz</a></li>
+  </ol>
+  <button class="theme-btn" id="themeBtn" type="button">Switch light/dark</button>
+</nav>
+
+<main>
+<header class="hero" id="top">
+  <p class="unit">Unit 6 · 6 teaching hours</p>
+  <h1>Dynamic routing: link-state and hybrid protocols</h1>
+  <p>Distance-vector routers trust what their neighbours tell them. Link-state routers draw their own map. This unit shows how that difference plays out in Open Shortest Path First (OSPF), how to configure and verify single-area OSPF, and where Enhanced Interior Gateway Routing Protocol (EIGRP) fits between the two worlds.</p>
+
+  <figure class="topo">
+    <svg viewBox="0 0 640 300" role="img" aria-label="Lab topology: Corp router connected to SF and LA routers over serial links and to Boulder over Ethernet, with Hello packets moving on each link">
+      <defs>
+        <path id="l1" d="M320 150 L120 70"/>
+        <path id="l2" d="M320 150 L520 70"/>
+        <path id="l3" d="M320 150 L320 260"/>
+      </defs>
+      <g stroke="var(--line)" stroke-width="4" fill="none">
+        <use href="#l1"/><use href="#l2"/><use href="#l3"/>
+      </g>
+      <g class="pkt">
+        <circle r="6" fill="var(--orange)"><animateMotion dur="3s" repeatCount="indefinite"><mpath href="#l1"/></animateMotion></circle>
+        <circle r="6" fill="var(--orange)"><animateMotion dur="3s" begin="1s" repeatCount="indefinite" keyPoints="1;0" keyTimes="0;1"><mpath href="#l2"/></animateMotion></circle>
+        <circle r="6" fill="var(--aqua)"><animateMotion dur="2.4s" begin=".5s" repeatCount="indefinite"><mpath href="#l3"/></animateMotion></circle>
+      </g>
+      <g font-family="JetBrains Mono">
+        <text x="175" y="98">S0/0 172.16.10.0/30</text>
+        <text x="395" y="98">S0/1 172.16.10.4/30</text>
+        <text x="330" y="212">Fa0/0 10.10.10.0/24</text>
+      </g>
+      <g>
+        <rect x="270" y="126" width="100" height="48" rx="10" fill="var(--paper)" stroke="var(--ink)" stroke-width="2"/>
+        <text class="rname" x="320" y="155" text-anchor="middle">Corp</text>
+        <rect x="70" y="46" width="100" height="48" rx="10" fill="var(--paper)" stroke="var(--ink)" stroke-width="2"/>
+        <text class="rname" x="120" y="75" text-anchor="middle">SF</text>
+        <rect x="470" y="46" width="100" height="48" rx="10" fill="var(--paper)" stroke="var(--ink)" stroke-width="2"/>
+        <text class="rname" x="520" y="75" text-anchor="middle">LA</text>
+        <rect x="270" y="236" width="100" height="48" rx="10" fill="var(--paper)" stroke="var(--ink)" stroke-width="2"/>
+        <text class="rname" x="320" y="265" text-anchor="middle">Boulder</text>
+      </g>
+      <text x="120" y="118" text-anchor="middle">Local network 192.168.10.0/24</text>
+      <text x="520" y="118" text-anchor="middle">Local network 192.168.20.0/24</text>
+    </svg>
+    <figcaption>The running example for this unit, from the chapter. Corp, SF (San Francisco), LA (Los Angeles) and Boulder are router names; S0/0 means Serial interface 0/0 and Fa0/0 means FastEthernet interface 0/0. Orange dots are Hello packets on point-to-point serial links; the aqua dot is a Hello packet on the Ethernet link, where a designated router (DR) and backup designated router (BDR) are elected.</figcaption>
+  </figure>
+
+  <div class="objectives">
+    <h3>By the end of this unit you should be able to</h3>
+    <ul>
+      <li>Explain the characteristics of link-state routing protocols and contrast them with distance-vector protocols.</li>
+      <li>Describe how OSPF discovers neighbours, floods Link-State Advertisements (LSAs) and computes routes with the Shortest Path First (SPF) algorithm, also called Dijkstra's algorithm.</li>
+      <li>Calculate OSPF cost and wildcard masks, then configure single-area OSPF on a small network.</li>
+      <li>Verify OSPF with Cisco <code>show</code> commands and interpret their output.</li>
+      <li>Introduce EIGRP and compare Routing Information Protocol (RIP), OSPF and EIGRP.</li>
+    </ul>
+  </div>
+</header>
+
+<!-- ============ 6.1 ============ -->
+<section class="unit-part" id="ls" style="--c:var(--aqua)">
+  <div class="num">6.1</div>
+  <h2>Characteristics of link-state protocols</h2>
+  <p>A <strong>link-state</strong> router learns the state of every link in its area, stores it in a <em>link-state database (LSDB)</em>, and runs the <strong>Dijkstra Shortest Path First (SPF)</strong> algorithm itself. Every router in an area ends up with the same map and calculates its own best paths from it.</p>
+
+  <div class="duo">
+    <div>
+      <h4>Distance vector (RIP)</h4>
+      <ul>
+        <li>Knows only distance and direction ("the network is 3 hops that way").</li>
+        <li>Sends the whole routing table periodically (RIP: every 30 s).</li>
+        <li>"Routing by rumour": trusts neighbours' tables.</li>
+        <li>Bellman-Ford algorithm; metric is hop count (max 15).</li>
+        <li>Slow convergence; prone to loops without extra fixes.</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Link state (OSPF, Intermediate System to Intermediate System, IS-IS)</h4>
+      <ul>
+        <li>Knows the full topology of its area.</li>
+        <li>Sends small updates only when something changes (event-triggered).</li>
+        <li>Each router computes routes independently.</li>
+        <li>Dijkstra SPF algorithm; metric is cost (bandwidth-based).</li>
+        <li>Fast convergence, scalable with areas, but uses more processor (CPU) time and memory.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Key characteristics</h3>
+  <ul>
+    <li><strong>Three tables:</strong> neighbour table, topology table (LSDB) and routing table.</li>
+    <li><strong>Hello protocol</strong> discovers neighbours and keeps the relationship alive.</li>
+    <li><strong>LSAs are flooded</strong> so all routers in the area have identical databases.</li>
+    <li><strong>Triggered, partial updates</strong> instead of periodic full tables, so less bandwidth is used.</li>
+    <li><strong>Hierarchical design</strong> using areas, which limits flooding and contains instability.</li>
+    <li><strong>Classless:</strong> supports Variable Length Subnet Masking (VLSM), Classless Inter-Domain Routing (CIDR) and discontiguous networks.</li>
+    <li><strong>Trade-off:</strong> needs more memory and CPU and is harder to design and configure.</li>
+  </ul>
+
+  <div class="tag">
+    <div class="t">Mnemonic: link-state routers are CHEFS</div>
+    <p>They cook their own routes from the full list of ingredients instead of eating someone else's leftovers.</p>
+    <ul>
+      <li><b class="l">C</b>omplete map of the area (LSDB)</li>
+      <li><b class="l">H</b>ierarchical design using areas</li>
+      <li><b class="l">E</b>vent-triggered updates, not periodic</li>
+      <li><b class="l">F</b>ast convergence</li>
+      <li><b class="l">S</b>PF (Dijkstra) calculated on every router</li>
+    </ul>
+  </div>
+
+  <h3>Interior vs exterior protocols</h3>
+  <ul>
+    <li><strong>IGP (Interior Gateway Protocol):</strong> routes inside one autonomous system (AS). Examples: RIP, OSPF, EIGRP, IS-IS.</li>
+    <li><strong>EGP (Exterior Gateway Protocol):</strong> routes between autonomous systems. The Internet uses Border Gateway Protocol (BGP).</li>
+    <li>An OSPF router that connects to another routing domain or AS is an <strong>Autonomous System Boundary Router (ASBR)</strong>.</li>
+  </ul>
+</section>
+
+<!-- ============ 6.2 ============ -->
+<section class="unit-part" id="ospf" style="--c:var(--orange)">
+  <div class="num">6.2</div>
+  <h2>OSPF fundamentals</h2>
+  <p><strong>Open Shortest Path First</strong> is an open-standard (RFC 2328, OSPFv2 for IPv4) link-state IGP. Because it is not vendor-owned, it runs on Cisco and non-Cisco routers alike, which is the main reason for its popularity.</p>
+
+  <h3>Main features</h3>
+  <ul>
+    <li>Supports areas and a hierarchical design; <strong>area 0 is the backbone</strong> and every other area must connect to it.</li>
+    <li>Minimises update traffic with triggered, multicast updates.</li>
+    <li>Supports VLSM/CIDR; no auto-summarisation.</li>
+    <li>No hop-count limit, unlike RIP's 15.</li>
+    <li>Load-balances across equal-cost paths (4 by default on Cisco).</li>
+    <li>Administrative distance is <strong>110</strong>.</li>
+    <li>OSPFv3 carries the same ideas to IPv6.</li>
+  </ul>
+
+  <h3 id="areas">Areas and special routers</h3>
+  <ul>
+    <li><strong>Backbone area (area 0):</strong> every OSPF design must have one.</li>
+    <li><strong>ABR (Area Border Router):</strong> has interfaces in area 0 and in at least one other area.</li>
+    <li><strong>ASBR (Autonomous System Boundary Router):</strong> connects OSPF to an external routing domain.</li>
+    <li>Why use areas: smaller routing tables, faster convergence, and problems stay inside one area.</li>
+  </ul>
+
+  <h3 id="terms">Key terminology</h3>
+  <p>The chapter lists fifteen terms to learn before studying how OSPF works. All fifteen are below, grouped so related ideas sit together, followed by the other terms the chapter uses later.</p>
+
+  <h4>Routers and their relationships</h4>
+  <div class="tw"><table>
+    <thead><tr><th>Term</th><th>Meaning</th><th>Remember</th></tr></thead>
+    <tbody>
+      <tr><td>Link</td><td>A network or router interface assigned to a network. Once an interface is added to the OSPF process it is a link, with an up/down state and one or more IP addresses.</td><td>Interface in OSPF = link.</td></tr>
+      <tr><td>Router ID (RID)</td><td>An IP address used to identify the router; OSPF's "name" for it. Cisco uses the highest loopback address, or if there is none, the highest active physical interface address (the <code>router-id</code> command overrides both).</td><td>Real Love Prevails.</td></tr>
+      <tr><td>Neighbour</td><td>Two or more routers with an interface on a common network, for example the two ends of a serial link. They must agree on area ID, stub-area flag, authentication password (if used), and Hello and Dead intervals.</td><td>A Stubborn Admin Hates mismatches.</td></tr>
+      <tr><td>Adjacency</td><td>A relationship between two OSPF routers that allows direct exchange of route updates. Not every neighbour becomes adjacent: on multi-access networks routers become adjacent only with the DR and BDR; on point-to-point and point-to-multipoint links they become adjacent with the router at the other end.</td><td>Every adjacency is a neighbour, but not every neighbour is adjacent.</td></tr>
+      <tr><td>Designated router (DR)</td><td>Elected on a broadcast (multi-access) network to reduce the number of adjacencies and to distribute routing information to and from the other routers on that network. Highest priority wins; a tie is broken by highest router ID.</td><td>Priority first, RID second, zero never.</td></tr>
+      <tr><td>Backup designated router (BDR)</td><td>A hot standby for the DR. It receives all routing updates from adjacent routers but does not send out LSA updates itself unless it takes over.</td><td>The vice-captain: listens to everything, speaks only when the captain is gone.</td></tr>
+      <tr><td>DROTHER</td><td>Any router on a multi-access segment that did not win the DR or BDR election. It still forms a full neighbour relationship with every router on the segment, but becomes fully adjacent only with the DR and BDR — never with another DROTHER.</td><td>Everyone else at the table, who orders through the DR, not each other.</td></tr>
+      <tr><td>Hello protocol</td><td>Provides dynamic neighbour discovery and keeps neighbour relationships alive. Hello packets are sent to multicast address 224.0.0.5.</td><td>No Hello, no neighbour.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h4>Databases and advertisements</h4>
+  <div class="tw"><table>
+    <thead><tr><th>Term</th><th>Meaning</th><th>Remember</th></tr></thead>
+    <tbody>
+      <tr><td>Neighbourship database</td><td>A list of all OSPF routers whose Hello packets have been seen, with details such as each router's RID and state. Viewed with <code>show ip ospf neighbor</code>.</td><td>Who I know.</td></tr>
+      <tr><td>Topological database</td><td>All the information from the LSA packets received for an area. It is the input to the Dijkstra algorithm that computes the shortest path to every network. Viewed with <code>show ip ospf database</code>.</td><td>What the map looks like.</td></tr>
+      <tr><td>Link State Advertisement (LSA)</td><td>An OSPF data packet containing link-state and routing information, shared only with routers that have formed an adjacency. LSAs update and maintain the topological database.</td><td>LSAs are the pieces of the map.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="tag">
+    <div class="t">Mnemonic: "Who, What, Where"</div>
+    <p>Neighbourship database = <b>who</b> I know. Topological database = <b>what</b> the map looks like. Routing table = <b>where</b> to send each packet.</p>
+  </div>
+
+  <h4>Areas</h4>
+  <div class="tw"><table>
+    <thead><tr><th>Term</th><th>Meaning</th><th>Remember</th></tr></thead>
+    <tbody>
+      <tr><td>OSPF area</td><td>A group of contiguous networks and routers sharing a common area ID. All routers in the same area have the same topology table. A router can belong to several areas because the area ID is set per interface. A multi-area design must include area 0, the backbone.</td><td>Same area, same map.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h4>Network types</h4>
+  <p>The network type decides whether a DR/BDR election happens and how often Hellos are sent.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Network type</th><th>Meaning and examples</th><th>DR/BDR elected?</th><th>Hello / Dead</th></tr></thead>
+    <tbody>
+      <tr><td>Broadcast (multi-access)</td><td>Many devices on one network, and one packet can reach all of them. Example: Ethernet.</td><td>Yes</td><td>10 s / 40 s</td></tr>
+      <tr><td>Nonbroadcast multi-access (NBMA)</td><td>Many devices on one network but no broadcast ability. Examples: Frame Relay, X.25, Asynchronous Transfer Mode (ATM). Needs special OSPF configuration.</td><td>Yes</td><td>30 s / 120 s</td></tr>
+      <tr><td>Point-to-point</td><td>A direct connection between exactly two routers, either physical (a serial cable) or logical (a Frame Relay circuit).</td><td>No</td><td>10 s / 40 s</td></tr>
+      <tr><td>Point-to-multipoint</td><td>One interface on one router connected to several routers, all on the same network. Can be further classified as broadcast or nonbroadcast.</td><td>No</td><td>30 s / 120 s</td></tr>
+    </tbody>
+  </table></div>
+  <div class="tag">
+    <div class="t">Mnemonic: "Big Networks Pick Presidents"</div>
+    <p><b>B</b>roadcast and <b>N</b>BMA networks hold a DR/BDR election; <b>P</b>oint-to-point and <b>P</b>oint-to-multipoint do not. The two "P" types have only direct partners, so there is nobody to elect.</p>
+  </div>
+
+  <h4>Other terms used in this chapter</h4>
+  <div class="tw"><table>
+    <thead><tr><th>Term</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td>Autonomous system (AS)</td><td>A group of networks under one administration, running a common routing policy.</td></tr>
+      <tr><td>Backbone area (area 0)</td><td>The central area that all other areas must connect to.</td></tr>
+      <tr><td>Area Border Router (ABR)</td><td>A router with interfaces in area 0 and at least one other area.</td></tr>
+      <tr><td>Autonomous System Boundary Router (ASBR)</td><td>A router that connects OSPF to an external routing domain or another AS.</td></tr>
+      <tr><td>Link State Update (LSU)</td><td>The packet that carries one or more LSAs during flooding.</td></tr>
+      <tr><td>LSA flooding</td><td>Sending LSAs to every router in the area so all have the same topology map; each update must be acknowledged.</td></tr>
+      <tr><td>AllSPFRouters / AllDRouters</td><td>The multicast groups 224.0.0.5 (all OSPF routers) and 224.0.0.6 (DR and BDR only).</td></tr>
+      <tr><td>Shortest Path First (SPF) tree</td><td>The tree each router builds with itself as the root, using the Dijkstra algorithm, containing only networks in its own area.</td></tr>
+      <tr><td>Cost</td><td>OSPF's metric: 10<sup>8</sup> ÷ interface bandwidth on Cisco routers, summed along the path. Can be changed with <code>ip ospf cost</code>.</td></tr>
+      <tr><td>Process ID</td><td>A number from 1 to 65,535 that identifies an OSPF instance on one router. It is locally significant and need not match between routers.</td></tr>
+      <tr><td>Area ID</td><td>0 to 4,294,967,295, or dotted-decimal form such as 0.0.0.0. Must match on both ends of a link.</td></tr>
+      <tr><td>Wildcard mask</td><td>Used in the <code>network</code> command: 0 means "must match", 255 means "don't care". Equal to block size minus one.</td></tr>
+      <tr><td>Loopback interface</td><td>A virtual, software-only interface that is always up, used for a stable RID and for testing. Usually given a /32 host mask.</td></tr>
+      <tr><td>Passive interface</td><td>An interface on which OSPF stops sending Hellos, so no neighbour forms there, while its network is still advertised.</td></tr>
+      <tr><td>Default route origination</td><td><code>default-information originate</code> makes one router advertise its default route to all others; it appears as <code>O*E2</code>.</td></tr>
+      <tr><td>Administrative distance (AD)</td><td>How trustworthy a route source is; lower wins. OSPF is 110.</td></tr>
+      <tr><td>Convergence</td><td>The time for all routers to agree on the topology after a change. OSPF converges quickly.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h4>Neighbour requirements</h4>
+  <p>Two routers become neighbours only if these values match on the shared link:</p>
+  <ul>
+    <li>Area ID</li>
+    <li>Stub-area flag</li>
+    <li>Authentication (if used)</li>
+    <li>Hello and Dead intervals</li>
+    <li>Also: same subnet and mask, and (for FULL state) the same interface MTU</li>
+  </ul>
+  <div class="tag">
+    <div class="t">Mnemonic: "A Stubborn Admin Hates mismatches"</div>
+    <ul>
+      <li><b class="l">A</b>rea ID</li>
+      <li><b class="l">S</b>tub flag</li>
+      <li><b class="l">A</b>uthentication</li>
+      <li><b class="l">H</b>ello/Dead timers</li>
+    </ul>
+  </div>
+
+  <h3 id="operation">How OSPF works</h3>
+  <p>OSPF operation happens in three stages, in this order:</p>
+  <ol class="steps">
+    <li><strong>Neighbour and adjacency initialisation.</strong> Hellos go out every enabled interface to multicast <code>224.0.0.5</code>. Routers that agree on the parameters above become neighbours, then exchange database summaries until they are fully adjacent.</li>
+    <li><strong>LSA flooding.</strong> Link-state information is sent in Link State Update (LSU) packets to every router in the area and must be acknowledged, so all routers hold the same topology map.</li>
+    <li><strong>SPF tree calculation.</strong> Each router places itself at the root of a tree and uses Dijkstra's algorithm to find the lowest-cost path to every network in the area. The best paths go into the routing table.</li>
+  </ol>
+  <div class="tag">
+    <div class="t">Mnemonic: "Hello, Flood, Tree"</div>
+    <p>Think of a new student: first you say <b>hello</b> to classmates, then you get <b>flooded</b> with everyone's notes, then you draw your own <b>family tree</b> of who sits where.</p>
+  </div>
+
+  <h4>Hello and Dead timers</h4>
+  <ul>
+    <li>Broadcast and point-to-point networks: Hello <strong>10 s</strong>, Dead <strong>40 s</strong>.</li>
+    <li>NBMA and point-to-multipoint networks: Hello <strong>30 s</strong>, Dead <strong>120 s</strong>.</li>
+    <li>Rule of thumb: Dead = 4 × Hello.</li>
+  </ul>
+
+  <h4>Multicast addresses</h4>
+  <ul>
+    <li><code>224.0.0.5</code> (AllSPFRouters): Hellos, and updates sent by the DR to everyone.</li>
+    <li><code>224.0.0.6</code> (AllDRouters): updates sent by other routers to the DR and BDR only.</li>
+  </ul>
+  <div class="tag">
+    <div class="t">Mnemonic: "Five for all, six for the chiefs"</div>
+    <p>.5 reaches every OSPF router; .6 reaches only the DR and BDR.</p>
+  </div>
+  <div class="note" style="--c:var(--aqua)">
+    <p><strong>Who sends vs. who listens:</strong> on <code>224.0.0.6</code>, every router on the segment sends its update there, but only the DR and BDR are listening — traffic only flows DROTHER → DR/BDR, never the other way. On <code>224.0.0.5</code>, every router listens, including the DR itself: Hellos always go out on .5 from everyone, and the DR's own consolidated LSAs go out on .5 too. Being the main sender on an address doesn't stop a router from also being a member of that same multicast group — that's how the DR still hears its neighbours' Hellos.</p>
+  </div>
+
+  <h4>OSPF packet types</h4>
+  <p>Adjacencies are built with five packet types, which fit a restaurant story:</p>
+  <ul>
+    <li><strong>Hello</strong>: say hi to the waiter.</li>
+    <li><strong>DBD</strong> (Database Description): read the menu, a summary of what the other side has.</li>
+    <li><strong>LSR</strong> (Link-State Request): order the dishes you don't have.</li>
+    <li><strong>LSU</strong> (Link-State Update): the dishes arrive, carrying the actual LSAs.</li>
+    <li><strong>LSAck</strong>: say thank you, confirming receipt.</li>
+  </ul>
+
+  <h4>Neighbour states</h4>
+  <p>Down → Init → 2-Way → ExStart → Exchange → Loading → Full. In the chapter's logs you will see messages such as <code>from LOADING to FULL, Loading Done</code>, meaning the adjacency has just completed.</p>
+  <div class="tag">
+    <div class="t">Mnemonic: "Down In The Early Evening Lovers Fall"</div>
+    <p><b>D</b>own, <b>I</b>nit, <b>T</b>wo-Way, <b>E</b>xStart, <b>E</b>xchange, <b>L</b>oading, <b>F</b>ull.</p>
+  </div>
+
+  <h4>DR/BDR election (multi-access networks only)</h4>
+  <ul>
+    <li>Highest interface <strong>priority</strong> wins (default 1, range 0–255).</li>
+    <li>If priorities tie, the highest <strong>Router ID</strong> wins.</li>
+    <li>Priority <strong>0</strong> means the router can never become DR or BDR.</li>
+    <li>The election is not pre-emptive: a better router joining later does not take over until the DR fails.</li>
+    <li>Point-to-point links have no election; <code>show ip ospf neighbor</code> shows <code>FULL/ -</code>.</li>
+  </ul>
+  <div class="tag">
+    <div class="t">Mnemonic: "Priority first, RID second, zero never"</div>
+  </div>
+
+  <h4 id="nvadj">Neighbour vs. adjacency, visualised</h4>
+  <p>These two get used almost interchangeably, but OSPF treats them as distinct stages. On a multi-access segment, being a <em>neighbour</em> only requires matching Hello parameters — everyone gets there. Becoming <em>adjacent</em> means fully exchanging link-state databases, and that only happens between a router and the DR/BDR.</p>
+  <figure class="topo">
+    <svg viewBox="0 0 640 460" role="img" aria-label="Four routers on one broadcast segment. Dashed lines show all six neighbour pairs. Solid orange lines overlay five of those pairs to show adjacency: every pair involving the DR or BDR. The remaining pair, the two DROTHERs, has no solid line.">
+      <g stroke="var(--muted)" stroke-width="2" stroke-dasharray="5 5" fill="none" opacity=".55">
+        <line x1="320" y1="60" x2="560" y2="210"/>
+        <line x1="320" y1="60" x2="320" y2="360"/>
+        <line x1="320" y1="60" x2="80" y2="210"/>
+        <line x1="560" y1="210" x2="320" y2="360"/>
+        <line x1="560" y1="210" x2="80" y2="210"/>
+        <line x1="320" y1="360" x2="80" y2="210"/>
+      </g>
+      <g stroke="var(--orange)" stroke-width="3" fill="none">
+        <line x1="320" y1="60" x2="560" y2="210"/>
+        <line x1="320" y1="60" x2="320" y2="360"/>
+        <line x1="320" y1="60" x2="80" y2="210"/>
+        <line x1="560" y1="210" x2="320" y2="360"/>
+        <line x1="560" y1="210" x2="80" y2="210"/>
+      </g>
+      <g>
+        <rect x="270" y="36" width="100" height="48" rx="10" fill="var(--paper)" stroke="var(--ink)" stroke-width="2"/>
+        <text class="rname" x="320" y="58" text-anchor="middle">R1</text>
+        <text x="320" y="76" text-anchor="middle">DR</text>
+
+        <rect x="510" y="186" width="100" height="48" rx="10" fill="var(--paper)" stroke="var(--ink)" stroke-width="2"/>
+        <text class="rname" x="560" y="208" text-anchor="middle">R2</text>
+        <text x="560" y="226" text-anchor="middle">BDR</text>
+
+        <rect x="270" y="336" width="100" height="48" rx="10" fill="var(--paper)" stroke="var(--ink)" stroke-width="2"/>
+        <text class="rname" x="320" y="358" text-anchor="middle">R3</text>
+        <text x="320" y="376" text-anchor="middle">DROTHER</text>
+
+        <rect x="30" y="186" width="100" height="48" rx="10" fill="var(--paper)" stroke="var(--ink)" stroke-width="2"/>
+        <text class="rname" x="80" y="208" text-anchor="middle">R4</text>
+        <text x="80" y="226" text-anchor="middle">DROTHER</text>
+      </g>
+      <g>
+        <line x1="140" y1="420" x2="180" y2="420" stroke="var(--muted)" stroke-width="2" stroke-dasharray="5 5"/>
+        <text x="190" y="424">neighbour only</text>
+        <line x1="340" y1="420" x2="380" y2="420" stroke="var(--orange)" stroke-width="3"/>
+        <text x="390" y="424">neighbour + adjacent</text>
+      </g>
+    </svg>
+    <figcaption>Only the R3–R4 pair has no solid line. Both DROTHERs are neighbours — they've exchanged Hellos and match on the required parameters — but neither is the DR or BDR, so they never exchange full link-state databases with each other.</figcaption>
+  </figure>
+  <div class="note" style="--c:var(--orange)">
+    <p><strong>Trap to watch for:</strong> the neighbour/adjacency gap only exists because of the DR/BDR mechanism, and that mechanism only runs on broadcast and NBMA networks. On a point-to-point link there's just one other router to talk to — no full-mesh problem to avoid — so becoming neighbours there means becoming fully adjacent. Don't generalise the gap to every network type.</p>
+  </div>
+
+  <h3 id="cost">The OSPF cost metric</h3>
+  <p>OSPF's metric is <strong>cost</strong>. Every outgoing interface has a cost, and a route's cost is the sum of the outgoing interface costs along the path. Cisco calculates it from bandwidth:</p>
+  <p style="font-size:1.2rem;text-align:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:700">Cost = Reference bandwidth ÷ Interface bandwidth = 10<sup>8</sup> ÷ bandwidth (bps)</p>
+  <div class="tw"><table>
+    <thead><tr><th>Interface</th><th>Bandwidth</th><th>Default cost</th></tr></thead>
+    <tbody>
+      <tr><td>Serial (T1)</td><td>1.544 Mbps</td><td>64</td></tr>
+      <tr><td>Ethernet</td><td>10 Mbps</td><td>10</td></tr>
+      <tr><td>FastEthernet</td><td>100 Mbps</td><td>1</td></tr>
+      <tr><td>GigabitEthernet</td><td>1000 Mbps</td><td>1 (cost cannot go below 1)</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>Override per interface with <code>ip ospf cost 1-65535</code>.</li>
+    <li>Because 100 Mbps and 1 Gbps both cost 1, modern networks raise the reference with <code>auto-cost reference-bandwidth</code> (set it the same on every router).</li>
+    <li>Worked example: Corp's route <code>O 192.168.20.0/24 [110/65]</code> means AD 110 and cost 65 = 64 (serial link) + 1 (LA's FastEthernet LAN).</li>
+  </ul>
+  <div class="tag">
+    <div class="t">Mnemonic: "Cost = 100 over Mbps"</div>
+    <p>With the default reference, just divide 100 by the link speed in Mbps. Fast link, low cost; lower total cost wins.</p>
+  </div>
+
+  <div class="lab" id="costLab">
+    <h4>Try it: OSPF cost calculator</h4>
+    <label for="bw">Interface bandwidth (Mbps)</label>
+    <input id="bw" type="number" min="0.001" step="any" value="1.544">
+    <label for="ref">Reference bandwidth (Mbps)</label>
+    <input id="ref" type="number" min="1" step="any" value="100">
+    <div class="out" id="costOut" aria-live="polite"></div>
+  </div>
+
+  <h3 id="config">Configuring single-area OSPF</h3>
+  <p>Only two commands are needed at minimum.</p>
+  <pre><span class="p">Router(config)#</span>router ospf <i>process-id</i>          <span class="c">! 1–65535, locally significant</span>
+<span class="p">Router(config-router)#</span>network <i>address wildcard</i> area <i>area-id</i></pre>
+  <ul>
+    <li><strong>Process ID</strong> (1–65,535) is local only; neighbours may use different numbers.</li>
+    <li><strong>Area ID</strong> (0–4,294,967,295, or dotted form like <code>0.0.0.0</code>) must match on both ends of a link.</li>
+    <li>The <code>network</code> command does two jobs: it enables OSPF on matching interfaces and advertises those networks.</li>
+  </ul>
+  <div class="tag">
+    <div class="t">Mnemonic: "Process is Private, Area must Agree"</div>
+    <p>Process IDs can differ between routers. Area IDs on a shared link cannot.</p>
+  </div>
+
+  <h4>Wildcard masks</h4>
+  <ul>
+    <li>A <strong>0 bit</strong> means "must match"; a <strong>1 bit</strong> means "don't care".</li>
+    <li>Wildcard = <code>255.255.255.255</code> − subnet mask, which is the same as block size − 1 in the interesting octet.</li>
+    <li><code>0.0.0.0</code> matches one exact interface address; this is the simplest and safest choice.</li>
+    <li>/30 → block 4 → wildcard <code>0.0.0.3</code>; /29 → block 8 → <code>0.0.0.7</code>; /28 → block 16 → <code>0.0.0.15</code>; /24 → <code>0.0.0.255</code>.</li>
+  </ul>
+  <div class="tag">
+    <div class="t">Mnemonic: "Wildcard is the mask flipped: block size minus one"</div>
+  </div>
+
+  <div class="lab" id="wcLab">
+    <h4>Try it: network-statement builder</h4>
+    <label for="cidr">Interface address with prefix</label>
+    <input id="cidr" type="text" value="192.168.10.65/29" spellcheck="false" autocomplete="off">
+    <label for="area">Area</label>
+    <input id="area" type="text" value="0" spellcheck="false">
+    <div class="out" id="wcOut" aria-live="polite"></div>
+  </div>
+
+  <h4>Example: the chapter's network</h4>
+  <p>Always start with <code>show ip int brief</code> to see exactly what the router is connected to. Three routers, three styles, same result:</p>
+  <pre><span class="c">! Corp — exact interface addresses (wildcard 0.0.0.0)</span>
+<span class="p">Corp(config)#</span>router ospf 132
+<span class="p">Corp(config-router)#</span>network 10.10.10.1 0.0.0.0 area 0
+<span class="p">Corp(config-router)#</span>network 172.16.10.1 0.0.0.0 area 0
+<span class="p">Corp(config-router)#</span>network 172.16.10.5 0.0.0.0 area 0
+
+<span class="c">! SF — exact addresses, different process ID</span>
+<span class="p">SF(config)#</span>router ospf 300
+<span class="p">SF(config-router)#</span>network 192.168.10.1 0.0.0.0 area 0
+<span class="p">SF(config-router)#</span>network 172.16.10.2 0.0.0.0 area 0
+
+<span class="c">! LA — wider wildcards</span>
+<span class="p">LA(config)#</span>router ospf 100
+<span class="p">LA(config-router)#</span>network 192.168.20.0 0.0.0.255 area 0
+<span class="p">LA(config-router)#</span>network 172.16.0.0 0.0.255.255 area 0</pre>
+
+  <h4>Useful extras</h4>
+  <ul>
+    <li><code>passive-interface fa0/1</code>: stop sending Hellos on an interface (for example a LAN with no routers) while still advertising its network.</li>
+    <li><code>default-information originate</code>: on the edge router with a default route, advertise it to all OSPF routers. Other routers see it as <code>O*E2 0.0.0.0/0</code>.</li>
+  </ul>
+  <pre><span class="p">Corp(config)#</span>ip route 0.0.0.0 0.0.0.0 fa0/0
+<span class="p">Corp(config)#</span>router ospf 1
+<span class="p">Corp(config-router)#</span>default-information originate</pre>
+
+  <h3 id="rid">Router ID and loopback interfaces</h3>
+  <p>A router picks its RID once, when the OSPF process starts, using this order:</p>
+  <ol class="steps">
+    <li>The <code>router-id</code> command under <code>router ospf</code>.</li>
+    <li>The highest IP address on any up loopback interface.</li>
+    <li>The highest IP address on any active physical interface.</li>
+  </ol>
+  <ul>
+    <li>Loopbacks are virtual interfaces that never go down, which gives a stable RID. Use a <code>/32</code> host mask to save address space.</li>
+    <li>Changing the RID has no effect until you reload or run <code>clear ip ospf process</code>.</li>
+    <li>Create loopbacks before enabling OSPF so the RID is right from the start.</li>
+  </ul>
+  <pre><span class="p">Corp(config)#</span>interface loopback 0
+<span class="p">Corp(config-if)#</span>ip address 172.31.1.1 255.255.255.255
+<span class="p">Corp(config)#</span>router ospf 1
+<span class="p">Corp(config-router)#</span>router-id 223.255.255.254
+<span class="p">Corp#</span>clear ip ospf process</pre>
+  <div class="tag">
+    <div class="t">Mnemonic: "Real Love Prevails" (R → L → P)</div>
+    <p><b>R</b>outer-id command beats <b>L</b>oopback, which beats <b>P</b>hysical interface.</p>
+  </div>
+
+  <h3 id="verify">Verifying OSPF</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Command</th><th>What it shows</th></tr></thead>
+    <tbody>
+      <tr><td><code>show ip route</code></td><td>OSPF routes marked <code>O</code>, with [AD/cost], e.g. [110/65].</td></tr>
+      <tr><td><code>show ip ospf</code></td><td>Process ID, router ID, areas, SPF run statistics, LSA timers.</td></tr>
+      <tr><td><code>show ip ospf database</code></td><td>The LSDB: every router's RID (Link ID, ADV Router) per area.</td></tr>
+      <tr><td><code>show ip ospf interface</code></td><td>Interface IP, area, process ID, RID, network type, cost, priority, DR/BDR, Hello/Dead timers, neighbour count.</td></tr>
+      <tr><td><code>show ip ospf neighbor</code></td><td>Neighbour RID, priority, state (e.g. FULL/DR, FULL/ -), dead time, address, interface.</td></tr>
+      <tr><td><code>show ip protocols</code></td><td>Overview of all routing protocols: RID, networks and areas configured, routing sources, AD.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="tag">
+    <div class="t">Mnemonic: "Really Only Deal In Neighbour Problems"</div>
+    <p><b>R</b>oute, <b>O</b>spf, <b>D</b>atabase, <b>I</b>nterface, <b>N</b>eighbor, <b>P</b>rotocols: the six verification commands.</p>
+  </div>
+
+  <h4>Troubleshooting checklist</h4>
+  <ul>
+    <li><code>%OSPF: OSPF not enabled on FastEthernet0/0</code>: the interface is not matched by any <code>network</code> statement. Check the address and wildcard.</li>
+    <li>No neighbours: compare area, subnet, Hello/Dead timers and authentication with <code>show ip ospf interface</code>.</li>
+    <li>Stuck in ExStart/Exchange: check for an MTU mismatch.</li>
+    <li>Neighbour missing on a LAN: check for a <code>passive-interface</code> on that interface.</li>
+    <li>Unexpected path: compare interface costs, especially in multi-vendor networks where costs may be calculated differently.</li>
+  </ul>
+</section>
+
+<!-- ============ 6.3 ============ -->
+<section class="unit-part" id="eigrp" style="--c:var(--yellow)">
+  <div class="num">6.3</div>
+  <h2>Introduction to EIGRP</h2>
+  <p><strong>Enhanced Interior Gateway Routing Protocol</strong> was developed by Cisco and later published as an informational RFC (RFC 7868). It is an <em>advanced distance-vector</em> protocol, often called a <strong>hybrid</strong>: it shares routes with neighbours like a distance-vector protocol, but borrows link-state ideas such as Hellos, neighbour tables and triggered, partial updates.</p>
+
+  <h3>Key features</h3>
+  <ul>
+    <li><strong>DUAL</strong> (Diffusing Update Algorithm) gives loop-free paths and very fast convergence.</li>
+    <li>Keeps three tables: neighbour, topology and routing.</li>
+    <li>Hellos to multicast <code>224.0.0.10</code>, every 5 s on LANs (hold time 15 s).</li>
+    <li>Partial, bounded, triggered updates; no periodic full tables.</li>
+    <li>Administrative distance: <strong>90</strong> internal, <strong>170</strong> external; routes shown as <code>D</code>.</li>
+    <li>Composite metric: by default <strong>bandwidth</strong> (slowest link) and <strong>delay</strong> (sum of delays).</li>
+    <li>Supports equal-cost and <strong>unequal-cost</strong> load balancing (the <code>variance</code> command).</li>
+    <li>Classless, supports VLSM and both IPv4 and IPv6; maximum hop count 255 (100 by default).</li>
+  </ul>
+  <div class="tag">
+    <div class="t">Mnemonic for EIGRP metric parts: "Big Dogs Really Like Meat"</div>
+    <p><b>B</b>andwidth, <b>D</b>elay, <b>R</b>eliability, <b>L</b>oad, <b>M</b>TU. Only the first two (the "Big Dogs") are used by default.</p>
+  </div>
+
+  <h3>DUAL vocabulary</h3>
+  <ul>
+    <li><strong>Feasible Distance (FD):</strong> this router's best total metric to a destination.</li>
+    <li><strong>Reported/Advertised Distance (RD):</strong> the neighbour's own metric to that destination.</li>
+    <li><strong>Successor:</strong> the neighbour on the best path; it is placed in the routing table.</li>
+    <li><strong>Feasible Successor:</strong> a pre-computed backup kept in the topology table, used instantly if the successor fails.</li>
+    <li><strong>Feasibility condition:</strong> a backup qualifies only if its RD &lt; the current FD, which guarantees no loop.</li>
+  </ul>
+  <div class="tag">
+    <div class="t">Mnemonic: "Successor is the driver, Feasible Successor is the spare tyre"</div>
+    <p>The spare is already in the boot, so there is no waiting when the tyre goes flat. That is why EIGRP converges so fast.</p>
+  </div>
+
+  <h3>Basic EIGRP configuration</h3>
+  <pre><span class="p">Router(config)#</span>router eigrp 10            <span class="c">! AS number: MUST match on neighbours</span>
+<span class="p">Router(config-router)#</span>network 10.0.0.0
+<span class="p">Router(config-router)#</span>network 172.16.10.0 0.0.0.3
+<span class="p">Router(config-router)#</span>no auto-summary
+
+<span class="c">! Verify</span>
+<span class="p">Router#</span>show ip eigrp neighbors
+<span class="p">Router#</span>show ip eigrp topology
+<span class="p">Router#</span>show ip route eigrp</pre>
+  <div class="note" style="--c:var(--yellow)"><strong>Contrast with OSPF:</strong> OSPF's process ID is local, but EIGRP's AS number is not. Two EIGRP routers with different AS numbers will never become neighbours.</div>
+
+  <h3 id="compare">Comparing RIP, OSPF and EIGRP</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Feature</th><th>RIPv2</th><th>OSPF</th><th>EIGRP</th></tr></thead>
+    <tbody>
+      <tr><td>Type</td><td>Distance vector</td><td>Link state</td><td>Advanced distance vector (hybrid)</td></tr>
+      <tr><td>Algorithm</td><td>Bellman-Ford</td><td>Dijkstra (SPF)</td><td>DUAL</td></tr>
+      <tr><td>Metric</td><td>Hop count</td><td>Cost (bandwidth)</td><td>Bandwidth + delay (composite)</td></tr>
+      <tr><td>Administrative distance</td><td>120</td><td>110</td><td>90 internal / 170 external</td></tr>
+      <tr><td>Hop limit</td><td>15</td><td>None</td><td>255 (100 default)</td></tr>
+      <tr><td>Updates</td><td>Periodic, every 30 s, full table</td><td>Triggered, partial</td><td>Triggered, partial</td></tr>
+      <tr><td>Multicast address</td><td>224.0.0.9</td><td>224.0.0.5 / 224.0.0.6</td><td>224.0.0.10</td></tr>
+      <tr><td>Hello / Dead (LAN)</td><td>None</td><td>10 s / 40 s</td><td>5 s / 15 s hold</td></tr>
+      <tr><td>Convergence</td><td>Slow</td><td>Fast</td><td>Very fast</td></tr>
+      <tr><td>VLSM / classless</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+      <tr><td>Load balancing</td><td>Equal cost</td><td>Equal cost</td><td>Equal and unequal cost</td></tr>
+      <tr><td>Hierarchy</td><td>Flat</td><td>Areas (area 0 backbone)</td><td>Flat (summarisation possible)</td></tr>
+      <tr><td>Standard</td><td>Open</td><td>Open</td><td>Cisco-developed, published RFC 7868</td></tr>
+      <tr><td>Resource use</td><td>Low</td><td>High CPU/memory</td><td>Moderate</td></tr>
+      <tr><td>Route code</td><td>R</td><td>O</td><td>D</td></tr>
+    </tbody>
+  </table></div>
+  <div class="tag">
+    <div class="t">Mnemonic for administrative distance: "EIGRP is Early, OSPF On time, RIP Running late"</div>
+    <p>90, 110, 120: the earlier (lower) number is more trusted and wins when two protocols know the same route.</p>
+  </div>
+</section>
+
+<!-- ============ Mnemonics recap ============ -->
+<section class="unit-part" id="mnemonics" style="--c:var(--ink)">
+  <h2>All mnemonics on one page</h2>
+  <div class="tw"><table>
+    <thead><tr><th>Concept</th><th>Mnemonic</th><th>Stands for</th></tr></thead>
+    <tbody>
+      <tr><td>Link-state traits</td><td>CHEFS</td><td>Complete map, Hierarchical, Event-triggered, Fast, SPF</td></tr>
+      <tr><td>OSPF databases</td><td>Who, What, Where</td><td>Neighbourship database, topological database, routing table</td></tr>
+      <tr><td>Network types</td><td>Big Networks Pick Presidents</td><td>Broadcast and NBMA elect a DR; point-to-point and point-to-multipoint do not</td></tr>
+      <tr><td>Neighbour must match</td><td>A Stubborn Admin Hates mismatches</td><td>Area, Stub flag, Authentication, Hello/Dead</td></tr>
+      <tr><td>OSPF operation</td><td>Hello, Flood, Tree</td><td>Adjacency, LSA flooding, SPF calculation</td></tr>
+      <tr><td>Multicast</td><td>Five for all, six for the chiefs</td><td>224.0.0.5 all routers, 224.0.0.6 DR/BDR</td></tr>
+      <tr><td>Packet types</td><td>Restaurant story</td><td>Hello, DBD (menu), LSR (order), LSU (food), LSAck (thanks)</td></tr>
+      <tr><td>Neighbour states</td><td>Down In The Early Evening Lovers Fall</td><td>Down, Init, 2-Way, ExStart, Exchange, Loading, Full</td></tr>
+      <tr><td>DR election</td><td>Priority first, RID second, zero never</td><td>Highest priority, then highest RID; 0 = never DR</td></tr>
+      <tr><td>Cost</td><td>Cost = 100 over Mbps</td><td>10<sup>8</sup> ÷ bandwidth</td></tr>
+      <tr><td>Configuration</td><td>Process is Private, Area must Agree</td><td>Process ID local; area must match</td></tr>
+      <tr><td>Wildcard</td><td>Mask flipped, block size minus one</td><td>255.255.255.255 − mask</td></tr>
+      <tr><td>Router ID</td><td>Real Love Prevails</td><td>router-id → Loopback → Physical</td></tr>
+      <tr><td>Verification</td><td>Really Only Deal In Neighbour Problems</td><td>route, ospf, database, interface, neighbor, protocols</td></tr>
+      <tr><td>EIGRP metric</td><td>Big Dogs Really Like Meat</td><td>Bandwidth, Delay, Reliability, Load, MTU</td></tr>
+      <tr><td>EIGRP backup</td><td>Driver and spare tyre</td><td>Successor and Feasible Successor</td></tr>
+      <tr><td>AD values</td><td>Early, On time, Running late</td><td>EIGRP 90, OSPF 110, RIP 120</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ============ Quiz ============ -->
+<section class="unit-part" id="check" style="--c:var(--orange)">
+  <h2>Self-check quiz</h2>
+  <p>Answer in your head or on paper first, then open each question to check.</p>
+
+  <details class="q"><summary>1. Write the command that enables OSPF process 101 on a router.</summary>
+    <div class="a"><code>router ospf 101</code></div></details>
+  <details class="q"><summary>2. Which command displays details of all OSPF routing processes on a router?</summary>
+    <div class="a"><code>show ip ospf</code></div></details>
+  <details class="q"><summary>3. Which command shows interface-specific OSPF information such as cost and timers?</summary>
+    <div class="a"><code>show ip ospf interface</code></div></details>
+  <details class="q"><summary>4. Which command lists all OSPF neighbours and their state?</summary>
+    <div class="a"><code>show ip ospf neighbor</code></div></details>
+  <details class="q"><summary>5. Which command displays the collection of OSPF link states (the LSDB)?</summary>
+    <div class="a"><code>show ip ospf database</code></div></details>
+  <details class="q"><summary>6. What does Cisco use to calculate OSPF cost?</summary>
+    <div class="a">Interface bandwidth: cost = 10<sup>8</sup> ÷ bandwidth in bps (reference bandwidth 100 Mbps by default).</div></details>
+  <details class="q"><summary>7. Two routers are not forming an adjacency. List the likely causes.</summary>
+    <div class="a">Mismatched area ID, Hello/Dead timers, authentication, stub flag, or subnet/mask; MTU mismatch; interface not included by a <code>network</code> statement; or a <code>passive-interface</code> configured on the link. (A Stubborn Admin Hates mismatches.)</div></details>
+  <details class="q"><summary>8. What is the default administrative distance of OSPF, and of internal EIGRP?</summary>
+    <div class="a">OSPF 110; internal EIGRP 90.</div></details>
+  <details class="q"><summary>9. What are the default Hello and Dead timers on an Ethernet OSPF link?</summary>
+    <div class="a">Hello 10 seconds, Dead 40 seconds.</div></details>
+  <details class="q"><summary>10. Write the network statement that puts the /29 subnet containing 192.168.10.49 into area 0.</summary>
+    <div class="a"><code>network 192.168.10.48 0.0.0.7 area 0</code> (block size 8, so the subnet starts at .48 and the wildcard is 7).</div></details>
+  <details class="q"><summary>11. A router has loopback 172.31.1.1, a physical interface 192.168.20.1, and <code>router-id 1.1.1.1</code> configured. What is its RID?</summary>
+    <div class="a">1.1.1.1. The <code>router-id</code> command always wins (Real Love Prevails), once the process is cleared or the router reloads.</div></details>
+  <details class="q"><summary>12. Two Ethernet routers both have priority 1. Router X has RID 10.1.1.1 and Router Y has RID 172.31.1.4. Which becomes DR?</summary>
+    <div class="a">Router Y: priorities tie, so the higher RID wins.</div></details>
+  <details class="q"><summary>13. Why is EIGRP called a hybrid protocol?</summary>
+    <div class="a">It advertises routes to neighbours like distance vector, but uses link-state-like features: Hellos, neighbour and topology tables, and triggered partial updates. DUAL gives it loop-free fast convergence.</div></details>
+  <details class="q"><summary>14. Calculate the OSPF cost from Corp to 192.168.20.0/24 over a T1 serial link and LA's FastEthernet LAN.</summary>
+    <div class="a">64 + 1 = 65, shown in the routing table as <code>[110/65]</code>.</div></details>
+  <details class="q"><summary>15. What is a DROTHER?</summary>
+    <div class="a">A router on a multi-access segment that did not win the DR or BDR election. It still forms full neighbour relationships with every router on the segment, but becomes fully adjacent only with the DR and BDR.</div></details>
+  <details class="q"><summary>16. Two DROTHERs sit on the same Ethernet segment. Are they neighbours, adjacent, both, or neither?</summary>
+    <div class="a">Neighbours only. They exchange Hellos and match on the required parameters, but since neither is the DR or BDR, they never form a full adjacency with each other. Every adjacency is a neighbour, but not every neighbour is adjacent.</div></details>
+  <details class="q"><summary>17. True or false: a DROTHER sends its LSAs directly to another DROTHER on the same segment.</summary>
+    <div class="a">False. It sends to the DR and BDR on <code>224.0.0.6</code>; the DR then redistributes the consolidated updates on <code>224.0.0.5</code>, which every router on the segment — including the BDR — is listening to.</div></details>
+  <details class="q"><summary>18. On a point-to-point serial link, where no DR/BDR election happens, can two routers be neighbours without becoming adjacent?</summary>
+    <div class="a">No. The neighbour/adjacency gap exists only because of the DR/BDR election on multi-access and NBMA networks. With just one other router on a point-to-point link, there's no full-mesh problem to avoid, so becoming neighbours there means becoming fully adjacent.</div></details>
+</section>
+
+<footer>
+  Based on Chapter 18, "Open Shortest Path First (OSPF)", with added material on EIGRP and protocol comparison for Unit 6.
+</footer>
+</main>
+</div>
+
+<script>
+(function(){
+  // theme toggle
+  var btn=document.getElementById('themeBtn');
+  btn.addEventListener('click',function(){
+    var root=document.documentElement;
+    var cur=root.getAttribute('data-theme');
+    var dark=cur?cur==='dark':window.matchMedia('(prefers-color-scheme: dark)').matches;
+    root.setAttribute('data-theme',dark?'light':'dark');
+  });
+
+  // cost calculator
+  var bw=document.getElementById('bw'),ref=document.getElementById('ref'),co=document.getElementById('costOut');
+  function cost(){
+    var b=parseFloat(bw.value),r=parseFloat(ref.value);
+    if(!(b>0)||!(r>0)){co.innerHTML='<span class="err">Enter positive numbers for both bandwidths.</span>';return;}
+    var raw=r/b,c=Math.max(1,Math.floor(raw));
+    if(c>65535)c=65535;
+    co.textContent='Cost = '+r+' ÷ '+b+' = '+(Math.round(raw*1000)/1000)+'\nOSPF cost used: '+c+(raw<1?'  (rounded up to the minimum of 1)':'');
+  }
+  bw.addEventListener('input',cost);ref.addEventListener('input',cost);cost();
+
+  // wildcard / network statement builder
+  var ci=document.getElementById('cidr'),ar=document.getElementById('area'),wo=document.getElementById('wcOut');
+  function toInt(p){return ((p[0]<<24)>>>0)+(p[1]<<16)+(p[2]<<8)+p[3];}
+  function toIp(n){return [(n>>>24)&255,(n>>>16)&255,(n>>>8)&255,n&255].join('.');}
+  function wc(){
+    var m=ci.value.trim().match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})\/(\d{1,2})$/);
+    if(!m){wo.innerHTML='<span class="err">Use the form a.b.c.d/prefix, for example 10.255.255.81/30.</span>';return;}
+    var o=[+m[1],+m[2],+m[3],+m[4]],pre=+m[5];
+    if(o.some(function(x){return x>255;})||pre>32){wo.innerHTML='<span class="err">Each octet must be 0–255 and the prefix 0–32.</span>';return;}
+    var ip=toInt(o),mask=pre===0?0:(0xFFFFFFFF<<(32-pre))>>>0,wild=(~mask)>>>0,net=(ip&mask)>>>0;
+    var block=Math.pow(2,32-pre);
+    var a=ar.value.trim()||'0';
+    wo.textContent=
+      'Subnet mask   '+toIp(mask)+'\n'+
+      'Wildcard      '+toIp(wild)+'   (block size '+block+')\n'+
+      'Network       '+toIp(net)+'\n\n'+
+      'Subnet style:     network '+toIp(net)+' '+toIp(wild)+' area '+a+'\n'+
+      'Interface style:  network '+toIp(ip)+' 0.0.0.0 area '+a;
+  }
+  ci.addEventListener('input',wc);ar.addEventListener('input',wc);wc();
+})();
+</script>
+</body>
+</html>

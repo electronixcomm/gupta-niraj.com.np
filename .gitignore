@@ -12,3 +12,9 @@ desktop.ini
 *.log
 .env
 node_modules/
+
+# Source/working folders (not published)
+teaching/Uniglobe college/
+
+# Office lock files
+~$*

@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Unit 1.1: Computer Network Basics Review</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #0d1117;
+    color: #c9d1d9;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+  .deck-container {
+    width: 100vw;
+    height: 100vh;
+    max-width: 1920px;
+    max-height: 1080px;
+    position: relative;
+    background: #161b22;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.8);
+    display: flex;
+    flex-direction: column;
+  }
+  .slide {
+    display: none;
+    width: 100%;
+    height: 100%;
+    padding: 50px 70px;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    opacity: 0;
+    transition: opacity 0.4s ease-in-out;
+    box-sizing: border-box;
+  }
+  .slide.active { display: flex; opacity: 1; }
+
+  .slide-header {
+    border-bottom: 2px solid #30363d;
+    padding-bottom: 12px;
+    margin-bottom: 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+  .slide-header h2 {
+    font-size: 2.1rem;
+    color: #58a6ff;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+  }
+  .slide-header .unit-tag {
+    font-size: 0.95rem;
+    color: #8b949e;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+  }
+
+  .slide-footer {
+    position: absolute;
+    bottom: 18px;
+    left: 70px;
+    right: 70px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    color: #8b949e;
+    border-top: 1px solid #21262d;
+    padding-top: 10px;
+  }
+
+  .content-area {
+    flex: 1;
+    display: flex;
+    gap: 25px;
+    overflow-y: auto;
+  }
+  .col-1 { flex: 1; }
+  .col-2 { flex: 2; }
+  .col-half { flex: 1; }
+
+  .card {
+    background: #21262d;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 18px;
+    margin-bottom: 18px;
+  }
+  .card-header {
+    font-weight: 600;
+    color: #f0f6fc;
+    margin-bottom: 10px;
+    font-size: 1.15rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .card-header .badge {
+    font-size: 0.75rem;
+    padding: 3px 8px;
+    border-radius: 12px;
+    background: #238636;
+    color: #ffffff;
+  }
+  .card-header .badge.warn { background: #d29922; }
+  .card-header .badge.core { background: #a371f7; }
+
+  ul.tech-list { list-style: none; padding-left: 0; }
+  ul.tech-list li {
+    position: relative;
+    padding-left: 20px;
+    margin-bottom: 10px;
+    line-height: 1.45;
+    font-size: 1rem;
+  }
+  ul.tech-list li::before {
+    content: "■";
+    position: absolute;
+    left: 0;
+    color: #58a6ff;
+    font-size: 0.8rem;
+    top: 2px;
+  }
+
+  table.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    font-size: 0.9rem;
+  }
+  table.data-table th, table.data-table td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid #30363d;
+  }
+  table.data-table th {
+    background: #161b22;
+    color: #58a6ff;
+    font-weight: 600;
+  }
+  table.data-table tr:hover { background: #262c36; }
+
+  .image-container {
+    width: 100%;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #30363d;
+    background: #0d1117;
+    margin-top: 10px;
+    text-align: center;
+  }
+  .image-container img {
+    max-width: 100%;
+    height: 170px;
+    object-fit: cover;
+    display: block;
+    margin: 0 auto;
+  }
+  .image-caption {
+    font-size: 0.75rem;
+    color: #8b949e;
+    padding: 6px;
+    background: #161b22;
+    border-top: 1px solid #21262d;
+  }
+
+  .tree-node {
+    border-left: 3px solid #58a6ff;
+    padding-left: 15px;
+    margin-left: 10px;
+    margin-bottom: 12px;
+  }
+  .tree-title { font-weight: bold; color: #f0f6fc; font-size: 1.05rem; }
+  .tree-desc { font-size: 0.9rem; color: #8b949e; margin-top: 3px; }
+
+  .note-box {
+    background: linear-gradient(135deg, rgba(163,113,247,0.12), rgba(163,113,247,0.03));
+    border: 1px solid #a371f7;
+    border-radius: 8px;
+    padding: 16px 18px;
+    margin-top: 6px;
+  }
+  .note-box .note-title {
+    color: #d2a8ff;
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .note-box p { font-size: 0.9rem; color: #c9d1d9; line-height: 1.5; margin-bottom: 6px; }
+
+  .nav-controls {
+    position: absolute;
+    bottom: 12px;
+    right: 70px;
+    display: flex;
+    gap: 10px;
+    z-index: 10;
+  }
+  .nav-btn {
+    background: #21262d;
+    border: 1px solid #30363d;
+    color: #c9d1d9;
+    padding: 6px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s;
+  }
+  .nav-btn:hover { background: #30363d; color: #58a6ff; }
+
+  .title-slide {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background: radial-gradient(circle at center, #1f242d 0%, #0d1117 100%);
+  }
+  .title-slide h1 { font-size: 3.3rem; color: #58a6ff; margin-bottom: 15px; }
+  .title-slide h3 { font-size: 1.4rem; color: #8b949e; font-weight: 400; margin-bottom: 30px; }
+  .title-slide .meta-box {
+    border: 1px solid #30363d;
+    padding: 15px 30px;
+    border-radius: 8px;
+    background: #161b22;
+    display: inline-block;
+    font-size: 0.95rem;
+  }
+
+  strong { color: #f0f6fc; }
+  .highlight { color: #f2cc60; }
+  .correct { color: #7ee787; }
+
+  .diagram-svg { width: 100%; background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 10px; }
+</style>
+</head>
+<body><div style="font:14px/1.4 Inter,-apple-system,Segoe UI,sans-serif;background:#0b1d3a;padding:10px 16px;"><a href="/teaching/switching-routing.html" style="color:#fbf9f3;text-decoration:none;">&larr; Switching &amp; Routing &middot; all units</a></div>
+
+<div class="deck-container">
+
+  <!-- SLIDE 1: TITLE -->
+  <div class="slide title-slide active">
+    <h1>Unit 1.1 — Foundations of Routing &amp; Switching</h1>
+    <h3>Computer Network Basics: A Quick Review</h3>
+    <div class="meta-box">
+      <strong>Course:</strong> NCS 485 – Routing &amp; Switching<br>
+      <strong>Topic 1.1:</strong> Role of Routers/Switches; OSI &amp; TCP/IP Review (Layer 2 vs Layer 3)<br>
+      <strong>Focus:</strong> Core networking concepts every routing/switching engineer must know
+    </div>
+  </div>
+
+  <!-- SLIDE 2: WHY THIS MATTERS - HOOK -->
+  <div class="slide">
+    <div class="slide-header">
+      <h2>Before We Begin: Why Should You Care?</h2>
+      <span class="unit-tag">NCS 485 | Unit 1.1 Opening Hook</span>
+    </div>
+    <div class="content-area">
+      <div class="col-1">
+        <div class="card" style="border-color:#f2cc60;">
+          <div class="card-header">🤔 Think About This...</div>
+          <p style="font-size:1.02rem; line-height:1.6;">
+            Right now, opening one Instagram reel or one Google search sends your request through your
+            <strong>home router</strong>, your <strong>ISP's switches</strong>, dozens of <strong>backbone routers</strong>
+            across cities or countries, into a <strong>data center's core switches</strong> — and the reply comes back
+            in under <strong class="highlight">200 milliseconds</strong>.
+          </p>
+          <p style="font-size:0.95rem; color:#8b949e; margin-top:8px;">
+            Everything in this course is about how that happens — reliably, billions of times a second, without
+            collisions or chaos.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-header">📊 Scale of the Problem</div>
+          <ul class="tech-list">
+            <li>An estimated <strong class="highlight">~21–22 billion</strong> devices are connected to networks worldwide in 2026 — nearly 3× the human population.</li>
+            <li>Every device needs a switch or AP to join the LAN, and a router to reach anything outside it.</li>
+            <li>None of this scales without the rules you're about to learn: MAC/IP addressing, forwarding tables, and routing protocols.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-1">
+        <div class="card">
+          <div class="card-header">📬 A Familiar Analogy: The Postal System</div>
+          <div class="tree-node">
+            <div class="tree-title">Switch ≈ Local Sorting Office</div>
+            <div class="tree-desc">Delivers mail within one neighborhood by street address (MAC address). Fast, local, doesn't need to know the whole country.</div>
+          </div>
+          <div class="tree-node">
+            <div class="tree-title">Router ≈ National Highway / Customs Hub</div>
+            <div class="tree-desc">Moves mail between cities and countries using postal codes (IP addresses), picking the best route each time.</div>
+          </div>
+        </div>
+        <div class="note-box" style="border-color:#7ee787; background:linear-gradient(135deg, rgba(126,231,135,0.12), rgba(126,231,135,0.03));">
+          <div class="note-title" style="color:#7ee787;">🎯 Why It's Worth Mastering</div>
+          <p>Routing &amp; Switching is the foundation behind Cisco's <strong>CCNA</strong> certification and nearly every
+            networking, cloud, and cybersecurity job — before you can secure or automate a network, you first have
+            to understand how it moves data.</p>
+          <p style="margin-bottom:0;"><strong>Discuss:</strong> name three devices you used today that were connected
+            to a network. What kind of device do you think connected them together first?</p>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>NCS 485: Routing and Switching</span>
+      <span>Slide 2 of 13</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 3: WHAT IS A COMPUTER NETWORK -->
+  <div class="slide">
+    <div class="slide-header">
+      <h2>What Is a Computer Network?</h2>
+      <span class="unit-tag">NCS 485 | Unit 1.1 Basic Review</span>
+    </div>
+    <div class="content-area">
+      <div class="col-1">
+        <div class="card">
+          <div class="card-header">Definition</div>
+          <p style="font-size:0.98rem; line-height:1.6;">
+            A <strong>computer network</strong> is a set of interconnected devices (<strong>nodes</strong>) linked by
+            transmission <strong>media</strong>, that communicate using shared <strong>protocols</strong> to exchange data
+            and share resources.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-header">Why Networks Exist — Core Benefits</div>
+          <ul class="tech-list">
+            <li><strong>Resource Sharing:</strong> printers, files, internet access shared across many users.</li>
+            <li><strong>Communication:</strong> email, VoIP, video conferencing, instant messaging.</li>
+            <li><strong>Centralized Data &amp; Management:</strong> servers store and control data in one place.</li>
+            <li><strong>Cost Efficiency &amp; Scalability:</strong> shared hardware and bandwidth reduce cost per user.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-1">
+        <div class="card">
+          <div class="card-header">A Network in Practice</div>
+          <div class="image-container">
+            <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Network_cables_and_switch.jpg" alt="Network cables connected to a switch">
+            <div class="image-caption">End-device cables terminating into a LAN switch</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">Simplified Path of Data</div>
+          <div class="diagram-svg">
+            <svg viewBox="0 0 560 160" xmlns="http://www.w3.org/2000/svg">
+              <rect x="10" y="55" width="80" height="50" rx="6" fill="#21262d" stroke="#58a6ff"/>
+              <text x="50" y="85" fill="#c9d1d9" font-size="13" text-anchor="middle">PC</text>
+              <line x1="90" y1="80" x2="150" y2="80" stroke="#8b949e" stroke-width="2"/>
+              <rect x="150" y="55" width="90" height="50" rx="6" fill="#21262d" stroke="#7ee787"/>
+              <text x="195" y="80" fill="#c9d1d9" font-size="12" text-anchor="middle">Switch</text>
+              <text x="195" y="95" fill="#8b949e" font-size="9" text-anchor="middle">Layer 2</text>
+              <line x1="240" y1="80" x2="300" y2="80" stroke="#8b949e" stroke-width="2"/>
+              <rect x="300" y="55" width="90" height="50" rx="6" fill="#21262d" stroke="#f2cc60"/>
+              <text x="345" y="80" fill="#c9d1d9" font-size="12" text-anchor="middle">Router</text>
+              <text x="345" y="95" fill="#8b949e" font-size="9" text-anchor="middle">Layer 3</text>
+              <line x1="390" y1="80" x2="450" y2="80" stroke="#8b949e" stroke-width="2"/>
+              <ellipse cx="505" cy="80" rx="50" ry="30" fill="#161b22" stroke="#a371f7"/>
+              <text x="505" y="84" fill="#c9d1d9" font-size="12" text-anchor="middle">Internet</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>NCS 485: Routing and Switching</span>
+      <span>Slide 3 of 13</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 4: NETWORK COMPONENTS + CORE NODE NOTE -->
+  <div class="slide">
+    <div class="slide-header">
+      <h2>Network Components: Nodes &amp; Links</h2>
+      <span class="unit-tag">NCS 485 | Unit 1.1 Basic Review</span>
+    </div>
+    <div class="content-area">
+      <div class="col-half">
+        <div class="card">
+          <div class="card-header"><span class="badge">Component 1</span> Network Nodes</div>
+          <div class="tree-node">
+            <div class="tree-title">End Nodes (Endpoints / Hosts)</div>
+            <div class="tree-desc">Generate or consume application data. Examples: PC, laptop, server, printer, IP phone.</div>
+          </div>
+          <div class="tree-node">
+            <div class="tree-title">Intermediate Nodes (Infrastructure)</div>
+            <div class="tree-desc"><strong>Layer 2:</strong> Switches, Access Points, Bridges.</div>
+            <div class="tree-desc"><strong>Layer 3:</strong> Routers, Layer 3 Switches, Firewalls.</div>
+          </div>
+          <div class="note-box">
+            <div class="note-title">📝 Note — What Is a "Core Node"?</div>
+            <p>
+              In a hierarchical network design, devices are grouped into three functional layers:
+              <strong>Access</strong> (connects end devices), <strong>Distribution</strong> (aggregates &amp; applies policy),
+              and <strong>Core</strong>.
+            </p>
+            <p>
+              A <strong>Core Node</strong> is a high-speed backbone switch/router in the <strong>Core Layer</strong>. Its
+              only job is to forward traffic between distribution-layer devices <em>as fast as possible</em> —
+              it does <strong class="correct">not</strong> perform filtering, ACLs, or policy enforcement, since that
+              would slow down the backbone.
+            </p>
+            <p style="margin-bottom:0;">Core nodes are still <strong>Intermediate Nodes</strong> — "core" describes their
+              <em>position and role</em> in the topology, not a new device category.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-half">
+        <div class="card">
+          <div class="card-header"><span class="badge core">Component 2</span> Network Links (Media)</div>
+          <div class="tree-node">
+            <div class="tree-title">Guided (Wired) Media</div>
+            <div class="tree-desc">Twisted Pair (UTP/STP), Fiber Optic, Coaxial.</div>
+          </div>
+          <div class="tree-node">
+            <div class="tree-title">Unguided (Wireless) Media</div>
+            <div class="tree-desc">Radio Frequency (Wi-Fi, Cellular), Microwave (LOS / Non-LOS).</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">Core Switches in Action</div>
+          <div class="image-container">
+            <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Cisco_switch_stack_-_IMG_0691.jpg" alt="Stacked Cisco switches forming a core switch">
+            <div class="image-caption">Stacked switches acting as a virtual core switch for high-bandwidth backbone links</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>NCS 485: Routing and Switching</span>
+      <span>Slide 4 of 13</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 5: OSI vs TCP/IP -->
+  <div class="slide">
+    <div class="slide-header">
+      <h2>OSI Model vs TCP/IP Suite — Model Comparison</h2>
+      <span class="unit-tag">NCS 485 | Why Two Models Exist</span>
+    </div>
+    <div class="content-area">
+      <div class="col-1">
+        <div class="card">
+          <div class="card-header">The OSI 7-Layer Model</div>
+          <div class="image-container">
+            <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Osi-model-7-layers.png" alt="OSI 7 layer model diagram" style="height:150px; object-fit:contain; background:#fff;">
+            <div class="image-caption">Application → Presentation → Session → Transport → Network → Data Link → Physical</div>
+          </div>
+        </div>
+        <div class="note-box" style="border-color:#7ee787; background:linear-gradient(135deg, rgba(126,231,135,0.12), rgba(126,231,135,0.03));">
+          <div class="note-title" style="color:#7ee787;">🤝 What They Have in Common</div>
+          <p style="margin-bottom:0;">Both are <strong>layered models</strong> that break communication into independent
+            stages, both support <strong>encapsulation</strong> (each layer wraps the data from the layer above it),
+            and both are used side-by-side in real networking work — OSI to talk about problems, TCP/IP to talk
+            about what's actually running on the wire.</p>
+        </div>
+      </div>
+      <div class="col-1">
+        <table class="data-table">
+          <thead>
+            <tr><th>Aspect</th><th>OSI Model</th><th>TCP/IP Suite</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Full Name</td><td>Open Systems Interconnection</td><td>Transmission Control Protocol / Internet Protocol</td></tr>
+            <tr><td>Standardized By</td><td>ISO &amp; ITU-T (1984)</td><td>DoD / DARPA (1970s) → later IETF</td></tr>
+            <tr><td># of Layers</td><td><strong class="highlight">7</strong> layers</td><td><strong class="highlight">4</strong> layers (some texts: 5)</td></tr>
+            <tr><td>Nature</td><td>Generic, <em>protocol-independent</em> reference model</td><td>Protocol-specific — built directly around TCP, IP, etc.</td></tr>
+            <tr><td>Design Approach</td><td>Model designed first, protocols fitted to it later</td><td>Protocols existed first; model documented to describe them</td></tr>
+            <tr><td>Layer Coupling</td><td>Strict — each layer independent with a defined interface</td><td>Looser — layers more integrated, boundaries overlap</td></tr>
+            <tr><td>Upper Layers</td><td>3 separate layers: Session, Presentation, Application</td><td>Combined into <strong>one</strong> Application layer</td></tr>
+            <tr><td>Reliability</td><td>Reliability assumed built into every layer</td><td>Only Transport layer chooses reliability (TCP vs UDP)</td></tr>
+            <tr><td>Adoption Today</td><td>Rarely implemented directly — used for teaching &amp; troubleshooting</td><td><strong class="correct">Actually implemented — runs the real Internet</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>NCS 485: Routing and Switching</span>
+      <span>Slide 5 of 13</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 6: OSI vs TCP/IP LAYER MAPPING + PROTOCOLS -->
+  <div class="slide">
+    <div class="slide-header">
+      <h2>OSI vs TCP/IP — Layer Mapping, PDUs &amp; Protocols</h2>
+      <span class="unit-tag">NCS 485 | Layer 2 vs Layer 3 Devices</span>
+    </div>
+    <div class="content-area">
+      <div class="col-2">
+        <table class="data-table" style="font-size:0.83rem;">
+          <thead>
+            <tr><th>OSI Layer</th><th>PDU</th><th>TCP/IP Layer</th><th>Example Protocols</th><th>Device</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>7 Application</td><td rowspan="3">Data</td><td rowspan="3">Application</td><td>HTTP, DNS, FTP, SMTP</td><td rowspan="3">End-user software</td></tr>
+            <tr><td>6 Presentation</td><td>TLS/SSL, JPEG, ASCII</td></tr>
+            <tr><td>5 Session</td><td>NetBIOS, RPC, sockets</td></tr>
+            <tr><td>4 Transport</td><td>Segment</td><td>Transport</td><td>TCP, UDP</td><td>Firewall (stateful)</td></tr>
+            <tr><td><strong class="highlight">3 Network</strong></td><td>Packet</td><td>Internet</td><td>IP, ICMP, OSPF, ARP*</td><td><strong class="highlight">Router / L3 Switch</strong></td></tr>
+            <tr><td><strong class="highlight">2 Data Link</strong></td><td rowspan="2">Frame / Bits</td><td rowspan="2">Network Access</td><td>Ethernet, PPP, HDLC</td><td><strong class="highlight">Switch / Bridge</strong></td></tr>
+            <tr><td>1 Physical</td><td>DSL, Wi-Fi radio, cabling</td><td>Hub, Cable, NIC</td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:0.75rem; color:#8b949e; margin-top:4px;">*ARP is often taught at L2/L3 boundary — resolves an IP address to a MAC address.</p>
+        <div class="note-box" style="margin-top:12px;">
+          <div class="note-title">📦 Encapsulation — How Data Actually Moves</div>
+          <p style="margin-bottom:0;">Going <strong>down</strong> the stack, each layer wraps the data above it in its own
+            header (Data → Segment → Packet → Frame → Bits). Going <strong>up</strong> the stack at the receiver, each
+            header is stripped off in reverse order. This is why a switch only needs to read the <strong>frame header</strong>,
+            while a router must open it further to read the <strong>packet header</strong>.</p>
+        </div>
+      </div>
+      <div class="col-1">
+        <div class="card">
+          <div class="card-header">Key Takeaway</div>
+          <p style="font-size:0.9rem; color:#8b949e;">
+            <strong class="correct">Switches</strong> forward frames using MAC addresses at <strong>Layer 2</strong>.
+            <strong class="correct">Routers</strong> forward packets using IP addresses at <strong>Layer 3</strong>.
+            This distinction drives every topic in this course.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-header">Quick Mapping Example</div>
+          <p style="font-size:0.88rem; color:#8b949e; line-height:1.6;">
+            Opening a website = <strong>HTTP</strong> (App) over <strong>TCP</strong> (Transport) over
+            <strong>IP</strong> (Internet) over <strong>Ethernet</strong> (Network Access) — four TCP/IP layers,
+            each mapping cleanly onto the OSI layers on the left.
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>NCS 485: Routing and Switching</span>
+      <span>Slide 6 of 13</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 7: SWITCHING VS ROUTING -->
+  <div class="slide">
+    <div class="slide-header">
+      <h2>Switching vs Routing — Devices &amp; Roles</h2>
+      <span class="unit-tag">NCS 485 | Unit 1.1 Basic Review</span>
+    </div>
+    <div class="content-area">
+      <div class="col-1">
+        <table class="data-table">
+          <thead><tr><th>Aspect</th><th>Switch (L2)</th><th>Router (L3)</th></tr></thead>
+          <tbody>
+            <tr><td>Forwarding Basis</td><td>MAC Address</td><td>IP Address</td></tr>
+            <tr><td>Table Used</td><td>MAC Address Table</td><td>Routing Table</td></tr>
+            <tr><td>Domain</td><td>Connects hosts within one LAN</td><td>Connects different networks/LANs</td></tr>
+            <tr><td>Broadcast Domain</td><td>One (unless VLANs)</td><td>Separates broadcast domains</td></tr>
+            <tr><td>Typical Role</td><td>Access / Core switching</td><td>Inter-network gateway</td></tr>
+          </tbody>
+        </table>
+        <div class="card" style="margin-top:15px;">
+          <div class="card-header">Cisco IOS CLI — First Look</div>
+          <p style="font-size:0.88rem; color:#8b949e;">Both routers and switches run <strong>Cisco IOS</strong> and share the
+            same basic CLI modes: <strong>User EXEC → Privileged EXEC → Global Configuration</strong>, accessed via console,
+            SSH, or Telnet.</p>
+        </div>
+      </div>
+      <div class="col-1">
+        <div class="card">
+          <div class="card-header">Real Hardware</div>
+          <div style="display:flex; gap:10px;">
+            <div class="image-container" style="flex:1;">
+              <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Cisco_Catalyst_4506-E_Switch_004.jpg" alt="Cisco Catalyst switch front panel">
+              <div class="image-caption">Enterprise LAN Switch (Layer 2)</div>
+            </div>
+            <div class="image-container" style="flex:1;">
+              <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Router_Cisco_1900_series.jpg" alt="Cisco 1900 series router">
+              <div class="image-caption">Enterprise Router (Layer 3)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>NCS 485: Routing and Switching</span>
+      <span>Slide 7 of 13</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 8: REAL-WORLD SCENARIO - ROLE OF ROUTERS & SWITCHES -->
+  <div class="slide">
+    <div class="slide-header">
+      <h2>Putting It Together: A Real Network Scenario</h2>
+      <span class="unit-tag">NCS 485 | Role of Routers &amp; Switches in Practice</span>
+    </div>
+    <div class="content-area">
+      <div class="col-2">
+        <div class="card">
+          <div class="card-header">Scenario: "Himal Traders" Office Network</div>
+          <p style="font-size:0.95rem; line-height:1.6; margin-bottom:10px;">
+            A small company has two departments — <strong>Sales</strong> and <strong>Accounts</strong> — each with
+            several PCs on its own switch, plus one connection out to the Internet through the company's ISP.
+          </p>
+          <div class="diagram-svg">
+            <svg viewBox="0 0 640 260" xmlns="http://www.w3.org/2000/svg">
+              <!-- Private network boundary box -->
+              <rect x="10" y="10" width="400" height="240" rx="10" fill="none" stroke="#3dd6d0" stroke-width="2" stroke-dasharray="6,4"/>
+              <text x="20" y="28" fill="#3dd6d0" font-size="12" font-weight="bold">PRIVATE NETWORK (Inside the Building)</text>
+
+              <!-- Sales dept -->
+              <rect x="30" y="45" width="45" height="35" rx="4" fill="#21262d" stroke="#58a6ff"/>
+              <text x="52" y="66" fill="#c9d1d9" font-size="10" text-anchor="middle">PC</text>
+              <rect x="85" y="45" width="45" height="35" rx="4" fill="#21262d" stroke="#58a6ff"/>
+              <text x="107" y="66" fill="#c9d1d9" font-size="10" text-anchor="middle">PC</text>
+              <line x1="52" y1="80" x2="52" y2="100" stroke="#8b949e" stroke-width="2"/>
+              <line x1="107" y1="80" x2="107" y2="100" stroke="#8b949e" stroke-width="2"/>
+              <rect x="30" y="100" width="100" height="35" rx="4" fill="#21262d" stroke="#7ee787"/>
+              <text x="80" y="122" fill="#c9d1d9" font-size="11" text-anchor="middle">Sales Switch</text>
+
+              <!-- Accounts dept -->
+              <rect x="30" y="160" width="45" height="35" rx="4" fill="#21262d" stroke="#58a6ff"/>
+              <text x="52" y="181" fill="#c9d1d9" font-size="10" text-anchor="middle">PC</text>
+              <rect x="85" y="160" width="45" height="35" rx="4" fill="#21262d" stroke="#58a6ff"/>
+              <text x="107" y="181" fill="#c9d1d9" font-size="10" text-anchor="middle">PC</text>
+              <line x1="52" y1="160" x2="52" y2="140" stroke="#8b949e" stroke-width="2"/>
+              <line x1="107" y1="160" x2="107" y2="140" stroke="#8b949e" stroke-width="2"/>
+              <rect x="30" y="105" width="100" height="0" fill="none"/>
+              <rect x="30" y="140" width="100" height="35" rx="4" fill="#21262d" stroke="#7ee787"/>
+              <text x="80" y="162" fill="#c9d1d9" font-size="11" text-anchor="middle">Accounts Switch</text>
+
+              <!-- lines from switches to router -->
+              <line x1="130" y1="117" x2="290" y2="140" stroke="#8b949e" stroke-width="2"/>
+              <line x1="130" y1="157" x2="290" y2="140" stroke="#8b949e" stroke-width="2"/>
+
+              <!-- Router at boundary -->
+              <rect x="290" y="115" width="100" height="50" rx="6" fill="#21262d" stroke="#f2cc60" stroke-width="2"/>
+              <text x="340" y="138" fill="#c9d1d9" font-size="12" text-anchor="middle" font-weight="bold">Router</text>
+              <text x="340" y="153" fill="#f2cc60" font-size="9" text-anchor="middle">Gateway</text>
+
+              <!-- Public network -->
+              <line x1="410" y1="140" x2="470" y2="140" stroke="#8b949e" stroke-width="2"/>
+              <text x="425" y="70" fill="#a371f7" font-size="12" font-weight="bold">PUBLIC NETWORK</text>
+              <ellipse cx="560" cy="140" rx="70" ry="40" fill="#161b22" stroke="#a371f7" stroke-width="2"/>
+              <text x="560" y="136" fill="#c9d1d9" font-size="12" text-anchor="middle">ISP /</text>
+              <text x="560" y="150" fill="#c9d1d9" font-size="12" text-anchor="middle">Internet</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="col-1">
+        <div class="card">
+          <div class="card-header">What Each Device Is Actually Doing</div>
+          <ul class="tech-list">
+            <li><strong>Sales Switch / Accounts Switch:</strong> forward frames between PCs <em>inside their own department</em>
+              using MAC addresses. They never look at anything outside the building.</li>
+            <li><strong>Router:</strong> the single device that knows about <em>both sides</em> — the private LAN inside,
+              and the public Internet outside. Every packet that leaves the building must pass through it.</li>
+          </ul>
+        </div>
+        <div class="note-box" style="border-color:#f2cc60; background:linear-gradient(135deg, rgba(242,204,96,0.12), rgba(242,204,96,0.03));">
+          <div class="note-title" style="color:#f2cc60;">🔑 Why This Scenario Matters Next</div>
+          <p>
+            Notice the dashed boundary right at the router: everything to its <strong>left</strong> uses addressing that
+            only needs to make sense <em>inside this building</em>, while everything to its <strong>right</strong> must
+            be globally unique on the Internet.
+          </p>
+          <p style="margin-bottom:0;">
+            That boundary is exactly why we study <strong class="highlight">Private vs Public IP addressing</strong>
+            right after understanding router/switch roles — the concept only makes sense once you can picture
+            <em>where</em> that line actually sits in a real network.
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>NCS 485: Routing and Switching</span>
+      <span>Slide 8 of 13</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 9: COPPER CABLE TYPES, SPEED & USE CASE -->
+  <div class="slide">
+    <div class="slide-header">
+      <h2>Guided Media I: Copper Cabling — Speed &amp; Use Case</h2>
+      <span class="unit-tag">NCS 485 | Transmission Media Review</span>
+    </div>
+    <div class="content-area">
+      <div class="col-2">
+        <table class="data-table">
+          <thead>
+            <tr><th>Type</th><th>Category</th><th>Max Speed</th><th>Max Distance</th><th>Typical Use Case</th></tr>
+          </thead>
+          <tbody>
+            <tr><td rowspan="2"><strong>Coaxial</strong></td><td>RG-6 / RG-59</td><td>~1 Gbps (DOCSIS)</td><td>~500 m (with amps)</td><td>Cable TV/Internet (ISP last-mile), legacy 10BASE2/5 LANs</td></tr>
+            <tr><td>—</td><td>—</td><td>—</td><td>Broadband distribution, CCTV runs</td></tr>
+            <tr><td rowspan="4"><strong>Twisted Pair (UTP/STP)</strong></td><td>Cat5e</td><td>1 Gbps</td><td>100 m</td><td>Legacy desktop/access-layer LAN drops</td></tr>
+            <tr><td>Cat6</td><td>1 Gbps (10 Gbps ≤55 m)</td><td>100 m</td><td>Standard enterprise access-layer wiring today</td></tr>
+            <tr><td>Cat6a</td><td><span class="highlight">10 Gbps</span></td><td>100 m</td><td>New builds, PoE++ AP/camera runs, future-proofing</td></tr>
+            <tr><td>Cat8</td><td><span class="highlight">25–40 Gbps</span></td><td>30 m</td><td>Data center Top-of-Rack (switch-to-server) links</td></tr>
+          </tbody>
+        </table>
+        <div class="card" style="margin-top:15px;">
+          <div class="card-header">Why Copper Still Matters</div>
+          <p style="font-size:0.9rem; color:#8b949e;">Copper (twisted pair) remains the dominant <strong>access-layer</strong> medium
+            because it is cheap, easy to terminate (RJ-45), and can carry <strong>Power over Ethernet (PoE)</strong> to phones,
+            APs, and cameras — something fiber cannot do.</p>
+        </div>
+      </div>
+      <div class="col-1">
+        <div class="card">
+          <div class="card-header">Twisted Pair (RJ-45)</div>
+          <div class="image-container">
+            <img src="https://commons.wikimedia.org/wiki/Special:FilePath/RJ45_Ethernet_Cable.jpg" alt="RJ45 twisted pair ethernet cable">
+            <div class="image-caption">UTP cable with RJ-45 connector — standard LAN drop cable</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">Coaxial Cable</div>
+          <div class="image-container">
+            <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Coax_cable.jpg" alt="RG-6 coaxial cable">
+            <div class="image-caption">RG-6 coax — used for cable internet/TV last-mile links</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>NCS 485: Routing and Switching</span>
+      <span>Slide 9 of 13</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 10: FIBER OPTIC TYPES, SPEED & USE CASE -->
+  <div class="slide">
+    <div class="slide-header">
+      <h2>Guided Media II: Fiber Optic Cabling — Speed &amp; Use Case</h2>
+      <span class="unit-tag">NCS 485 | Transmission Media Review</span>
+    </div>
+    <div class="content-area">
+      <div class="col-2">
+        <table class="data-table">
+          <thead>
+            <tr><th>Fiber Type</th><th>Light Source</th><th>Speed Capability</th><th>Max Distance</th><th>Typical Use Case</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>MMF (OM1/OM2)</strong></td><td>LED</td><td>100 Mbps – 1 Gbps</td><td>Up to 2 km / 550 m</td><td>Legacy LAN backbone links</td></tr>
+            <tr><td><strong>MMF (OM3/OM4)</strong></td><td>VCSEL Laser</td><td><span class="highlight">10–100 Gbps</span></td><td>300–550 m</td><td>Data center rack-to-rack, campus riser links</td></tr>
+            <tr><td><strong>SMF (OS1/OS2)</strong></td><td>Laser Diode</td><td><span class="highlight">10–400+ Gbps</span></td><td>10–40+ km</td><td>Campus/building backbone, ISP &amp; metro WAN links</td></tr>
+          </tbody>
+        </table>
+        <div class="card" style="margin-top:15px;">
+          <div class="card-header">Copper vs Fiber — When to Choose Which</div>
+          <ul class="tech-list">
+            <li><strong>Choose Copper (UTP):</strong> short access-layer runs (&lt;100 m), need PoE, lower cost.</li>
+            <li><strong>Choose Fiber:</strong> long backbone/riser runs, high EMI environments, highest bandwidth, no distance limit from electrical interference.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-1">
+        <div class="card">
+          <div class="card-header">Fiber Optic Cable</div>
+          <div class="image-container">
+            <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Fiber_Optical_Cable.jpg" alt="Fiber optic cable with light passing through">
+            <div class="image-caption">Single-mode fiber — long-haul, high-speed backbone medium</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">Fiber Bundle (Bulk Cable)</div>
+          <div class="image-container">
+            <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Optical_fiber_cable-06ASD.jpg" alt="Optical fiber bulk cable cross-section">
+            <div class="image-caption">Multi-strand fiber cable used for building/campus backbone runs</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>NCS 485: Routing and Switching</span>
+      <span>Slide 10 of 13</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 11: CABLE WIRING TYPES - STRAIGHT, CROSSOVER, ROLLOVER, AUTO-MDIX -->
+  <div class="slide">
+    <div class="slide-header">
+      <h2>Cable Wiring Types: Straight-Through, Crossover &amp; Rollover</h2>
+      <span class="unit-tag">NCS 485 | Layer 1 Cabling Standards</span>
+    </div>
+    <div class="content-area">
+      <div class="col-1">
+        <div class="card">
+          <div class="card-header"><span class="badge">1</span> Straight-Through Cable</div>
+          <p style="font-size:0.9rem; margin-bottom:6px;">Connects <strong>unlike devices</strong> — e.g. PC ↔ Switch, Switch ↔ Router.
+            Both ends use the same wiring standard.</p>
+          <div class="diagram-svg">
+            <svg viewBox="0 0 500 60" xmlns="http://www.w3.org/2000/svg">
+              <text x="10" y="20" fill="#79c0ff" font-size="12" font-family="monospace">End A: T568B</text>
+              <text x="380" y="20" fill="#79c0ff" font-size="12" font-family="monospace">End B: T568B</text>
+              <line x1="140" y1="16" x2="370" y2="16" stroke="#58a6ff" stroke-width="2"/>
+              <text x="10" y="45" fill="#8b949e" font-size="11" font-family="monospace">Pin 1 (Tx+) ---------------- Pin 1 (Tx+)</text>
+            </svg>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="badge warn">2</span> Crossover Cable</div>
+          <p style="font-size:0.9rem; margin-bottom:6px;">Connects <strong>like devices</strong> — e.g. Switch ↔ Switch, Router ↔ Router,
+            PC ↔ PC (direct).</p>
+          <div class="diagram-svg">
+            <svg viewBox="0 0 500 60" xmlns="http://www.w3.org/2000/svg">
+              <text x="10" y="20" fill="#79c0ff" font-size="12" font-family="monospace">End A: T568A</text>
+              <text x="380" y="20" fill="#79c0ff" font-size="12" font-family="monospace">End B: T568B</text>
+              <line x1="140" y1="16" x2="370" y2="45" stroke="#f2cc60" stroke-width="2"/>
+              <line x1="140" y1="45" x2="370" y2="16" stroke="#f2cc60" stroke-width="2"/>
+              <text x="10" y="50" fill="#8b949e" font-size="10" font-family="monospace">Tx/Rx pairs swapped (Pin 1↔3, Pin 2↔6)</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="col-1">
+        <div class="card">
+          <div class="card-header"><span class="badge core">3</span> Rollover (Console) Cable</div>
+          <p style="font-size:0.9rem; margin-bottom:6px;">Connects a PC's USB/serial port to a router/switch <strong>console port</strong>
+            for out-of-band CLI management. Pinout is completely reversed end-to-end.</p>
+          <div class="diagram-svg">
+            <svg viewBox="0 0 500 60" xmlns="http://www.w3.org/2000/svg">
+              <text x="10" y="20" fill="#79c0ff" font-size="12" font-family="monospace">Pin 1 -----------------------&gt; Pin 8</text>
+              <text x="10" y="38" fill="#79c0ff" font-size="12" font-family="monospace">Pin 2 -----------------------&gt; Pin 7</text>
+              <text x="10" y="56" fill="#8b949e" font-size="10" font-family="monospace">...(fully mirrored, 8 ↔ 1)</text>
+            </svg>
+          </div>
+        </div>
+        <div class="note-box" style="border-color:#a371f7;">
+          <div class="note-title">⚙️ Auto-MDIX — Why Crossovers Are Nearly Obsolete</div>
+          <p><strong>Auto-MDIX</strong> (Automatic Medium-Dependent Interface Crossover) lets a modern switch or router port
+            automatically detect whether the connected device needs a straight-through or crossover pinout, and
+            electronically swap its Tx/Rx pairs to match.</p>
+          <p style="margin-bottom:0;">Result: on current Cisco equipment, <strong class="correct">any</strong> cable
+            (straight-through or crossover) works in <strong class="correct">any</strong> port — but understanding the
+            wiring is still required knowledge for legacy gear, cabling exams, and troubleshooting.</p>
+        </div>
+        <div class="card">
+          <div class="card-header">Quick Reference: When to Use Which</div>
+          <table class="data-table">
+            <thead><tr><th>Connection</th><th>Cable Type</th></tr></thead>
+            <tbody>
+              <tr><td>PC → Switch</td><td>Straight-Through</td></tr>
+              <tr><td>Switch → Router</td><td>Straight-Through</td></tr>
+              <tr><td>Switch → Switch</td><td>Crossover*</td></tr>
+              <tr><td>Router → Router</td><td>Crossover*</td></tr>
+              <tr><td>PC → Router/Switch Console</td><td>Rollover</td></tr>
+            </tbody>
+          </table>
+          <p style="font-size:0.78rem; color:#8b949e; margin-top:6px;">*Not needed on Auto-MDIX-enabled ports.</p>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>NCS 485: Routing and Switching</span>
+      <span>Slide 11 of 13</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 12: SFP / TRANSCEIVER TYPES -->
+  <div class="slide">
+    <div class="slide-header">
+      <h2>SFP &amp; Transceiver Types — Modular Interfaces</h2>
+      <span class="unit-tag">NCS 485 | Router/Switch Uplink Modules</span>
+    </div>
+    <div class="content-area">
+      <div class="col-1">
+        <table class="data-table">
+          <thead>
+            <tr><th>Form Factor</th><th>Speed</th><th>Typical Use Case</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>SFP</strong> (mini-GBIC)</td><td>1 Gbps</td><td>Gigabit switch uplinks, copper/fiber access links</td></tr>
+            <tr><td><strong>SFP+</strong></td><td>10 Gbps</td><td>Enterprise switch-to-switch, server NIC uplinks</td></tr>
+            <tr><td><strong>SFP28</strong></td><td>25 Gbps</td><td>Modern data center leaf-server links</td></tr>
+            <tr><td><strong>QSFP+</strong></td><td>40 Gbps</td><td>Data center spine/core interconnects</td></tr>
+            <tr><td><strong>QSFP28</strong></td><td>100 Gbps</td><td>High-density core/spine backbone links</td></tr>
+            <tr><td><strong>QSFP-DD</strong></td><td>400 / 800 Gbps</td><td>Hyperscale data center interconnects</td></tr>
+          </tbody>
+        </table>
+        <div class="card" style="margin-top:15px;">
+          <div class="card-header">DAC &amp; AOC — Cable-Integrated Alternatives</div>
+          <p style="font-size:0.88rem; color:#8b949e;">
+            <strong>DAC (Direct Attach Copper):</strong> SFP+/QSFP connectors permanently bonded to a copper twinax cable —
+            cheap, low-latency, for short intra-rack runs (&lt;7 m).<br><br>
+            <strong>AOC (Active Optical Cable):</strong> transceivers permanently bonded to a fiber cable — lightweight,
+            EMI-immune, for medium runs (&lt;100 m).
+          </p>
+        </div>
+      </div>
+      <div class="col-1">
+        <div class="card">
+          <div class="card-header">SFP Module (1G/10G Fiber)</div>
+          <div class="image-container">
+            <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Module_SFP_Module_Fibre_GLC-SX-MMD_CISCO.jpg" alt="Cisco SFP fiber transceiver module">
+            <div class="image-caption">Cisco GLC-SX-MMD SFP transceiver</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">QSFP+ Module (40G)</div>
+          <div class="image-container">
+            <img src="https://commons.wikimedia.org/wiki/Special:FilePath/QSFP-40G-SR4_Transceiver.jpg" alt="QSFP 40G transceiver module">
+            <div class="image-caption">40 Gbps QSFP+ transceiver for core/spine links</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>NCS 485: Routing and Switching</span>
+      <span>Slide 12 of 13</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 13: OFC COLOR CODING -->
+  <div class="slide">
+    <div class="slide-header">
+      <h2>Optical Fiber Cable (OFC) Color Coding</h2>
+      <span class="unit-tag">NCS 485 | TIA-598-C Standard</span>
+    </div>
+    <div class="content-area">
+      <div class="col-2">
+        <table class="data-table">
+          <thead>
+            <tr><th>Fiber Type</th><th>Jacket Color</th><th>Connector Color</th><th>Mode</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>OM1 (62.5/125 µm)</td>
+              <td><span style="display:inline-block;width:14px;height:14px;background:#ff8c1a;border-radius:3px;margin-right:6px;vertical-align:middle;"></span>Orange</td>
+              <td>Beige</td><td>Multimode (legacy)</td>
+            </tr>
+            <tr>
+              <td>OM2 (50/125 µm)</td>
+              <td><span style="display:inline-block;width:14px;height:14px;background:#ff8c1a;border-radius:3px;margin-right:6px;vertical-align:middle;"></span>Orange</td>
+              <td>Black</td><td>Multimode</td>
+            </tr>
+            <tr>
+              <td>OM3 (laser-optimized)</td>
+              <td><span style="display:inline-block;width:14px;height:14px;background:#3dd6d0;border-radius:3px;margin-right:6px;vertical-align:middle;"></span>Aqua</td>
+              <td>Aqua</td><td>Multimode</td>
+            </tr>
+            <tr>
+              <td>OM4 (laser-optimized)</td>
+              <td><span style="display:inline-block;width:14px;height:14px;background:#3dd6d0;border-radius:3px;margin-right:6px;vertical-align:middle;"></span>Aqua / <span style="display:inline-block;width:14px;height:14px;background:#a371f7;border-radius:3px;margin:0 6px;vertical-align:middle;"></span>Violet</td>
+              <td>Violet</td><td>Multimode</td>
+            </tr>
+            <tr>
+              <td>OM5 (wideband)</td>
+              <td><span style="display:inline-block;width:14px;height:14px;background:#7ee787;border-radius:3px;margin-right:6px;vertical-align:middle;"></span>Lime Green</td>
+              <td>Lime Green</td><td>Multimode (SWDM)</td>
+            </tr>
+            <tr>
+              <td>OS1 / OS2</td>
+              <td><span style="display:inline-block;width:14px;height:14px;background:#f2cc60;border-radius:3px;margin-right:6px;vertical-align:middle;"></span>Yellow</td>
+              <td>Blue (UPC) / Green (APC)</td><td>Single-mode</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="card" style="margin-top:15px;">
+          <div class="card-header">Quick Field Rule</div>
+          <p style="font-size:0.9rem; color:#8b949e;">
+            <strong class="highlight">Yellow = Single-mode</strong>, <strong class="highlight">Orange = Legacy Multimode</strong>,
+            <strong class="highlight">Aqua = Laser-Optimized Multimode</strong>. Never mate a
+            <strong class="correct">blue (UPC)</strong> connector with a <strong style="color:#7ee787;">green (APC)</strong>
+            one — the angled polish causes major signal loss and possible damage.
+          </p>
+        </div>
+      </div>
+      <div class="col-1">
+        <div class="card">
+          <div class="card-header">Standard 12-Fiber Strand Sequence (TIA-598-C)</div>
+          <div class="diagram-box" style="white-space:normal; line-height:1.9;">
+            1 Blue · 2 Orange · 3 Green · 4 Brown · 5 Slate · 6 White<br>
+            7 Red · 8 Black · 9 Yellow · 10 Violet · 11 Rose · 12 Aqua
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">Fiber in Practice</div>
+          <div class="image-container">
+            <img src="https://commons.wikimedia.org/wiki/Special:FilePath/SC-APC_fiber_optic_cable.jpg" alt="SC-APC fiber optic cable connector">
+            <div class="image-caption">SC-APC terminated fiber patch cable</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>NCS 485: Routing and Switching</span>
+      <span>Slide 13 of 13</span>
+    </div>
+  </div>
+
+  <div class="nav-controls">
+    <button class="nav-btn" onclick="prevSlide()">❮ Prev</button>
+    <button class="nav-btn" onclick="nextSlide()">Next ❯</button>
+  </div>
+
+</div>
+
+<script>
+  let currentSlide = 0;
+  const slides = document.querySelectorAll('.slide');
+  function showSlide(index) {
+    slides.forEach((slide, i) => {
+      slide.classList.remove('active');
+      if (i === index) slide.classList.add('active');
+    });
+  }
+  function nextSlide() { if (currentSlide < slides.length - 1) { currentSlide++; showSlide(currentSlide); } }
+  function prevSlide() { if (currentSlide > 0) { currentSlide--; showSlide(currentSlide); } }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+    else if (e.key === 'ArrowLeft') prevSlide();
+  });
+</script>
+
+</body>
+</html>

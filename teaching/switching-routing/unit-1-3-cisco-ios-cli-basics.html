@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cisco IOS & CLI Basics Guide</title>
+    <!-- Mermaid.js for Visual Boot Flowchart -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+    </script>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #e2e8f0;
+            --accent-color: #38bdf8;
+            --accent-green: #4ade80;
+            --accent-yellow: #facc15;
+            --border-color: #334155;
+            --terminal-bg: #000000;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--accent-color);
+            margin-bottom: 10px;
+            font-size: 2.2rem;
+        }
+
+        h2 {
+            color: var(--accent-color);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+            margin-top: 35px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        /* Callout Box Styling */
+        .info-callout {
+            background-color: #0f172a;
+            border-left: 4px solid var(--accent-yellow);
+            border-radius: 0 6px 6px 0;
+            padding: 15px 20px;
+            margin: 15px 0;
+        }
+
+        .info-callout h3 {
+            margin-top: 0;
+            color: var(--accent-yellow);
+            font-size: 1.05rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Terminal Window Styling */
+        .terminal {
+            background-color: var(--terminal-bg);
+            border-radius: 6px;
+            border: 1px solid #444;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            margin: 20px 0;
+            font-family: 'Courier New', Courier, monospace;
+            overflow: hidden;
+        }
+
+        .terminal-header {
+            background-color: #1e1e1e;
+            padding: 8px 15px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #333;
+        }
+
+        .terminal-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .btn-close { background-color: #ff5f56; }
+        .btn-minimize { background-color: #ffbd2e; }
+        .btn-maximize { background-color: #27c93f; }
+
+        .terminal-title {
+            color: #aaa;
+            font-size: 0.85rem;
+            margin-left: 15px;
+        }
+
+        .terminal-body {
+            padding: 15px;
+            color: #ffffff;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            line-height: 1.35;
+        }
+
+        .terminal-body .output-text { color: #dddddd; }
+        .terminal-body .prompt { color: #4ade80; font-weight: bold; }
+        .terminal-body .command { color: #ffffff; font-weight: bold; }
+        .terminal-body .marker { color: #facc15; font-weight: bold; }
+        .terminal-body .highlight { color: #38bdf8; font-weight: bold; }
+
+        .flowchart-container {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 10px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #0f172a;
+            color: var(--accent-color);
+        }
+
+        tr:nth-child(even) {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        .badge {
+            background-color: var(--accent-color);
+            color: #000;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body><div style="font:14px/1.4 Inter,-apple-system,Segoe UI,sans-serif;background:#0b1d3a;padding:10px 16px;"><a href="/teaching/switching-routing.html" style="color:#fbf9f3;text-decoration:none;">&larr; Switching &amp; Routing &middot; all units</a></div>
+
+<div class="container">
+    <header>
+        <h1>Introduction to Cisco IOS & CLI Basics</h1>
+        <p>Device boot sequence breakdown, annotated console log, memory architecture, and CLI usage.</p>
+    </header>
+
+    <!-- SECTION 1: ARCHITECTURE & DEFINITION -->
+    <section class="card">
+        <h2>1. Overview of Cisco IOS & Memory Architecture</h2>
+        <p><strong>Cisco IOS (Cisco Internetwork Operating System)</strong> is a proprietary family of multitasking network operating systems running on Cisco enterprise devices, including routers and switches. It packages routing, switching, internetworking, and security functions into a single system designed to optimize throughput and network management.</p>
+        
+        <p>To execute its functions, Cisco IOS relies on four primary memory structures:</p>
+        <ul>
+            <li><strong>ROM (Read-Only Memory):</strong> Contains early bootstrap code, power-on diagnostic code, and ROMMON recovery mode.</li>
+            <li><strong>Flash Memory:</strong> Stores the primary Cisco IOS image (e.g., <code>2960-lanbasek9-mz.150-2.SE4.bin</code>). Retains data across reboots.</li>
+            <li><strong>NVRAM (Non-Volatile RAM):</strong> Stores persistent startup configurations (<code>startup-config</code>) and boot options.</li>
+            <li><strong>RAM (Random Access Memory):</strong> Runs the operating system kernel, packet buffers, routing tables, and active configuration (<code>running-config</code>). Divided into Processor Memory and I/O Memory (IOMEM).</li>
+        </ul>
+    </section>
+
+    <!-- SECTION 2: BOOTUP FLOWCHART -->
+    <section class="card">
+        <h2>2. Switch / Router Initialization Flowchart</h2>
+        <div class="flowchart-container">
+            <div class="mermaid">
+            graph TD
+                A[Power On Device] --> B[1. Init - Bootloader & Hardware Check]
+                B --> C[2. IOS Loading - Locate & Decompress Image]
+                C --> D[3. POST - ASIC, Memory & Interface Tests]
+                D --> E{All POST Tests Passed?}
+                E -- No --> F[Hardware Error / System Halt]
+                E -- Yes --> G[4. Execution Prompt - Load Config & Ready CLI]
+                G --> H[Operational State: Switch>]
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 3: ANNOTATED TERMINAL SNAPSHOT WITH MILESTONES -->
+    <section class="card">
+        <h2>3. Boot Process Console Log (Marked Milestones)</h2>
+        <p>The console stream below highlights the 4 key operational stages with explicit <strong>[BEGINNING]</strong>, <strong>[END]</strong>, and <strong>NECESSITY</strong> annotations.</p>
+
+        <div class="terminal">
+            <div class="terminal-header">
+                <div class="terminal-buttons">
+                    <span class="btn btn-close"></span>
+                    <span class="btn btn-minimize"></span>
+                    <span class="btn btn-maximize"></span>
+                </div>
+                <div class="terminal-title">Packet Tracer - Switch1 CLI (Annotated Boot Output)</div>
+            </div>
+            <div class="terminal-body">
+<span class="marker">================================================================================
+>>> STEP 1: INIT (Bootloader & Low-Level Hardware Initialization)
+>>> [BEGINNING]
+>>> NECESSITY: Initializes low-level hardware, mounts the local flash system, and enables 
+    memory allocation so the system can locate and load the operating system.
+================================================================================</span>
+<span class="output-text">C2960 Boot Loader (C2960-HBOOT-M) Version 12.2(25r)FX, RELEASE SOFTWARE (fc4)
+Cisco WS-C2960-24TT (RC32300) processor (revision C0) with 21039K bytes of memory.
+2960-24TT starting...
+Base ethernet MAC Address: 0090.2B30.0307
+Xmodem file system is available.
+Initializing Flash...
+flashfs[0]: 1 files, 0 directories
+flashfs[0]: 0 orphaned files, 0 orphaned directories
+flashfs[0]: Total bytes: 64016384
+flashfs[0]: Bytes used: 4670455
+flashfs[0]: Bytes available: 59345929
+flashfs[0]: flashfs fsck took 1 seconds.
+...done Initializing Flash.
+
+Boot Sector Filesystem (bs:) installed, fsid: 3
+Parameter Block Filesystem (pb:) installed, fsid: 4</span>
+<span class="marker">>>> [STEP 1 END]</span>
+
+
+<span class="marker">================================================================================
+>>> STEP 2: IOS LOADING (Decompressing & Executing Operating System)
+>>> [BEGINNING]
+>>> NECESSITY: Finds the binary image file in Flash memory and loads the main Cisco IOS kernel 
+    into system RAM so network routing and switching capabilities can run.
+================================================================================</span>
+<span class="output-text">Loading "flash:/2960-lanbasek9-mz.150-2.SE4.bin"...
+########################################################################## [OK]
+<span class="highlight">Smart Init is enabled
+smart init is sizing iomem
+        TYPE        MEMORY_REQ
+        TOTAL:      0x00000000
+Rounded IOMEM up to: 0Mb.
+Using 6 percent iomem. [0Mb/512Mb]</span>
+
+Cisco IOS Software, C2960 Software (C2960-LANBASEK9-M), Version 15.0(2)SE4, RELEASE SOFTWARE (fc1)
+Technical Support: http://www.cisco.com/techsupport
+Copyright (c) 1986-2013 by Cisco Systems, Inc.
+Compiled Wed 26-Jun-13 02:49 by mnguyen
+Initializing flashfs...
+flashfs[2]: Initialization complete....done Initializing flashfs.
+Checking for Bootloader upgrade..
+Boot Loader upgrade not required (Stage 2)</span>
+<span class="marker">>>> [STEP 2 END]</span>
+
+
+<span class="marker">================================================================================
+>>> STEP 3: POST CHECKS (Power-On Self Test Diagnostics)
+>>> [BEGINNING]
+>>> NECESSITY: Validates CPU registers, ASIC switching hardware, memory structures, and port 
+    loopbacks to prevent damaged hardware from entering an active network state.
+================================================================================</span>
+<span class="output-text">POST: CPU MIC register Tests : Begin
+POST: CPU MIC register Tests : End, Status Passed
+POST: PortASIC Memory Tests : Begin
+POST: PortASIC Memory Tests : End, Status Passed
+POST: CPU MIC interface Loopback Tests : Begin
+POST: CPU MIC interface Loopback Tests : End, Status Passed
+POST: PortASIC RingLoopback Tests : Begin
+POST: PortASIC RingLoopback Tests : End, Status Passed
+POST: PortASIC CAM Subsystem Tests : Begin
+POST: PortASIC CAM Subsystem Tests : End, Status Passed
+POST: PortASIC Port Loopback Tests : Begin
+POST: PortASIC Port Loopback Tests : End, Status Passed
+Waiting for Port download...Complete</span>
+<span class="marker">>>> [STEP 3 END]</span>
+
+
+<span class="marker">================================================================================
+>>> STEP 4: REACHING EXECUTION PROMPT (Config Application & Interactive State)
+>>> [BEGINNING]
+>>> NECESSITY: Parses system inventory, applies persistent configuration (if available in NVRAM), 
+    and hands terminal execution control over to the administrator.
+================================================================================</span>
+<span class="output-text">Cisco WS-C2960-24TT-L (PowerPC405) processor (revision B0) with 65536K bytes of memory.
+Processor board ID FOC1010X104
+Last reset from power-on
+1 Virtual Ethernet interface
+24 FastEthernet interfaces
+2 Gigabit Ethernet interfaces
+The password-recovery mechanism is enabled.
+64K bytes of flash-simulated non-volatile configuration memory.
+Base ethernet MAC Address       : 00:90:2B:30:03:07
+
+Switch Ports Model              SW Version            SW Image
+*    1 26    WS-C2960-24TT-L    15.0(2)SE4            C2960-LANBASEK9-M
+
+Press RETURN to get started!</span>
+
+
+<span class="prompt">Switch></span> <span class="marker"><-- [STEP 4 END: Device fully functional in User EXEC Mode]</span>
+</div>
+        </div>
+
+        <!-- TECHNICAL DEEP DIVE CALLOUT -->
+        <div class="info-callout">
+            <h3>🔍 Technical Deep Dive: Understanding IOMEM Initialization Lines</h3>
+            <p>During <strong>Step 2 (IOS Loading)</strong>, you will notice these highlighted lines:</p>
+            <p><code>Rounded IOMEM up to: 0Mb. | Using 6 percent iomem. [0Mb/512Mb]</code></p>
+            <ul>
+                <li><strong>Smart Init:</strong> Cisco IOS’s automated memory allocation mechanism that calculates required RAM partitions upon boot.</li>
+                <li><strong>IOMEM (Input/Output Memory):</strong> Memory dedicated to handling network packet buffers and fast direct memory access (DMA).</li>
+                <li><strong>Why "0Mb"?:</strong> Catalyst 2960 switches use dedicated hardware <strong>ASICs</strong> directly on the switch ports to process frame buffers. Because packet forwarding happens in hardware rather than host system RAM, the IOS kernel rounds general host-RAM allocation for IOMEM down to 0MB.</li>
+                <li><strong>6 percent iomem [0Mb/512Mb]:</strong> Represents a tiny fractional slice (under 1MB) used strictly for basic interface control headers across the 512MB maximum supported address space.</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- SECTION 4: SUMMARY OF STAGES -->
+    <section class="card">
+        <h2>4. Summary: Boot Stage Responsibilities</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Boot Phase</th>
+                    <th>Start Signal</th>
+                    <th>End Signal</th>
+                    <th>Why It Is Necessary</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>1. Init</strong></td>
+                    <td><code>C2960 Boot Loader...</code></td>
+                    <td><code>...done Initializing Flash.</code></td>
+                    <td>Prepares system hardware and mounts the Flash filesystem to find the OS image.</td>
+                </tr>
+                <tr>
+                    <td><strong>2. IOS Loading</strong></td>
+                    <td><code>Loading "flash:/..."</code></td>
+                    <td><code>Boot Loader upgrade not required</code></td>
+                    <td>Loads the operating system into RAM so features (Layer 2/3 protocols) can execute.</td>
+                </tr>
+                <tr>
+                    <td><strong>3. POST Checks</strong></td>
+                    <td><code>POST: CPU MIC... Begin</code></td>
+                    <td><code>Waiting for Port download... Complete</code></td>
+                    <td>Verifies that all internal ASICs, CPU buses, and memory paths are physically working.</td>
+                </tr>
+                <tr>
+                    <td><strong>4. Execution Prompt</strong></td>
+                    <td><code>Cisco WS-C2960... processor</code></td>
+                    <td><code>Switch></code></td>
+                    <td>Loads saved configurations and opens command-line access for user management.</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+</div>
+
+</body>
+</html>

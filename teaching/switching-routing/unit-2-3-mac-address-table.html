@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2.3 MAC Address Table & Frame Forwarding — Routing & Switching</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Slab:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#eef0e7;
+    --panel:#f6f7f1;
+    --ink:#1b2430;
+    --ink-soft:#576072;
+    --wire:#b8722f;
+    --wire-soft:#e9d3b1;
+    --cut:#2f7d74;
+    --cut-soft:#cfe4e1;
+    --frag:#7c5f9c;
+    --frag-soft:#e0d5ea;
+    --store:#3a5a8c;
+    --store-soft:#d3ddec;
+    --danger:#a5372f;
+    --danger-soft:#f0d7d3;
+    --broadcast:#a5372f;
+    --broadcast-soft:#f0d7d3;
+    --unicast:#3a5a8c;
+    --unicast-soft:#d3ddec;
+    --learn:#2f7d74;
+    --learn-soft:#cfe4e1;
+    --line:#c8cbba;
+    --line-strong:#9ea283;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    font-size:16px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:'IBM Plex Mono', monospace;}
+  .wrap{max-width:900px; margin:0 auto; padding:0 28px;}
+
+  header.hero{padding:64px 0 40px; border-bottom:1px solid var(--line-strong);}
+  .kicker{font-family:'IBM Plex Mono', monospace; font-size:13px; color:var(--ink-soft); margin:0 0 18px;}
+  .kicker .dot{color:var(--wire);}
+  h1.title{font-family:'IBM Plex Slab', serif; font-weight:600; font-size:42px; line-height:1.15; margin:0 0 16px; max-width:16ch;}
+  .dek{font-size:18px; color:var(--ink-soft); max-width:58ch; margin:0 0 36px;}
+
+  section{padding:52px 0;}
+  section + section{border-top:1px solid var(--line);}
+  h2.sec-title{font-family:'IBM Plex Slab', serif; font-size:28px; font-weight:600; margin:0 0 8px;}
+  .sec-sub{color:var(--ink-soft); max-width:64ch; margin:0 0 30px;}
+  p{max-width:70ch;}
+
+  /* ============ topology diagram ============ */
+  .topo-card{background:var(--panel); border:1px solid var(--line-strong); padding:26px 24px;}
+  .topo{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:6px;}
+  .node{
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+    font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--ink-soft);
+    flex:0 0 130px;
+  }
+  .node .box{
+    width:76px; height:56px; border:2px solid var(--ink); background:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Slab', serif; font-size:15px; font-weight:600; color:var(--ink);
+  }
+  .node.switch .box{background:var(--wire-soft); width:96px; height:64px;}
+  .wire-line{flex:1; height:2px; background:var(--ink); position:relative; margin:0 -4px;}
+  .wire-line .port-label{
+    position:absolute; top:-22px; left:50%; transform:translateX(-50%);
+    font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--ink-soft);
+  }
+
+  /* ============ learning process ============ */
+  .learn-steps{display:grid; grid-template-columns:1fr; gap:0; margin-top:24px; border-top:1px solid var(--line-strong);}
+  .learn-step{display:grid; grid-template-columns:34px 1fr; gap:16px; padding:16px 4px; border-bottom:1px solid var(--line-strong);}
+  .learn-step .num{font-family:'IBM Plex Mono', monospace; color:var(--wire); font-size:14px;}
+  .learn-step p{margin:0;}
+
+  /* ============ decision flowchart ============ */
+  .flow{background:var(--panel); border:1px solid var(--line-strong); padding:26px 24px;}
+  .flow-row{display:flex; gap:14px; align-items:stretch; margin-bottom:14px; flex-wrap:wrap;}
+  .flow-box{
+    border:1px solid var(--ink); background:#fff; padding:12px 16px;
+    font-size:14px; flex:1; min-width:200px;
+    display:flex; align-items:center;
+  }
+  .flow-box.q{background:#fff; font-weight:500;}
+  .flow-box.forward{background:var(--unicast-soft); border-color:var(--unicast);}
+  .flow-box.filter{background:#eee; border-color:var(--ink-soft); border-style:dashed;}
+  .flow-box.flood-u{background:var(--frag-soft); border-color:var(--frag);}
+  .flow-box.flood-b{background:var(--broadcast-soft); border-color:var(--broadcast);}
+  .flow-arrow{
+    font-family:'IBM Plex Mono', monospace; color:var(--ink-soft);
+    display:flex; align-items:center; justify-content:center; font-size:13px; padding:0 4px;
+  }
+  .flow-outcome-label{font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--ink-soft); margin-bottom:4px; display:block;}
+
+  /* ============ decision table ============ */
+  table.compare{width:100%; border-collapse:collapse; margin-top:6px; font-size:14.5px;}
+  table.compare th, table.compare td{border:1px solid var(--line-strong); padding:10px 12px; text-align:left; vertical-align:top;}
+  table.compare thead th{background:var(--ink); color:var(--paper); font-family:'IBM Plex Mono', monospace; font-weight:500; font-size:12.5px;}
+  table.compare tbody th{font-family:'IBM Plex Slab', serif; font-weight:600; background:var(--panel); width:22%;}
+
+  .callout{border:1px solid var(--wire); background:var(--wire-soft); padding:16px 18px; margin:22px 0; font-size:14.5px;}
+  .callout strong{display:block; margin-bottom:4px; font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--ink);}
+
+  /* ============ simulator ============ */
+  .sim{border:1px solid var(--line-strong); background:var(--panel); padding:24px;}
+  .sim-progress{display:flex; gap:6px; margin-bottom:22px;}
+  .sim-progress .pip{
+    flex:1; height:6px; background:#dfe1d5; border:1px solid var(--line-strong);
+    cursor:pointer;
+  }
+  .sim-progress .pip.active{background:var(--wire); border-color:var(--wire);}
+  .sim-progress .pip.done{background:var(--wire-soft);}
+
+  .sim-grid{display:grid; grid-template-columns:1fr; gap:18px;}
+  @media (min-width:700px){ .sim-grid{grid-template-columns:1fr 1fr;} }
+
+  .sim-panel{background:#fff; border:1px solid var(--line-strong); padding:18px;}
+  .sim-panel h4{margin:0 0 12px; font-family:'IBM Plex Slab', serif; font-size:16px;}
+  .frame-field{display:flex; justify-content:space-between; font-family:'IBM Plex Mono', monospace; font-size:12.5px; padding:5px 0; border-bottom:1px dashed var(--line);}
+  .frame-field:last-child{border-bottom:none;}
+  .frame-field .k{color:var(--ink-soft);}
+
+  .badge{
+    display:inline-block; font-family:'IBM Plex Mono', monospace; font-size:11.5px;
+    padding:4px 10px; border:1px solid var(--ink); margin-bottom:14px;
+  }
+  .badge.broadcast{background:var(--broadcast-soft); border-color:var(--broadcast); color:var(--broadcast);}
+  .badge.unicast{background:var(--unicast-soft); border-color:var(--unicast); color:var(--unicast);}
+  .badge.floodu{background:var(--frag-soft); border-color:var(--frag); color:var(--frag);}
+
+  .path-toggle{display:flex; gap:0; margin-bottom:22px; border:1px solid var(--ink);}
+  .path-toggle button{
+    flex:1; font-family:'IBM Plex Mono', monospace; font-size:12.5px;
+    padding:12px 14px; border:none; background:#fff; cursor:pointer; color:var(--ink-soft);
+    border-right:1px solid var(--ink); text-align:left; line-height:1.4;
+  }
+  .path-toggle button:last-child{border-right:none;}
+  .path-toggle button.active{background:var(--ink); color:var(--paper);}
+  .path-toggle button strong{display:block; font-family:'IBM Plex Sans', sans-serif; font-size:13.5px; color:inherit; margin-bottom:2px;}
+
+  .cam-table{width:100%; border-collapse:collapse; font-size:13px;}
+  .cam-table th, .cam-table td{border:1px solid var(--line-strong); padding:7px 9px; font-family:'IBM Plex Mono', monospace; text-align:left;}
+  .cam-table th{background:var(--ink); color:var(--paper); font-weight:500; font-size:11px;}
+  .cam-table tr.fresh td{background:var(--learn-soft);}
+  .cam-table tr.empty td{color:var(--ink-soft); font-style:italic;}
+
+  .sim-narrative{margin-top:16px; padding:12px 14px; background:#fff; border-left:3px solid var(--wire); font-size:14px;}
+  .sim-buttons{display:flex; justify-content:space-between; margin-top:20px; gap:12px;}
+  .sim-buttons button{
+    font-family:'IBM Plex Mono', monospace; font-size:13px; padding:10px 18px;
+    border:1px solid var(--ink); background:#fff; cursor:pointer;
+  }
+  .sim-buttons button:hover:not(:disabled){background:var(--ink); color:var(--paper);}
+  .sim-buttons button:disabled{opacity:0.35; cursor:not-allowed;}
+
+  /* ============ recap ============ */
+  .recap{display:grid; grid-template-columns:1fr; gap:10px;}
+  .recap .item{display:flex; gap:12px; padding:12px 0; border-bottom:1px solid var(--line); font-size:15px;}
+  .recap .item:last-child{border-bottom:none;}
+  .recap .q{font-family:'IBM Plex Mono', monospace; color:var(--wire); flex:0 0 22px;}
+
+  footer{padding:36px 0 60px; color:var(--ink-soft); font-size:13px; border-top:1px solid var(--line-strong);}
+
+  @media (max-width:600px){
+    h1.title{font-size:30px;}
+    .topo{flex-direction:column;}
+    .wire-line{width:2px; height:36px;}
+    .wire-line .port-label{top:auto; left:14px; transform:none;}
+  }
+</style>
+</head>
+<body><div style="font:14px/1.4 Inter,-apple-system,Segoe UI,sans-serif;background:#0b1d3a;padding:10px 16px;"><a href="/teaching/switching-routing.html" style="color:#fbf9f3;text-decoration:none;">&larr; Switching &amp; Routing &middot; all units</a></div>
+
+<div class="wrap">
+  <header class="hero">
+    <p class="kicker">NCS 485 · Routing &amp; Switching <span class="dot">·</span> Unit 2.3</p>
+    <h1 class="title">The MAC address table, and how a switch decides where a frame goes</h1>
+    <p class="dek">A switch never has to be told which device sits on which port — it figures that out for itself, purely by watching traffic. This unit is about how that table gets built, how it goes stale, and the three things a switch can do once it's looked a destination MAC up.</p>
+
+    <div class="topo-card">
+      <p class="mono" style="font-size:12px; color:var(--ink-soft); margin:0 0 4px;">Reference topology used throughout this page</p>
+      <div class="topo">
+        <div class="node">
+          <div class="box">PC-A</div>
+          <span>192.168.1.10<br>AAAA.AAAA.AAAA</span>
+        </div>
+        <div class="wire-line"><span class="port-label">Fa0/1</span></div>
+        <div class="node switch">
+          <div class="box">SW1</div>
+          <span>CAM table lives here</span>
+        </div>
+        <div class="wire-line"><span class="port-label">Fa0/2</span></div>
+        <div class="node">
+          <div class="box">PC-B</div>
+          <span>192.168.1.20<br>BBBB.BBBB.BBBB</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ LEARNING ============ -->
+  <section id="learning">
+    <h2 class="sec-title">How the table is learned</h2>
+    <p class="sec-sub">The switch never inspects the destination MAC to learn anything. Learning only ever happens from the <strong>source</strong> MAC of an arriving frame.</p>
+    <div class="learn-steps">
+      <div class="learn-step"><span class="num">1</span><p>A frame arrives on a port — any port, any frame, it doesn't matter what kind.</p></div>
+      <div class="learn-step"><span class="num">2</span><p>The switch reads the <strong>source MAC address</strong> in the frame header.</p></div>
+      <div class="learn-step"><span class="num">3</span><p>It checks its table: is this source MAC already recorded? If not, it adds a new row: <span class="mono">source MAC → the port it just arrived on</span>.</p></div>
+      <div class="learn-step"><span class="num">4</span><p>If the MAC is already there, the switch just resets its <strong>aging timer</strong> — proof the device is still active on that port.</p></div>
+    </div>
+    <div class="callout">
+      <strong>Why this matters</strong>
+      The table only ever reflects devices that have <em>transmitted</em> something. A device that's been silent — even if it's powered on and perfectly reachable — simply won't have an entry until it sends its first frame.
+    </div>
+  </section>
+
+  <!-- ============ AGING ============ -->
+  <section id="aging">
+    <h2 class="sec-title">Aging: why entries disappear</h2>
+    <p class="sec-sub">Cisco switches default to a <strong>300-second (5-minute)</strong> aging timer per dynamically learned entry.</p>
+    <p>Every time a frame arrives with a source MAC that's already in the table, that entry's timer resets to 300 seconds. If 300 seconds pass with <em>zero</em> frames from that MAC, the entry is silently deleted — not because the device is gone, but simply because the switch hasn't heard from it recently enough to keep assuming where it lives.</p>
+    <p>This is exactly what creates the scenario from earlier: 6 minutes of silence from PC-B is enough to age its entry out, even though PC-B never actually went anywhere.</p>
+  </section>
+
+  <!-- ============ FORWARDING DECISION ============ -->
+  <section id="decision">
+    <h2 class="sec-title">The forwarding decision</h2>
+    <p class="sec-sub">Once a frame's destination MAC has been read, the switch has exactly three possible moves.</p>
+
+    <div class="flow">
+      <div class="flow-row">
+        <div class="flow-box q">Is the destination MAC a broadcast (FFFF.FFFF.FFFF) or multicast address?</div>
+      </div>
+      <div class="flow-row">
+        <div class="flow-arrow">yes →</div>
+        <div class="flow-box flood-b">
+          <div>
+            <span class="flow-outcome-label">outcome</span>
+            Flood out every port except the source — mandatory, table is never even checked
+          </div>
+        </div>
+      </div>
+      <div class="flow-row">
+        <div class="flow-arrow">no ↓</div>
+      </div>
+      <div class="flow-row">
+        <div class="flow-box q">Is the destination MAC in the table?</div>
+      </div>
+      <div class="flow-row">
+        <div class="flow-arrow">no →</div>
+        <div class="flow-box flood-u">
+          <div>
+            <span class="flow-outcome-label">outcome</span>
+            Unknown unicast flood — send out every port except the source, as a fallback
+          </div>
+        </div>
+      </div>
+      <div class="flow-row">
+        <div class="flow-arrow">yes ↓</div>
+      </div>
+      <div class="flow-row">
+        <div class="flow-box q">Is that port the same one the frame arrived on?</div>
+      </div>
+      <div class="flow-row">
+        <div class="flow-arrow">yes →</div>
+        <div class="flow-box filter">
+          <div>
+            <span class="flow-outcome-label">outcome</span>
+            Filter — drop the frame, destination is already on that segment
+          </div>
+        </div>
+      </div>
+      <div class="flow-row">
+        <div class="flow-arrow">no →</div>
+        <div class="flow-box forward">
+          <div>
+            <span class="flow-outcome-label">outcome</span>
+            Forward — send out that one port only
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ BROADCAST VS UNKNOWN UNICAST ============ -->
+  <section id="compare">
+    <h2 class="sec-title">Two different reasons to flood</h2>
+    <p class="sec-sub">Same physical action — out every port but the source — for two very different reasons.</p>
+    <table class="compare">
+      <thead><tr><th></th><th>Who chose the destination</th><th>What triggers it</th><th>Self-corrects?</th></tr></thead>
+      <tbody>
+        <tr>
+          <th>Unknown unicast flood</th>
+          <td>Source host, via a resolved MAC (e.g. from ARP)</td>
+          <td>Destination MAC is a real unicast address, just not yet in the table</td>
+          <td>Yes — one reply from the destination teaches the switch, future frames forward directly</td>
+        </tr>
+        <tr>
+          <th>Broadcast flood</th>
+          <td>Source host, intentionally addressing "everyone"</td>
+          <td>Destination MAC is exactly FFFF.FFFF.FFFF</td>
+          <td>No — it will flood every single time, forever; there's no real MAC to ever learn</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ SIMULATOR ============ -->
+  <section id="sim-section">
+    <h2 class="sec-title">Walk it through: PC-A pings PC-B after 6 minutes of silence</h2>
+    <p class="sec-sub">PC-B's CAM entry has aged out either way. What happens next depends on one thing: does PC-A still remember BB's MAC from ARP?</p>
+
+    <div class="sim">
+      <div class="path-toggle" id="pathToggle">
+        <button data-path="0" class="active"><strong>Path A — ARP cache also expired</strong>PC-A must re-ARP first → broadcast flood, then clean unicast</button>
+        <button data-path="1"><strong>Path B — ARP cache still valid</strong>PC-A already has BB's MAC → unknown unicast flood instead</button>
+      </div>
+
+      <div class="sim-progress" id="simProgress"></div>
+
+      <div class="sim-grid">
+        <div class="sim-panel">
+          <h4 id="frameTitle">Frame on the wire</h4>
+          <span class="badge" id="frameBadge">—</span>
+          <div id="frameFields"></div>
+        </div>
+        <div class="sim-panel">
+          <h4>CAM table (SW1)</h4>
+          <table class="cam-table">
+            <thead><tr><th>MAC</th><th>Port</th></tr></thead>
+            <tbody id="camBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="sim-narrative" id="simNarrative"></div>
+
+      <div class="sim-buttons">
+        <button id="prevBtn">&larr; Previous</button>
+        <span class="mono" id="stepLabel" style="align-self:center; color:var(--ink-soft); font-size:13px;"></span>
+        <button id="nextBtn">Next &rarr;</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ REAL DEVICE ============ -->
+  <section id="real-device">
+    <h2 class="sec-title">Seeing it on a real switch</h2>
+    <p class="sec-sub">Everything above is easy to state in the abstract. Here's an actual <span class="mono">show running-config</span> pulled from a lab switch — <span class="mono">UniGlobe_Main_Switch_1</span> — so you can connect the theory to something that came off real (simulated) hardware.</p>
+
+    <div class="topo-card">
+      <p class="mono" style="font-size:12px; color:var(--ink-soft); margin:0 0 10px;">UniGlobe_Main_Switch_1#show running-config <span style="color:var(--ink-soft);">(trimmed to the lines that matter for 2.3)</span></p>
+      <pre class="mono" style="background:#fff; border:1px solid var(--line-strong); padding:16px 18px; font-size:12.5px; line-height:1.7; overflow-x:auto; margin:0;">hostname UniGlobe_Main_Switch_1
+!
+spanning-tree mode pvst
+spanning-tree extend system-id
+!
+interface FastEthernet0/1
+!
+interface FastEthernet0/2
+!
+ &lt;&lt; Fa0/3 through Fa0/24, Gi0/1, Gi0/2 — all present, all unconfigured &gt;&gt;
+!
+interface Vlan1
+ ip address 192.168.1.2 255.255.255.0
+!
+ip default-gateway 192.168.1.1</pre>
+    </div>
+
+    <p style="margin-top:22px;">Two things worth pointing out to students who expect to <em>see</em> a MAC table sitting somewhere in this config:</p>
+    <div class="learn-steps">
+      <div class="learn-step"><span class="num">1</span><p>The MAC address table is <strong>not part of the running-config at all</strong>. It isn't a setting anyone typed in — it's a dynamic, in-memory table the switch builds itself by watching traffic, exactly as described above. That's why <span class="mono">show running-config</span> lists 24 FastEthernet interfaces and 2 Gigabit interfaces with essentially nothing configured on any of them, yet the switch is still perfectly capable of learning and forwarding on all of them the moment frames start arriving.</p></div>
+      <div class="learn-step"><span class="num">2</span><p>To actually see the table this unit has been describing, the command is <span class="mono">show mac address-table</span> (or the older <span class="mono">show mac-address-table</span>) — not <span class="mono">show running-config</span>. Have students run it after PC-A pings PC-B and compare what shows up against the CAM table in the simulator above.</p></div>
+    </div>
+
+    <div class="callout">
+      <strong>In-class exercise</strong>
+      On UniGlobe_Main_Switch_1, have students predict the output of <span class="mono">show mac address-table</span> before any host has sent traffic (empty — nothing has been learned yet, VLAN1's own IP doesn't create an entry), then again right after a ping between two attached PCs. The single new pair of rows that appears is the same source-MAC-triggered learning event walked through step-by-step earlier on this page.
+    </div>
+  </section>
+
+  <!-- ============ RECAP ============ -->
+  <section id="recap-section">
+    <h2 class="sec-title">Recap</h2>
+    <div class="recap">
+      <div class="item"><span class="q">1</span><span>The MAC table is built only from source MACs of arriving frames — never from destinations.</span></div>
+      <div class="item"><span class="q">2</span><span>Entries age out after 300 seconds of silence from that MAC — this doesn't mean the device is gone, just unheard-from recently.</span></div>
+      <div class="item"><span class="q">3</span><span>Every frame gets one of three outcomes: forward (known, different port), filter (known, same port), or flood (unknown, or broadcast/multicast).</span></div>
+      <div class="item"><span class="q">4</span><span>Unknown unicast flooding is temporary and self-correcting; broadcast flooding is permanent by design.</span></div>
+      <div class="item"><span class="q">5</span><span>An aged-out CAM entry never breaks connectivity — the very next frame the "missing" device sends re-teaches the switch instantly.</span></div>
+    </div>
+  </section>
+
+  <footer>
+    NCS 485 · Routing and Switching — Unit 2: Switching Concepts and Basic Configuration (2.3)
+  </footer>
+</div>
+
+<script>
+(function(){
+  const pathA = [
+    {
+      label: "Before — PC-B has gone silent for 6 minutes",
+      badge: null,
+      frameTitle: "No frame yet",
+      fields: [],
+      cam: [
+        {mac:"AAAA.AAAA.AAAA", port:"Fa0/1", state:"fresh"},
+        {mac:"BBBB.BBBB.BBBB (aged out)", port:"—", state:"empty"}
+      ],
+      narrative: "PC-B hasn't transmitted anything in over 300 seconds, so SW1 has removed its entry. PC-A's ARP cache has also expired. PC-A now wants to ping 192.168.1.20, but it doesn't even know BB's MAC address yet."
+    },
+    {
+      label: "Step 1 — PC-A broadcasts an ARP Request",
+      badge: {type:"broadcast", text:"Broadcast flood"},
+      frameTitle: "Frame: ARP Request",
+      fields: [
+        ["Src MAC","AAAA.AAAA.AAAA"],
+        ["Dst MAC","FFFF.FFFF.FFFF"],
+        ["Src IP","192.168.1.10"],
+        ["Target IP","192.168.1.20"],
+        ["Meaning","\u201cWho has .20? Tell .10\u201d"]
+      ],
+      cam: [
+        {mac:"AAAA.AAAA.AAAA", port:"Fa0/1", state:"fresh"},
+        {mac:"— (BB still unknown)", port:"—", state:"empty"}
+      ],
+      narrative: "SW1 refreshes AA's entry (already present). The destination is FFFF.FFFF.FFFF, so this is mandatory broadcast flooding — sent out every port except Fa0/1, no table lookup needed."
+    },
+    {
+      label: "Step 2 — PC-B replies, and gets relearned",
+      badge: {type:"unicast", text:"Unicast forward"},
+      frameTitle: "Frame: ARP Reply",
+      fields: [
+        ["Src MAC","BBBB.BBBB.BBBB"],
+        ["Dst MAC","AAAA.AAAA.AAAA"],
+        ["Src IP","192.168.1.20"],
+        ["Dst IP","192.168.1.10"],
+        ["Meaning","\u201c192.168.1.20 is at BB\u201d"]
+      ],
+      cam: [
+        {mac:"AAAA.AAAA.AAAA", port:"Fa0/1", state:""},
+        {mac:"BBBB.BBBB.BBBB", port:"Fa0/2", state:"fresh"}
+      ],
+      narrative: "The moment this frame arrives on Fa0/2, SW1 learns BB → Fa0/2 again. Destination MAC AA is already known → this is forwarded directly to Fa0/1. No flooding this time."
+    },
+    {
+      label: "Step 3 — PC-A sends the actual ping",
+      badge: {type:"unicast", text:"Unicast forward"},
+      frameTitle: "Frame: ICMP Echo Request",
+      fields: [
+        ["Src MAC","AAAA.AAAA.AAAA"],
+        ["Dst MAC","BBBB.BBBB.BBBB"],
+        ["Src IP","192.168.1.10"],
+        ["Dst IP","192.168.1.20"],
+        ["Meaning","ICMP Echo Request"]
+      ],
+      cam: [
+        {mac:"AAAA.AAAA.AAAA", port:"Fa0/1", state:"fresh"},
+        {mac:"BBBB.BBBB.BBBB", port:"Fa0/2", state:""}
+      ],
+      narrative: "PC-A now has BB's MAC from the ARP reply. SW1 looks up BB — already learned in Step 2 — so this forwards straight to Fa0/2. No unknown-unicast flood ever actually occurs on this path."
+    },
+    {
+      label: "Step 4 — PC-B replies, ping succeeds",
+      badge: {type:"unicast", text:"Unicast forward"},
+      frameTitle: "Frame: ICMP Echo Reply",
+      fields: [
+        ["Src MAC","BBBB.BBBB.BBBB"],
+        ["Dst MAC","AAAA.AAAA.AAAA"],
+        ["Src IP","192.168.1.20"],
+        ["Dst IP","192.168.1.10"],
+        ["Meaning","ICMP Echo Reply"]
+      ],
+      cam: [
+        {mac:"AAAA.AAAA.AAAA", port:"Fa0/1", state:""},
+        {mac:"BBBB.BBBB.BBBB", port:"Fa0/2", state:"fresh"}
+      ],
+      narrative: "SW1 refreshes BB's entry and forwards directly to Fa0/1, where AA is known. PC-A receives the reply — the ping succeeds, and both entries are now fully refreshed."
+    }
+  ];
+
+  const pathB = [
+    {
+      label: "Before — CAM entry aged out, but PC-A's ARP cache is still valid",
+      badge: null,
+      frameTitle: "No frame yet",
+      fields: [],
+      cam: [
+        {mac:"AAAA.AAAA.AAAA", port:"Fa0/1", state:"fresh"},
+        {mac:"BBBB.BBBB.BBBB (aged out)", port:"—", state:"empty"}
+      ],
+      narrative: "SW1's entry for BB is gone (300s timer), but PC-A's own ARP cache still remembers BB's MAC from an earlier exchange \u2014 ARP cache timeouts are typically much longer than the switch's 300 seconds. PC-A skips ARP entirely and addresses the frame directly."
+    },
+    {
+      label: "Step 1 — PC-A sends the ping straight away, dest MAC already filled in",
+      badge: {type:"floodu", text:"Unknown unicast flood"},
+      frameTitle: "Frame: ICMP Echo Request",
+      fields: [
+        ["Src MAC","AAAA.AAAA.AAAA"],
+        ["Dst MAC","BBBB.BBBB.BBBB"],
+        ["Src IP","192.168.1.10"],
+        ["Dst IP","192.168.1.20"],
+        ["Meaning","ICMP Echo Request \u2014 no ARP needed, MAC already cached"]
+      ],
+      cam: [
+        {mac:"AAAA.AAAA.AAAA", port:"Fa0/1", state:"fresh"},
+        {mac:"— (BB still unknown to SW1)", port:"—", state:"empty"}
+      ],
+      narrative: "SW1 refreshes AA's entry. It looks up destination MAC BB \u2014 a real, valid unicast address, but absent from the table. This is a genuine unknown unicast flood: sent out every port except Fa0/1, even though it's ordinary ping traffic, not a discovery protocol."
+    },
+    {
+      label: "Step 2 — PC-B receives the flooded frame, replies",
+      badge: {type:"unicast", text:"Unicast forward"},
+      frameTitle: "Frame: ICMP Echo Reply",
+      fields: [
+        ["Src MAC","BBBB.BBBB.BBBB"],
+        ["Dst MAC","AAAA.AAAA.AAAA"],
+        ["Src IP","192.168.1.20"],
+        ["Dst IP","192.168.1.10"],
+        ["Meaning","ICMP Echo Reply"]
+      ],
+      cam: [
+        {mac:"AAAA.AAAA.AAAA", port:"Fa0/1", state:""},
+        {mac:"BBBB.BBBB.BBBB", port:"Fa0/2", state:"fresh"}
+      ],
+      narrative: "PC-B received the flood fine \u2014 flooding guarantees delivery even without a table entry. Its reply arrives on Fa0/2, so SW1 relearns BB \u2192 Fa0/2 immediately. Destination MAC AA is already known \u2192 forwarded directly to Fa0/1."
+    },
+    {
+      label: "From here on — fully recovered",
+      badge: {type:"unicast", text:"Unicast forward"},
+      frameTitle: "Any further frames between AA and BB",
+      fields: [
+        ["Src MAC","AAAA.AAAA.AAAA or BBBB.BBBB.BBBB"],
+        ["Dst MAC","whichever is the other device"],
+        ["Meaning","Ordinary unicast traffic"]
+      ],
+      cam: [
+        {mac:"AAAA.AAAA.AAAA", port:"Fa0/1", state:""},
+        {mac:"BBBB.BBBB.BBBB", port:"Fa0/2", state:""}
+      ],
+      narrative: "A single unknown unicast flood was enough to resynchronize the table. Every subsequent frame in either direction is now a clean, direct unicast forward \u2014 exactly one flood was the entire cost of the stale entry."
+    }
+  ];
+
+  const paths = [pathA, pathB];
+  let pathIdx = 0;
+  let steps = paths[pathIdx];
+  let idx = 0;
+
+  const toggleBtns = document.querySelectorAll('#pathToggle button');
+  toggleBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      pathIdx = parseInt(btn.dataset.path, 10);
+      steps = paths[pathIdx];
+      idx = 0;
+      toggleBtns.forEach(b => b.classList.toggle('active', b === btn));
+      rebuildProgress();
+      render();
+    });
+  });
+  const progressEl = document.getElementById('simProgress');
+  const frameTitle = document.getElementById('frameTitle');
+  const frameBadge = document.getElementById('frameBadge');
+  const frameFields = document.getElementById('frameFields');
+  const camBody = document.getElementById('camBody');
+  const narrative = document.getElementById('simNarrative');
+  const stepLabel = document.getElementById('stepLabel');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+
+  // build progress pips
+  function rebuildProgress(){
+    progressEl.innerHTML = '';
+    steps.forEach((s, i) => {
+      const pip = document.createElement('div');
+      pip.className = 'pip';
+      pip.dataset.i = i;
+      pip.addEventListener('click', () => { idx = i; render(); });
+      progressEl.appendChild(pip);
+    });
+  }
+  rebuildProgress();
+
+  function render(){
+    const s = steps[idx];
+
+    // progress
+    Array.from(progressEl.children).forEach((pip, i) => {
+      pip.classList.toggle('active', i === idx);
+      pip.classList.toggle('done', i < idx);
+    });
+
+    frameTitle.textContent = s.frameTitle;
+    if(s.badge){
+      frameBadge.style.display = 'inline-block';
+      frameBadge.className = 'badge ' + s.badge.type;
+      frameBadge.textContent = s.badge.text;
+    } else {
+      frameBadge.style.display = 'none';
+    }
+
+    frameFields.innerHTML = '';
+    if(s.fields.length === 0){
+      const p = document.createElement('div');
+      p.style.color = 'var(--ink-soft)';
+      p.style.fontSize = '13px';
+      p.textContent = 'Nothing has been sent yet.';
+      frameFields.appendChild(p);
+    } else {
+      s.fields.forEach(([k,v]) => {
+        const row = document.createElement('div');
+        row.className = 'frame-field';
+        row.innerHTML = '<span class="k">' + k + '</span><span>' + v + '</span>';
+        frameFields.appendChild(row);
+      });
+    }
+
+    camBody.innerHTML = '';
+    s.cam.forEach(row => {
+      const tr = document.createElement('tr');
+      if(row.state) tr.className = row.state;
+      tr.innerHTML = '<td>' + row.mac + '</td><td>' + row.port + '</td>';
+      camBody.appendChild(tr);
+    });
+
+    narrative.textContent = s.narrative;
+    stepLabel.textContent = s.label;
+
+    prevBtn.disabled = idx === 0;
+    nextBtn.disabled = idx === steps.length - 1;
+  }
+
+  prevBtn.addEventListener('click', () => { if(idx>0){ idx--; render(); } });
+  nextBtn.addEventListener('click', () => { if(idx<steps.length-1){ idx++; render(); } });
+
+  render();
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Unit 6 · Enhanced Interior Gateway Routing Protocol (EIGRP)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2F5F7; --paper:#FFFFFF; --ink:#18222F; --muted:#556275; --line:#D5DDE5;
+  --aqua:#1E9C9A; --orange:#D9731A; --yellow:#B98D00;
+  --tag:#FFF6D6; --tag-ink:#4A3A00; --code-bg:#1B2533; --code-ink:#DDE6F0; --prompt:#8FC7FF;
+  --ok:#2E8B57; --warn:#B4442C;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121821; --paper:#19212C; --ink:#E4EAF1; --muted:#9AA8B8; --line:#2C3847;
+    --aqua:#3CC4C1; --orange:#F0914A; --yellow:#E2B92E;
+    --tag:#2B2616; --tag-ink:#F2E3AE; --code-bg:#0E141C; --code-ink:#DDE6F0; --prompt:#8FC7FF;
+    --ok:#5BC38A; --warn:#E5775F;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121821; --paper:#19212C; --ink:#E4EAF1; --muted:#9AA8B8; --line:#2C3847;
+  --aqua:#3CC4C1; --orange:#F0914A; --yellow:#E2B92E;
+  --tag:#2B2616; --tag-ink:#F2E3AE; --code-bg:#0E141C; --code-ink:#DDE6F0; --prompt:#8FC7FF;
+  --ok:#5BC38A; --warn:#E5775F;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 16px);scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+  font-size:1.0625rem;line-height:1.6}
+h1,h2,h3,h4{font-family:"Bricolage Grotesque","Atkinson Hyperlegible",system-ui,sans-serif;line-height:1.15;margin:0 0 .5em}
+h2{font-size:clamp(1.6rem,3.5vw,2.2rem);font-weight:800}
+h3{font-size:1.3rem;font-weight:700;margin-top:1.8em}
+h4{font-size:1.05rem;font-weight:700;margin-top:1.3em}
+p{margin:0 0 1em;max-width:74ch}
+a{color:inherit}
+code,pre,kbd{font-family:"JetBrains Mono",ui-monospace,Consolas,monospace;font-size:.88em}
+:not(pre)>code{background:color-mix(in srgb,var(--line) 55%,transparent);padding:.1em .35em;border-radius:4px}
+img,svg{max-width:100%}
+:focus-visible{outline:3px solid var(--orange);outline-offset:2px}
+.shell{display:grid;grid-template-columns:240px minmax(0,1fr);gap:48px;max-width:1180px;margin:0 auto;padding:0 24px}
+nav.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 24px);align-self:start;padding:28px 0;font-size:.95rem}
+nav.toc p{font-weight:700;margin-bottom:.4em}
+nav.toc ol{list-style:none;margin:0;padding:0}
+nav.toc li{margin:.15em 0}
+nav.toc a{display:block;text-decoration:none;padding:.3em .6em;border-left:4px solid var(--line);color:var(--muted)}
+nav.toc a:hover{color:var(--ink)}
+nav.toc a[data-c="aqua"]{border-color:var(--aqua)}
+nav.toc a[data-c="orange"]{border-color:var(--orange)}
+nav.toc a[data-c="yellow"]{border-color:var(--yellow)}
+main{max-width:76ch;padding-bottom:80px}
+@media (max-width:900px){.shell{grid-template-columns:1fr;gap:0}nav.toc{display:none}}
+.hero{padding:40px 0 24px}
+.hero h1{font-size:clamp(2.2rem,6vw,3.6rem);font-weight:800;letter-spacing:-.02em;margin-bottom:.2em}
+.hero .unit{color:var(--muted);font-size:1.05rem;margin-bottom:.8em}
+.topo{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:12px;margin:18px 0 8px}
+.topo svg{display:block;width:100%;height:auto}
+.topo text{font-family:"JetBrains Mono",monospace;font-size:11px;fill:var(--muted)}
+.topo .rname{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:14px;fill:var(--ink)}
+.topo figcaption{font-size:.9rem;color:var(--muted);padding:4px 8px 2px}
+.topo .rtr{fill:var(--paper);stroke:var(--ink);stroke-width:2}
+.objectives{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px 22px;margin:22px 0}
+.objectives h3{margin-top:0}
+.objectives ul{margin:0;padding-left:1.2em}
+section.unit-part{padding-top:48px;margin-top:24px;border-top:6px solid var(--c)}
+section.unit-part > .num{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;color:var(--c);font-size:1rem;margin-bottom:.2em}
+ul,ol{padding-left:1.3em}
+li{margin:.25em 0}
+.tag{position:relative;background:var(--tag);color:var(--tag-ink);border-radius:6px 14px 14px 6px;padding:16px 20px 16px 44px;margin:1.4em 0;
+  border:1px dashed color-mix(in srgb,var(--tag-ink) 35%,transparent)}
+.tag::before{content:"";position:absolute;left:16px;top:20px;width:12px;height:12px;border-radius:50%;border:3px solid var(--tag-ink);opacity:.55}
+.tag .t{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:1.15rem;margin-bottom:.35em}
+.tag ul{margin:.3em 0 0}
+.tw{overflow-x:auto;margin:1em 0 1.4em;border:1px solid var(--line);border-radius:10px;background:var(--paper)}
+table{border-collapse:collapse;width:100%;font-size:.95rem;min-width:480px}
+th,td{padding:.55em .8em;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+thead th{font-family:"Bricolage Grotesque",sans-serif;background:color-mix(in srgb,var(--line) 40%,var(--paper))}
+tbody tr:last-child td{border-bottom:0}
+td:first-child{font-weight:700}
+pre{background:var(--code-bg);color:var(--code-ink);padding:14px 16px;border-radius:10px;overflow-x:auto;line-height:1.5;margin:1em 0 1.3em}
+pre .p{color:var(--prompt)} pre .c{color:#8A9BB0;font-style:italic}
+.duo{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin:1em 0}
+.duo > div{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.duo h4{margin-top:0}
+.duo ul{margin:0}
+@media (max-width:760px){.duo{grid-template-columns:1fr}}
+.note{border-left:4px solid var(--c,var(--orange));padding:.4em 0 .4em 1em;margin:1.2em 0;color:var(--ink)}
+.note strong{font-family:"Bricolage Grotesque",sans-serif}
+.formula{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:16px 20px;margin:1em 0;font-family:"JetBrains Mono",monospace;font-size:.95rem;overflow-x:auto}
+details.q{background:var(--paper);border:1px solid var(--line);border-radius:10px;margin:.6em 0;padding:0}
+details.q summary{cursor:pointer;padding:.8em 1em;font-weight:700;list-style:none}
+details.q summary::-webkit-details-marker{display:none}
+details.q summary::after{content:"Show answer";float:right;font-weight:400;font-size:.85rem;color:var(--muted)}
+details.q[open] summary::after{content:"Hide"}
+details.q .a{padding:0 1em .9em;border-top:1px dashed var(--line);padding-top:.7em}
+.theme-btn{font:inherit;font-size:.85rem;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:.35em .9em;cursor:pointer;margin-top:1em}
+footer{color:var(--muted);font-size:.9rem;margin-top:3em}
+</style>
+</head>
+<body><div style="font:14px/1.4 Inter,-apple-system,Segoe UI,sans-serif;background:#0b1d3a;padding:10px 16px;"><a href="/teaching/switching-routing.html" style="color:#fbf9f3;text-decoration:none;">&larr; Switching &amp; Routing &middot; all units</a></div>
+<div class="shell">
+<nav class="toc" aria-label="Contents">
+  <p>Contents</p>
+  <ol>
+    <li><a href="#features" data-c="aqua">1. Features &amp; operation</a></li>
+    <li><a href="#neighbors" data-c="aqua">2. Neighbor discovery &amp; tables</a></li>
+    <li><a href="#dual" data-c="orange">3. DUAL: FD, RD, successors</a></li>
+    <li><a href="#rtp" data-c="orange">4. RTP &amp; packet types</a></li>
+    <li><a href="#metric" data-c="orange">5. The composite metric</a></li>
+    <li><a href="#config" data-c="yellow">6. Configuring EIGRP</a></li>
+    <li><a href="#vlsm" data-c="yellow">7. VLSM &amp; discontiguous networks</a></li>
+    <li><a href="#balance" data-c="yellow">8. Load balancing &amp; split horizon</a></li>
+    <li><a href="#verify">9. Verification commands</a></li>
+    <li><a href="#v6">10. EIGRPv6 quick reference</a></li>
+    <li><a href="#matrix" data-c="orange">11. Design comparison matrix</a></li>
+    <li><a href="#check">12. Self-check</a></li>
+  </ol>
+  <button class="theme-btn" id="themeBtn" type="button">Switch light/dark</button>
+</nav>
+
+<main>
+<header class="hero" id="top">
+  <p class="unit">Unit 6 · Theory background</p>
+  <h1>EIGRP: the hybrid routing protocol</h1>
+  <p>Enhanced Interior Gateway Routing Protocol (EIGRP) is Cisco's own advanced distance-vector protocol. It borrows link-state habits — formal neighbor discovery, a topology table, bounded triggered updates — while still reasoning the distance-vector way, from a neighbor's advertised numbers rather than a full map of the network.</p>
+  <div class="objectives">
+    <h3>What this page covers</h3>
+    <ul>
+      <li>EIGRP's features and why it's called "hybrid"</li>
+      <li>Neighbor discovery and the three tables EIGRP keeps</li>
+      <li>DUAL — reported/feasible distance, successors, feasible successors</li>
+      <li>RTP, the five packet types, and the composite metric formula</li>
+      <li>Configuration basics: AS numbers, auto-summary, passive interfaces, redistribution</li>
+      <li>Verification commands and a short EIGRPv6 reference</li>
+    </ul>
+  </div>
+</header>
+
+<section class="unit-part" id="features" style="--c:var(--aqua)">
+  <div class="num">1</div>
+  <h2>EIGRP features and operation</h2>
+  <p>EIGRP is a <strong>classless</strong> protocol that includes the subnet mask in every route update, so it supports VLSM and lets summaries be placed anywhere in the network. Cisco calls it a distance-vector protocol, but also an <em>advanced distance-vector</em> or <em>hybrid</em> protocol, because of traits it borrows from link-state design.</p>
+  <div class="duo">
+    <div><h4>Distance-vector side</h4><ul><li>Sends network + cost from the advertiser's perspective</li><li>No full link-state packets like OSPF</li><li>"Routing by rumor" — not every router hears updates firsthand</li></ul></div>
+    <div><h4>Link-state side</h4><ul><li>Formal neighbor discovery via Hello</li><li>Synchronizes topology at startup</li><li>Sends only bounded updates after that</li></ul></div>
+    <div><h4>Scale limits</h4><ul><li>Default hop count 100, max 255</li><li>Hop count bounds the AS size only — it is <strong>not</strong> the metric</li><li>Different ASs don't share routes automatically</li></ul></div>
+  </div>
+  <p>Other standout features: supports IP and IPv6 via protocol-dependent modules, considered classless like RIPv2 and OSPF, supports summaries and discontiguous networks, efficient neighbor discovery, communicates via the Reliable Transport Protocol (RTP), selects paths via the Diffusing Update Algorithm (DUAL), reduces bandwidth with bounded updates, and sends no broadcasts.</p>
+</section>
+
+<section class="unit-part" id="neighbors" style="--c:var(--aqua)">
+  <div class="num">2</div>
+  <h2>Neighbor discovery and the three tables</h2>
+  <p>Before routers exchange routes they must become neighbors. Three conditions must be met, exchanged via Hello/ACK:</p>
+  <ul>
+    <li>Hello or ACK received</li>
+    <li>AS numbers match</li>
+    <li>Identical metrics (K values)</li>
+  </ul>
+  <figure class="topo">
+    <svg viewBox="0 0 640 220" role="img" aria-label="Two routers exchange Hello and Hello/ACK over gi0/0 and gi0/1 to become EIGRP neighbors and populate each other's neighbor table.">
+      <rect class="rtr" x="40" y="70" width="140" height="60" rx="10"/>
+      <text class="rname" x="110" y="98" text-anchor="middle">Router A</text>
+      <text x="110" y="116" text-anchor="middle">gi0/0 · 10.1.1.1</text>
+      <rect class="rtr" x="460" y="70" width="140" height="60" rx="10"/>
+      <text class="rname" x="530" y="98" text-anchor="middle">Router B</text>
+      <text x="530" y="116" text-anchor="middle">gi0/1 · 10.1.1.2</text>
+      <line x1="180" y1="90" x2="460" y2="90" stroke="var(--aqua)" stroke-width="2"/>
+      <text x="320" y="82" text-anchor="middle" fill="var(--aqua)">Hello? 224.0.0.10, AS, metrics</text>
+      <line x1="460" y1="112" x2="180" y2="112" stroke="var(--orange)" stroke-width="2"/>
+      <text x="320" y="130" text-anchor="middle" fill="var(--orange)">Hello! (ACK)</text>
+      <text x="110" y="165" text-anchor="middle">Neighbor table:</text>
+      <text x="110" y="182" text-anchor="middle">10.1.1.2  gi0/0</text>
+      <text x="530" y="165" text-anchor="middle">Neighbor table:</text>
+      <text x="530" y="182" text-anchor="middle">10.1.1.1  gi0/1</text>
+    </svg>
+    <figcaption>Hello defaults to every 5 seconds. The hold timer tells a neighbor how long to wait before declaring this router dead — it does not need to match on both sides, since each side only dictates its own wait time to others.</figcaption>
+  </figure>
+  <p>Only when a <em>new</em> neighbor relationship forms does EIGRP advertise its entire routing information; after that, only changes propagate. Each router stores what it learns in three tables:</p>
+  <div class="tw"><table>
+    <thead><tr><th>Table</th><th>Holds</th><th>Command</th></tr></thead>
+    <tbody>
+      <tr><td>Neighbor table</td><td>Every directly connected EIGRP neighbor: IP address, hold time, smooth round-trip timer (SRTT), queue count</td><td><code>show ip eigrp neighbors</code></td></tr>
+      <tr><td>Topology table</td><td>Every route advertised by every neighbor — successors and feasible successors, both</td><td><code>show ip eigrp topology</code></td></tr>
+      <tr><td>Routing table</td><td>Only the successor route for each destination — the one actually used to forward traffic</td><td><code>show ip route eigrp</code></td></tr>
+    </tbody>
+  </table></div>
+  <div class="note" style="--c:var(--aqua)">The neighbor and topology tables live in RAM, maintained through Hello and update packets. The routing table is built only from what's in the topology table.</div>
+</section>
+
+<section class="unit-part" id="dual" style="--c:var(--orange)">
+  <div class="num">3</div>
+  <h2>DUAL: feasible distance, reported distance, successors</h2>
+  <p>DUAL (Diffusing Update Algorithm) finds backup routes in advance so EIGRP can react to a failure almost instantly, without flooding queries through the whole network.</p>
+  <div class="duo">
+    <div><h4>Reported / advertised distance (RD/AD)</h4><p>The metric a neighbor reports for a remote network — the neighbor's own routing-table metric to it. This is the <em>second</em> number in the topology table's parentheses.</p></div>
+    <div><h4>Feasible distance (FD)</h4><p>This router's own best total metric: the neighbor's RD plus the cost to reach that neighbor. The lowest FD wins the routing table.</p></div>
+    <div><h4>Successor</h4><p>The route with the lowest FD. Copied into the routing table and used to forward traffic — think "successful."</p></div>
+    <div><h4>Feasible successor (FS)</h4><p>A backup path whose RD is less than the current successor's FD. Stored only in the topology table, ready to replace the successor instantly if it fails.</p></div>
+  </div>
+  <pre>D 10.0.0.0/8 [90/2195456] via 172.16.10.2, 00:27:06, Serial0/0
+    <span class="c">^AD      ^FD (total cost to 10.0.0.0)</span></pre>
+  <p>Reading that line: <code>D</code> means DUAL, an EIGRP route. <code>90</code> is the <strong>administrative distance</strong> — easy to confuse with "advertised distance," which is why people often just call it <em>reported distance</em> instead. <code>2195456</code> is the <strong>feasible distance</strong>: the neighbor's reported distance, plus this router's own cost to reach that neighbor.</p>
+  <div class="tag"><div class="t">Feasibility condition</div>A neighbor's route only qualifies as a loop-free feasible successor if <strong>RD &lt; FD</strong> — its reported distance must be strictly less than this router's current feasible distance. If no neighbor satisfies that, the route goes <strong>active</strong> and DUAL must query neighbors for a new path — slower than simply promoting a feasible successor.</div>
+  <p>Three conditions DUAL depends on to work correctly: neighbors are discovered or declared dead within a finite time (Hello's job), every message is received correctly and in order (RTP's job), and all changes are processed in the order detected.</p>
+</section>
+
+<section class="unit-part" id="rtp" style="--c:var(--orange)">
+  <div class="num">4</div>
+  <h2>Reliable Transport Protocol and packet types</h2>
+  <p>EIGRP depends on its own proprietary Reliable Transport Protocol (RTP) to manage delivery between neighbors, mixing multicast and unicast. Multicasts go to <strong>224.0.0.10</strong>. If a neighbor doesn't reply to a multicast, EIGRP retries via unicast; after 16 failed unicast attempts, that neighbor is declared dead — a process nicknamed <em>reliable multicast</em>. Sequence numbers detect old or out-of-order packets.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Packet</th><th>Delivery</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td>Hello</td><td>Unreliable multicast</td><td>Discovers neighbors; no acknowledgment required</td></tr>
+      <tr><td>Update</td><td>Reliable multicast (unicast if only one router needs it)</td><td>Carries route information after a metric or topology change</td></tr>
+      <tr><td>Query</td><td>Reliable multicast</td><td>Asks neighbors for an alternate route after losing one</td></tr>
+      <tr><td>Reply</td><td>Unicast</td><td>Answers a Query, with a route or "none known"</td></tr>
+      <tr><td>ACK</td><td>Unicast, unreliable</td><td>Confirms an Update — never acknowledged itself, to avoid an endless chain</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="unit-part" id="metric" style="--c:var(--orange)">
+  <div class="num">5</div>
+  <h2>The composite metric</h2>
+  <p>EIGRP weighs up to four factors — bandwidth, delay, load, reliability — plus MTU, which is carried along but never actually used in the calculation. The formula uses tunable K-values:</p>
+  <div class="formula">metric = [K1·BW + (K2·BW)/(256−Load) + K3·Delay] × [K5/(Reliability+K4)]</div>
+  <p>By default K1 = K3 = 1 and K2 = K4 = K5 = 0, which collapses the formula to:</p>
+  <div class="formula">metric = lowest bandwidth along the path + sum of all delays along the path</div>
+  <ul>
+    <li>Bandwidth = [10,000,000 / (bandwidth in Kbps)] × 256 — the <em>lowest</em> bandwidth link in the path is what counts, not a sum.</li>
+    <li>Delay = [delay in tens of microseconds] × 256 — this one <em>is</em> summed along the whole path.</li>
+  </ul>
+  <div class="note" style="--c:var(--warn)"><strong>K-values must match exactly between neighbors</strong> — a mismatch is a common reason an adjacency never forms, even when AS numbers and addressing are correct. Adjust them only under vendor guidance; changing defaults can cause instability.</div>
+  <div class="tw"><table>
+    <thead><tr><th>K</th><th>Metric it weights</th></tr></thead>
+    <tbody>
+      <tr><td>K1</td><td>Bandwidth</td></tr>
+      <tr><td>K2</td><td>Load</td></tr>
+      <tr><td>K3</td><td>Delay</td></tr>
+      <tr><td>K4</td><td>Reliability</td></tr>
+      <tr><td>K5</td><td>MTU</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="unit-part" id="config" style="--c:var(--yellow)">
+  <div class="num">6</div>
+  <h2>Configuring EIGRP</h2>
+  <p>Two configuration modes are used: <strong>router configuration mode</strong> enables the protocol, chooses networks, and sets global factors; <strong>interface configuration mode</strong> tunes bandwidth, summaries, and passive behavior.</p>
+  <pre><span class="p">Router(config)#</span> router eigrp 20                 <span class="c">! AS number — must match on every neighbor</span>
+<span class="p">Router(config-router)#</span> network 10.0.0.0             <span class="c">! classful — enables every matching interface</span>
+<span class="p">Router(config-router)#</span> network 172.16.0.0
+<span class="p">Router(config-router)#</span> eigrp router-id 1.1.1.1      <span class="c">! optional; less critical than in OSPF</span>
+<span class="p">Router(config-router)#</span> passive-interface g0/2       <span class="c">! stops Hellos; network is still advertised</span>
+<span class="p">Router(config-router)#</span> no auto-summary             <span class="c">! disable classful summarization — see next section</span></pre>
+  <p>The AS number is only locally meaningful in the sense that its <em>value</em> doesn't matter (1–65,535) — but every router in the same EIGRP domain must use the <strong>same</strong> number, or no adjacency forms at all. A wildcard mask can narrow a <code>network</code> statement the same way it does in OSPF, but most EIGRP designs just use the classful form and rely on <code>passive-interface</code> to stop Hellos where they're not wanted.</p>
+  <div class="note" style="--c:var(--yellow)">The <code>passive-interface</code> command behaves differently here than under RIP: an EIGRP interface marked passive neither sends <em>nor reads</em> Hellos, so no adjacency can ever form there — but the network is still advertised to everyone else.</div>
+</section>
+
+<section class="unit-part" id="vlsm" style="--c:var(--yellow)">
+  <div class="num">7</div>
+  <h2>VLSM, summarization, and discontiguous networks</h2>
+  <p>EIGRP supports VLSM because the subnet mask travels with every route. It also <strong>auto-summarizes at classful boundaries by default</strong> in pre-15.0 code (15.x disables it by default, but the exam still expects you to know why it matters). The danger: if the same classful network is split across two sites separated by a different major network — a <strong>discontiguous network</strong> — every site injects a conflicting summary, and routing breaks.</p>
+  <pre>D 172.16.0.0/16 is a summary, 00:01:37, Null0   <span class="c">! two different sites both do this — collision</span></pre>
+  <p>The fix is always <code>no auto-summary</code> on every router in the discontiguous design. Manual summarization at specific, well-chosen points is still fully supported and often a good idea — it's <em>automatic</em> classful summarization across a discontiguous boundary that causes the outage.</p>
+</section>
+
+<section class="unit-part" id="balance" style="--c:var(--yellow)">
+  <div class="num">8</div>
+  <h2>Load balancing and split horizon</h2>
+  <div class="duo">
+    <div><h4>Equal-cost</h4><p>Up to 4 paths by default (same as RIP and OSPF), configurable up to 32 (16 on pre-15.0 code) with <code>maximum-paths</code>.</p></div>
+    <div><h4>Unequal-cost</h4><p>EIGRP alone among these three can balance across unequal paths using <code>variance</code>. A variance of 2 includes any feasible successor with FD up to twice the successor's — traffic still shares proportionally to cost, not evenly.</p></div>
+    <div><h4>Split horizon</h4><p>Enabled by default: a route learned on an interface is never advertised back out that same interface. Usually helpful, but causes trouble on point-to-multipoint hub links — subinterfaces are the usual fix.</p></div>
+  </div>
+</section>
+
+<section class="unit-part" id="verify">
+  <div class="num">9</div>
+  <h2>Verification commands</h2>
+  <div class="tw"><table>
+    <thead><tr><th>Command</th><th>Shows</th></tr></thead>
+    <tbody>
+      <tr><td><code>show ip eigrp neighbors</code></td><td>Adjacent routers, hold time, uptime, SRTT, RTO, queue count</td></tr>
+      <tr><td><code>show ip eigrp interfaces</code></td><td>Interfaces EIGRP is enabled on (passive interfaces don't appear)</td></tr>
+      <tr><td><code>show ip route eigrp</code></td><td>EIGRP routes in the routing table, marked <code>D</code> (internal) or <code>D EX</code> (redistributed)</td></tr>
+      <tr><td><code>show ip eigrp topology</code></td><td>Successors and feasible successors, FD/AD for each; <code>P</code> = passive (stable), <code>A</code> = active (searching)</td></tr>
+      <tr><td><code>show ip eigrp traffic</code></td><td>Packet counts sent/received per type — confirms updates are actually flowing</td></tr>
+      <tr><td><code>show ip protocols</code></td><td>AS number, K-values, variance, networks advertised, neighbor sources</td></tr>
+      <tr><td><code>show ip eigrp events</code></td><td>A log of route installs/removals and adjacency changes — verbose, but useful for instability</td></tr>
+    </tbody>
+  </table></div>
+  <div class="tag"><div class="t">If an adjacency won't form, check:</div>
+    <ul><li>Interfaces between the devices are down</li><li>Mismatched AS numbers</li><li>Proper interfaces aren't enabled for EIGRP</li><li>An interface is passive</li><li>K-values don't match</li><li>Authentication is misconfigured</li></ul>
+  </div>
+</section>
+
+<section class="unit-part" id="v6" style="--c:var(--aqua)">
+  <div class="num">10</div>
+  <h2>EIGRPv6 quick reference</h2>
+  <p>EIGRPv6 keeps the same algorithm (DUAL), the same reliability layer (RTP), and the same composite metric — the differences are all about addressing. There's no <code>network</code> command: EIGRPv6 is enabled directly, per interface.</p>
+  <pre><span class="p">Router(config)#</span> ipv6 unicast-routing
+<span class="p">Router(config)#</span> ipv6 router eigrp 10
+<span class="p">Router(config-rtr)#</span> no shutdown            <span class="c">! the process itself must be enabled</span>
+<span class="p">Router(config-rtr)#</span> router-id 1.1.1.1
+<span class="p">Router(config)#</span> interface g0/0
+<span class="p">Router(config-if)#</span> ipv6 eigrp 10            <span class="c">! enables EIGRPv6 on this interface only</span></pre>
+  <ul>
+    <li>Multicast address changes from <code>224.0.0.10</code> to <code>FF02::A</code>.</li>
+    <li>No <code>network</code> statements, so no <code>passive-interface</code> headaches either — if an interface isn't enabled, it's simply not part of the process.</li>
+    <li>Router ID matters far less than in OSPF; it's set under the global <code>ipv6 router eigrp</code> command since there may be no IPv4 address to derive one from.</li>
+    <li>Neighbor and next-hop addresses are always <strong>link-local</strong>, never the routed global address.</li>
+  </ul>
+</section>
+
+<section class="unit-part" id="matrix" style="--c:var(--orange)">
+  <div class="num">11</div>
+  <h2>Design comparison matrix: RIP vs. OSPF vs. EIGRP</h2>
+  <p>The numbers behind each protocol matter less than what they mean for a network you're actually designing. This table groups the dimensions that typically decide a real choice between the three.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Design dimension</th><th>RIPv2</th><th>OSPF</th><th>EIGRP</th></tr></thead>
+    <tbody>
+      <tr><td>Protocol class</td><td>Distance-vector</td><td>Link-state</td><td>Advanced distance-vector (hybrid)</td></tr>
+      <tr><td>Vendor support</td><td>Open standard — any vendor</td><td>Open standard — any vendor</td><td>Cisco devices only (informational RFC 7868, rarely implemented elsewhere)</td></tr>
+      <tr><td>Metric basis</td><td>Hop count only</td><td>Cost (bandwidth-derived)</td><td>Composite: bandwidth + delay (reliability/load available, unused by default)</td></tr>
+      <tr><td>Path quality awareness</td><td>None — a 1.5 Mbps link and a 10 Gbps link both count as "1 hop"</td><td>Reflects real link speed</td><td>Reflects real link speed, and distinguishes cumulative delay from bottleneck bandwidth</td></tr>
+      <tr><td>Convergence speed</td><td>Slow — periodic 30-second updates, holddown timers add delay</td><td>Fast — triggered flooding, but a full SPF recalculation is needed on change</td><td>Very fast — a feasible successor is often already sitting in the topology table, ready to install instantly</td></tr>
+      <tr><td>Maximum network diameter</td><td>15 hops — a hard ceiling that rules out large networks</td><td>No hop limit; areas bound the design instead</td><td>Hop count defaults to 100 (max 255), but it only bounds the AS — it is never the metric</td></tr>
+      <tr><td>Scalability / hierarchy</td><td>Small, flat networks only</td><td>Large networks, via a deliberate area hierarchy (area 0 backbone)</td><td>Large networks, via AS boundaries and judicious manual summarization — no mandatory hierarchy to design</td></tr>
+      <tr><td>Design effort required</td><td>Minimal — but that simplicity is also its ceiling</td><td>Higher — area boundaries, DR/BDR placement, and wildcard masks all need deliberate planning</td><td>Lower than OSPF for a flat design, but discontiguous-network and auto-summary pitfalls need explicit attention</td></tr>
+      <tr><td>Resource use (CPU/RAM)</td><td>Very low</td><td>Higher — a full link-state database plus SPF computation per area</td><td>Moderate — neighbor and topology tables are lighter than a full LSDB, and routing-by-rumor needs less local computation</td></tr>
+      <tr><td>Bandwidth use in steady state</td><td>Wasteful — the whole table is resent every 30 seconds regardless of change</td><td>Efficient — only a periodic LSA refresh every 30 minutes, otherwise event-driven</td><td>Very efficient — only bounded, partial updates after the initial exchange</td></tr>
+      <tr><td>VLSM / CIDR / discontiguous networks</td><td>Supported (v2 only); auto-summarization is also a risk</td><td>Full support, no auto-summary behavior to manage</td><td>Full support, but auto-summary is on by default pre-15.x and actively breaks discontiguous designs until disabled</td></tr>
+      <tr><td>Load balancing</td><td>Equal-cost only</td><td>Equal-cost only</td><td>Equal-cost by default; unique among the three in also supporting unequal-cost balancing via <code>variance</code></td></tr>
+      <tr><td>Administrative distance</td><td>120</td><td>110</td><td>90 internal / 170 external — preferred over both of the others when routes overlap</td></tr>
+      <tr><td>Best-fit scenario</td><td>Small, stable, single-vendor-irrelevant networks; labs and legacy gear</td><td>Large, multi-vendor, or multi-site networks needing a deliberate, inspectable hierarchy</td><td>Large, all-Cisco networks wanting fast convergence and lower design overhead than OSPF's areas</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note" style="--c:var(--orange)"><strong>Reading this table for a design decision:</strong> RIP is ruled out by its hop-count ceiling and metric blindness the moment a network has more than a handful of routers or any meaningful mix of link speeds. The real-world choice is almost always OSPF vs. EIGRP — and that usually comes down to two questions: is the network single-vendor (Cisco) throughout, and is a formal area hierarchy worth the extra design and documentation effort it demands.</div>
+</section>
+
+<section class="unit-part" id="check" style="--c:var(--ink)">
+  <div class="num">12</div>
+  <h2>Self-check</h2>
+  <details class="q"><summary>1. What's the difference between reported distance and feasible distance?</summary><div class="a">Reported distance is the neighbor's own metric to the destination. Feasible distance is this router's total cost — the neighbor's reported distance plus the cost to reach that neighbor. The lowest FD becomes the successor.</div></details>
+  <details class="q"><summary>2. Why would a feasible successor <em>not</em> exist for a given route?</summary><div class="a">If no neighbor's reported distance is less than the current feasible distance, the feasibility condition fails for all of them, so DUAL has no safe backup — the route goes active and queries are sent out.</div></details>
+  <details class="q"><summary>3. Two EIGRP routers won't form an adjacency even though IPs, masks, and AS numbers all match. What else should you check?</summary><div class="a">K-values. They must be identical on both sides — this is one of the three conditions for neighbor formation, and it's easy to overlook since it doesn't show up as an addressing or AS mismatch.</div></details>
+  <details class="q"><summary>4. A network has 172.16.1.0/24 on one site and 172.16.2.0/24 on another, connected through a 10.0.0.0/8 backbone. What EIGRP-specific problem does this risk, and what's the fix?</summary><div class="a">A discontiguous network — both sites auto-summarize to 172.16.0.0/16 by default and inject conflicting summaries. Fix: <code>no auto-summary</code> on every router in the design.</div></details>
+  <details class="q"><summary>5. What makes EIGRP capable of unequal-cost load balancing when RIP and OSPF aren't?</summary><div class="a">The <code>variance</code> command, which allows any feasible successor with a feasible distance up to a multiple of the successor's FD to also be installed and used, proportionally to its cost.</div></details>
+</section>
+
+<footer>EIGRP theory background for Unit 6 · companion to the OSPF terminology material and the EIGRP implementation lab.</footer>
+</main>
+</div>
+<script>
+document.getElementById('themeBtn').addEventListener('click',function(){
+  var r=document.documentElement,c=r.getAttribute('data-theme');
+  var dark=c?c==='dark':matchMedia('(prefers-color-scheme: dark)').matches;
+  r.setAttribute('data-theme',dark?'light':'dark');
+});
+</script>
+</body>
+</html>

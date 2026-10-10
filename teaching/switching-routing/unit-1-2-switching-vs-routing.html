@@ -1,0 +1,1761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Frames, Packets &amp; the Devices That Move Them</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root{
+  --bg: #0A1420;
+  --panel: #101E30;
+  --panel-alt: #16283D;
+  --grid-line: #1E3149;
+  --text: #E8EEF5;
+  --muted: #7C93AC;
+  --cyan: #5FD8C7;    /* L2 / frame theme */
+  --amber: #E8A853;   /* L3 / IP theme */
+  --cyan-dim: #2C5750;
+  --amber-dim: #5A4626;
+  --danger: #E8746B;
+  --font-head: 'Space Grotesk', sans-serif;
+  --font-body: 'IBM Plex Sans', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+
+*{ box-sizing: border-box; margin:0; padding:0; }
+
+html{ scroll-behavior: smooth; }
+
+body{
+  background:
+    linear-gradient(var(--bg), var(--bg)) ,
+    repeating-linear-gradient(0deg, transparent, transparent 39px, var(--grid-line) 40px),
+    repeating-linear-gradient(90deg, transparent, transparent 39px, var(--grid-line) 40px);
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  line-height: 1.6;
+  padding-left: 220px;
+}
+
+@media (max-width: 860px){
+  body{ padding-left: 0; padding-top: 56px; }
+}
+
+::selection{ background: var(--cyan-dim); color: var(--text); }
+
+/* ---------- rail ---------- */
+.rail{
+  position: fixed;
+  top:0; left:0; bottom:0;
+  width: 220px;
+  border-right: 1px solid var(--grid-line);
+  background: rgba(10,20,32,0.92);
+  backdrop-filter: blur(6px);
+  padding: 28px 0;
+  overflow-y: auto;
+  z-index: 50;
+}
+@media (max-width: 860px){
+  .rail{
+    position: fixed; top:0; left:0; right:0; bottom:auto; height: 56px; width:auto;
+    display:flex; align-items:center; overflow-x:auto; overflow-y:hidden; padding: 0 12px;
+    border-right:none; border-bottom:1px solid var(--grid-line);
+  }
+}
+.rail-title{
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  padding: 0 20px 20px;
+  border-bottom: 1px solid var(--grid-line);
+  margin-bottom: 12px;
+}
+@media (max-width:860px){ .rail-title{ display:none; } }
+.rail a{
+  display:flex;
+  gap:10px;
+  align-items:baseline;
+  padding: 10px 20px;
+  text-decoration:none;
+  color: var(--muted);
+  font-size: 13.5px;
+  border-left: 2px solid transparent;
+  transition: color .15s ease, border-color .15s ease;
+  white-space: nowrap;
+}
+@media (max-width:860px){
+  .rail a{ padding: 6px 12px; border-left:none; border-bottom:2px solid transparent; }
+}
+.rail a .t{ font-family: var(--font-mono); font-size: 11px; color: var(--cyan); opacity:.7; }
+.rail a.active{ color: var(--text); border-left-color: var(--cyan); background: rgba(95,216,199,0.06); }
+@media (max-width:860px){ .rail a.active{ border-left:none; border-bottom-color: var(--cyan); } }
+.rail a:hover{ color: var(--text); }
+
+/* ---------- layout ---------- */
+main{ max-width: 880px; margin: 0 auto; padding: 90px 40px 140px; }
+@media (max-width: 640px){ main{ padding: 50px 20px 100px; } }
+
+section{ padding-top: 40px; margin-top: -20px; }
+section:first-of-type{ padding-top: 0; }
+
+.kicker{
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--cyan);
+  margin-bottom: 10px;
+}
+.kicker.amber{ color: var(--amber); }
+
+h1{
+  font-family: var(--font-head);
+  font-weight: 600;
+  font-size: clamp(32px, 5vw, 46px);
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  margin-bottom: 18px;
+}
+h2{
+  font-family: var(--font-head);
+  font-weight: 600;
+  font-size: 28px;
+  letter-spacing: -0.005em;
+  margin-bottom: 14px;
+}
+h3{
+  font-family: var(--font-head);
+  font-weight: 500;
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+p{ color: #C7D4E3; max-width: 66ch; margin-bottom: 14px; }
+p.lead{ color: var(--text); font-size: 17px; max-width: 60ch; }
+strong{ color: var(--text); font-weight: 600; }
+code, .mono{ font-family: var(--font-mono); }
+
+hr.div{
+  border: none; border-top: 1px solid var(--grid-line);
+  margin: 56px 0;
+}
+
+/* ---------- panels ---------- */
+.panel{
+  background: var(--panel);
+  border: 1px solid var(--grid-line);
+  border-radius: 3px;
+  padding: 22px 24px;
+  margin: 18px 0;
+}
+.panel-label{
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.stepnote{
+  display:flex;
+  gap: 14px;
+  margin: 14px 0;
+}
+.stepnote .num{
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--cyan);
+  border: 1px solid var(--cyan-dim);
+  border-radius: 50%;
+  width: 24px; height: 24px;
+  flex: none;
+  display:flex; align-items:center; justify-content:center;
+  margin-top: 2px;
+}
+.stepnote p{ margin: 0; }
+
+/* ---------- two column compare ---------- */
+.compare{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 22px 0;
+}
+@media (max-width: 640px){ .compare{ grid-template-columns: 1fr; } }
+.compare-card{
+  border: 1px solid var(--grid-line);
+  border-radius: 3px;
+  padding: 20px;
+  background: var(--panel);
+}
+.compare-card.switch{ border-top: 3px solid var(--cyan); }
+.compare-card.router{ border-top: 3px solid var(--amber); }
+.compare-card h3{ display:flex; align-items:center; gap:8px; }
+.tag{
+  font-family: var(--font-mono); font-size: 10px; padding: 2px 7px;
+  border-radius: 2px; letter-spacing: .03em;
+}
+.tag.cyan{ background: var(--cyan-dim); color: var(--cyan); }
+.tag.amber{ background: var(--amber-dim); color: var(--amber); }
+.compare-card ul{ margin: 10px 0 0 18px; color: #C7D4E3; font-size: 14.5px; }
+.compare-card li{ margin-bottom: 6px; }
+
+table.compare-table{
+  width: 100%;
+  border-collapse: collapse;
+  margin: 22px 0;
+  font-size: 14px;
+}
+table.compare-table th, table.compare-table td{
+  border: 1px solid var(--grid-line);
+  padding: 10px 14px;
+  text-align: left;
+  vertical-align: top;
+}
+table.compare-table th{
+  background: var(--panel-alt);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--muted);
+  font-weight: 500;
+}
+table.compare-table td:first-child{ color: var(--muted); font-family: var(--font-mono); font-size: 12.5px; white-space:nowrap; }
+table.compare-table td.c{ color: var(--cyan); }
+table.compare-table td.a{ color: var(--amber); }
+
+/* ---------- forwarding simulator ---------- */
+.sim{
+  border: 1px solid var(--grid-line);
+  border-radius: 3px;
+  background: var(--panel);
+  padding: 24px;
+  margin: 20px 0;
+}
+.sim-topo{
+  position: relative;
+  height: 170px;
+  margin-bottom: 16px;
+}
+.sim-topo svg{ width:100%; height:100%; display:block; }
+.sim-controls{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom: 14px; }
+button.btn{
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  background: var(--panel-alt);
+  color: var(--text);
+  border: 1px solid var(--grid-line);
+  border-radius: 3px;
+  padding: 9px 16px;
+  cursor: pointer;
+  transition: border-color .15s ease, background .15s ease;
+}
+button.btn:hover{ border-color: var(--cyan); }
+button.btn.amber:hover{ border-color: var(--amber); }
+button.btn:disabled{ opacity:.4; cursor:not-allowed; }
+select.pick{
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  background: var(--panel-alt);
+  color: var(--text);
+  border: 1px solid var(--grid-line);
+  border-radius: 3px;
+  padding: 9px 10px;
+}
+.sim-log{
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--muted);
+  min-height: 90px;
+  border-top: 1px dashed var(--grid-line);
+  padding-top: 12px;
+}
+.sim-log .line{ margin-bottom: 5px; opacity:0; transform: translateY(4px); animation: fadeIn .3s ease forwards; }
+.sim-log .line.hi{ color: var(--cyan); }
+.sim-log .line.hi2{ color: var(--amber); }
+.sim-log .line.bad{ color: var(--danger); }
+@keyframes fadeIn{ to{ opacity:1; transform: translateY(0);} }
+
+.mac-table{ font-family: var(--font-mono); font-size: 12px; width:100%; border-collapse: collapse; margin-top: 6px; }
+.mac-table th, .mac-table td{ border: 1px solid var(--grid-line); padding: 6px 10px; text-align:left; }
+.mac-table th{ color: var(--muted); font-weight:500; background: var(--panel-alt); }
+.mac-table td.learned{ color: var(--cyan); }
+
+/* ---------- byte diagrams ---------- */
+.byteline{
+  display:flex;
+  border: 1px solid var(--grid-line);
+  border-radius: 3px;
+  overflow:hidden;
+  margin: 22px 0 6px;
+}
+.byteline .seg{
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  padding: 14px 6px;
+  text-align:center;
+  cursor:pointer;
+  border-right: 1px solid var(--grid-line);
+  color: var(--muted);
+  background: var(--panel);
+  transition: background .15s ease, color .15s ease;
+  display:flex; flex-direction:column; justify-content:center; gap:3px;
+}
+.byteline .seg:last-child{ border-right:none; }
+.byteline .seg small{ display:block; font-size:9.5px; opacity:.7; }
+.byteline .seg:hover{ background: var(--panel-alt); color: var(--text); }
+.byteline .seg.active{ background: var(--cyan-dim); color: var(--cyan); }
+.byteline .seg.active.a{ background: var(--amber-dim); color: var(--amber); }
+
+.field-detail{
+  border: 1px solid var(--grid-line);
+  border-left: 3px solid var(--cyan);
+  border-radius: 3px;
+  padding: 16px 20px;
+  background: var(--panel-alt);
+  margin-bottom: 22px;
+  min-height: 70px;
+}
+.field-detail.amber{ border-left-color: var(--amber); }
+.field-detail .fname{ font-family: var(--font-head); font-size: 16px; margin-bottom: 6px; }
+.field-detail .fmeta{ font-family: var(--font-mono); font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+.field-detail p{ font-size: 14px; margin-bottom: 0; }
+
+/* IPv4 32-bit grid */
+.ip-header{ margin: 22px 0 6px; border: 1px solid var(--grid-line); border-radius:3px; overflow:hidden; }
+.ip-row{ display:flex; border-bottom: 1px solid var(--grid-line); }
+.ip-row:last-child{ border-bottom:none; }
+.ip-header .cell{
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 12px 4px;
+  text-align:center;
+  color: var(--muted);
+  cursor:pointer;
+  border-right: 1px solid var(--grid-line);
+  background: var(--panel);
+  transition: background .15s ease, color .15s ease;
+  display:flex; align-items:center; justify-content:center;
+}
+.ip-header .cell:last-child{ border-right:none; }
+.ip-header .cell:hover{ background: var(--panel-alt); color:var(--text); }
+.ip-header .cell.active{ background: var(--amber-dim); color: var(--amber); }
+.bitscale{ display:flex; font-family: var(--font-mono); font-size: 9.5px; color: var(--muted); opacity:.6; margin-bottom: 4px; }
+.bitscale span{ flex:1; text-align:left; }
+
+/* ---------- quiz ---------- */
+.quiz-q{ border: 1px solid var(--grid-line); border-radius:3px; padding: 18px 20px; margin-bottom: 14px; background: var(--panel); }
+.quiz-q .qtext{ font-family: var(--font-head); font-size: 15.5px; margin-bottom: 12px; }
+.quiz-opts{ display:flex; flex-direction:column; gap:8px; }
+.qopt{
+  text-align:left;
+  font-family: var(--font-body);
+  font-size: 14px;
+  padding: 10px 14px;
+  border: 1px solid var(--grid-line);
+  border-radius:3px;
+  background: var(--panel-alt);
+  color: var(--text);
+  cursor: pointer;
+}
+.qopt:hover{ border-color: var(--cyan); }
+.qopt.correct{ border-color: var(--cyan); background: var(--cyan-dim); color: var(--cyan); }
+.qopt.wrong{ border-color: var(--danger); background: #3A1E1B; color: var(--danger); }
+.qopt.disabled{ pointer-events:none; }
+.score-box{
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--amber);
+  border: 1px solid var(--grid-line);
+  border-radius:3px;
+  padding: 16px 20px;
+  margin-top: 18px;
+  display:none;
+}
+
+footer{
+  max-width: 880px; margin: 0 auto; padding: 0 40px 80px;
+  font-family: var(--font-mono); font-size: 11.5px; color: var(--muted);
+}
+</style>
+</head>
+<body><div style="font:14px/1.4 Inter,-apple-system,Segoe UI,sans-serif;background:#0b1d3a;padding:10px 16px;"><a href="/teaching/switching-routing.html" style="color:#fbf9f3;text-decoration:none;">&larr; Switching &amp; Routing &middot; all units</a></div>
+
+<nav class="rail">
+  <div class="rail-title">L2 / L3 — TEACHING FLOW</div>
+  <a href="#intro" data-target="intro">Roadmap</a>
+  <a href="#frame" data-target="frame">Ethernet Frame</a>
+  <a href="#ipv4" data-target="ipv4">IPv4 Header</a>
+  <a href="#compare" data-target="compare">Switching vs Routing</a>
+  <a href="#arp-cam" data-target="arp-cam">ARP &amp; CAM Table</a>
+  <a href="#forwarding" data-target="forwarding">Forwarding LAN &amp; WAN</a>
+  <a href="#recap" data-target="recap">Recap &amp; Quiz</a>
+</nav>
+
+<main>
+
+  <!-- INTRO -->
+  <section id="intro">
+    <div class="kicker">STRUCTURE FIRST, BEHAVIOR SECOND</div>
+    <h1>How a frame becomes a packet becomes a delivery.</h1>
+    <p class="lead">Every message on a network is carried inside two nested envelopes: a <strong>frame</strong>, addressed to a neighbor, wrapped around a <strong>packet</strong>, addressed to a destination that might be on the other side of the planet. We'll open both envelopes first, byte by byte — then look at the devices that read them and the decisions those devices make.</p>
+
+    <div class="panel">
+      <div class="panel-label">FLOW</div>
+      <div class="stepnote"><div class="num">1</div><p>Ethernet frame — the fields a switch reads</p></div>
+      <div class="stepnote"><div class="num">2</div><p>IPv4 header — the fields a router reads</p></div>
+      <div class="stepnote"><div class="num">3</div><p>Switching vs. routing — same addresses, different jobs</p></div>
+      <div class="stepnote"><div class="num">4</div><p>Forwarding in practice — LAN switching, WAN routing</p></div>
+      <div class="stepnote"><div class="num">5</div><p>Recap and a quick check</p></div>
+    </div>
+
+    <p>One rule of thumb carries the whole lesson: <strong>a switch reads a frame; a router reads a packet.</strong> Once the structure of each is familiar, the behavior of the devices reading them makes itself obvious.</p>
+  </section>
+
+  <hr class="div">
+
+  <!-- FRAME -->
+  <section id="frame">
+    <div class="kicker">STRUCTURE — LAYER 2</div>
+    <h2>Ethernet frame design</h2>
+    <p>This is the outer envelope — what a switch actually reads. Click a segment.</p>
+
+    <div class="byteline" id="frame-line">
+      <div class="seg" data-f="preamble" style="flex:1.1">Preamble<small>7 B</small></div>
+      <div class="seg" data-f="sfd" style="flex:0.6">SFD<small>1 B</small></div>
+      <div class="seg" data-f="dmac" style="flex:1.4">Dest MAC<small>6 B</small></div>
+      <div class="seg" data-f="smac" style="flex:1.4">Src MAC<small>6 B</small></div>
+      <div class="seg" data-f="type" style="flex:1">EtherType<small>2 B</small></div>
+      <div class="seg" data-f="payload" style="flex:2.2">Payload<small>46–1500 B</small></div>
+      <div class="seg" data-f="fcs" style="flex:0.9">FCS<small>4 B</small></div>
+    </div>
+
+    <div class="field-detail" id="frame-detail">
+      <div class="fname">Click any field above</div>
+      <div class="fmeta">—</div>
+      <p>Each field's job is explained here as you select it.</p>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">FRAME SIZE RULES</div>
+      <p style="margin-bottom:6px;">Minimum frame: <strong>64 bytes</strong> (dest MAC through FCS) — anything smaller is a collision fragment and gets discarded.</p>
+      <p style="margin-bottom:0;">Maximum standard frame: <strong>1518 bytes</strong> (1522 with an 802.1Q VLAN tag). Anything larger is a "jumbo frame," and needs support on every hop.</p>
+    </div>
+  </section>
+
+  <hr class="div">
+
+  <!-- IPv4 -->
+  <section id="ipv4">
+    <div class="kicker amber">STRUCTURE — LAYER 3</div>
+    <h2>IPv4 header design</h2>
+    <p>This is the inner envelope, sitting inside the frame's payload once EtherType says <code>0x0800</code>. It's laid out in 32-bit rows — click a field.</p>
+
+    <div class="bitscale">
+      <span>0</span><span>4</span><span>8</span><span>16</span><span>19</span><span>24</span><span style="text-align:right;">31</span>
+    </div>
+    <div class="ip-header" id="ip-header">
+      <div class="ip-row">
+        <div class="cell" data-f="version" style="flex:1">Version<br>4b</div>
+        <div class="cell" data-f="ihl" style="flex:1">IHL<br>4b</div>
+        <div class="cell" data-f="dscp" style="flex:2">DSCP / ECN<br>8b</div>
+        <div class="cell" data-f="totlen" style="flex:4">Total Length — 16b</div>
+      </div>
+      <div class="ip-row">
+        <div class="cell" data-f="id" style="flex:4">Identification — 16b</div>
+        <div class="cell" data-f="flags" style="flex:1.2">Flags<br>3b</div>
+        <div class="cell" data-f="fragoff" style="flex:2.8">Fragment Offset — 13b</div>
+      </div>
+      <div class="ip-row">
+        <div class="cell" data-f="ttl" style="flex:2">TTL<br>8b</div>
+        <div class="cell" data-f="proto" style="flex:2">Protocol<br>8b</div>
+        <div class="cell" data-f="chk" style="flex:4">Header Checksum — 16b</div>
+      </div>
+      <div class="ip-row">
+        <div class="cell" data-f="src" style="flex:1">Source IP Address — 32b</div>
+      </div>
+      <div class="ip-row">
+        <div class="cell" data-f="dst" style="flex:1">Destination IP Address — 32b</div>
+      </div>
+      <div class="ip-row">
+        <div class="cell" data-f="opts" style="flex:1">Options (if IHL &gt; 5) + Padding — variable</div>
+      </div>
+    </div>
+
+    <div class="field-detail amber" id="ip-detail">
+      <div class="fname">Click any field above</div>
+      <div class="fmeta">—</div>
+      <p>Each field's job is explained here as you select it.</p>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">HOW THE PIECES CONNECT</div>
+      <p style="margin:0;"><strong>IHL</strong> tells a router how many 32-bit words the header is (5 = 20 bytes, no options). <strong>Protocol</strong> tells the receiving host what's inside the payload (6 = TCP, 17 = UDP, 1 = ICMP) — the Layer-3 counterpart to the frame's EtherType. <strong>TTL</strong> is decremented by every router; a packet stuck in a routing loop dies instead of circulating forever.</p>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">FRAME vs. HEADER, SIDE BY SIDE</div>
+      <table class="compare-table" style="margin:0;">
+        <tr><th>Question</th><th>Ethernet frame</th><th>IPv4 header</th></tr>
+        <tr><td>Address type</td><td class="c">MAC (48-bit, flat)</td><td class="a">IP (32-bit, hierarchical)</td></tr>
+        <tr><td>Read by</td><td class="c">Switches, NICs</td><td class="a">Routers, hosts</td></tr>
+        <tr><td>Scope of address</td><td class="c">Next neighbor on the wire only</td><td class="a">Meaningful end-to-end</td></tr>
+        <tr><td>"What's inside" field</td><td class="c">EtherType</td><td class="a">Protocol</td></tr>
+        <tr><td>Rewritten in transit?</td><td class="c">Yes — every hop</td><td class="a">No — except TTL and checksum</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <hr class="div">
+
+  <!-- SWITCHING VS ROUTING -->
+  <section id="compare">
+    <div class="kicker">BEHAVIOR — PART 1</div>
+    <h2>Switching vs. routing</h2>
+    <p>Now that the envelopes are familiar: both switching and routing are forwarding decisions. The difference is <strong>which envelope's address they read, and how far that address can take a message.</strong></p>
+
+    <div class="compare">
+      <div class="compare-card switch">
+        <h3>Switching <span class="tag cyan">Layer 2</span></h3>
+        <p style="font-size:14px;">Forwards <strong>frames</strong> using the destination <strong>MAC address</strong>, within a single LAN segment (one broadcast domain).</p>
+        <ul>
+          <li>Learns MAC-to-port mappings automatically by watching source addresses</li>
+          <li>Builds a MAC address table in hardware (ASIC) — very fast, low latency</li>
+          <li>Has no concept of IP addresses or subnets</li>
+          <li>Every port is, by default, in the same network</li>
+        </ul>
+      </div>
+      <div class="compare-card router">
+        <h3>Routing <span class="tag amber">Layer 3</span></h3>
+        <p style="font-size:14px;">Forwards <strong>packets</strong> using the destination <strong>IP address</strong>, between different networks.</p>
+        <ul>
+          <li>Maintains a routing table, built statically or via a protocol (OSPF, BGP, etc.)</li>
+          <li>Picks a path using longest-prefix match, not an exact lookup</li>
+          <li>Each interface sits on a different subnet</li>
+          <li>Decrements TTL, may fragment, may perform NAT</li>
+        </ul>
+      </div>
+    </div>
+
+    <table class="compare-table">
+      <tr><th>Dimension</th><th>Switch</th><th>Router</th></tr>
+      <tr><td>OSI layer</td><td class="c">Layer 2 (Data Link)</td><td class="a">Layer 3 (Network)</td></tr>
+      <tr><td>Address used</td><td class="c">MAC address (48-bit, burned-in)</td><td class="a">IP address (32-bit for IPv4, hierarchical)</td></tr>
+      <tr><td>Table</td><td class="c">MAC address table (learned)</td><td class="a">Routing table (configured or learned)</td></tr>
+      <tr><td>Scope</td><td class="c">One LAN / broadcast domain</td><td class="a">Connects separate networks</td></tr>
+      <tr><td>Typical use</td><td class="c">Wire up PCs, printers, APs, servers in an office or a data-center rack</td><td class="a">Connect the LAN to the ISP, connect branch offices over a WAN, route between VLANs</td></tr>
+      <tr><td>Unknown destination</td><td class="c">Floods the frame out every other port</td><td class="a">Uses a default route, or drops with "destination unreachable"</td></tr>
+    </table>
+
+    <div class="panel">
+      <div class="panel-label">WORTH KNOWING</div>
+      <p style="margin:0;">A <strong>Layer 3 switch</strong> blurs the line — it switches within VLANs and routes between them, all in hardware. The concepts stay identical; only the box changes.</p>
+    </div>
+  </section>
+
+  <hr class="div">
+
+  <!-- ARP + CAM -->
+  <section id="arp-cam">
+    <div class="kicker">THE MISSING STEP</div>
+    <h2>How a MAC address is learned in the first place</h2>
+    <p>Every diagram so far assumed the sender already knew the destination MAC. In practice, a host almost never does at first — it has to ask. This is <strong>ARP</strong> (Address Resolution Protocol): the process that turns a known IP address into an unknown MAC address, and the moment a switch's CAM table actually gets built.</p>
+    <p>Step through the interactive walkthrough below — it traces a real two-host, one-switch exchange from empty tables through a resolved ping, matching what you'd see in a live packet capture.</p>
+    <div class="panel" style="padding:0; overflow:hidden;">
+      <iframe id="arp-frame" title="ARP discovery and CAM table walkthrough" style="width:100%; border:0; display:block; background:#0A0E14; min-height:600px;" srcdoc="<!DOCTYPE html>
+<html lang=&quot;en&quot;>
+<head>
+<meta charset=&quot;UTF-8&quot;>
+<title>ARP Discovery &amp;amp; CAM Table Walkthrough</title>
+<meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;>
+<link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;>
+<link href=&quot;https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap&quot; rel=&quot;stylesheet&quot;>
+<style>
+  :root{
+    --bg:#0A0E14;
+    --panel:#0F1520;
+    --panel-2:#141C29;
+    --border:#232D3D;
+    --border-soft:#1A2230;
+    --text:#E7ECF3;
+    --muted:#8291A8;
+    --muted-2:#5C6B82;
+    --amber:#E8A33D;
+    --amber-dim:#3A2C15;
+    --cyan:#4FC3F7;
+    --cyan-dim:#122C36;
+    --green:#7ED9A8;
+    --green-dim:#123322;
+    --violet:#B79CF0;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'IBM Plex Sans',system-ui,sans-serif;
+    padding:28px 18px 60px;
+    min-height:100vh;
+  }
+  .wrap{max-width:980px;margin:0 auto;}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,monospace;}
+
+  /* ---- Header ---- */
+  header{margin-bottom:22px;}
+  .kicker{
+    color:var(--muted-2);
+    font-size:12.5px;
+    letter-spacing:.02em;
+    margin:0 0 6px;
+  }
+  h1{
+    font-size:26px;
+    font-weight:600;
+    margin:0 0 8px;
+    letter-spacing:-0.01em;
+  }
+  header p{
+    color:var(--muted);
+    font-size:14.5px;
+    line-height:1.55;
+    margin:0;
+    max-width:64ch;
+  }
+
+  /* ---- Step nav ---- */
+  .stepnav{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:12px 14px;
+    margin:22px 0 18px;
+  }
+  .navbtn{
+    background:var(--panel-2);
+    border:1px solid var(--border);
+    color:var(--text);
+    width:34px;height:34px;
+    border-radius:8px;
+    font-size:16px;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    flex:none;
+    transition:background .15s, border-color .15s;
+  }
+  .navbtn:hover:not(:disabled){background:#1B2536;border-color:#2E3B50;}
+  .navbtn:disabled{opacity:.35;cursor:not-allowed;}
+  .navmid{flex:1;min-width:0;}
+  .navmid .count{
+    color:var(--muted-2);
+    font-size:11.5px;
+    font-family:'IBM Plex Mono',monospace;
+    letter-spacing:.02em;
+  }
+  .navmid .title{
+    font-size:15px;
+    font-weight:600;
+    margin-top:2px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .playbtn{
+    background:var(--panel-2);
+    border:1px solid var(--border);
+    color:var(--text);
+    padding:0 16px;
+    height:34px;
+    border-radius:8px;
+    font-size:13px;
+    font-weight:500;
+    cursor:pointer;
+    flex:none;
+  }
+  .playbtn:hover{background:#1B2536;border-color:#2E3B50;}
+  .playbtn.active{background:var(--amber-dim);border-color:#5A431E;color:var(--amber);}
+
+  .progress{
+    height:3px;
+    background:var(--border-soft);
+    border-radius:2px;
+    overflow:hidden;
+    margin:0 0 22px;
+  }
+  .progress > div{
+    height:100%;
+    background:linear-gradient(90deg,var(--cyan),var(--amber));
+    transition:width .35s ease;
+  }
+
+  /* ---- Topology ---- */
+  .stage{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:18px 18px 8px;
+    margin-bottom:16px;
+  }
+  .layerbadge{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    background:var(--panel-2);
+    border:1px solid var(--border);
+    border-radius:999px;
+    padding:4px 12px 4px 8px;
+    font-size:11.5px;
+    font-family:'IBM Plex Mono',monospace;
+    color:var(--muted);
+    margin-bottom:12px;
+  }
+  .layerbadge .dot{
+    width:7px;height:7px;border-radius:50%;
+    background:var(--muted-2);
+  }
+  .layerbadge.l1 .dot{background:#8B95A6;}
+  .layerbadge.l2 .dot{background:var(--cyan);}
+  .layerbadge.l3 .dot{background:var(--amber);}
+  .layerbadge.l4 .dot{background:var(--green);}
+  .layerbadge b{color:var(--text);font-weight:600;}
+
+  svg{display:block;width:100%;height:auto;}
+  .device-box{fill:var(--panel-2);stroke:var(--border);stroke-width:1.5;}
+  .device-box.active{stroke:var(--amber);}
+  .device-label{fill:var(--text);font-family:'IBM Plex Sans',sans-serif;font-weight:600;font-size:14px;}
+  .device-sub{fill:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:11px;}
+  .device-sub.hi{fill:var(--amber);}
+  .wire{stroke:var(--border);stroke-width:2;}
+  .port-label{fill:var(--muted-2);font-family:'IBM Plex Mono',monospace;font-size:10px;}
+
+  .frame-pill{
+    transition:transform .55s cubic-bezier(.4,0,.2,1), opacity .25s ease;
+    opacity:0;
+  }
+  .frame-pill.show{opacity:1;}
+  .frame-pill rect{stroke-width:1.5;}
+  .frame-pill.broadcast rect{fill:var(--amber-dim);stroke:var(--amber);}
+  .frame-pill.broadcast text{fill:var(--amber);}
+  .frame-pill.unicast rect{fill:var(--cyan-dim);stroke:var(--cyan);}
+  .frame-pill.unicast text{fill:var(--cyan);}
+  .frame-pill.data rect{fill:var(--green-dim);stroke:var(--green);}
+  .frame-pill.data text{fill:var(--green);}
+  .frame-pill text{font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:500;}
+
+  .pulse-ring{
+    opacity:0;
+    transition:opacity .2s;
+  }
+  .pulse-ring.show{opacity:1;animation:pulse 1.4s ease-out infinite;}
+  @keyframes pulse{
+    0%{transform:scale(0.4);opacity:.7;}
+    100%{transform:scale(2.6);opacity:0;}
+  }
+
+  /* ---- Narrative ---- */
+  .narrative{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:16px 18px;
+    margin-bottom:16px;
+  }
+  .narrative .payload{
+    display:inline-block;
+    background:var(--panel-2);
+    border:1px solid var(--border-soft);
+    border-radius:6px;
+    padding:8px 11px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12.5px;
+    color:var(--muted);
+    margin-top:10px;
+    line-height:1.6;
+  }
+  .narrative p{margin:0;font-size:14.5px;line-height:1.65;color:var(--text);}
+  .narrative p.dim{color:var(--muted);font-size:13px;margin-top:8px;}
+
+  /* ---- Tables ---- */
+  .tables{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:14px;
+    margin-bottom:16px;
+  }
+  @media (max-width:780px){
+    .tables{grid-template-columns:1fr;}
+  }
+  .tablecard{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:14px 14px 12px;
+  }
+  .tablecard h3{
+    font-size:12.5px;
+    font-weight:600;
+    margin:0 0 3px;
+    color:var(--text);
+  }
+  .tablecard .sub{
+    font-size:11px;
+    color:var(--muted-2);
+    margin-bottom:10px;
+    font-family:'IBM Plex Mono',monospace;
+  }
+  table{width:100%;border-collapse:collapse;font-family:'IBM Plex Mono',monospace;font-size:12px;}
+  th{
+    text-align:left;
+    color:var(--muted-2);
+    font-weight:500;
+    font-size:10.5px;
+    text-transform:none;
+    padding:0 0 6px;
+    border-bottom:1px solid var(--border-soft);
+  }
+  td{
+    padding:7px 0;
+    border-bottom:1px solid var(--border-soft);
+    color:var(--muted);
+  }
+  tr:last-child td{border-bottom:none;}
+  td.empty-row{color:var(--muted-2);font-style:normal;}
+  tr.new-row td{
+    color:var(--text);
+    animation:rowflash 1s ease;
+  }
+  @keyframes rowflash{
+    0%{background:rgba(232,163,61,.22);}
+    100%{background:transparent;}
+  }
+
+  /* ---- Terminals ---- */
+  .verify-head{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:10px;
+    margin:22px 0 10px;
+  }
+  .verify-head h2{
+    font-size:14.5px;
+    font-weight:600;
+    margin:0;
+  }
+  .verify-head span{
+    font-size:12px;
+    color:var(--muted);
+  }
+  .terminals{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:14px;
+    margin-bottom:16px;
+  }
+  @media (max-width:780px){
+    .terminals{grid-template-columns:1fr;}
+  }
+  .termcard{
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    overflow:hidden;
+    background:#000;
+  }
+  .termbar{
+    background:var(--panel-2);
+    border-bottom:1px solid var(--border);
+    padding:8px 12px;
+    font-size:12px;
+    font-weight:600;
+    color:var(--text);
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .termbar .tag{
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:400;
+    color:var(--muted-2);
+    font-size:11px;
+  }
+  .termbody{
+    margin:0;
+    padding:12px 13px 14px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11.5px;
+    line-height:1.7;
+    color:#C7D0DD;
+    white-space:pre;
+    overflow-x:auto;
+    min-height:118px;
+  }
+
+  /* ---- Step rail ---- */
+  .rail{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:10px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+  }
+  .railbtn{
+    background:var(--panel-2);
+    border:1px solid var(--border-soft);
+    color:var(--muted);
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    padding:6px 9px;
+    border-radius:6px;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .railbtn:hover{border-color:#3A4A62;}
+  .railbtn.on{
+    background:var(--amber-dim);
+    border-color:#5A431E;
+    color:var(--amber);
+  }
+  .railbtn.done{color:var(--green);}
+
+  footer{
+    text-align:center;
+    color:var(--muted-2);
+    font-size:11.5px;
+    margin-top:26px;
+  }
+</style>
+</head>
+<body>
+<div class=&quot;wrap&quot;>
+
+  <header>
+    <p class=&quot;kicker mono&quot;>L3 → L2 → L1 · ENCAPSULATION WALKTHROUGH</p>
+    <h1>How PC 1 learns PC 2's MAC address</h1>
+    <p>Two hosts, one switch, empty tables — traced from an actual Packet Tracer capture. Step through ARP discovery and the ping that follows it to watch encapsulation happen at each layer, and see exactly when the switch's CAM table and each host's ARP cache get written.</p>
+  </header>
+
+  <div class=&quot;stepnav&quot;>
+    <button class=&quot;navbtn&quot; id=&quot;prevBtn&quot; aria-label=&quot;Previous step&quot;>‹</button>
+    <div class=&quot;navmid&quot;>
+      <div class=&quot;count mono&quot; id=&quot;stepCount&quot;>STEP 1 / 12</div>
+      <div class=&quot;title&quot; id=&quot;stepTitle&quot;>Both hosts start with empty tables</div>
+    </div>
+    <button class=&quot;playbtn&quot; id=&quot;playBtn&quot;>▶ Play</button>
+    <button class=&quot;navbtn&quot; id=&quot;nextBtn&quot; aria-label=&quot;Next step&quot;>›</button>
+  </div>
+
+  <div class=&quot;progress&quot;><div id=&quot;progressBar&quot; style=&quot;width:0%&quot;></div></div>
+
+  <div class=&quot;stage&quot;>
+    <span class=&quot;layerbadge&quot; id=&quot;layerBadge&quot;><span class=&quot;dot&quot;></span><b>—</b></span>
+    <svg id=&quot;topoSvg&quot; viewBox=&quot;0 0 900 250&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;>
+      <!-- wires -->
+      <line class=&quot;wire&quot; x1=&quot;170&quot; y1=&quot;140&quot; x2=&quot;380&quot; y2=&quot;140&quot;/>
+      <line class=&quot;wire&quot; x1=&quot;520&quot; y1=&quot;140&quot; x2=&quot;730&quot; y2=&quot;140&quot;/>
+      <text class=&quot;port-label&quot; x=&quot;200&quot; y=&quot;132&quot;>Fa0/1</text>
+      <text class=&quot;port-label&quot; x=&quot;655&quot; y=&quot;132&quot;>Fa0/2</text>
+
+      <!-- PC1 -->
+      <rect class=&quot;device-box&quot; id=&quot;box-pc1&quot; x=&quot;40&quot; y=&quot;95&quot; width=&quot;130&quot; height=&quot;90&quot; rx=&quot;8&quot;/>
+      <text class=&quot;device-label&quot; x=&quot;105&quot; y=&quot;125&quot; text-anchor=&quot;middle&quot;>PC 1</text>
+      <text class=&quot;device-sub&quot; x=&quot;105&quot; y=&quot;145&quot; text-anchor=&quot;middle&quot;>192.168.1.10</text>
+      <text class=&quot;device-sub&quot; x=&quot;105&quot; y=&quot;160&quot; text-anchor=&quot;middle&quot; id=&quot;pc1-mac&quot;>00e0.f969.74b5</text>
+
+      <!-- Switch -->
+      <rect class=&quot;device-box&quot; id=&quot;box-sw&quot; x=&quot;380&quot; y=&quot;85&quot; width=&quot;140&quot; height=&quot;110&quot; rx=&quot;8&quot;/>
+      <text class=&quot;device-label&quot; x=&quot;450&quot; y=&quot;118&quot; text-anchor=&quot;middle&quot;>Switch</text>
+      <text class=&quot;device-sub&quot; x=&quot;450&quot; y=&quot;138&quot; text-anchor=&quot;middle&quot;>CAM table</text>
+      <text class=&quot;device-sub&quot; x=&quot;450&quot; y=&quot;153&quot; text-anchor=&quot;middle&quot; id=&quot;sw-p1&quot;>Fa0/1: —</text>
+      <text class=&quot;device-sub&quot; x=&quot;450&quot; y=&quot;168&quot; text-anchor=&quot;middle&quot; id=&quot;sw-p2&quot;>Fa0/2: —</text>
+
+      <!-- PC2 -->
+      <rect class=&quot;device-box&quot; id=&quot;box-pc2&quot; x=&quot;730&quot; y=&quot;95&quot; width=&quot;130&quot; height=&quot;90&quot; rx=&quot;8&quot;/>
+      <text class=&quot;device-label&quot; x=&quot;795&quot; y=&quot;125&quot; text-anchor=&quot;middle&quot;>PC 2</text>
+      <text class=&quot;device-sub&quot; x=&quot;795&quot; y=&quot;145&quot; text-anchor=&quot;middle&quot;>192.168.1.20</text>
+      <text class=&quot;device-sub&quot; x=&quot;795&quot; y=&quot;160&quot; text-anchor=&quot;middle&quot; id=&quot;pc2-mac&quot;>0009.7cb8.ac55</text>
+
+      <!-- pulse rings (ingress learn indicator) -->
+      <circle class=&quot;pulse-ring&quot; id=&quot;pulse-pc1&quot; cx=&quot;105&quot; cy=&quot;185&quot; r=&quot;4&quot; fill=&quot;var(--amber)&quot;/>
+      <circle class=&quot;pulse-ring&quot; id=&quot;pulse-sw&quot; cx=&quot;450&quot; cy=&quot;195&quot; r=&quot;4&quot; fill=&quot;var(--amber)&quot;/>
+      <circle class=&quot;pulse-ring&quot; id=&quot;pulse-pc2&quot; cx=&quot;795&quot; cy=&quot;185&quot; r=&quot;4&quot; fill=&quot;var(--amber)&quot;/>
+
+      <!-- moving frame -->
+      <g class=&quot;frame-pill&quot; id=&quot;framePill&quot;>
+        <rect x=&quot;-46&quot; y=&quot;-13&quot; width=&quot;92&quot; height=&quot;26&quot; rx=&quot;6&quot;/>
+        <text id=&quot;frameText&quot; x=&quot;0&quot; y=&quot;4&quot; text-anchor=&quot;middle&quot;>FRAME</text>
+      </g>
+    </svg>
+  </div>
+
+  <div class=&quot;narrative&quot;>
+    <p id=&quot;narrativeText&quot;>All tables are empty. PC 1 wants to send data to 192.168.1.20 but has no MAC address for it yet.</p>
+    <div class=&quot;payload mono&quot; id=&quot;payloadBox&quot; style=&quot;display:none;&quot;></div>
+  </div>
+
+  <div class=&quot;tables&quot;>
+    <div class=&quot;tablecard&quot;>
+      <h3>PC 1 — ARP Cache</h3>
+      <div class=&quot;sub&quot;>Layer 3 → Layer 2</div>
+      <table>
+        <thead><tr><th>IP Address</th><th>MAC Address</th></tr></thead>
+        <tbody id=&quot;pc1ArpBody&quot;><tr><td class=&quot;empty-row&quot; colspan=&quot;2&quot;>empty</td></tr></tbody>
+      </table>
+    </div>
+    <div class=&quot;tablecard&quot;>
+      <h3>Switch — CAM Table</h3>
+      <div class=&quot;sub&quot;>Layer 2 → Physical port</div>
+      <table>
+        <thead><tr><th>Port</th><th>MAC Address</th></tr></thead>
+        <tbody id=&quot;camBody&quot;><tr><td class=&quot;empty-row&quot; colspan=&quot;2&quot;>empty</td></tr></tbody>
+      </table>
+    </div>
+    <div class=&quot;tablecard&quot;>
+      <h3>PC 2 — ARP Cache</h3>
+      <div class=&quot;sub&quot;>Layer 3 → Layer 2</div>
+      <table>
+        <thead><tr><th>IP Address</th><th>MAC Address</th></tr></thead>
+        <tbody id=&quot;pc2ArpBody&quot;><tr><td class=&quot;empty-row&quot; colspan=&quot;2&quot;>empty</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class=&quot;verify-head&quot;>
+    <h2>Verify it the way Packet Tracer would show it</h2>
+    <span class=&quot;mono&quot;>arp -a · show mac address-table</span>
+  </div>
+  <div class=&quot;terminals&quot;>
+    <div class=&quot;termcard&quot;>
+      <div class=&quot;termbar&quot;>Laptop0 <span class=&quot;tag&quot;>Desktop &amp;gt; Command Prompt</span></div>
+      <pre class=&quot;termbody&quot; id=&quot;term-pc1&quot;></pre>
+    </div>
+    <div class=&quot;termcard&quot;>
+      <div class=&quot;termbar&quot;>Switch0 <span class=&quot;tag&quot;>CLI</span></div>
+      <pre class=&quot;termbody&quot; id=&quot;term-sw&quot;></pre>
+    </div>
+    <div class=&quot;termcard&quot;>
+      <div class=&quot;termbar&quot;>Laptop1 <span class=&quot;tag&quot;>Desktop &amp;gt; Command Prompt</span></div>
+      <pre class=&quot;termbody&quot; id=&quot;term-pc2&quot;></pre>
+    </div>
+  </div>
+
+  <div class=&quot;rail&quot; id=&quot;rail&quot;></div>
+
+  <footer>Switch reads Layer 2 addresses only — it never opens the Layer 3 packet inside the data frame.<br>In the real capture, Laptop1 also pinged 192.168.1.10 right after this exchange — since its ARP cache and the switch's CAM table were already populated, that reply came straight back with no rediscovery needed (round trip: min 0ms / max 9ms / avg 4ms).</footer>
+</div>
+
+<script>
+const MAC1 = &quot;00e0.f969.74b5&quot;, MAC2 = &quot;0009.7cb8.ac55&quot;;
+const IP1 = &quot;192.168.1.10&quot;, IP2 = &quot;192.168.1.20&quot;;
+
+const steps = [
+  {
+    title: &quot;Both hosts start with empty tables&quot;,
+    layer: &quot;l1&quot;, layerText: &quot;IDLE&quot;,
+    narrative: &quot;Running arp -a on either laptop right now returns \u201cNo ARP Entries Found.\u201d PC 1 is about to run ping &quot; + IP2 + &quot; — before any ICMP data can go out, that ping has to solve the same problem: it doesn't know PC 2's MAC address yet.&quot;,
+    payload: null, frame: null, active: [], cam: {p1:null,p2:null}, arp1: null, arp2: null
+  },
+  {
+    title: &quot;ping triggers an ARP request (L3 → L2 → L1)&quot;,
+    layer: &quot;l3&quot;, layerText: &quot;LAYER 3 · building ARP request&quot;,
+    narrative: &quot;PC 1 checks its ARP cache for &quot; + IP2 + &quot;, finds nothing, and pauses the echo request. Instead it builds an ARP request payload asking who owns that address.&quot;,
+    payload: &quot;ARP Request:  \u201cWho has &quot; + IP2 + &quot;? Tell &quot; + IP1 + &quot; (&quot; + MAC1 + &quot;)\u201d&quot;,
+    frame: null, active: [&quot;pc1&quot;], cam: {p1:null,p2:null}, arp1: null, arp2: null
+  },
+  {
+    title: &quot;PC 1 encapsulates it into a broadcast frame&quot;,
+    layer: &quot;l2&quot;, layerText: &quot;LAYER 2 · Ethernet encapsulation&quot;,
+    narrative: &quot;The ARP payload is wrapped in an Ethernet frame addressed to the broadcast MAC FF:FF:FF:FF:FF:FF, since PC 1 doesn't know a specific destination yet, then sent out Fa0/1.&quot;,
+    payload: &quot;Src MAC: &quot; + MAC1 + &quot;  →  Dst MAC: FF:FF:FF:FF:FF:FF   (EtherType 0x0806 · ARP)&quot;,
+    frame: {type:&quot;broadcast&quot;, label:&quot;ARP REQUEST&quot;, path:&quot;pc1-sw&quot;}, active: [&quot;pc1&quot;],
+    cam: {p1:null,p2:null}, arp1: null, arp2: null
+  },
+  {
+    title: &quot;Switch learns PC 1 and floods the frame&quot;,
+    layer: &quot;l2&quot;, layerText: &quot;LAYER 2 · CAM table learn (ingress)&quot;,
+    narrative: &quot;The switch reads the frame's source MAC on Fa0/1 and records Fa0/1 → &quot; + MAC1 + &quot; in its CAM table. Since the destination is a broadcast, it floods the frame out every other port.&quot;,
+    payload: null, frame: {type:&quot;broadcast&quot;, label:&quot;FLOOD&quot;, path:&quot;sw-pc2&quot;},
+    active: [&quot;sw&quot;], cam: {p1:MAC1,p2:null}, arp1: null, arp2: null, pulse:&quot;sw&quot;
+  },
+  {
+    title: &quot;PC 2 decapsulates the request&quot;,
+    layer: &quot;l3&quot;, layerText: &quot;LAYER 3 · reading ARP payload&quot;,
+    narrative: &quot;PC 2 receives the frame, strips the Ethernet header, and reads the ARP payload — recognizing &quot; + IP2 + &quot; as its own address.&quot;,
+    payload: null, frame: null, active: [&quot;pc2&quot;], cam: {p1:MAC1,p2:null}, arp1: null, arp2: null
+  },
+  {
+    title: &quot;PC 2 learns PC 1's mapping&quot;,
+    layer: &quot;l3&quot;, layerText: &quot;LAYER 3 · ARP cache write&quot;,
+    narrative: &quot;Before replying, PC 2 stores what it just learned about the sender: &quot; + IP1 + &quot; maps to &quot; + MAC1 + &quot;.&quot;,
+    payload: null, frame: null, active: [&quot;pc2&quot;], cam: {p1:MAC1,p2:null},
+    arp1: null, arp2: {ip:IP1, mac:MAC1}, pulse:&quot;pc2&quot;
+  },
+  {
+    title: &quot;PC 2 encapsulates a unicast ARP reply&quot;,
+    layer: &quot;l2&quot;, layerText: &quot;LAYER 2 · Ethernet encapsulation&quot;,
+    narrative: &quot;PC 2 crafts an ARP reply (\u201c&quot; + IP2 + &quot; is at &quot; + MAC2 + &quot;\u201d) and wraps it in a unicast frame addressed directly to PC 1, sent out Fa0/2.&quot;,
+    payload: &quot;Src MAC: &quot; + MAC2 + &quot;  →  Dst MAC: &quot; + MAC1,
+    frame: {type:&quot;unicast&quot;, label:&quot;ARP REPLY&quot;, path:&quot;pc2-sw&quot;}, active: [&quot;pc2&quot;],
+    cam: {p1:MAC1,p2:null}, arp1: null, arp2: {ip:IP1, mac:MAC1}
+  },
+  {
+    title: &quot;Switch learns PC 2 and forwards to Fa0/1 only&quot;,
+    layer: &quot;l2&quot;, layerText: &quot;LAYER 2 · CAM table learn (ingress)&quot;,
+    narrative: &quot;The switch reads the source MAC on Fa0/2 and records Fa0/2 → &quot; + MAC2 + &quot;. It then looks up the destination MAC &quot; + MAC1 + &quot;, finds it already mapped to Fa0/1, and forwards the reply there — no flooding needed this time.&quot;,
+    payload: null, frame: {type:&quot;unicast&quot;, label:&quot;UNICAST&quot;, path:&quot;sw-pc1&quot;},
+    active: [&quot;sw&quot;], cam: {p1:MAC1,p2:MAC2}, arp1: null, arp2: {ip:IP1, mac:MAC1}, pulse:&quot;sw&quot;
+  },
+  {
+    title: &quot;PC 1 learns PC 2's mapping — ARP resolved&quot;,
+    layer: &quot;l3&quot;, layerText: &quot;LAYER 3 · ARP cache write&quot;,
+    narrative: &quot;PC 1 decapsulates the reply and stores &quot; + IP2 + &quot; → &quot; + MAC2 + &quot;. Checking arp -a on PC 1 right now would show exactly this entry — both caches and the CAM table are fully populated.&quot;,
+    payload: null, frame: null, active: [&quot;pc1&quot;], cam: {p1:MAC1,p2:MAC2},
+    arp1: {ip:IP2, mac:MAC2}, arp2: {ip:IP1, mac:MAC1}, pulse:&quot;pc1&quot;
+  },
+  {
+    title: &quot;The paused ping resumes: ICMP Echo Request&quot;,
+    layer: &quot;l3&quot;, layerText: &quot;LAYER 3 → 1 · ICMP encapsulation&quot;,
+    narrative: &quot;With the MAC now known, PC 1's ping proceeds. ICMP has no Layer 4 header of its own — the Echo Request rides directly inside an IP packet (Src &quot; + IP1 + &quot; → Dst &quot; + IP2 + &quot;), which is wrapped in an Ethernet frame (Src &quot; + MAC1 + &quot; → Dst &quot; + MAC2 + &quot;) and sent out Fa0/1.&quot;,
+    payload: &quot;[ICMP Echo Request] → [L3: &quot; + IP1 + &quot; → &quot; + IP2 + &quot;] → [L2: &quot; + MAC1 + &quot; → &quot; + MAC2 + &quot; | FCS]&quot;,
+    frame: {type:&quot;data&quot;, label:&quot;ECHO REQUEST&quot;, path:&quot;pc1-sw&quot;}, active: [&quot;pc1&quot;],
+    cam: {p1:MAC1,p2:MAC2}, arp1: {ip:IP2, mac:MAC2}, arp2: {ip:IP1, mac:MAC1}, pc1Ping:&quot;inflight&quot;
+  },
+  {
+    title: &quot;Switch forwards on MAC alone — no L3 lookup&quot;,
+    layer: &quot;l2&quot;, layerText: &quot;LAYER 2 · CAM table lookup only&quot;,
+    narrative: &quot;The switch checks only the Layer 2 destination MAC (&quot; + MAC2 + &quot;), matches it to Fa0/2 in its CAM table, and forwards the frame there instantly. It never opens or inspects the Layer 3 IP packet inside.&quot;,
+    payload: null, frame: {type:&quot;data&quot;, label:&quot;ECHO REQUEST&quot;, path:&quot;sw-pc2&quot;},
+    active: [&quot;sw&quot;], cam: {p1:MAC1,p2:MAC2}, arp1: {ip:IP2, mac:MAC2}, arp2: {ip:IP1, mac:MAC1}, pc1Ping:&quot;inflight&quot;
+  },
+  {
+    title: &quot;PC 2 decapsulates and builds an Echo Reply&quot;,
+    layer: &quot;l3&quot;, layerText: &quot;LAYER 1 → 3 · decapsulation&quot;,
+    narrative: &quot;PC 2 verifies the frame, strips the Ethernet and IP headers, hands the ICMP Echo Request to its own ICMP module, and immediately builds an Echo Reply addressed back to PC 1.&quot;,
+    payload: null, frame: null, active: [&quot;pc2&quot;], cam: {p1:MAC1,p2:MAC2},
+    arp1: {ip:IP2, mac:MAC2}, arp2: {ip:IP1, mac:MAC1}, pc1Ping:&quot;inflight&quot;
+  },
+  {
+    title: &quot;PC 2 sends the Echo Reply back&quot;,
+    layer: &quot;l3&quot;, layerText: &quot;LAYER 3 → 1 · ICMP encapsulation&quot;,
+    narrative: &quot;The Echo Reply is wrapped in an IP packet (Src &quot; + IP2 + &quot; → Dst &quot; + IP1 + &quot;) and an Ethernet frame (Src &quot; + MAC2 + &quot; → Dst &quot; + MAC1 + &quot;), sent out Fa0/2 — no ARP needed here, since PC 2 already knows PC 1's MAC.&quot;,
+    payload: &quot;[ICMP Echo Reply] → [L3: &quot; + IP2 + &quot; → &quot; + IP1 + &quot;] → [L2: &quot; + MAC2 + &quot; → &quot; + MAC1 + &quot; | FCS]&quot;,
+    frame: {type:&quot;data&quot;, label:&quot;ECHO REPLY&quot;, path:&quot;pc2-sw&quot;}, active: [&quot;pc2&quot;],
+    cam: {p1:MAC1,p2:MAC2}, arp1: {ip:IP2, mac:MAC2}, arp2: {ip:IP1, mac:MAC1}, pc1Ping:&quot;inflight&quot;
+  },
+  {
+    title: &quot;Switch forwards the reply straight to Fa0/1&quot;,
+    layer: &quot;l2&quot;, layerText: &quot;LAYER 2 · CAM table lookup only&quot;,
+    narrative: &quot;Both MACs have been known since the ARP exchange, so this is now a plain, fast lookup — destination &quot; + MAC1 + &quot; maps to Fa0/1, and the frame goes straight there. No learning, no flooding.&quot;,
+    payload: null, frame: {type:&quot;data&quot;, label:&quot;ECHO REPLY&quot;, path:&quot;sw-pc1&quot;},
+    active: [&quot;sw&quot;], cam: {p1:MAC1,p2:MAC2}, arp1: {ip:IP2, mac:MAC2}, arp2: {ip:IP1, mac:MAC1}, pc1Ping:&quot;inflight&quot;
+  },
+  {
+    title: &quot;PC 1 decapsulates the reply — ping complete&quot;,
+    layer: &quot;l4&quot;, layerText: &quot;LAYER 1 → 3 · decapsulation&quot;,
+    narrative: &quot;PC 1 strips the Ethernet and IP headers and hands the Echo Reply to its ping process. This exchange repeats four times by default in Packet Tracer, all four succeed with sub-millisecond replies, matching the actual captured output below.&quot;,
+    payload: null, frame: null, active: [&quot;pc1&quot;], cam: {p1:MAC1,p2:MAC2},
+    arp1: {ip:IP2, mac:MAC2}, arp2: {ip:IP1, mac:MAC1}, pc1Ping:&quot;done&quot;
+  }
+];
+
+let idx = 0;
+let playing = false;
+let playTimer = null;
+
+function pc1Term(s){
+  let out = &quot;C:\\>arp -a\n\n&quot;;
+  out += s.arp1
+    ? (&quot;Internet Address      Physical Address      Type\n  &quot; + s.arp1.ip + &quot;           &quot; + s.arp1.mac + &quot;           dynamic\n&quot;)
+    : &quot;No ARP Entries Found\n&quot;;
+  if (s.pc1Ping === &quot;inflight&quot;){
+    out += &quot;\nC:\\>ping &quot; + IP2 + &quot;\n\nPinging &quot; + IP2 + &quot; with 32 bytes of data:\n&quot;;
+  } else if (s.pc1Ping === &quot;done&quot;){
+    out += &quot;\nC:\\>ping &quot; + IP2 + &quot;\n\nPinging &quot; + IP2 + &quot; with 32 bytes of data:\n\n&quot;
+      + &quot;Reply from &quot; + IP2 + &quot;: bytes=32 time<1ms TTL=128\n&quot;.repeat(4)
+      + &quot;\nPing statistics for &quot; + IP2 + &quot;:\n&quot;
+      + &quot;    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),\n&quot;
+      + &quot;Approximate round trip times in milli-seconds:\n&quot;
+      + &quot;    Minimum = 0ms, Maximum = 0ms, Average = 0ms\n&quot;;
+  }
+  out += &quot;\nC:\\>&quot;;
+  return out;
+}
+
+function pc2Term(s){
+  let out = &quot;C:\\>arp -a\n\n&quot;;
+  out += s.arp2
+    ? (&quot;Internet Address      Physical Address      Type\n  &quot; + s.arp2.ip + &quot;           &quot; + s.arp2.mac + &quot;           dynamic\n&quot;)
+    : &quot;No ARP Entries Found\n&quot;;
+  out += &quot;\nC:\\>&quot;;
+  return out;
+}
+
+function swTerm(s){
+  const rowFa1 = s.cam.p1 ? (&quot;   1    &quot; + s.cam.p1 + &quot;    DYNAMIC     Fa0/1\n&quot;) : &quot;&quot;;
+  const rowFa2 = s.cam.p2 ? (&quot;   1    &quot; + s.cam.p2 + &quot;    DYNAMIC     Fa0/2\n&quot;) : &quot;&quot;;
+  // once both ports are learned, the real device listed Fa0/2 above Fa0/1
+  const rows = (s.cam.p1 &amp;&amp; s.cam.p2) ? (rowFa2 + rowFa1) : (rowFa1 + rowFa2);
+  return &quot;Switch>show mac address-table\n&quot;
+    + &quot;          Mac Address Table\n&quot;
+    + &quot;-------------------------------------------\n\n&quot;
+    + &quot;Vlan    Mac Address       Type        Ports\n&quot;
+    + &quot;----    -----------       --------    -----\n&quot;
+    + rows + &quot;\nSwitch>&quot;;
+}
+
+const els = {
+  prev: document.getElementById('prevBtn'),
+  next: document.getElementById('nextBtn'),
+  play: document.getElementById('playBtn'),
+  count: document.getElementById('stepCount'),
+  title: document.getElementById('stepTitle'),
+  progress: document.getElementById('progressBar'),
+  layerBadge: document.getElementById('layerBadge'),
+  narrative: document.getElementById('narrativeText'),
+  payloadBox: document.getElementById('payloadBox'),
+  pc1Arp: document.getElementById('pc1ArpBody'),
+  pc2Arp: document.getElementById('pc2ArpBody'),
+  cam: document.getElementById('camBody'),
+  framePill: document.getElementById('framePill'),
+  frameText: document.getElementById('frameText'),
+  boxPc1: document.getElementById('box-pc1'),
+  boxSw: document.getElementById('box-sw'),
+  boxPc2: document.getElementById('box-pc2'),
+  swP1: document.getElementById('sw-p1'),
+  swP2: document.getElementById('sw-p2'),
+  pulsePc1: document.getElementById('pulse-pc1'),
+  pulseSw: document.getElementById('pulse-sw'),
+  pulsePc2: document.getElementById('pulse-pc2'),
+  rail: document.getElementById('rail'),
+  termPc1: document.getElementById('term-pc1'),
+  termSw: document.getElementById('term-sw'),
+  termPc2: document.getElementById('term-pc2'),
+};
+
+const paths = {
+  &quot;pc1-sw&quot;: {from:105, to:450},
+  &quot;sw-pc2&quot;: {from:450, to:795},
+  &quot;pc2-sw&quot;: {from:795, to:450},
+  &quot;sw-pc1&quot;: {from:450, to:105},
+};
+
+function buildRail(){
+  els.rail.innerHTML = &quot;&quot;;
+  steps.forEach((s,i)=>{
+    const b = document.createElement('button');
+    b.className = 'railbtn';
+    b.textContent = (i+1) + (i<9?&quot;  &quot;:&quot; &quot;) + s.title.split(' ').slice(0,3).join(' ');
+    b.addEventListener('click', ()=>{ stopPlaying(); goTo(i); });
+    els.rail.appendChild(b);
+  });
+}
+
+function render(){
+  const s = steps[idx];
+
+  els.count.textContent = &quot;STEP &quot; + (idx+1) + &quot; / &quot; + steps.length;
+  els.title.textContent = s.title;
+  els.progress.style.width = ((idx)/(steps.length-1)*100) + &quot;%&quot;;
+  els.narrative.textContent = s.narrative;
+
+  els.layerBadge.className = &quot;layerbadge &quot; + s.layer;
+  els.layerBadge.querySelector('b').textContent = s.layerText;
+
+  if (s.payload){
+    els.payloadBox.style.display = &quot;inline-block&quot;;
+    els.payloadBox.textContent = s.payload;
+  } else {
+    els.payloadBox.style.display = &quot;none&quot;;
+  }
+
+  // device highlight
+  [els.boxPc1, els.boxSw, els.boxPc2].forEach(b=>b.classList.remove('active'));
+  if (s.active.includes('pc1')) els.boxPc1.classList.add('active');
+  if (s.active.includes('sw')) els.boxSw.classList.add('active');
+  if (s.active.includes('pc2')) els.boxPc2.classList.add('active');
+
+  // pulse
+  [els.pulsePc1, els.pulseSw, els.pulsePc2].forEach(p=>p.classList.remove('show'));
+  if (s.pulse === 'pc1') els.pulsePc1.classList.add('show');
+  if (s.pulse === 'sw') els.pulseSw.classList.add('show');
+  if (s.pulse === 'pc2') els.pulsePc2.classList.add('show');
+
+  // frame pill
+  if (s.frame){
+    const p = paths[s.frame.path];
+    els.framePill.className = &quot;frame-pill show &quot; + s.frame.type;
+    els.frameText.textContent = s.frame.label;
+    els.framePill.setAttribute('transform', 'translate(' + p.from + ',65)');
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{
+        els.framePill.setAttribute('transform', 'translate(' + p.to + ',65)');
+      });
+    });
+  } else {
+    els.framePill.classList.remove('show');
+  }
+
+  // CAM table
+  els.swP1.textContent = &quot;Port 1: &quot; + (s.cam.p1 || &quot;—&quot;);
+  els.swP1.classList.toggle('hi', !!s.cam.p1);
+  els.swP2.textContent = &quot;Port 2: &quot; + (s.cam.p2 || &quot;—&quot;);
+  els.swP2.classList.toggle('hi', !!s.cam.p2);
+
+  const camRows = [];
+  if (s.cam.p1) camRows.push([&quot;Fa0/1&quot;, s.cam.p1]);
+  if (s.cam.p2) camRows.push([&quot;Fa0/2&quot;, s.cam.p2]);
+  els.cam.innerHTML = camRows.length
+    ? camRows.map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td></tr>').join('')
+    : '<tr><td class=&quot;empty-row&quot; colspan=&quot;2&quot;>empty</td></tr>';
+
+  // ARP tables
+  els.pc1Arp.innerHTML = s.arp1
+    ? '<tr class=&quot;new-row&quot;><td>'+s.arp1.ip+'</td><td>'+s.arp1.mac+'</td></tr>'
+    : '<tr><td class=&quot;empty-row&quot; colspan=&quot;2&quot;>empty</td></tr>';
+  els.pc2Arp.innerHTML = s.arp2
+    ? '<tr class=&quot;new-row&quot;><td>'+s.arp2.ip+'</td><td>'+s.arp2.mac+'</td></tr>'
+    : '<tr><td class=&quot;empty-row&quot; colspan=&quot;2&quot;>empty</td></tr>';
+
+  // terminal panes
+  els.termPc1.textContent = pc1Term(s);
+  els.termSw.textContent = swTerm(s);
+  els.termPc2.textContent = pc2Term(s);
+
+  els.prev.disabled = idx === 0;
+  els.next.disabled = idx === steps.length - 1;
+
+  Array.from(els.rail.children).forEach((b,i)=>{
+    b.classList.toggle('on', i === idx);
+    b.classList.toggle('done', i < idx);
+  });
+}
+
+function goTo(i){
+  idx = Math.max(0, Math.min(steps.length - 1, i));
+  render();
+  if (idx === steps.length - 1) stopPlaying();
+}
+
+function stopPlaying(){
+  playing = false;
+  els.play.textContent = &quot;▶ Play&quot;;
+  els.play.classList.remove('active');
+  if (playTimer) { clearInterval(playTimer); playTimer = null; }
+}
+
+els.prev.addEventListener('click', ()=>{ stopPlaying(); goTo(idx-1); });
+els.next.addEventListener('click', ()=>{ stopPlaying(); goTo(idx+1); });
+els.play.addEventListener('click', ()=>{
+  if (playing){ stopPlaying(); return; }
+  if (idx === steps.length - 1) idx = 0;
+  playing = true;
+  els.play.textContent = &quot;❚❚ Pause&quot;;
+  els.play.classList.add('active');
+  render();
+  playTimer = setInterval(()=>{
+    if (idx >= steps.length - 1){ stopPlaying(); return; }
+    idx++;
+    render();
+  }, 2200);
+});
+
+document.addEventListener('keydown', (e)=>{
+  if (e.key === 'ArrowRight'){ stopPlaying(); goTo(idx+1); }
+  if (e.key === 'ArrowLeft'){ stopPlaying(); goTo(idx-1); }
+});
+
+buildRail();
+render();
+</script>
+</body>
+</html>
+"></iframe>
+    </div>
+    <div class="panel">
+      <div class="panel-label">WHY THIS MATTERS FOR THE SIMULATIONS ABOVE</div>
+      <p style="margin:0;">The LAN switch simulation earlier skipped straight to "the switch learns a MAC" — this is the full version of how that MAC got onto the wire to begin with. Notice ARP itself is a broadcast, learned and flooded exactly like any other unknown-destination frame.</p>
+    </div>
+  </section>
+
+  <hr class="div">
+
+  <!-- FORWARDING -->
+  <section id="forwarding">
+    <div class="kicker">BEHAVIOR — PART 2</div>
+    <h2>Watching a forwarding decision happen</h2>
+    <p>Run each simulation below. Notice what stays the same across hops, and what gets rewritten at every single one.</p>
+
+    <h3 style="margin-top:26px;">LAN: a switch forwards a frame</h3>
+    <p>Four hosts share one switch. The switch only knows MAC addresses — it learns them the first time it sees a frame, then forwards by exact match.</p>
+    <div class="sim" id="lan-sim">
+      <div class="sim-topo"><svg id="lan-svg" viewBox="0 0 700 170"></svg></div>
+      <div class="sim-controls">
+        <span class="mono" style="font-size:12.5px;color:var(--muted);">Send from</span>
+        <select class="pick" id="lan-src">
+          <option value="A">Host A</option><option value="B">Host B</option>
+          <option value="C">Host C</option><option value="D">Host D</option>
+        </select>
+        <span class="mono" style="font-size:12.5px;color:var(--muted);">to</span>
+        <select class="pick" id="lan-dst">
+          <option value="C">Host C</option><option value="A">Host A</option>
+          <option value="B">Host B</option><option value="D">Host D</option>
+        </select>
+        <button class="btn" id="lan-send">Send frame</button>
+        <button class="btn" id="lan-reset">Clear MAC table</button>
+      </div>
+      <table class="mac-table" id="lan-table">
+        <tr><th>MAC (host)</th><th>Port</th></tr>
+      </table>
+      <div class="sim-log" id="lan-log"></div>
+    </div>
+
+    <h3 style="margin-top:34px;">WAN: routers forward a packet across three hops</h3>
+    <p>The same packet crosses three routers to reach a remote host. Watch the <span style="color:var(--amber)">IP addresses</span> (unchanged end-to-end) against the <span style="color:var(--cyan)">MAC addresses and TTL</span> (rewritten at every hop).</p>
+    <div class="sim" id="wan-sim">
+      <div class="sim-topo"><svg id="wan-svg" viewBox="0 0 700 150"></svg></div>
+      <div class="sim-controls">
+        <button class="btn amber" id="wan-send">Send packet, Host A → Host Z</button>
+        <button class="btn amber" id="wan-reset">Reset</button>
+      </div>
+      <div class="sim-log" id="wan-log"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">THE ONE FACT TO KEEP</div>
+      <p style="margin:0;"><strong>The IP header's source and destination addresses never change in transit.</strong> The Ethernet frame wrapped around it is torn off and rebuilt at every single router, because a MAC address is only ever meaningful to your immediate neighbor on the wire.</p>
+    </div>
+
+    <h3 style="margin-top:34px;">Full worked example: a ping across two routers</h3>
+    <p>Same idea, traced address-by-address. Host A pings Host B across two subnets joined by two routers — every hop strips one Ethernet frame off and builds a new one, while the IP packet inside rides through untouched.</p>
+
+    <div class="panel">
+      <div class="panel-label">TOPOLOGY</div>
+      <table class="compare-table" style="margin:0;">
+        <tr><td>Host A (Subnet 1)</td><td colspan="2">IP 192.168.1.20 &nbsp;·&nbsp; MAC AA:AA</td></tr>
+        <tr><td>Router 1 — Int 1 (gateway)</td><td colspan="2">IP 192.168.1.1 &nbsp;·&nbsp; MAC BB:BB</td></tr>
+        <tr><td>Router 1 — Int 2 (link)</td><td colspan="2">IP 10.0.0.1 &nbsp;·&nbsp; MAC CC:CC</td></tr>
+        <tr><td>Router 2 — Int 1 (link)</td><td colspan="2">IP 10.0.0.2 &nbsp;·&nbsp; MAC DD:DD</td></tr>
+        <tr><td>Router 2 — Int 2 (gateway)</td><td colspan="2">IP 172.16.1.1 &nbsp;·&nbsp; MAC EE:EE</td></tr>
+        <tr><td>Host B (Subnet 2)</td><td colspan="2">IP 172.16.1.50 &nbsp;·&nbsp; MAC FF:FF</td></tr>
+      </table>
+    </div>
+
+    <div class="panel">
+      <div class="stepnote">
+        <div class="num">1</div>
+        <p><strong>Host A builds and encapsulates the packet.</strong> It checks its routing table, sees 172.16.1.50 is off-subnet, and forwards to its default gateway. Packet: src 192.168.1.20 → dst 172.16.1.50. Frame: src MAC AA:AA → dst MAC <strong>BB:BB</strong> (Router 1's local interface — not Host B's MAC, which Host A has no way to know yet).</p>
+      </div>
+      <div class="stepnote">
+        <div class="num">2</div>
+        <p><strong>Router 1 receives and strips the frame.</strong> Destination MAC matches BB:BB, so the Ethernet header is stripped and discarded. It reads the Layer 3 destination (172.16.1.50), finds a route via Interface 2 toward Router 2 (10.0.0.2), and decrements TTL by 1.</p>
+      </div>
+      <div class="stepnote">
+        <div class="num">3</div>
+        <p><strong>Router 1 re-encapsulates and forwards.</strong> A brand-new frame is built for the router-to-router link. Packet unchanged: src 192.168.1.20 → dst 172.16.1.50. New frame: src MAC <strong>CC:CC</strong> (R1's exit interface) → dst MAC <strong>DD:DD</strong> (R2's receiving interface).</p>
+      </div>
+      <div class="stepnote">
+        <div class="num">4</div>
+        <p><strong>Router 2 receives and strips the frame.</strong> Destination MAC matches DD:DD, so that second Ethernet header is stripped. It reads 172.16.1.50 again and finds that subnet directly connected on its own Interface 2 — no further router needed. TTL is decremented a second time.</p>
+      </div>
+      <div class="stepnote">
+        <div class="num">5</div>
+        <p><strong>Router 2 re-encapsulates for local delivery.</strong> A third frame is built, this time addressed straight to Host B. Packet still unchanged: src 192.168.1.20 → dst 172.16.1.50. New frame: src MAC <strong>EE:EE</strong> (R2's gateway interface) → dst MAC <strong>FF:FF</strong> (Host B's real MAC, learned via ARP on that segment).</p>
+      </div>
+      <div class="stepnote">
+        <div class="num">6</div>
+        <p><strong>Host B receives and processes.</strong> Destination MAC and IP both match. It strips the final frame, hands the payload up to ICMP, and builds an Echo Reply — running this entire process in reverse to get back to Host A.</p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">ADDRESS CHANGES ACROSS THE PATH</div>
+      <table class="compare-table" style="margin:0;">
+        <tr><th>Wire segment</th><th>Src IP</th><th>Dst IP</th><th>Src MAC</th><th>Dst MAC</th></tr>
+        <tr><td>Host A → Router 1</td><td class="a">192.168.1.20</td><td class="a">172.16.1.50</td><td class="c">AA:AA</td><td class="c">BB:BB</td></tr>
+        <tr><td>Router 1 → Router 2</td><td class="a">192.168.1.20</td><td class="a">172.16.1.50</td><td class="c">CC:CC</td><td class="c">DD:DD</td></tr>
+        <tr><td>Router 2 → Host B</td><td class="a">192.168.1.20</td><td class="a">172.16.1.50</td><td class="c">EE:EE</td><td class="c">FF:FF</td></tr>
+      </table>
+      <p style="margin:14px 0 0;">Three different frames, one unbroken packet. The <span style="color:var(--amber)">IP columns</span> never move; the <span style="color:var(--cyan)">MAC columns</span> reset at every hop — exactly what the simulator above just showed you in motion.</p>
+    </div>
+  </section>
+
+  <hr class="div">
+
+  <!-- RECAP -->
+  <section id="recap">
+    <div class="kicker">CLOSE</div>
+    <h2>Recap</h2>
+    <ul style="margin:0 0 24px 18px; color:#C7D4E3;">
+      <li style="margin-bottom:8px;">An <strong>Ethernet frame</strong> is a MAC-addressed envelope with an EtherType and a checksum; an <strong>IPv4 header</strong> is a smaller, structured envelope inside it, addressed by IP with its own TTL and checksum.</li>
+      <li style="margin-bottom:8px;">A <strong>switch</strong> forwards <strong>frames</strong> by MAC address inside one LAN; a <strong>router</strong> forwards <strong>packets</strong> by IP address between networks.</li>
+      <li style="margin-bottom:8px;">On a LAN, an unknown destination MAC gets <strong>flooded</strong>; a known one is switched straight to its learned port.</li>
+      <li style="margin-bottom:8px;">Across a WAN, the <strong>IP header rides unchanged</strong> end-to-end while the <strong>Ethernet frame around it is rebuilt at every hop.</strong></li>
+    </ul>
+
+    <h3>Five-question check</h3>
+    <div id="quiz"></div>
+    <div class="score-box" id="score-box"></div>
+  </section>
+
+</main>
+
+<footer>END OF LESSON</footer>
+
+<script>
+// ---------- scroll spy ----------
+const links = document.querySelectorAll('.rail a');
+const sections = [...links].map(l => document.getElementById(l.dataset.target));
+const spy = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if(e.isIntersecting){
+      links.forEach(l => l.classList.remove('active'));
+      const link = document.querySelector(`.rail a[data-target="${e.target.id}"]`);
+      if(link) link.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+sections.forEach(s => s && spy.observe(s));
+
+// ---------- Ethernet frame field details ----------
+const frameInfo = {
+  preamble: ["Preamble", "7 bytes · alternating 1s and 0s", "Lets the receiving NIC's clock synchronize with the sender's before real data arrives. It's a physical-layer signal, not part of the logical frame that gets forwarded."],
+  sfd: ["Start Frame Delimiter", "1 byte · 10101011", "Marks the exact boundary where the preamble ends and the addressed frame begins."],
+  dmac: ["Destination MAC Address", "6 bytes · e.g. AC:DE:48:00:11:22", "The address of the next device on the wire — the immediate neighbor, not the final destination. A switch reads this to decide which port to forward out."],
+  smac: ["Source MAC Address", "6 bytes · e.g. 3C:22:FB:AA:BB:CC", "The sender's own hardware address. Switches read this on every incoming frame to learn or refresh their MAC address table."],
+  type: ["EtherType", "2 bytes · e.g. 0x0800", "Identifies the protocol carried in the payload: 0x0800 = IPv4, 0x0806 = ARP, 0x86DD = IPv6. It's how the receiving host knows how to unwrap what's inside."],
+  payload: ["Payload (Data)", "46–1500 bytes", "The actual contents — typically an IPv4 or IPv6 packet. Padded up to the 46-byte minimum if the real data is shorter, so the frame can't be mistaken for a collision."],
+  fcs: ["Frame Check Sequence", "4 bytes · CRC-32", "A checksum computed over the frame. The receiver recomputes it and silently discards the frame if the two don't match — Ethernet doesn't retransmit, that's left to higher layers."]
+};
+document.querySelectorAll('#frame-line .seg').forEach(seg => {
+  seg.addEventListener('click', () => {
+    document.querySelectorAll('#frame-line .seg').forEach(s => s.classList.remove('active'));
+    seg.classList.add('active');
+    const [name, meta, desc] = frameInfo[seg.dataset.f];
+    const d = document.getElementById('frame-detail');
+    d.querySelector('.fname').textContent = name;
+    d.querySelector('.fmeta').textContent = meta;
+    d.querySelector('p').textContent = desc;
+  });
+});
+
+// ---------- IPv4 field details ----------
+const ipInfo = {
+  version: ["Version", "4 bits · value = 4", "Identifies this as an IPv4 header. A router uses this before it even knows how long the header is, to pick the right parsing rules."],
+  ihl: ["Internet Header Length", "4 bits · value in 32-bit words", "Header length measured in 4-byte words. 5 means a 20-byte header with no options — the vast majority of packets. 15 is the max, i.e. 60 bytes."],
+  dscp: ["DSCP / ECN", "8 bits", "Differentiated Services Code Point marks a packet's priority for QoS (e.g. voice traffic first). Explicit Congestion Notification lets routers signal congestion without dropping the packet."],
+  totlen: ["Total Length", "16 bits · header + payload, in bytes", "The full size of the IP packet including this header. Since it's 16 bits, a single IPv4 packet tops out at 65,535 bytes."],
+  id: ["Identification", "16 bits", "A tag shared by all fragments of the same original packet, so the destination host can reassemble them correctly even if they arrive out of order."],
+  flags: ["Flags", "3 bits", "Controls fragmentation: 'Don't Fragment' tells routers to drop the packet rather than split it; 'More Fragments' marks all but the last piece of a fragmented packet."],
+  fragoff: ["Fragment Offset", "13 bits", "Tells the receiver where this fragment belongs in the original, unfragmented packet, measured in 8-byte units."],
+  ttl: ["Time To Live", "8 bits · typical default 64 or 128", "Decremented by exactly 1 at every router. When it hits zero, the packet is dropped and an ICMP 'Time Exceeded' is sent back — this is what stops routing loops from running forever, and is exactly how the 'traceroute' tool works."],
+  proto: ["Protocol", "8 bits · e.g. 6, 17, 1", "Tells the receiving host what's riding inside this packet: 6 = TCP, 17 = UDP, 1 = ICMP. The Layer-3 equivalent of the frame's EtherType."],
+  chk: ["Header Checksum", "16 bits", "A checksum over the header only (not the payload). Recalculated at every hop, since TTL changes every time — a cheap integrity check, not a security feature."],
+  src: ["Source IP Address", "32 bits", "The originating host. Unlike the frame's source MAC, this stays identical for the packet's entire trip end-to-end."],
+  dst: ["Destination IP Address", "32 bits", "The final host. Every router along the path performs a longest-prefix match against this address to choose the next hop — it never gets rewritten in transit (NAT is the one deliberate exception)."],
+  opts: ["Options + Padding", "Variable, rare in practice", "Optional fields like strict/loose source routing or timestamps. Padded with zero bits so the header always ends on a 32-bit boundary. Most modern traffic skips this entirely."]
+};
+document.querySelectorAll('#ip-header .cell').forEach(cell => {
+  cell.addEventListener('click', () => {
+    document.querySelectorAll('#ip-header .cell').forEach(c => c.classList.remove('active'));
+    cell.classList.add('active');
+    const [name, meta, desc] = ipInfo[cell.dataset.f];
+    const d = document.getElementById('ip-detail');
+    d.querySelector('.fname').textContent = name;
+    d.querySelector('.fmeta').textContent = meta;
+    d.querySelector('p').textContent = desc;
+  });
+});
+
+// ---------- LAN switch simulation ----------
+const lanHosts = {
+  A: {x:60,  y:30,  mac:"AA:11"}, B: {x:640, y:30,  mac:"BB:22"},
+  C: {x:60,  y:140, mac:"CC:33"}, D: {x:640, y:140, mac:"DD:44"}
+};
+const lanPorts = {A:1, B:2, C:3, D:4};
+let macTable = {};
+
+function drawLan(activePath){
+  const svg = document.getElementById('lan-svg');
+  let s = `<rect x="300" y="65" width="100" height="40" rx="3" fill="#16283D" stroke="#1E3149"/>
+    <text x="350" y="90" text-anchor="middle" fill="#5FD8C7" font-family="IBM Plex Mono" font-size="12">SWITCH</text>`;
+  Object.entries(lanHosts).forEach(([k,h]) => {
+    const midx = 350, midy = 85;
+    const isActive = activePath && activePath.includes(k);
+    s += `<line x1="${h.x+30}" y1="${h.y+15}" x2="${midx}" y2="${midy}" stroke="${isActive ? '#5FD8C7':'#1E3149'}" stroke-width="${isActive?2:1}"/>`;
+  });
+  Object.entries(lanHosts).forEach(([k,h]) => {
+    const isActive = activePath && activePath.includes(k);
+    s += `<rect x="${h.x}" y="${h.y}" width="60" height="30" rx="3" fill="${isActive?'#2C5750':'#101E30'}" stroke="${isActive?'#5FD8C7':'#1E3149'}"/>
+      <text x="${h.x+30}" y="${h.y+19}" text-anchor="middle" fill="${isActive?'#5FD8C7':'#7C93AC'}" font-family="IBM Plex Mono" font-size="12">Host ${k}</text>`;
+  });
+  svg.innerHTML = s;
+}
+function renderMacTable(){
+  const t = document.getElementById('lan-table');
+  let rows = '<tr><th>MAC (host)</th><th>Port</th></tr>';
+  Object.entries(macTable).forEach(([host, port]) => {
+    rows += `<tr><td class="learned">${lanHosts[host].mac} (Host ${host})</td><td class="learned">Port ${port}</td></tr>`;
+  });
+  t.innerHTML = rows;
+}
+function lanLog(msg, cls){
+  const log = document.getElementById('lan-log');
+  const line = document.createElement('div');
+  line.className = 'line' + (cls ? ' '+cls : '');
+  line.textContent = msg;
+  log.appendChild(line);
+  log.scrollTop = log.scrollHeight;
+}
+document.getElementById('lan-send').addEventListener('click', () => {
+  const src = document.getElementById('lan-src').value;
+  const dst = document.getElementById('lan-dst').value;
+  if(src === dst){ lanLog("Source and destination can't be the same host.", 'bad'); return; }
+  document.getElementById('lan-log').innerHTML = '';
+  drawLan([src]);
+  lanLog(`Frame arrives: src=${lanHosts[src].mac} (Host ${src}) → dst=${lanHosts[dst].mac} (Host ${dst})`);
+  setTimeout(() => {
+    macTable[src] = lanPorts[src];
+    renderMacTable();
+    lanLog(`Switch learns: ${lanHosts[src].mac} is on port ${lanPorts[src]}.`, 'hi');
+  }, 500);
+  setTimeout(() => {
+    if(macTable[dst] !== undefined){
+      lanLog(`Destination ${lanHosts[dst].mac} found in table on port ${lanPorts[dst]} — forwarded to that port only.`, 'hi');
+      drawLan([src, dst]);
+    } else {
+      lanLog(`Destination ${lanHosts[dst].mac} not in table — unknown unicast. Frame is FLOODED out every port except port ${lanPorts[src]}.`, 'bad');
+      drawLan(Object.keys(lanHosts));
+    }
+  }, 1100);
+});
+document.getElementById('lan-reset').addEventListener('click', () => {
+  macTable = {};
+  renderMacTable();
+  document.getElementById('lan-log').innerHTML = '';
+  drawLan(null);
+});
+drawLan(null); renderMacTable();
+
+// ---------- WAN routing simulation ----------
+const wanNodes = [
+  {id:'A', label:'Host A', x:40,  mac:'11:AA', ip:'10.0.0.5'},
+  {id:'R1',label:'Router 1', x:200, mac:'22:BB'},
+  {id:'R2',label:'Router 2', x:360, mac:'33:CC'},
+  {id:'R3',label:'Router 3', x:520, mac:'44:DD'},
+  {id:'Z', label:'Host Z', x:660, mac:'55:EE', ip:'203.0.113.9'}
+];
+function drawWan(activeIdx){
+  const svg = document.getElementById('wan-svg');
+  let s = '';
+  for(let i=0;i<wanNodes.length-1;i++){
+    const isActive = activeIdx !== undefined && i === activeIdx;
+    s += `<line x1="${wanNodes[i].x+40}" y1="75" x2="${wanNodes[i+1].x}" y2="75" stroke="${isActive?'#E8A853':'#1E3149'}" stroke-width="${isActive?2:1}"/>`;
+  }
+  wanNodes.forEach((n,i) => {
+    const isActive = activeIdx !== undefined && (i === activeIdx || i === activeIdx+1);
+    const isRouter = n.id.startsWith('R');
+    s += `<rect x="${n.x}" y="55" width="40" height="40" rx="${isRouter?3:20}" fill="${isActive?'#5A4626':'#101E30'}" stroke="${isActive?'#E8A853':'#1E3149'}"/>
+      <text x="${n.x+20}" y="102" text-anchor="middle" fill="${isActive?'#E8A853':'#7C93AC'}" font-family="IBM Plex Mono" font-size="11">${n.label}</text>`;
+  });
+  svg.innerHTML = s;
+}
+function wanLog(msg, cls){
+  const log = document.getElementById('wan-log');
+  const line = document.createElement('div');
+  line.className = 'line' + (cls ? ' '+cls : '');
+  line.innerHTML = msg;
+  log.appendChild(line);
+  log.scrollTop = log.scrollHeight;
+}
+document.getElementById('wan-send').addEventListener('click', (e) => {
+  e.target.disabled = true;
+  document.getElementById('wan-log').innerHTML = '';
+  let ttl = 4;
+  wanLog(`Host A builds a packet: IP src=10.0.0.5, dst=203.0.113.9 — this never changes below.`, 'hi2');
+  const hops = [
+    {i:0, from:'Host A', to:'Router 1', mac:'11:AA → 22:BB'},
+    {i:1, from:'Router 1', to:'Router 2', mac:'22:BB → 33:CC'},
+    {i:2, from:'Router 2', to:'Router 3', mac:'33:CC → 44:DD'},
+    {i:3, from:'Router 3', to:'Host Z', mac:'44:DD → 55:EE'}
+  ];
+  hops.forEach((hop, idx) => {
+    setTimeout(() => {
+      drawWan(hop.i);
+      ttl--;
+      wanLog(`${hop.from} → ${hop.to}: frame rebuilt (MAC ${hop.mac}), TTL decremented to ${ttl}.`, 'hi');
+    }, 500 + idx*750);
+  });
+  setTimeout(() => {
+    wanLog(`Host Z receives the packet. IP addresses arrived unchanged; only the surrounding frame was rebuilt, four separate times.`, 'hi2');
+    e.target.disabled = false;
+  }, 500 + hops.length*750 + 200);
+});
+document.getElementById('wan-reset').addEventListener('click', () => {
+  document.getElementById('wan-log').innerHTML = '';
+  drawWan();
+  document.getElementById('wan-send').disabled = false;
+});
+drawWan();
+
+// ---------- quiz ----------
+const quizData = [
+  { q: "A switch decides where to forward a frame based on:", opts: ["Destination IP address","Destination MAC address","TTL value","Protocol number"], correct: 1 },
+  { q: "What does a switch do with a frame addressed to a MAC it hasn't learned yet?", opts: ["Drops it silently","Sends it back to the source","Floods it out every other port","Sends an ICMP error"], correct: 2 },
+  { q: "As a packet crosses three routers, what stays the same from start to finish?", opts: ["The source and destination MAC addresses","The source and destination IP addresses","The TTL value","The FCS checksum"], correct: 1 },
+  { q: "In an Ethernet II frame, the EtherType field is used to:", opts: ["Store the destination MAC","Indicate what protocol is in the payload (e.g. IPv4)","Count the payload length in bits","Hold the CRC checksum"], correct: 1 },
+  { q: "What happens to an IPv4 packet's TTL when it hits zero?", opts: ["It's fragmented","It's forwarded anyway","It's dropped and an ICMP message is sent back","It's re-routed automatically"], correct: 2 }
+];
+const quizEl = document.getElementById('quiz');
+let score = 0, answered = 0;
+quizData.forEach((item, qi) => {
+  const block = document.createElement('div');
+  block.className = 'quiz-q';
+  block.innerHTML = `<div class="qtext">${qi+1}. ${item.q}</div><div class="quiz-opts"></div>`;
+  const optsWrap = block.querySelector('.quiz-opts');
+  item.opts.forEach((opt, oi) => {
+    const b = document.createElement('button');
+    b.className = 'qopt';
+    b.textContent = opt;
+    b.addEventListener('click', () => {
+      if(block.dataset.done) return;
+      block.dataset.done = '1';
+      const all = optsWrap.querySelectorAll('.qopt');
+      all.forEach(a => a.classList.add('disabled'));
+      if(oi === item.correct){ b.classList.add('correct'); score++; }
+      else{
+        b.classList.add('wrong');
+        all[item.correct].classList.add('correct');
+      }
+      answered++;
+      if(answered === quizData.length){
+        const box = document.getElementById('score-box');
+        box.style.display = 'block';
+        box.textContent = `Score: ${score} / ${quizData.length} — ` + (score === quizData.length ? "clean sweep." : "review the sections above for any you missed.");
+      }
+    });
+    optsWrap.appendChild(b);
+  });
+  quizEl.appendChild(block);
+});
+
+// ---------- ARP walkthrough iframe: auto-fit height ----------
+(function(){
+  const f = document.getElementById("arp-frame");
+  if(!f) return;
+  function fit(){
+    try{
+      const doc = f.contentWindow.document;
+      const h = Math.max(doc.documentElement.scrollHeight, doc.body.scrollHeight);
+      f.style.height = (h + 20) + "px";
+    }catch(e){ f.style.height = "1500px"; }
+  }
+  f.addEventListener("load", () => { fit(); setTimeout(fit, 300); });
+  window.addEventListener("resize", fit);
+})();
+</script>
+
+</body>
+</html>

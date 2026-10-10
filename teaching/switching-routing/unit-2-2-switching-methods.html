@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2.2 Switching Methods — Routing & Switching</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Slab:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#eef0e7;
+    --panel:#f6f7f1;
+    --ink:#1b2430;
+    --ink-soft:#576072;
+    --wire:#b8722f;
+    --wire-soft:#e9d3b1;
+    --cut:#2f7d74;
+    --cut-soft:#cfe4e1;
+    --frag:#7c5f9c;
+    --frag-soft:#e0d5ea;
+    --store:#3a5a8c;
+    --store-soft:#d3ddec;
+    --danger:#a5372f;
+    --danger-soft:#f0d7d3;
+    --line:#c8cbba;
+    --line-strong:#9ea283;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    font-size:16px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:'IBM Plex Mono', monospace;}
+  .slab{font-family:'IBM Plex Slab', serif;}
+
+  /* background ruled paper texture on section edges */
+  .wrap{
+    max-width:900px;
+    margin:0 auto;
+    padding:0 28px;
+  }
+
+  header.hero{
+    padding:64px 0 40px;
+    border-bottom:1px solid var(--line-strong);
+  }
+  .kicker{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    color:var(--ink-soft);
+    margin:0 0 18px;
+    letter-spacing:0.02em;
+  }
+  .kicker .dot{color:var(--wire);}
+  h1.title{
+    font-family:'IBM Plex Slab', serif;
+    font-weight:600;
+    font-size:44px;
+    line-height:1.15;
+    margin:0 0 16px;
+    max-width:14ch;
+  }
+  .dek{
+    font-size:18px;
+    color:var(--ink-soft);
+    max-width:56ch;
+    margin:0 0 36px;
+  }
+
+  /* ================= Hero timeline diagram ================= */
+  .timeline-card{
+    background:var(--panel);
+    border:1px solid var(--line-strong);
+    padding:26px 24px 20px;
+  }
+  .timeline-label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-bottom:10px;
+  }
+  .ruler{
+    position:relative;
+    height:20px;
+    border-bottom:1px solid var(--line-strong);
+    margin-bottom:2px;
+  }
+  .ruler .tick{
+    position:absolute;
+    bottom:0;
+    width:1px;
+    height:6px;
+    background:var(--line-strong);
+  }
+  .ruler .tick.major{height:10px;}
+  .ruler .ticklabel{
+    position:absolute;
+    bottom:12px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10px;
+    color:var(--ink-soft);
+    transform:translateX(-50%);
+  }
+  .frame-bar{
+    position:relative;
+    height:46px;
+    display:flex;
+    border:1px solid var(--ink);
+    overflow:hidden;
+    margin-top:6px;
+  }
+  .frame-bar .seg{
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    color:var(--ink);
+    border-right:1px solid var(--ink);
+    white-space:nowrap;
+    overflow:hidden;
+  }
+  .frame-bar .seg:last-child{border-right:none;}
+  .seg.dest{background:var(--wire-soft);}
+  .seg.src{background:#e7e2d3;}
+  .seg.type{background:#dfe3d2;}
+  .seg.payload{background:#fff;}
+  .seg.pad{background:repeating-linear-gradient(45deg, #fff, #fff 4px, #e7e5db 4px, #e7e5db 8px);}
+  .seg.fcs{background:var(--store-soft);}
+
+  .decision-row{
+    position:relative;
+    height:64px;
+    margin-top:8px;
+  }
+  .decision{
+    position:absolute;
+    top:0;
+    transform:translateX(-50%);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    width:120px;
+  }
+  .decision .flag{
+    width:2px;
+    height:14px;
+  }
+  .decision .chip{
+    margin-top:4px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10.5px;
+    padding:3px 7px;
+    border:1px solid var(--ink);
+    text-align:center;
+    line-height:1.3;
+  }
+  .decision.cut .flag{background:var(--cut);}
+  .decision.cut .chip{background:var(--cut-soft); border-color:var(--cut);}
+  .decision.frag .flag{background:var(--frag);}
+  .decision.frag .chip{background:var(--frag-soft); border-color:var(--frag);}
+  .decision.store .flag{background:var(--store);}
+  .decision.store .chip{background:var(--store-soft); border-color:var(--store);}
+
+  .legend{
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px 22px;
+    margin-top:44px;
+    font-size:12.5px;
+    color:var(--ink-soft);
+  }
+  .legend span{display:inline-flex; align-items:center; gap:6px;}
+  .legend i{width:11px; height:11px; display:inline-block; border:1px solid var(--ink);}
+
+  /* ================= sections ================= */
+  section{padding:52px 0;}
+  section + section{border-top:1px solid var(--line);}
+  h2.sec-title{
+    font-family:'IBM Plex Slab', serif;
+    font-size:28px;
+    font-weight:600;
+    margin:0 0 8px;
+  }
+  .sec-sub{
+    color:var(--ink-soft);
+    max-width:62ch;
+    margin:0 0 30px;
+  }
+  p{max-width:70ch;}
+  .max-prose{max-width:70ch;}
+
+  /* method panels */
+  .methods{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:16px;
+  }
+  .method{
+    border:1px solid var(--line-strong);
+    background:var(--panel);
+    padding:22px 22px 20px;
+    position:relative;
+  }
+  .method .m-head{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:10px;
+    flex-wrap:wrap;
+  }
+  .method h3{
+    font-family:'IBM Plex Slab', serif;
+    font-size:20px;
+    margin:0;
+  }
+  .method .speed{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--ink-soft);
+    white-space:nowrap;
+  }
+  .method.cut{border-left:4px solid var(--cut);}
+  .method.frag{border-left:4px solid var(--frag);}
+  .method.store{border-left:4px solid var(--store);}
+  .method p{margin:6px 0;}
+  .method .tag-row{
+    margin-top:12px;
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .tag{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    padding:3px 8px;
+    border:1px solid var(--line-strong);
+    color:var(--ink-soft);
+    background:#fff;
+  }
+
+  /* comparison table */
+  table.compare{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:6px;
+    font-size:14.5px;
+  }
+  table.compare th, table.compare td{
+    border:1px solid var(--line-strong);
+    padding:10px 12px;
+    text-align:left;
+    vertical-align:top;
+  }
+  table.compare thead th{
+    background:var(--ink);
+    color:var(--paper);
+    font-family:'IBM Plex Mono', monospace;
+    font-weight:500;
+    font-size:12.5px;
+  }
+  table.compare tbody th{
+    font-family:'IBM Plex Slab', serif;
+    font-weight:600;
+    background:var(--panel);
+    width:15%;
+  }
+
+  /* frame anatomy diagram */
+  .anatomy{
+    border:1px solid var(--line-strong);
+    background:var(--panel);
+    padding:22px;
+  }
+  .field-list{
+    display:grid;
+    gap:0;
+    margin-top:18px;
+    border-top:1px solid var(--line-strong);
+  }
+  .field-row{
+    display:grid;
+    grid-template-columns:34px 1fr 90px auto;
+    gap:14px;
+    align-items:center;
+    padding:10px 4px;
+    border-bottom:1px solid var(--line-strong);
+    font-size:14px;
+  }
+  .field-row .swatch{width:16px; height:16px; border:1px solid var(--ink);}
+  .field-row .fname{font-weight:500;}
+  .field-row .fsize{font-family:'IBM Plex Mono', monospace; color:var(--ink-soft); text-align:right;}
+  .field-row .fnote{color:var(--ink-soft); font-size:13px;}
+  .swatch.dest{background:var(--wire-soft);}
+  .swatch.src{background:#e7e2d3;}
+  .swatch.type{background:#dfe3d2;}
+  .swatch.payload{background:#fff;}
+  .swatch.pad{background:repeating-linear-gradient(45deg, #fff, #fff 3px, #e7e5db 3px, #e7e5db 6px);}
+  .swatch.fcs{background:var(--store-soft);}
+  .swatch.pre{background:#ddd;}
+
+  .callout{
+    border:1px solid var(--wire);
+    background:var(--wire-soft);
+    padding:16px 18px;
+    margin:22px 0;
+    font-size:14.5px;
+  }
+  .callout strong{display:block; margin-bottom:4px; font-family:'IBM Plex Mono', monospace; font-size:12px; text-transform:none; color:var(--ink);}
+
+  /* collision window diagram */
+  .collision-scene{
+    border:1px solid var(--line-strong);
+    background:var(--panel);
+    padding:22px;
+  }
+  .cs-track{
+    position:relative;
+    height:70px;
+    border:1px solid var(--ink);
+    margin-top:16px;
+    overflow:hidden;
+  }
+  .cs-zone{
+    position:absolute;
+    top:0; bottom:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+  }
+  .cs-zone.window{left:0; width:39%; background:var(--danger-soft); border-right:2px dashed var(--danger);}
+  .cs-zone.safe{left:39%; right:0; background:#fff;}
+  .cs-caption{
+    display:flex;
+    justify-content:space-between;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    color:var(--ink-soft);
+    margin-top:6px;
+  }
+
+  /* padding calculator */
+  .calc{
+    border:1px solid var(--line-strong);
+    background:var(--panel);
+    padding:24px;
+  }
+  .calc-controls{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    flex-wrap:wrap;
+    margin-bottom:22px;
+  }
+  .calc-controls label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    color:var(--ink-soft);
+  }
+  input[type="range"]{
+    flex:1;
+    min-width:200px;
+    accent-color:var(--wire);
+  }
+  .calc-readout{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:22px;
+    min-width:70px;
+    text-align:right;
+  }
+  .stack{
+    display:flex;
+    height:52px;
+    border:1px solid var(--ink);
+    overflow:hidden;
+  }
+  .stack .chunk{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    border-right:1px solid var(--ink);
+    transition:width 0.12s ease-out;
+    overflow:hidden;
+    white-space:nowrap;
+  }
+  .stack .chunk:last-child{border-right:none;}
+  .chunk.hdr{background:var(--wire-soft);}
+  .chunk.data{background:#fff;}
+  .chunk.padc{background:repeating-linear-gradient(45deg, #fff, #fff 4px, #e7e5db 4px, #e7e5db 8px);}
+  .chunk.fcsc{background:var(--store-soft);}
+  .calc-summary{
+    margin-top:16px;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:12px;
+  }
+  .calc-summary .box{
+    border:1px solid var(--line-strong);
+    background:#fff;
+    padding:12px 14px;
+  }
+  .calc-summary .box .k{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    color:var(--ink-soft);
+  }
+  .calc-summary .box .v{
+    font-family:'IBM Plex Slab', serif;
+    font-size:22px;
+    margin-top:2px;
+  }
+  .calc-verdict{
+    margin-top:16px;
+    font-size:14.5px;
+    padding:12px 14px;
+    border-left:3px solid var(--ink-soft);
+    background:#fff;
+  }
+
+  /* recap */
+  .recap{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:10px;
+  }
+  .recap .item{
+    display:flex;
+    gap:12px;
+    padding:12px 0;
+    border-bottom:1px solid var(--line);
+    font-size:15px;
+  }
+  .recap .item:last-child{border-bottom:none;}
+  .recap .q{
+    font-family:'IBM Plex Mono', monospace;
+    color:var(--wire);
+    flex:0 0 22px;
+  }
+
+  footer{
+    padding:36px 0 60px;
+    color:var(--ink-soft);
+    font-size:13px;
+    border-top:1px solid var(--line-strong);
+  }
+
+  @media (min-width:720px){
+    .methods{grid-template-columns:repeat(3,1fr);}
+  }
+  @media (max-width:600px){
+    h1.title{font-size:32px;}
+    .field-row{grid-template-columns:24px 1fr 60px; }
+    .field-row .fnote{grid-column:1 / -1; padding-left:38px;}
+    .calc-summary{grid-template-columns:1fr;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important;}
+  }
+</style>
+</head>
+<body><div style="font:14px/1.4 Inter,-apple-system,Segoe UI,sans-serif;background:#0b1d3a;padding:10px 16px;"><a href="/teaching/switching-routing.html" style="color:#fbf9f3;text-decoration:none;">&larr; Switching &amp; Routing &middot; all units</a></div>
+
+<div class="wrap">
+  <header class="hero">
+    <p class="kicker">NCS 485 · Routing &amp; Switching <span class="dot">·</span> Unit 2.2</p>
+    <h1 class="title">How a switch decides when to forward a frame</h1>
+    <p class="dek">Every switch faces the same trade-off: wait for more of the frame and forward it safely, or act early and forward it fast. The three switching methods are just three different answers to that trade-off — and the answer is decided by exactly how many bytes the switch reads before making its move.</p>
+
+    <div class="timeline-card">
+      <p class="timeline-label">One 64-byte frame, streaming in left to right — marked where each method makes its call</p>
+      <div class="ruler" id="ruler"></div>
+      <div class="frame-bar" id="frameBar">
+        <div class="seg dest" style="width:9.375%">Dest MAC</div>
+        <div class="seg src" style="width:9.375%">Src MAC</div>
+        <div class="seg type" style="width:3.125%">Type</div>
+        <div class="seg payload" style="width:59.375%">Payload</div>
+        <div class="seg fcs" style="width:6.25%">FCS</div>
+      </div>
+      <div class="decision-row" id="decisionRow">
+        <div class="decision cut" style="left:29.7%">
+          <div class="flag"></div>
+          <div class="chip">Cut-through<br>reads 14 bytes</div>
+        </div>
+        <div class="decision frag" style="left:60%">
+          <div class="flag"></div>
+          <div class="chip">Fragment-free<br>reads 64 bytes</div>
+        </div>
+        <div class="decision store" style="left:97%">
+          <div class="flag"></div>
+          <div class="chip">Store-and-forward<br>reads all 64 bytes + trailer</div>
+        </div>
+      </div>
+      <div class="legend">
+        <span><i style="background:var(--wire-soft)"></i>Destination MAC</span>
+        <span><i style="background:#e7e2d3"></i>Source MAC</span>
+        <span><i style="background:#dfe3d2"></i>EtherType</span>
+        <span><i style="background:#fff"></i>Payload</span>
+        <span><i style="background:var(--store-soft)"></i>FCS trailer</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= THE THREE METHODS ================= -->
+  <section id="methods-section">
+    <h2 class="sec-title">Three methods, three amounts of patience</h2>
+    <p class="sec-sub">All three read the frame in the same order. They differ only in how early they stop reading and start forwarding.</p>
+
+    <div class="methods">
+      <div class="method cut">
+        <div class="m-head">
+          <h3>Cut-through</h3>
+          <span class="speed">reads 6 bytes*</span>
+        </div>
+        <p>Forwards the instant it has read the <strong>destination MAC address</strong> — the first field after the preamble. It doesn't wait for the rest of the frame to arrive at all.</p>
+        <p>No error checking is done, so a damaged or malformed frame can be forwarded before the switch has any way of knowing it's bad.</p>
+        <div class="tag-row">
+          <span class="tag">fastest</span>
+          <span class="tag">no CRC check</span>
+          <span class="tag">can forward runts</span>
+        </div>
+      </div>
+
+      <div class="method frag">
+        <div class="m-head">
+          <h3>Fragment-free</h3>
+          <span class="speed">reads 64 bytes</span>
+        </div>
+        <p>Waits for the first <strong>64 bytes</strong> — the legal minimum frame size — before forwarding. Anything shorter than that can only be a collision fragment.</p>
+        <p>This filters out collision debris, but it still doesn't verify the FCS, so real data corruption inside a full-length frame slips through.</p>
+        <div class="tag-row">
+          <span class="tag">middle ground</span>
+          <span class="tag">filters collisions</span>
+          <span class="tag">no CRC check</span>
+        </div>
+      </div>
+
+      <div class="method store">
+        <div class="m-head">
+          <h3>Store-and-forward</h3>
+          <span class="speed">reads entire frame</span>
+        </div>
+        <p>Buffers the <strong>whole frame</strong>, including the FCS trailer, then runs a CRC check. Corrupt or malformed frames are simply dropped.</p>
+        <p>The default on most modern switches — the latency cost is small at gigabit+ speeds, and it's the only method that actually verifies frame integrity.</p>
+        <div class="tag-row">
+          <span class="tag">slowest</span>
+          <span class="tag">full CRC check</span>
+          <span class="tag">most reliable</span>
+        </div>
+      </div>
+    </div>
+    <p style="font-size:13px; color:var(--ink-soft); margin-top:14px;">* 6 bytes of destination MAC, arriving right after the preamble and SFD — see the frame anatomy below.</p>
+  </section>
+
+  <!-- ================= COMPARISON TABLE ================= -->
+  <section id="compare-section">
+    <h2 class="sec-title">Side by side</h2>
+    <table class="compare">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Waits for</th>
+          <th>Error checking</th>
+          <th>Latency</th>
+          <th>Best suited to</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>Cut-through</th>
+          <td>Destination MAC (6 bytes)</td>
+          <td>None</td>
+          <td>Lowest</td>
+          <td>Low-error networks needing minimum delay</td>
+        </tr>
+        <tr>
+          <th>Fragment-free</th>
+          <td>First 64 bytes</td>
+          <td>Collision fragments only</td>
+          <td>Medium</td>
+          <td>Shared/half-duplex segments prone to collisions</td>
+        </tr>
+        <tr>
+          <th>Store-and-forward</th>
+          <td>Entire frame + FCS</td>
+          <td>Full CRC</td>
+          <td>Highest</td>
+          <td>General-purpose, accuracy-first (Cisco default)</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ================= FRAME ANATOMY ================= -->
+  <section id="anatomy-section">
+    <h2 class="sec-title">Why cut-through can read the MAC without seeing the trailer</h2>
+    <p class="sec-sub">It works because the frame layout is fixed. The destination MAC always sits at the same offset — the switch doesn't need to see where the frame ends to know what's at the start.</p>
+
+    <div class="anatomy">
+      <p style="margin:0; font-size:14px; color:var(--ink-soft);">Bytes arrive left to right, in this order, every time:</p>
+      <div class="field-list">
+        <div class="field-row">
+          <div class="swatch pre"></div>
+          <div class="fname">Preamble + SFD</div>
+          <div class="fsize">8 B</div>
+          <div class="fnote">Clock sync only — carries no addressing information</div>
+        </div>
+        <div class="field-row">
+          <div class="swatch dest"></div>
+          <div class="fname">Destination MAC</div>
+          <div class="fsize">6 B</div>
+          <div class="fnote">Fixed position — this is all cut-through needs to read</div>
+        </div>
+        <div class="field-row">
+          <div class="swatch src"></div>
+          <div class="fname">Source MAC</div>
+          <div class="fsize">6 B</div>
+          <div class="fnote">&nbsp;</div>
+        </div>
+        <div class="field-row">
+          <div class="swatch type"></div>
+          <div class="fname">EtherType / Length</div>
+          <div class="fsize">2 B</div>
+          <div class="fnote">Tells the receiver how much of the payload is real data</div>
+        </div>
+        <div class="field-row">
+          <div class="swatch payload"></div>
+          <div class="fname">Payload</div>
+          <div class="fsize">46–1500 B</div>
+          <div class="fnote">Actual data — padded up to 46 B if the real data is smaller</div>
+        </div>
+        <div class="field-row">
+          <div class="swatch fcs"></div>
+          <div class="fname">FCS (trailer)</div>
+          <div class="fsize">4 B</div>
+          <div class="fnote">Only store-and-forward waits for and checks this</div>
+        </div>
+      </div>
+
+      <div class="callout">
+        <strong>Key point</strong>
+        The Preamble and SFD are not counted toward the 64-byte minimum — that count starts at the Destination MAC and runs through the FCS. That's exactly the 18–1518 byte range you'll see quoted for Ethernet frame size.
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= COLLISION WINDOW ================= -->
+  <section id="collision-section">
+    <h2 class="sec-title">Where "64 bytes" actually comes from</h2>
+    <p class="sec-sub">It isn't an arbitrary round number. It's tied to how long it takes a collision to be detected on a shared Ethernet segment.</p>
+    <p class="max-prose">On a half-duplex segment, CSMA/CD guarantees that if two devices transmit at once, the collision will be detected and jammed within the time it takes to send the first 64 bytes — the <strong>collision window</strong>. Once a transmission survives past that point, every device on the segment has already sensed the wire is busy, so the rest of the frame is safe from collision.</p>
+
+    <div class="collision-scene">
+      <p class="timeline-label">A frame's first 64 bytes, relative to the collision window</p>
+      <div class="cs-track">
+        <div class="cs-zone window">Collision window — a fragment ending here is a runt</div>
+        <div class="cs-zone safe">Past this point, it's structurally a real frame</div>
+      </div>
+      <div class="cs-caption"><span>0 bytes</span><span>64 bytes</span></div>
+    </div>
+
+    <p class="max-prose" style="margin-top:20px;">So fragment-free isn't inspecting the content of those 64 bytes for correctness — it's simply confirming the frame lived long enough to prove it isn't collision debris. Anything that dies before byte 64 is discarded as a runt.</p>
+  </section>
+
+  <!-- ================= PADDING CALCULATOR ================= -->
+  <section id="calc-section">
+    <h2 class="sec-title">Try it: how padding fills the gap to 64 bytes</h2>
+    <p class="sec-sub">Drag the slider to change how much real data is being sent, and watch the PAD field grow or disappear to keep the frame at or above the 64-byte floor.</p>
+
+    <div class="calc">
+      <div class="calc-controls">
+        <label for="payloadSlider">Actual data in payload</label>
+        <input type="range" id="payloadSlider" min="0" max="200" value="0" step="1">
+        <span class="calc-readout"><span id="payloadVal">0</span> B</span>
+      </div>
+
+      <div class="stack" id="stackBar">
+        <div class="chunk hdr" id="chunkHdr">MACs + Type — 14 B</div>
+        <div class="chunk data" id="chunkData"></div>
+        <div class="chunk padc" id="chunkPad"></div>
+        <div class="chunk fcsc" id="chunkFcs">FCS — 4 B</div>
+      </div>
+
+      <div class="calc-summary">
+        <div class="box">
+          <div class="k">PAD inserted</div>
+          <div class="v"><span id="padOut">46</span> B</div>
+        </div>
+        <div class="box">
+          <div class="k">Payload field total</div>
+          <div class="v"><span id="payloadFieldOut">46</span> B</div>
+        </div>
+        <div class="box">
+          <div class="k">Total frame on the wire</div>
+          <div class="v"><span id="totalOut">64</span> B</div>
+        </div>
+      </div>
+
+      <div class="calc-verdict" id="verdict">
+        Real data is 0 bytes, which is below the 46-byte minimum payload — the NIC adds 46 bytes of PAD to reach the 64-byte frame floor.
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= RECAP ================= -->
+  <section id="recap-section">
+    <h2 class="sec-title">Recap</h2>
+    <div class="recap">
+      <div class="item"><span class="q">1</span><span>Cut-through forwards after reading just the destination MAC (6 bytes) — fast, but it can forward corrupted frames.</span></div>
+      <div class="item"><span class="q">2</span><span>Fragment-free waits for 64 bytes to rule out collision fragments — a middle ground on speed and safety.</span></div>
+      <div class="item"><span class="q">3</span><span>Store-and-forward waits for the whole frame and checks the FCS — slowest, but the only method that catches actual data corruption.</span></div>
+      <div class="item"><span class="q">4</span><span>64 bytes is the Ethernet minimum frame size, sized to match the CSMA/CD collision window — not a round number picked for convenience.</span></div>
+      <div class="item"><span class="q">5</span><span>Padding is added by the sender's NIC, only when real data is under 46 bytes, and it's silently dropped by the receiver using the EtherType/length information.</span></div>
+    </div>
+  </section>
+
+  <footer>
+    NCS 485 · Routing and Switching — Unit 2: Switching Concepts and Basic Configuration (2.2)
+  </footer>
+</div>
+
+<script>
+  // Build ruler ticks 0–64 in steps of 8, majors every 16
+  (function buildRuler(){
+    const ruler = document.getElementById('ruler');
+    const max = 64;
+    for(let b=0; b<=max; b+=8){
+      const pct = (b/max)*100;
+      const tick = document.createElement('div');
+      tick.className = 'tick' + (b % 16 === 0 ? ' major' : '');
+      tick.style.left = pct + '%';
+      ruler.appendChild(tick);
+      if(b % 16 === 0){
+        const label = document.createElement('div');
+        label.className = 'ticklabel';
+        label.style.left = pct + '%';
+        label.textContent = b;
+        ruler.appendChild(label);
+      }
+    }
+  })();
+
+  // Padding calculator
+  const slider = document.getElementById('payloadSlider');
+  const payloadVal = document.getElementById('payloadVal');
+  const padOut = document.getElementById('padOut');
+  const payloadFieldOut = document.getElementById('payloadFieldOut');
+  const totalOut = document.getElementById('totalOut');
+  const chunkData = document.getElementById('chunkData');
+  const chunkPad = document.getElementById('chunkPad');
+  const verdict = document.getElementById('verdict');
+  const HDR = 14; // dest+src+type
+  const FCS = 4;
+  const MIN_PAYLOAD = 46;
+
+  function render(){
+    const data = parseInt(slider.value, 10);
+    const pad = Math.max(0, MIN_PAYLOAD - data);
+    const payloadField = data + pad;
+    const total = HDR + payloadField + FCS;
+
+    payloadVal.textContent = data;
+    padOut.textContent = pad;
+    payloadFieldOut.textContent = payloadField;
+    totalOut.textContent = total;
+
+    // proportional widths against a 200B scale for the stack visual
+    const scale = 200 + HDR + FCS; // matches slider max scenario
+    const hdrPct = (HDR/scale)*100;
+    const dataPct = (data/scale)*100;
+    const padPct = (pad/scale)*100;
+    const fcsPct = (FCS/scale)*100;
+
+    document.getElementById('chunkHdr').style.width = hdrPct + '%';
+    chunkData.style.width = dataPct + '%';
+    chunkData.textContent = data > 0 ? ('Data — ' + data + ' B') : '';
+    chunkPad.style.width = padPct + '%';
+    chunkPad.textContent = pad > 0 ? ('PAD — ' + pad + ' B') : '';
+    document.getElementById('chunkFcs').style.width = fcsPct + '%';
+
+    if(pad > 0){
+      verdict.textContent = 'Real data is ' + data + ' bytes, which is below the 46-byte minimum payload — the NIC adds ' + pad + ' bytes of PAD to reach the 64-byte frame floor.';
+    } else {
+      verdict.textContent = 'Real data is ' + data + ' bytes, already at or above the 46-byte minimum — no PAD is needed. Total frame size is ' + total + ' bytes.';
+    }
+  }
+  slider.addEventListener('input', render);
+  render();
+</script>
+
+</body>
+</html>

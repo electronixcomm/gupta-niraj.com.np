@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Unit 6 Lab · EIGRP Implementation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2F5F7; --paper:#FFFFFF; --ink:#18222F; --muted:#556275; --line:#D5DDE5;
+  --aqua:#1E9C9A; --orange:#D9731A; --yellow:#B98D00;
+  --tag:#FFF6D6; --tag-ink:#4A3A00; --code-bg:#1B2533; --code-ink:#DDE6F0; --prompt:#8FC7FF;
+  --ok:#2E8B57; --warn:#B4442C;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121821; --paper:#19212C; --ink:#E4EAF1; --muted:#9AA8B8; --line:#2C3847;
+    --aqua:#3CC4C1; --orange:#F0914A; --yellow:#E2B92E;
+    --tag:#2B2616; --tag-ink:#F2E3AE; --code-bg:#0E141C; --code-ink:#DDE6F0; --prompt:#8FC7FF;
+    --ok:#5BC38A; --warn:#E5775F;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121821; --paper:#19212C; --ink:#E4EAF1; --muted:#9AA8B8; --line:#2C3847;
+  --aqua:#3CC4C1; --orange:#F0914A; --yellow:#E2B92E;
+  --tag:#2B2616; --tag-ink:#F2E3AE; --code-bg:#0E141C; --code-ink:#DDE6F0; --prompt:#8FC7FF;
+  --ok:#5BC38A; --warn:#E5775F;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 16px);scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+  font-size:1.0625rem;line-height:1.6}
+h1,h2,h3,h4{font-family:"Bricolage Grotesque","Atkinson Hyperlegible",system-ui,sans-serif;line-height:1.15;margin:0 0 .5em}
+h2{font-size:clamp(1.6rem,3.5vw,2.2rem);font-weight:800}
+h3{font-size:1.3rem;font-weight:700;margin-top:1.8em}
+h4{font-size:1.05rem;font-weight:700;margin-top:1.3em}
+p{margin:0 0 1em}
+a{color:inherit}
+code,pre,kbd{font-family:"JetBrains Mono",ui-monospace,Consolas,monospace;font-size:.88em}
+:not(pre)>code{background:color-mix(in srgb,var(--line) 55%,transparent);padding:.1em .35em;border-radius:4px}
+img,svg{max-width:100%}
+:focus-visible{outline:3px solid var(--orange);outline-offset:2px}
+.shell{display:grid;grid-template-columns:240px minmax(0,1fr);gap:48px;max-width:1180px;margin:0 auto;padding:0 24px}
+nav.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 24px);align-self:start;padding:28px 0;font-size:.95rem}
+nav.toc p{font-weight:700;margin-bottom:.4em}
+nav.toc ol{list-style:none;margin:0;padding:0}
+nav.toc li{margin:.15em 0}
+nav.toc a{display:block;text-decoration:none;padding:.3em .6em;border-left:4px solid var(--line);color:var(--muted)}
+nav.toc a:hover{color:var(--ink)}
+nav.toc a[data-c="aqua"]{border-color:var(--aqua)}
+nav.toc a[data-c="orange"]{border-color:var(--orange)}
+nav.toc a[data-c="yellow"]{border-color:var(--yellow)}
+nav.toc .sub a{padding-left:1.4em;font-size:.9rem}
+main{max-width:76ch;padding-bottom:80px}
+@media (max-width:900px){.shell{grid-template-columns:1fr;gap:0}nav.toc{display:none}}
+.hero{padding:40px 0 24px}
+.hero h1{font-size:clamp(2.2rem,6vw,3.6rem);font-weight:800;letter-spacing:-.02em;margin-bottom:.2em}
+.hero .unit{color:var(--muted);font-size:1.05rem;margin-bottom:.8em}
+.topo{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:12px;margin:18px 0 8px}
+.topo svg{display:block;width:100%;height:auto}
+.topo text{font-family:"JetBrains Mono",monospace;font-size:11px;fill:var(--muted)}
+.topo .rname{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:14px;fill:var(--ink)}
+.topo figcaption{font-size:.9rem;color:var(--muted);padding:4px 8px 2px}
+.objectives{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px 22px;margin:22px 0}
+.objectives h3{margin-top:0}
+.objectives ul{margin:0;padding-left:1.2em}
+section.unit-part{padding-top:48px;margin-top:24px;border-top:6px solid var(--c)}
+section.unit-part > .num{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;color:var(--c);font-size:1rem;margin-bottom:.2em}
+ul,ol{padding-left:1.3em}
+li{margin:.25em 0}
+.tag{position:relative;background:var(--tag);color:var(--tag-ink);border-radius:6px 14px 14px 6px;padding:16px 20px 16px 44px;margin:1.4em 0;
+  border:1px dashed color-mix(in srgb,var(--tag-ink) 35%,transparent)}
+.tag::before{content:"";position:absolute;left:16px;top:20px;width:12px;height:12px;border-radius:50%;border:3px solid var(--tag-ink);opacity:.55}
+.tag .t{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:1.15rem;margin-bottom:.35em}
+.tag ul{margin:.3em 0 0}
+.tw{overflow-x:auto;margin:1em 0 1.4em;border:1px solid var(--line);border-radius:10px;background:var(--paper)}
+table{border-collapse:collapse;width:100%;font-size:.95rem;min-width:520px}
+th,td{padding:.55em .8em;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+thead th{font-family:"Bricolage Grotesque",sans-serif;background:color-mix(in srgb,var(--line) 40%,var(--paper))}
+tbody tr:last-child td{border-bottom:0}
+td:first-child{font-weight:700}
+pre{background:var(--code-bg);color:var(--code-ink);padding:14px 16px;border-radius:10px;overflow-x:auto;line-height:1.5;margin:1em 0 1.3em}
+pre .p{color:var(--prompt)} pre .c{color:#8A9BB0;font-style:italic}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:1em 0}
+.duo > div{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.duo h4{margin-top:0}
+.duo ul{margin:0}
+@media (max-width:620px){.duo{grid-template-columns:1fr}}
+.note{border-left:4px solid var(--c,var(--orange));padding:.4em 0 .4em 1em;margin:1.2em 0;color:var(--ink)}
+.note strong{font-family:"Bricolage Grotesque",sans-serif}
+details.q{background:var(--paper);border:1px solid var(--line);border-radius:10px;margin:.6em 0;padding:0}
+details.q summary{cursor:pointer;padding:.8em 1em;font-weight:700;list-style:none}
+details.q summary::-webkit-details-marker{display:none}
+details.q summary::after{content:"Show answer";float:right;font-weight:400;font-size:.85rem;color:var(--muted)}
+details.q[open] summary::after{content:"Hide"}
+details.q .a{padding:0 1em .9em;border-top:1px dashed var(--line);padding-top:.7em}
+.theme-btn{font:inherit;font-size:.85rem;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:.35em .9em;cursor:pointer;margin-top:1em}
+footer{color:var(--muted);font-size:.9rem;margin-top:3em}
+.topo .rtr{fill:var(--paper);stroke:var(--ink);stroke-width:2}
+.topo .end{fill:var(--bg);stroke:var(--muted);stroke-width:1.5;stroke-dasharray:4 3}
+.topo .ename{font-family:"Atkinson Hyperlegible",sans-serif;font-size:13px;fill:var(--ink)}
+.topo .sn text,.topo text.sn{fill:var(--muted)}
+.topo .sn{font-family:"JetBrains Mono",monospace}
+.topo .sn text{font-size:12px}
+.topo .ifl text{font-size:10px;fill:var(--orange);font-family:"JetBrains Mono",monospace}
+table.rs td:first-child{font-weight:400}
+table.rs td[rowspan]{font-weight:700;background:color-mix(in srgb,var(--line) 20%,var(--paper))}
+details.cfgset{border:1px solid var(--line);border-radius:10px;background:var(--paper);margin:.6em 0}
+details.cfgset summary{cursor:pointer;padding:.6em 1em;font-family:"Bricolage Grotesque",sans-serif;font-weight:700}
+details.cfgset pre{margin:0 .6em .6em}
+.prewrap{position:relative}
+.copy{position:absolute;top:8px;right:8px;font:inherit;font-size:.8rem;background:color-mix(in srgb,var(--code-ink) 12%,transparent);color:var(--code-ink);border:1px solid color-mix(in srgb,var(--code-ink) 30%,transparent);border-radius:6px;padding:.2em .6em;cursor:pointer}
+.check{border:2px solid var(--ok);border-radius:12px;padding:12px 18px;margin:1.2em 0;background:color-mix(in srgb,var(--ok) 7%,var(--paper))}
+.check .ct{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;color:var(--ok);margin-bottom:.2em}
+.check ul{margin:.2em 0}
+td.ans{font-weight:700;color:var(--orange)}
+.lab{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:1.5em 0}
+.lab h4{margin-top:0}
+#checklist label{display:flex;gap:.6em;align-items:flex-start;padding:.35em 0;border-bottom:1px dashed var(--line);font-weight:400;margin:0}
+#checklist input{margin-top:.35em;width:auto;accent-color:var(--orange)}
+#checklist label.done span{color:var(--muted);text-decoration:line-through}
+</style>
+</head>
+<body><div style="font:14px/1.4 Inter,-apple-system,Segoe UI,sans-serif;background:#0b1d3a;padding:10px 16px;"><a href="/teaching/switching-routing.html" style="color:#fbf9f3;text-decoration:none;">&larr; Switching &amp; Routing &middot; all units</a></div>
+<div class="shell">
+<nav class="toc" aria-label="Contents">
+  <p>Lab contents</p>
+  <ol>
+    <li><a href="#problem">1. Problem statement</a></li>
+    <li><a href="#structure" data-c="aqua">2. Network structure</a></li>
+    <li class="sub"><a href="#topology">Topology</a></li>
+    <li class="sub"><a href="#addressing">Addressing table</a></li>
+    <li class="sub"><a href="#design">EIGRP design</a></li>
+    <li><a href="#tasks" data-c="orange">3. EIGRP lab</a></li>
+    <li class="sub"><a href="#t1">Task 1 Base config</a></li>
+    <li class="sub"><a href="#t2">Task 2 Static routes</a></li>
+    <li class="sub"><a href="#t3">Task 3 Enable EIGRP</a></li>
+    <li class="sub"><a href="#t4">Task 4 Redistribution</a></li>
+    <li class="sub"><a href="#t5">Task 5 Verification</a></li>
+    <li class="sub"><a href="#t6">Task 6 Metric and paths</a></li>
+    <li class="sub"><a href="#t7">Task 7 Troubleshooting</a></li>
+    <li><a href="#v6" data-c="yellow">4. EIGRPv6 (later)</a></li>
+    <li><a href="#reflect">5. Reflection questions</a></li>
+  </ol>
+  <button class="theme-btn" id="themeBtn" type="button">Switch light/dark</button>
+</nav>
+
+<main>
+<header class="hero" id="top">
+  <p class="unit">Unit 6 · Practical lab · Cisco Packet Tracer</p>
+  <h1>EIGRP lab: the same network, a different protocol</h1>
+  <p>This lab rebuilds NovaTech's internal routing on the exact topology and addressing from the OSPF lab — same routers, same subnets, same constraints — but using EIGRP instead. Building both on identical wiring makes the contrast concrete: what EIGRP configuration saves you, and what it asks you to watch for instead (AS numbers, K-values, auto-summary).</p>
+  <div class="objectives">
+    <h3>What you will practise</h3>
+    <ul>
+      <li>Configuring EIGRP with classful <code>network</code> statements and passive interfaces.</li>
+      <li>Connecting a router that cannot run EIGRP using static routes and redistribution.</li>
+      <li>Disabling auto-summary to fix a genuinely discontiguous network.</li>
+      <li>Verifying neighbors, the topology table, and the routing table; reading FD/RD.</li>
+      <li>Predicting the EIGRP composite metric from bandwidth and delay, and watching failover.</li>
+      <li>Finding and fixing EIGRP-specific faults, including a K-value mismatch.</li>
+    </ul>
+    <p style="margin:.8em 0 0"><strong>Time:</strong> about 2.5 hours for Parts 1–3. Part 4 is optional, for a later session.</p>
+  </div>
+</header>
+
+<section class="unit-part" id="problem" style="--c:var(--ink)">
+  <div class="num">Part 1</div>
+  <h2>Problem statement</h2>
+  <p><strong>NovaTech Pvt. Ltd.</strong> already migrated its internal routing to OSPF (see the companion lab). Management now wants the network team to evaluate EIGRP as an alternative on the same wiring, before deciding which to standardise on company-wide. Your job is to reconfigure the same four internal routers with EIGRP so that:</p>
+  <ul>
+    <li>Every internal network can still reach every other internal network.</li>
+    <li>A link failure still reroutes traffic automatically.</li>
+    <li>All sites still reach the Internet server at <code>172.31.100.10</code> through HQ, with only one router knowing about the ISP.</li>
+    <li>No Hellos are sent toward PCs, servers, or Branch C, which cannot run EIGRP.</li>
+    <li>Branch C stays reachable from every site and can still reach the Internet.</li>
+  </ul>
+  <div class="note" style="--c:var(--orange)"><strong>Constraint:</strong> the ISP link is still static-only; HQ-R1 must inject a default route into EIGRP for the rest of the company.</div>
+  <div class="note" style="--c:var(--orange)"><strong>Constraint:</strong> Branch C (BR-C) still cannot run a routing protocol. BR-B and BR-C keep their static routes; BR-B must inject Branch C's network into EIGRP.</div>
+  <div class="note" style="--c:var(--warn)"><strong>Watch for:</strong> HQ-R1's LAN (172.16.20.0/24) and BR-A's LAN (172.16.50.0/24) are both subnets of the same classful network, 172.16.0.0/16, but they sit on opposite sides of the 10.0.0.0/8 backbone. That makes this a genuinely <strong>discontiguous network</strong> — exactly the condition that breaks EIGRP's default auto-summary behaviour.</div>
+</section>
+
+<section class="unit-part" id="structure" style="--c:var(--aqua)">
+  <div class="num">Part 2</div>
+  <h2>Network structure</h2>
+  <p>Unchanged from the OSPF lab — same six routers and end devices, same cabling, same IP addresses. Only the routing protocol configuration differs.</p>
+
+  <h3 id="topology">Topology</h3>
+  <figure class="topo">
+    <svg viewBox="0 0 780 640" role="img" aria-label="NovaTech topology: ISP-R connects to Internet-Server and to HQ-R1 by a copper link and a serial link. HQ-R1 connects to Server-HQ and HQ-R2. HQ-R2 connects to PC-HQ, to BR-A by copper and to BR-B by serial. BR-A connects to BR-B and PC-A. BR-B connects to BR-C and PC-B. BR-C connects to PC-C.">
+      <g fill="none" stroke-width="3">
+        <line x1="400" y1="70" x2="620" y2="70" stroke="var(--line)"/>
+        <line x1="345" y1="88" x2="345" y2="172" stroke="var(--line)"/>
+        <line x1="385" y1="88" x2="385" y2="172" stroke="var(--warn)"/>
+        <line x1="410" y1="190" x2="620" y2="190" stroke="var(--line)"/>
+        <line x1="365" y1="208" x2="365" y2="282" stroke="var(--line)"/>
+        <line x1="320" y1="300" x2="170" y2="300" stroke="var(--line)"/>
+        <line x1="340" y1="318" x2="185" y2="442" stroke="var(--line)"/>
+        <line x1="390" y1="318" x2="470" y2="442" stroke="var(--warn)"/>
+        <line x1="210" y1="460" x2="440" y2="460" stroke="var(--line)"/>
+        <line x1="530" y1="460" x2="640" y2="460" stroke="var(--line)"/>
+        <line x1="165" y1="478" x2="165" y2="552" stroke="var(--line)"/>
+        <line x1="485" y1="478" x2="485" y2="552" stroke="var(--line)"/>
+        <line x1="685" y1="478" x2="685" y2="552" stroke="var(--line)"/>
+      </g>
+      <g class="sn" font-size="12">
+        <text x="510" y="62" text-anchor="middle">172.31.100.0/24</text>
+        <text x="338" y="134" text-anchor="end">172.31.0.0/30</text>
+        <text x="392" y="134">172.31.0.4/30 (serial)</text>
+        <text x="515" y="182" text-anchor="middle">172.16.20.0/24</text>
+        <text x="373" y="250">10.0.0.0/30</text>
+        <text x="245" y="292" text-anchor="middle">10.1.10.0/24</text>
+        <text x="245" y="378" text-anchor="end">10.0.1.0/30</text>
+        <text x="438" y="378">10.0.2.0/30 (serial)</text>
+        <text x="325" y="452" text-anchor="middle">10.0.3.0/30</text>
+        <text x="585" y="452" text-anchor="middle">10.0.4.0/30 (static)</text>
+        <text x="173" y="520">172.16.50.0/24</text>
+        <text x="493" y="520">10.3.10.0/24</text>
+        <text x="693" y="520">192.168.30.0/24</text>
+      </g>
+      <g class="ifl" font-size="10">
+        <text x="404" y="84">G0/0 .1</text><text x="600" y="84" text-anchor="end">.10</text>
+        <text x="341" y="102" text-anchor="end">G0/1 .1</text><text x="341" y="168" text-anchor="end">G0/1 .2</text>
+        <text x="389" y="102">S0/0/0 .5 DCE</text><text x="389" y="168">S0/0/0 .6</text>
+        <text x="414" y="204">G0/2 .1</text><text x="600" y="204" text-anchor="end">.10</text>
+        <text x="369" y="222">G0/0 .1</text><text x="369" y="278">G0/0 .2</text>
+        <text x="316" y="314" text-anchor="end">G0/1 .1</text><text x="174" y="314">.10</text>
+        <text x="300" y="336" text-anchor="end">G0/2 .1</text><text x="196" y="434">G0/0 .2</text>
+        <text x="402" y="336">S0/0/0 .1 DCE</text><text x="478" y="434">S0/0/0 .2</text>
+        <text x="214" y="476">G0/1 .1</text><text x="436" y="476" text-anchor="end">G0/0 .2</text>
+        <text x="534" y="476">G0/1 .1</text><text x="636" y="476" text-anchor="end">G0/0 .2</text>
+        <text x="161" y="496" text-anchor="end">G0/2 .1</text>
+        <text x="481" y="496" text-anchor="end">G0/2 .1</text>
+        <text x="681" y="496" text-anchor="end">G0/1 .1</text>
+      </g>
+      <g>
+        <rect class="rtr" x="320" y="52" width="90" height="36" rx="9"/><text class="rname" x="365" y="75" text-anchor="middle">ISP-R</text>
+        <rect class="rtr" x="320" y="172" width="90" height="36" rx="9"/><text class="rname" x="365" y="195" text-anchor="middle">HQ-R1</text>
+        <rect class="rtr" x="320" y="282" width="90" height="36" rx="9"/><text class="rname" x="365" y="305" text-anchor="middle">HQ-R2</text>
+        <rect class="rtr" x="120" y="442" width="90" height="36" rx="9"/><text class="rname" x="165" y="465" text-anchor="middle">BR-A</text>
+        <rect class="rtr" x="440" y="442" width="90" height="36" rx="9"/><text class="rname" x="485" y="465" text-anchor="middle">BR-B</text>
+        <rect class="rtr" x="640" y="442" width="90" height="36" rx="9"/><text class="rname" x="685" y="465" text-anchor="middle">BR-C</text>
+        <rect class="end" x="620" y="52" width="130" height="36" rx="4"/><text class="ename" x="685" y="75" text-anchor="middle">Internet-Server</text>
+        <rect class="end" x="620" y="172" width="130" height="36" rx="4"/><text class="ename" x="685" y="195" text-anchor="middle">Server-HQ</text>
+        <rect class="end" x="60" y="282" width="110" height="36" rx="4"/><text class="ename" x="115" y="305" text-anchor="middle">PC-HQ</text>
+        <rect class="end" x="110" y="552" width="110" height="36" rx="4"/><text class="ename" x="165" y="575" text-anchor="middle">PC-A</text>
+        <rect class="end" x="430" y="552" width="110" height="36" rx="4"/><text class="ename" x="485" y="575" text-anchor="middle">PC-B</text>
+        <rect class="end" x="630" y="552" width="110" height="36" rx="4"/><text class="ename" x="685" y="575" text-anchor="middle">PC-C</text>
+      </g>
+      <g font-size="11" class="sn">
+        <line x1="40" y1="612" x2="80" y2="612" stroke="var(--line)" stroke-width="3"/><text x="88" y="616">Gigabit Ethernet (copper)</text>
+        <line x1="270" y1="612" x2="310" y2="612" stroke="var(--warn)" stroke-width="3"/><text x="318" y="616">Serial (red in Packet Tracer)</text>
+      </g>
+    </svg>
+    <figcaption>Same topology as the OSPF lab. G = GigabitEthernet, S = Serial, DCE = data communications equipment (the clocking end). BR-C does not run EIGRP; it stays joined to BR-B by static routes.</figcaption>
+  </figure>
+
+  <h3 id="addressing">Addressing table</h3>
+  <div class="tw"><table class="rs">
+    <thead><tr><th>Device</th><th>Interface</th><th>IP address / mask</th><th>Connected to</th></tr></thead>
+    <tbody>
+      <tr><td rowspan="3">ISP-R</td><td>G0/0</td><td>172.31.100.1 /24</td><td>Internet-Server</td></tr>
+      <tr><td>G0/1</td><td>172.31.0.1 /30</td><td>HQ-R1 G0/1 (primary)</td></tr>
+      <tr><td>S0/0/0 (DCE)</td><td>172.31.0.5 /30</td><td>HQ-R1 S0/0/0 (backup)</td></tr>
+      <tr><td rowspan="4">HQ-R1</td><td>G0/0</td><td>10.0.0.1 /30</td><td>HQ-R2 G0/0</td></tr>
+      <tr><td>G0/1</td><td>172.31.0.2 /30</td><td>ISP-R G0/1</td></tr>
+      <tr><td>S0/0/0</td><td>172.31.0.6 /30</td><td>ISP-R S0/0/0</td></tr>
+      <tr><td>G0/2</td><td>172.16.20.1 /24</td><td>Server-HQ</td></tr>
+      <tr><td rowspan="4">HQ-R2</td><td>G0/0</td><td>10.0.0.2 /30</td><td>HQ-R1 G0/0</td></tr>
+      <tr><td>G0/1</td><td>10.1.10.1 /24</td><td>PC-HQ</td></tr>
+      <tr><td>G0/2</td><td>10.0.1.1 /30</td><td>BR-A G0/0</td></tr>
+      <tr><td>S0/0/0 (DCE)</td><td>10.0.2.1 /30</td><td>BR-B S0/0/0</td></tr>
+      <tr><td rowspan="3">BR-A</td><td>G0/0</td><td>10.0.1.2 /30</td><td>HQ-R2 G0/2</td></tr>
+      <tr><td>G0/1</td><td>10.0.3.1 /30</td><td>BR-B G0/0</td></tr>
+      <tr><td>G0/2</td><td>172.16.50.1 /24</td><td>PC-A</td></tr>
+      <tr><td rowspan="4">BR-B</td><td>S0/0/0</td><td>10.0.2.2 /30</td><td>HQ-R2 S0/0/0</td></tr>
+      <tr><td>G0/0</td><td>10.0.3.2 /30</td><td>BR-A G0/1</td></tr>
+      <tr><td>G0/1</td><td>10.0.4.1 /30</td><td>BR-C G0/0</td></tr>
+      <tr><td>G0/2</td><td>10.3.10.1 /24</td><td>PC-B</td></tr>
+      <tr><td rowspan="2">BR-C</td><td>G0/0</td><td>10.0.4.2 /30</td><td>BR-B G0/1</td></tr>
+      <tr><td>G0/1</td><td>192.168.30.1 /24</td><td>PC-C</td></tr>
+    </tbody>
+  </table></div>
+
+  <h4>End devices</h4>
+  <div class="tw"><table>
+    <thead><tr><th>Device</th><th>IP address</th><th>Subnet mask</th><th>Default gateway</th></tr></thead>
+    <tbody>
+      <tr><td>Internet-Server</td><td>172.31.100.10</td><td>255.255.255.0</td><td>172.31.100.1</td></tr>
+      <tr><td>Server-HQ</td><td>172.16.20.10</td><td>255.255.255.0</td><td>172.16.20.1</td></tr>
+      <tr><td>PC-HQ</td><td>10.1.10.10</td><td>255.255.255.0</td><td>10.1.10.1</td></tr>
+      <tr><td>PC-A</td><td>172.16.50.10</td><td>255.255.255.0</td><td>172.16.50.1</td></tr>
+      <tr><td>PC-B</td><td>10.3.10.10</td><td>255.255.255.0</td><td>10.3.10.1</td></tr>
+      <tr><td>PC-C</td><td>192.168.30.10</td><td>255.255.255.0</td><td>192.168.30.1</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3 id="design">EIGRP design</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Router</th><th>Role</th><th>EIGRP router ID</th><th>Network statements (AS 20)</th><th>Passive interface</th></tr></thead>
+    <tbody>
+      <tr><td>ISP-R</td><td>External, no EIGRP</td><td>–</td><td>–</td><td>–</td></tr>
+      <tr><td>HQ-R1</td><td>Edge router; redistributes the default route</td><td>1.1.1.1</td><td><code>network 10.0.0.0</code><br><code>network 172.16.0.0</code></td><td>G0/2</td></tr>
+      <tr><td>HQ-R2</td><td>Core router</td><td>2.2.2.2</td><td><code>network 10.0.0.0</code></td><td>G0/1</td></tr>
+      <tr><td>BR-A</td><td>Branch</td><td>3.3.3.3</td><td><code>network 10.0.0.0</code><br><code>network 172.16.0.0</code></td><td>G0/2</td></tr>
+      <tr><td>BR-B</td><td>Branch; static link to BR-C; redistributes Branch C's network</td><td>4.4.4.4</td><td><code>network 10.0.0.0</code></td><td>G0/1, G0/2</td></tr>
+      <tr><td>BR-C</td><td>Branch, <strong>no EIGRP</strong>: static default route to BR-B</td><td>–</td><td>–</td><td>–</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li><strong>Autonomous system number:</strong> 20 on every router — it must be identical everywhere, or no adjacency forms at all, even if every interface and subnet is correct.</li>
+    <li>Classful <code>network 10.0.0.0</code> automatically enables every interface whose address starts with 10 — no wildcard mask needed, unlike OSPF.</li>
+    <li><strong>The ISP links (172.31.0.0/30 and 172.31.0.4/30) are never in EIGRP.</strong> They don't match either <code>network</code> statement, so no wildcard-based exclusion is even needed.</li>
+    <li><strong>no auto-summary is mandatory on HQ-R1, HQ-R2, BR-A, and BR-B.</strong> HQ-R1 and BR-A both advertise subnets of 172.16.0.0/16, and they are separated by the 10.0.0.0/8 backbone — a genuinely discontiguous network. Leaving auto-summary on will black-hole traffic between Server-HQ and PC-A.</li>
+    <li><strong>Branch C:</strong> BR-C sends everything to BR-B with a static default route. BR-B has a static route to 192.168.30.0/24 and redistributes it into EIGRP with a metric, so every EIGRP router learns it automatically.</li>
+  </ul>
+</section>
+
+<section class="unit-part" id="tasks" style="--c:var(--orange)">
+  <div class="num">Part 3</div>
+  <h2>EIGRP lab: commands and verification</h2>
+  <p>If you already built the OSPF lab on this topology, Task 1 and Task 2 are identical — skip to Task 3. Otherwise, work through every task in order.</p>
+
+  <h3 id="t1">Task 1: Basic device configuration and addressing</h3>
+  <p>Configure the hostname and every interface on each router. Serial DCE ends (ISP-R and HQ-R2) also need a clock rate.</p>
+  <details class="cfgset"><summary>ISP-R</summary>
+<pre class="cfg">enable
+configure terminal
+hostname ISP-R
+no ip domain-lookup
+interface g0/0
+ ip address 172.31.100.1 255.255.255.0
+ no shutdown
+interface g0/1
+ ip address 172.31.0.1 255.255.255.252
+ no shutdown
+interface s0/0/0
+ ip address 172.31.0.5 255.255.255.252
+ clock rate 64000
+ no shutdown
+end</pre></details>
+  <details class="cfgset"><summary>HQ-R1</summary>
+<pre class="cfg">enable
+configure terminal
+hostname HQ-R1
+no ip domain-lookup
+interface g0/0
+ ip address 10.0.0.1 255.255.255.252
+ no shutdown
+interface g0/1
+ ip address 172.31.0.2 255.255.255.252
+ no shutdown
+interface s0/0/0
+ ip address 172.31.0.6 255.255.255.252
+ no shutdown
+interface g0/2
+ ip address 172.16.20.1 255.255.255.0
+ no shutdown
+end</pre></details>
+  <details class="cfgset"><summary>HQ-R2</summary>
+<pre class="cfg">enable
+configure terminal
+hostname HQ-R2
+no ip domain-lookup
+interface g0/0
+ ip address 10.0.0.2 255.255.255.252
+ no shutdown
+interface g0/1
+ ip address 10.1.10.1 255.255.255.0
+ no shutdown
+interface g0/2
+ ip address 10.0.1.1 255.255.255.252
+ no shutdown
+interface s0/0/0
+ ip address 10.0.2.1 255.255.255.252
+ clock rate 64000
+ no shutdown
+end</pre></details>
+  <details class="cfgset"><summary>BR-A</summary>
+<pre class="cfg">enable
+configure terminal
+hostname BR-A
+no ip domain-lookup
+interface g0/0
+ ip address 10.0.1.2 255.255.255.252
+ no shutdown
+interface g0/1
+ ip address 10.0.3.1 255.255.255.252
+ no shutdown
+interface g0/2
+ ip address 172.16.50.1 255.255.255.0
+ no shutdown
+end</pre></details>
+  <details class="cfgset"><summary>BR-B</summary>
+<pre class="cfg">enable
+configure terminal
+hostname BR-B
+no ip domain-lookup
+interface s0/0/0
+ ip address 10.0.2.2 255.255.255.252
+ no shutdown
+interface g0/0
+ ip address 10.0.3.2 255.255.255.252
+ no shutdown
+interface g0/1
+ ip address 10.0.4.1 255.255.255.252
+ no shutdown
+interface g0/2
+ ip address 10.3.10.1 255.255.255.0
+ no shutdown
+end</pre></details>
+  <details class="cfgset"><summary>BR-C</summary>
+<pre class="cfg">enable
+configure terminal
+hostname BR-C
+no ip domain-lookup
+interface g0/0
+ ip address 10.0.4.2 255.255.255.252
+ no shutdown
+interface g0/1
+ ip address 192.168.30.1 255.255.255.0
+ no shutdown
+end</pre></details>
+  <div class="check"><div class="ct">Check before moving on</div><ul>
+    <li><code>show ip interface brief</code> on every router: all used interfaces show <strong>up / up</strong>.</li>
+    <li>Each PC can ping its own default gateway.</li>
+    <li>Expected: PC-C <strong>cannot</strong> yet ping PC-HQ, because no routing exists between sites.</li>
+  </ul></div>
+
+  <h3 id="t2">Task 2: Static routing at the ISP edge and to Branch C</h3>
+  <details class="cfgset"><summary>HQ-R1: default route toward the ISP</summary>
+<pre class="cfg">configure terminal
+ip route 0.0.0.0 0.0.0.0 172.31.0.1
+ip route 0.0.0.0 0.0.0.0 172.31.0.5 10
+end</pre></details>
+  <details class="cfgset"><summary>ISP-R: routes back to NovaTech networks</summary>
+<pre class="cfg">configure terminal
+ip route 10.0.0.0 255.0.0.0 172.31.0.2
+ip route 172.16.0.0 255.255.0.0 172.31.0.2
+ip route 192.168.30.0 255.255.255.0 172.31.0.2
+ip route 10.0.0.0 255.0.0.0 172.31.0.6 10
+ip route 172.16.0.0 255.255.0.0 172.31.0.6 10
+ip route 192.168.30.0 255.255.255.0 172.31.0.6 10
+end</pre></details>
+  <details class="cfgset"><summary>BR-C: default route to BR-B</summary>
+<pre class="cfg">configure terminal
+ip route 0.0.0.0 0.0.0.0 10.0.4.1
+end</pre></details>
+  <details class="cfgset"><summary>BR-B: route to the Branch C network</summary>
+<pre class="cfg">configure terminal
+ip route 192.168.30.0 255.255.255.0 10.0.4.2
+end</pre></details>
+  <div class="check"><div class="ct">Check</div><ul>
+    <li>HQ-R1 <code>ping 172.31.100.10</code> succeeds.</li>
+    <li>BR-B can ping PC-C at <code>192.168.30.10</code>. Other sites cannot reach it yet; that comes in Task 4.</li>
+  </ul></div>
+
+  <h3 id="t3">Task 3: Enable EIGRP</h3>
+  <p>On HQ-R1, HQ-R2, BR-A and BR-B (not BR-C): start the process under AS 20, set a router ID, add a classful <code>network</code> statement for every attached major network, make LAN-facing interfaces passive, and disable auto-summary everywhere.</p>
+  <div class="tag"><div class="t">Why no auto-summary everywhere?</div>HQ-R1's 172.16.20.0/24 and BR-A's 172.16.50.0/24 are both subnets of 172.16.0.0/16, split across the 10.0.0.0/8 backbone. Left on, each site injects a competing 172.16.0.0/16 summary pointing to Null0, and the two LANs lose contact with each other.</div>
+  <details class="cfgset"><summary>HQ-R1</summary>
+<pre class="cfg">configure terminal
+router eigrp 20
+ eigrp router-id 1.1.1.1
+ network 10.0.0.0
+ network 172.16.0.0
+ passive-interface g0/2
+ no auto-summary
+end</pre></details>
+  <details class="cfgset"><summary>HQ-R2</summary>
+<pre class="cfg">configure terminal
+router eigrp 20
+ eigrp router-id 2.2.2.2
+ network 10.0.0.0
+ passive-interface g0/1
+ no auto-summary
+end</pre></details>
+  <details class="cfgset"><summary>BR-A</summary>
+<pre class="cfg">configure terminal
+router eigrp 20
+ eigrp router-id 3.3.3.3
+ network 10.0.0.0
+ network 172.16.0.0
+ passive-interface g0/2
+ no auto-summary
+end</pre></details>
+  <details class="cfgset"><summary>BR-B</summary>
+<pre class="cfg">configure terminal
+router eigrp 20
+ eigrp router-id 4.4.4.4
+ network 10.0.0.0
+ passive-interface g0/1
+ passive-interface g0/2
+ no auto-summary
+end</pre></details>
+  <p>As neighbors come up you should see console messages such as:</p>
+<pre>%DUAL-5-NBRCHANGE: IP-EIGRP(0) 20: Neighbor 10.0.0.2 (GigabitEthernet0/0) is up: new adjacency</pre>
+  <div class="note" style="--c:var(--orange)"><strong>BR-B's G0/1 is passive, not absent.</strong> The 10.0.4.0/30 link is still covered by <code>network 10.0.0.0</code> and still advertised, but no Hellos go out toward BR-C, so no adjacency is even attempted there.</div>
+
+  <h3 id="t4">Task 4: Redistribute the default route and the Branch C network</h3>
+  <p>EIGRP has no equivalent of OSPF's <code>default-information originate</code> — a non-EIGRP route, including a static default, is shared the same way any redistributed route is: with <code>redistribute static</code> and an explicit metric, since EIGRP cannot invent bandwidth/delay figures for a route it didn't learn itself.</p>
+  <details class="cfgset"><summary>HQ-R1: redistribute the default route</summary>
+<pre class="cfg">configure terminal
+router eigrp 20
+ redistribute static metric 1544 2000 255 1 1500
+end</pre></details>
+  <details class="cfgset"><summary>BR-B: redistribute the Branch C route</summary>
+<pre class="cfg">configure terminal
+router eigrp 20
+ redistribute static metric 1544 2000 255 1 1500
+end</pre></details>
+  <p>The five numbers after <code>metric</code> are bandwidth (Kbit), delay (tens of microseconds), reliability, load, and MTU — the same five factors the composite metric formula uses. Any reasonable values work here since the route doesn't compete on cost with anything else.</p>
+  <div class="check"><div class="ct">Check</div><ul>
+    <li>On BR-A, <code>show ip route</code> includes <code>D EX 192.168.30.0/24</code> and <code>D*EX 0.0.0.0/0</code>.</li>
+    <li>PC-C can ping the Internet-Server at <code>172.31.100.10</code> and PC-HQ at <code>10.1.10.10</code>.</li>
+  </ul></div>
+</section>
+
+<section class="unit-part" id="t5h" style="--c:var(--orange)">
+  <h3 id="t5">Task 5: Verification</h3>
+  <h4>5.1 Neighbors: <code>show ip eigrp neighbors</code></h4>
+  <p>Four EIGRP links means four adjacencies. BR-C runs no EIGRP, so it has none.</p>
+  <div class="tw"><table class="rs">
+    <thead><tr><th>Router</th><th>Neighbor</th><th>Interface</th></tr></thead>
+    <tbody>
+      <tr><td>HQ-R1</td><td>10.0.0.2 (HQ-R2)</td><td>G0/0</td></tr>
+      <tr><td rowspan="3">HQ-R2</td><td>10.0.0.1 (HQ-R1)</td><td>G0/0</td></tr>
+      <tr><td>10.0.1.2 (BR-A)</td><td>G0/2</td></tr>
+      <tr><td>10.0.2.2 (BR-B)</td><td>S0/0/0</td></tr>
+      <tr><td rowspan="2">BR-A</td><td>10.0.1.1 (HQ-R2)</td><td>G0/0</td></tr>
+      <tr><td>10.0.3.2 (BR-B)</td><td>G0/1</td></tr>
+      <tr><td rowspan="2">BR-B</td><td>10.0.2.1 (HQ-R2)</td><td>S0/0/0</td></tr>
+      <tr><td>10.0.3.1 (BR-A)</td><td>G0/0</td></tr>
+      <tr><td>BR-C</td><td>–</td><td>No EIGRP, so no neighbors</td></tr>
+    </tbody>
+  </table></div>
+  <h4>5.2 Routes: <code>show ip route eigrp</code></h4>
+  <p>On BR-A you should see internal <code>D</code> routes plus two external routes:</p>
+<pre>D    10.0.0.0/30    D    10.0.2.0/30    D    10.1.10.0/24    D    10.3.10.0/24
+D EX 192.168.30.0/24
+D*EX 0.0.0.0/0</pre>
+  <h4>5.3 Other commands</h4>
+  <div class="tw"><table>
+    <thead><tr><th>Command</th><th>Look for</th></tr></thead>
+    <tbody>
+      <tr><td><code>show ip protocols</code></td><td>AS 20, K1=1 K3=1 (others 0) on every router, "Automatic network summarization is not in effect", static routes listed as redistributed on HQ-R1 and BR-B.</td></tr>
+      <tr><td><code>show ip eigrp topology</code></td><td>Passive (<code>P</code>) entries with an FD and, where a second path exists, a second line — that's the feasible successor.</td></tr>
+      <tr><td><code>show ip eigrp interfaces</code></td><td>Every active, non-passive EIGRP interface, with peer counts matching the neighbor table.</td></tr>
+    </tbody>
+  </table></div>
+  <h4>5.4 End-to-end tests</h4>
+  <div class="tw"><table>
+    <thead><tr><th>From</th><th>Command</th><th>Expected</th></tr></thead>
+    <tbody>
+      <tr><td>PC-C</td><td><code>ping 10.1.10.10</code></td><td>Success (PC-HQ)</td></tr>
+      <tr><td>PC-A</td><td><code>ping 172.16.20.10</code></td><td>Success (Server-HQ) — this is the discontiguous-network check</td></tr>
+      <tr><td>PC-B</td><td><code>ping 172.31.100.10</code></td><td>Success through the redistributed default route</td></tr>
+    </tbody>
+  </table></div>
+  <div class="lab"><h4>Verification checklist</h4>
+    <p style="font-size:.9rem;color:var(--muted);margin:0 0 .4em">Tick items as you finish. Saved in this browser.</p>
+    <div id="checklist"></div>
+  </div>
+</section>
+
+<section class="unit-part" id="t6h" style="--c:var(--orange)">
+  <h3 id="t6">Task 6: Metric, path selection and failover</h3>
+  <p>Using IOS defaults — GigabitEthernet: 1,000,000 Kbit / 10 µs delay; Serial (T1): 1,544 Kbit / 20,000 µs delay — and the default formula (metric = lowest bandwidth component along the path + sum of delay components):</p>
+  <h4>6.1 Predict first</h4>
+  <div class="tw"><table>
+    <thead><tr><th>Path, HQ-R2 → 10.3.10.0/24</th><th>Working</th><th>Total FD</th></tr></thead>
+    <tbody>
+      <tr><td>via BR-A (all Gigabit)</td><td>BW 2,560 + delay (256×3 hops)</td><td class="ans">≈ 3,328</td></tr>
+      <tr><td>via BR-B (serial)</td><td>BW 1,657,856 (serial dominates) + delay (512,000 + 256)</td><td class="ans">≈ 2,170,112</td></tr>
+    </tbody>
+  </table></div>
+  <p>Verify with <code>show ip eigrp topology 10.3.10.0/24</code> and <code>show ip route 10.3.10.0</code> — figures will vary slightly from these illustrative defaults if Packet Tracer reports different interface values; always confirm with <code>show interfaces</code> rather than assuming a textbook number.</p>
+  <h4>6.2 Simulate a link failure</h4>
+<pre class="cfg">! On HQ-R2
+configure terminal
+interface g0/2
+ shutdown
+end
+show ip route 10.3.10.0</pre>
+  <p>The serial path should become the new successor within seconds, since it was already sitting in the topology table as a feasible successor. Restore the link with <code>no shutdown</code> afterward.</p>
+  <h4>6.3 Challenge: unequal-cost load balancing</h4>
+  <p>The two paths above are far from equal, so a very generous variance is needed to install both. On HQ-R2 and BR-B:</p>
+<pre class="cfg">router eigrp 20
+ variance 700
+end
+show ip route 10.3.10.0</pre>
+  <details class="q"><summary>What do you expect to see, and is this a good idea?</summary><div class="a">Both the Gigabit path and the serial path should appear as successors, sharing traffic in proportion to their metrics — so the fast path still carries far more. In practice a variance this large is a bad idea here: it sends meaningful traffic over a link hundreds of times slower, just to use it at all. Remove the variance afterward with <code>no variance 700</code>.</div></details>
+</section>
+
+<section class="unit-part" id="t7h" style="--c:var(--orange)">
+  <h3 id="t7">Task 7: Troubleshooting</h3>
+  <p>A partner secretly introduces <strong>one</strong> fault below. Find it with only <code>show</code> commands, then fix it.</p>
+  <div class="tag"><div class="t">If an adjacency won't form, check in order</div>Interfaces down → AS numbers → K-values → passive interface → authentication.</div>
+  <details class="q"><summary>Fault 1: Nobody can reach Branch C</summary><div class="a">
+    <p><strong>Break it (BR-B):</strong> <code>router eigrp 20</code> → <code>no redistribute static</code></p>
+    <p><strong>Symptom:</strong> BR-B can still ping PC-C, but no other site can.</p>
+    <p><strong>Diagnose:</strong> no <code>D EX 192.168.30.0/24</code> elsewhere; <code>show ip protocols</code> on BR-B no longer lists redistribution.</p>
+    <p><strong>Fix:</strong> re-enter <code>redistribute static metric 1544 2000 255 1 1500</code>.</p></div></details>
+  <details class="q"><summary>Fault 2: Branch A loses every EIGRP neighbor at once</summary><div class="a">
+    <p><strong>Break it (BR-A):</strong> <code>no router eigrp 20</code> then <code>router eigrp 200</code> with the same network statements.</p>
+    <p><strong>Symptom:</strong> <code>show ip eigrp neighbors</code> on BR-A is empty, even though interfaces are up.</p>
+    <p><strong>Diagnose:</strong> <code>show ip protocols</code> on BR-A reports <code>"eigrp 200"</code> instead of <code>"eigrp 20"</code> — the AS number is wrong, and EIGRP ignores Hellos from a different AS entirely.</p>
+    <p><strong>Fix:</strong> recreate the process under AS 20.</p></div></details>
+  <details class="q"><summary>Fault 3: PC-C reaches its gateway and nothing else</summary><div class="a">
+    <p><strong>Break it (BR-C):</strong> <code>no ip route 0.0.0.0 0.0.0.0 10.0.4.1</code> then <code>ip route 0.0.0.0 0.0.0.0 10.0.4.6</code></p>
+    <p><strong>Symptom:</strong> PC-C can ping 192.168.30.1 but nothing beyond.</p>
+    <p><strong>Diagnose:</strong> <code>show ip route</code> on BR-C has no <code>S*</code> entry — the next hop isn't on any connected network.</p>
+    <p><strong>Fix:</strong> point the default route back at 10.0.4.1.</p></div></details>
+  <details class="q"><summary>Fault 4: Branches reach each other but not the Internet</summary><div class="a">
+    <p><strong>Break it (HQ-R1):</strong> <code>router eigrp 20</code> → <code>no redistribute static</code></p>
+    <p><strong>Symptom:</strong> internal pings work; pings to 172.31.100.10 fail everywhere except Server-HQ, which sits behind HQ-R1 directly.</p>
+    <p><strong>Diagnose:</strong> no <code>D*EX 0.0.0.0/0</code> on branch routers.</p>
+    <p><strong>Fix:</strong> re-enter <code>redistribute static metric 1544 2000 255 1 1500</code>.</p></div></details>
+  <details class="q"><summary>Fault 5: Branch A won't form a single adjacency</summary><div class="a">
+    <p><strong>Break it (BR-A):</strong> <code>router eigrp 20</code> → <code>metric weights 0 1 1 1 0 0</code></p>
+    <p><strong>Symptom:</strong> BR-A loses every neighbor, even though AS numbers and addressing are correct everywhere.</p>
+    <p><strong>Diagnose:</strong> <code>show ip protocols</code> on BR-A shows <code>K1=1, K2=1, K3=1, K4=0, K5=0</code> — K2 doesn't match the rest of the network's <code>K1=1, K2=0, K3=1, K4=0, K5=0</code>. K-values must be identical to form an adjacency, and this is easy to miss because it doesn't show up as an addressing or AS problem.</p>
+    <p><strong>Fix:</strong> <code>metric weights 0 1 0 1 0 0</code> to restore the defaults.</p></div></details>
+  <details class="q"><summary>Fault 6: Server-HQ and PC-A stop reaching each other, everything else is fine</summary><div class="a">
+    <p><strong>Break it (BR-A):</strong> <code>router eigrp 20</code> → <code>auto-summary</code></p>
+    <p><strong>Symptom:</strong> HQ-R1 and BR-A can each reach every 10.x network, but Server-HQ (172.16.20.0/24) and PC-A (172.16.50.0/24) can no longer reach each other.</p>
+    <p><strong>Diagnose:</strong> <code>show ip route</code> on BR-A shows <code>D 172.16.0.0/16 is a summary, 00:00:14, Null0</code> — BR-A is now summarizing its own 172.16.50.0/24 to the whole classful network and discarding anything inside it that isn't actually local, which silently drops traffic for 172.16.20.0/24.</p>
+    <p><strong>Fix:</strong> <code>no auto-summary</code>.</p></div></details>
+</section>
+
+<section class="unit-part" id="v6" style="--c:var(--yellow)">
+  <div class="num">Part 4 · for later practice</div>
+  <h2>Optional extension: EIGRPv6</h2>
+  <p>Once IPv6 addressing has been assigned to this same topology, EIGRPv6 is enabled per interface rather than with <code>network</code> statements:</p>
+<pre class="cfg">! Every EIGRP-speaking router
+configure terminal
+ipv6 unicast-routing
+ipv6 router eigrp 20
+ no shutdown
+ router-id 1.1.1.1
+exit
+interface g0/0
+ ipv6 eigrp 20
+interface g0/1
+ ipv6 eigrp 20
+! repeat per interface, skipping links toward BR-C and the ISP</pre>
+  <p>There's no auto-summary setting and no <code>passive-interface</code> puzzle to solve: an interface not enabled with <code>ipv6 eigrp 20</code> is simply outside the process. Verify with <code>show ipv6 eigrp neighbors</code>, <code>show ipv6 eigrp topology</code>, and <code>show ipv6 route eigrp</code> — next-hop addresses will always be link-local (<code>FE80::...</code>), never the routed address.</p>
+</section>
+
+<section class="unit-part" id="reflect" style="--c:var(--ink)">
+  <div class="num">Part 5</div>
+  <h2>Reflection questions</h2>
+  <details class="q"><summary>1. Why did EIGRP need no wildcard masks where OSPF did?</summary><div class="a">EIGRP's classful <code>network 10.0.0.0</code> enables every interface whose address falls anywhere in 10.0.0.0/8, with no finer control offered or needed for this design. OSPF's wildcard lets you match an exact subnet, which is why it was used there to keep the ISP links out precisely.</div></details>
+  <details class="q"><summary>2. Why wasn't auto-summary a problem in the OSPF lab, but is one here?</summary><div class="a">OSPF doesn't auto-summarize at all — it advertises exactly the subnets in its <code>network</code> statements. EIGRP's classic behavior collapses subnets to their classful boundary automatically, which breaks the moment the same classful network appears on both sides of a discontiguous backbone, as 172.16.0.0/16 does here.</div></details>
+  <details class="q"><summary>3. Why does redistributing the default route need an explicit metric here, but OSPF just needed <code>default-information originate</code>?</summary><div class="a">OSPF's command exists specifically to inject a default route with a sensible built-in cost. EIGRP's redistribution is generic — any non-EIGRP source needs bandwidth, delay, reliability, load, and MTU supplied by hand, because EIGRP has no way to measure those for a route it didn't calculate itself.</div></details>
+  <details class="q"><summary>4. If HQ-R2's link to BR-A fails, how does EIGRP reroute traffic to 172.16.50.0/24 compared to how OSPF would?</summary><div class="a">Both converge quickly, but EIGRP likely already has the serial-path route sitting in its topology table as a feasible successor, ready to install the instant the successor disappears — no recalculation needed. OSPF must rerun its SPF algorithm against the updated link-state database before it can choose a new path.</div></details>
+  <details class="q"><summary>5. BR-C still can't run EIGRP. Did anything about its role change from the OSPF lab?</summary><div class="a">No — the static-route relationship with BR-B is identical regardless of which IGP runs elsewhere. BR-C never needs to know which protocol the rest of the network uses.</div></details>
+</section>
+
+<footer>NovaTech EIGRP lab for Unit 6 · same topology and addressing as the companion OSPF lab. Commands are for Cisco IOS 15 on 2911 routers.</footer>
+</main>
+</div>
+
+<script>
+(function(){
+  document.getElementById('themeBtn').addEventListener('click',function(){
+    var r=document.documentElement,c=r.getAttribute('data-theme');
+    var dark=c?c==='dark':matchMedia('(prefers-color-scheme: dark)').matches;
+    r.setAttribute('data-theme',dark?'light':'dark');
+  });
+  document.querySelectorAll('pre.cfg').forEach(function(pre){
+    var w=document.createElement('div');w.className='prewrap';
+    pre.parentNode.insertBefore(w,pre);w.appendChild(pre);
+    var b=document.createElement('button');b.type='button';b.className='copy';b.textContent='Copy';
+    b.addEventListener('click',function(){
+      var t=pre.innerText;
+      function ok(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1500);}
+      function fallback(){
+        try{var r=document.createRange();r.selectNodeContents(pre);var s=getSelection();s.removeAllRanges();s.addRange(r);
+          if(document.execCommand('copy')){ok();}else{b.textContent='Selected: press Ctrl+C';}
+        }catch(e){b.textContent='Select and copy manually';}
+      }
+      try{if(navigator.clipboard){navigator.clipboard.writeText(t).then(ok,fallback);}else{fallback();}}catch(e){fallback();}
+    });
+    w.appendChild(b);
+  });
+  var items=[
+    'All router interfaces are up/up (show ip interface brief)',
+    'Every PC can ping its default gateway',
+    'HQ-R1 can ping the Internet-Server 172.31.100.10',
+    'BR-C has a static default route; BR-B has a static route to 192.168.30.0/24',
+    'Four EIGRP adjacencies are up (show ip eigrp neighbors)',
+    'K-values match on every router (show ip protocols)',
+    'Automatic network summarization is not in effect, everywhere',
+    'Other routers show D EX 192.168.30.0/24 and a D*EX default route',
+    'PC-A can ping Server-HQ (discontiguous-network check)',
+    'Metric predictions from Task 6 match show ip eigrp topology',
+    'Failover to the serial link observed and link restored',
+    'Troubleshooting fault found and fixed'
+  ];
+  var key='novatech-eigrp-lab-checklist',saved={};
+  try{saved=JSON.parse(localStorage.getItem(key)||'{}')||{};}catch(e){saved={};}
+  var box=document.getElementById('checklist');
+  items.forEach(function(txt,i){
+    var l=document.createElement('label'),c=document.createElement('input'),s=document.createElement('span');
+    c.type='checkbox';c.checked=!!saved[i];s.textContent=txt;if(c.checked)l.className='done';
+    c.addEventListener('change',function(){saved[i]=c.checked;l.className=c.checked?'done':'';
+      try{localStorage.setItem(key,JSON.stringify(saved));}catch(e){}});
+    l.appendChild(c);l.appendChild(s);box.appendChild(l);
+  });
+})();
+</script>
+</body>
+</html>

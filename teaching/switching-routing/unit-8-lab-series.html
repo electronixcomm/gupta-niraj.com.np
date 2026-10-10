@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Unit 8 WAN Labs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: NOC-console teaching tool — sticky top bar with Theory/Lab mode switch, left index rail, single reading column with embedded simulators. */
+:root{
+  --bg:#F3F5F6; --surface:#FFFFFF; --surface-2:#E9EEF1; --ink:#13212A; --muted:#566874; --line:#D3DCE1;
+  --accent:#0A6A8F; --accent-soft:#DCEEF5; --amber:#A85A06; --amber-soft:#FBEBD6;
+  --ok:#23784A; --ok-soft:#DDF1E5; --bad:#B3261E; --bad-soft:#FBE1DE;
+  --t4g:#2459B0; --t4g-soft:#E0E9F8; --t3g:#1D7E54; --t3g-soft:#DDF2E7; --t2g:#7340AA; --t2g-soft:#EEE5F8; --mg:#5F6E78; --mg-soft:#E7ECEF;
+  --code-bg:#0F1C24; --code-fg:#D3E1E8; --code-dim:#7F97A4; --code-prompt:#6FC3E4; --code-cmt:#E0A458; --code-out:#A9C4B5;
+  --f-display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --f-body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+  --r:8px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0D151A; --surface:#141F26; --surface-2:#1B2831; --ink:#E2EAEE; --muted:#93A4AE; --line:#27363F;
+  --accent:#58B6DB; --accent-soft:#16313D; --amber:#E7A04F; --amber-soft:#3A2A16;
+  --ok:#62C48F; --ok-soft:#173226; --bad:#F27A6F; --bad-soft:#3D1D1A;
+  --t4g:#78A6EC; --t4g-soft:#1A2943; --t3g:#62C99A; --t3g-soft:#163327; --t2g:#B694E2; --t2g-soft:#2A2040; --mg:#9AA8B1; --mg-soft:#222E35;
+  --code-bg:#091116; --code-fg:#D3E1E8; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0D151A; --surface:#141F26; --surface-2:#1B2831; --ink:#E2EAEE; --muted:#93A4AE; --line:#27363F;
+  --accent:#58B6DB; --accent-soft:#16313D; --amber:#E7A04F; --amber-soft:#3A2A16;
+  --ok:#62C48F; --ok-soft:#173226; --bad:#F27A6F; --bad-soft:#3D1D1A;
+  --t4g:#78A6EC; --t4g-soft:#1A2943; --t3g:#62C99A; --t3g-soft:#163327; --t2g:#B694E2; --t2g-soft:#2A2040; --mg:#9AA8B1; --mg-soft:#222E35;
+  --code-bg:#091116; --code-fg:#D3E1E8; color-scheme:dark;}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.6}
+a{color:var(--accent)}
+h1,h2,h3,h4{font-family:var(--f-display);line-height:1.2;text-wrap:balance;margin:0}
+h2{font-size:1.75rem;font-weight:800;letter-spacing:-.01em}
+h3{font-size:1.2rem;font-weight:700;margin-top:2rem}
+h4{font-size:1rem;font-weight:700;margin-top:1.25rem}
+p{margin:.6rem 0}
+code{font-family:var(--f-mono);font-size:.88em;background:var(--surface-2);padding:.08em .35em;border-radius:4px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* top bar */
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
+.topbar-in{max-width:1280px;margin:0 auto;padding:.6rem 16px;display:flex;flex-wrap:wrap;gap:.6rem 1.2rem;align-items:center}
+.brand{display:flex;flex-direction:column;min-width:0;flex:1 1 260px}
+.brand .eyebrow{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.brand strong{font-family:var(--f-display);font-size:1.15rem;font-weight:800}
+.modes{display:flex;background:var(--surface-2);border-radius:999px;padding:3px;gap:3px}
+.modes button{border:0;background:transparent;color:var(--muted);font:600 .92rem var(--f-body);padding:.42rem 1.1rem;border-radius:999px;cursor:pointer}
+.modes button[aria-selected="true"]{background:var(--ink);color:var(--surface)}
+.progress{font-family:var(--f-mono);font-size:.78rem;color:var(--muted);white-space:nowrap}
+
+/* shell */
+.shell{max-width:1280px;margin:0 auto;padding-inline:16px;padding-block:1.5rem 4rem;display:grid;grid-template-columns:230px minmax(0,1fr);gap:2.5rem}
+.rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px);align-self:start;max-height:calc(100vh - 100px);overflow:auto}
+.rail nav{display:flex;flex-direction:column;gap:2px}
+.rail .rh{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:.2rem 0 .5rem}
+.rail a{display:block;text-decoration:none;color:var(--ink);font-size:.9rem;padding:.38rem .6rem;border-radius:6px;border-left:3px solid transparent}
+.rail a:hover{background:var(--surface-2)}
+.rail a.on{border-left-color:var(--accent);background:var(--accent-soft);font-weight:600}
+.rail a .n{font-family:var(--f-mono);font-size:.78rem;color:var(--muted);margin-right:.35rem}
+main{min-width:0}
+section.unit{padding-block:.5rem 2.5rem;border-bottom:1px solid var(--line);margin-bottom:2rem;scroll-margin-top:90px}
+section.unit:last-child{border-bottom:0}
+.sec-label{font-family:var(--f-mono);font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:.35rem}
+.lead{font-size:1.06rem;color:var(--muted);max-width:68ch}
+.prose{max-width:72ch}
+.hero{padding:1.2rem 0 1.6rem;border-bottom:1px solid var(--line);margin-bottom:2rem}
+.hero h1{font-size:clamp(1.8rem,4vw,2.6rem);font-weight:800;letter-spacing:-.02em}
+.hero .meta{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.9rem}
+.chip{display:inline-flex;align-items:center;gap:.35rem;font:500 .78rem var(--f-mono);padding:.2rem .6rem;border-radius:999px;background:var(--surface-2);color:var(--ink);border:1px solid var(--line)}
+.chip.t4g{background:var(--t4g-soft);color:var(--t4g);border-color:transparent}
+.chip.t3g{background:var(--t3g-soft);color:var(--t3g);border-color:transparent}
+.chip.t2g{background:var(--t2g-soft);color:var(--t2g);border-color:transparent}
+.chip.mg{background:var(--mg-soft);color:var(--mg);border-color:transparent}
+.outcomes{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:.8rem;margin-top:1.2rem}
+.outcomes div{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:.8rem .9rem;font-size:.92rem}
+.outcomes b{display:block;font-family:var(--f-mono);font-size:.72rem;color:var(--accent);letter-spacing:.06em;text-transform:uppercase;margin-bottom:.2rem}
+
+/* tables */
+.tw{overflow-x:auto;margin:1rem 0;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{text-align:left;padding:.5rem .7rem;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--f-mono);font-size:.74rem;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);background:var(--surface-2);font-weight:600}
+tr:last-child td{border-bottom:0}
+td.num,th.num{font-variant-numeric:tabular-nums;text-align:right}
+.y{color:var(--ok);font-weight:600}.n{color:var(--bad);font-weight:600}
+
+/* callouts */
+.note{border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:.8rem 1rem;margin:1rem 0;font-size:.94rem}
+.note.key{background:var(--accent-soft);border-color:transparent}
+.note.warn{background:var(--amber-soft);border-color:transparent}
+.note.bad{background:var(--bad-soft);border-color:transparent}
+.note.tel{background:var(--surface);border-left:4px solid var(--t4g)}
+.note > b:first-child{display:block;font-family:var(--f-mono);font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.2rem}
+
+/* code */
+.cli{position:relative;background:var(--code-bg);color:var(--code-fg);border-radius:var(--r);margin:1rem 0;overflow:hidden}
+.cli .bar{display:flex;justify-content:space-between;align-items:center;gap:.5rem;padding:.35rem .5rem .35rem .8rem;background:rgba(255,255,255,.05);font:500 .72rem var(--f-mono);color:var(--code-dim);letter-spacing:.05em;text-transform:uppercase}
+.cli pre{margin:0;padding:.8rem 1rem;overflow-x:auto;font:400 .84rem/1.55 var(--f-mono);white-space:pre}
+.cli .p{color:var(--code-prompt)} .cli .c{color:var(--code-cmt)} .cli .o{color:var(--code-out)}
+.copy{border:1px solid rgba(255,255,255,.18);background:transparent;color:var(--code-fg);font:500 .72rem var(--f-mono);padding:.2rem .55rem;border-radius:4px;cursor:pointer}
+.copy:hover{background:rgba(255,255,255,.1)}
+.tabs{display:flex;flex-wrap:wrap;gap:4px;margin-top:1rem}
+.tabs button{border:1px solid var(--line);background:var(--surface);color:var(--muted);font:600 .8rem var(--f-mono);padding:.3rem .7rem;border-radius:6px 6px 0 0;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--code-bg);color:var(--code-fg);border-color:var(--code-bg)}
+.tabs + .tabpanes .cli{margin-top:0;border-top-left-radius:0}
+
+/* widgets */
+.widget{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:1rem;margin:1.4rem 0}
+.widget-h{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:.4rem 1rem;margin-bottom:.7rem}
+.widget-h h4{margin:0;font-size:1.02rem}
+.widget-h span{font:500 .72rem var(--f-mono);color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.ctl{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin:.5rem 0}
+.btn{border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font:600 .85rem var(--f-body);padding:.42rem .8rem;border-radius:6px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.btn.danger{background:var(--bad-soft);border-color:transparent;color:var(--bad)}
+select,input[type=text],input[type=number]{font:500 .86rem var(--f-mono);padding:.35rem .5rem;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);min-width:0}
+label.f{display:flex;flex-direction:column;gap:.2rem;font-size:.78rem;color:var(--muted);font-family:var(--f-mono)}
+.svgwrap{overflow-x:auto}
+.svgwrap svg{display:block;max-width:100%;height:auto;margin:0 auto}
+.svg-t{fill:var(--ink);font-family:var(--f-mono);font-size:12px}
+.svg-m{fill:var(--muted);font-family:var(--f-mono);font-size:10.5px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;align-items:start}
+.grid2 > *{min-width:0}
+.stat{display:flex;gap:1.2rem;flex-wrap:wrap;font-family:var(--f-mono);font-size:.82rem}
+.stat b{font-size:1.15rem;font-variant-numeric:tabular-nums;display:block;color:var(--ink)}
+.meter{height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden;margin-top:.25rem;width:140px}
+.meter i{display:block;height:100%;background:var(--ok);width:5%;transition:width .3s}
+.log{background:var(--code-bg);color:var(--code-out);font:400 .78rem/1.5 var(--f-mono);padding:.6rem .8rem;border-radius:6px;height:150px;overflow:auto;white-space:pre-wrap}
+.pill{display:inline-block;font:600 .74rem var(--f-mono);padding:.15rem .55rem;border-radius:999px}
+.pill.up{background:var(--ok-soft);color:var(--ok)} .pill.down{background:var(--bad-soft);color:var(--bad)} .pill.mid{background:var(--amber-soft);color:var(--amber)}
+.timeline{display:flex;height:34px;border-radius:6px;overflow:hidden;border:1px solid var(--line);margin:.5rem 0}
+.timeline div{display:flex;align-items:center;justify-content:center;font:600 .7rem var(--f-mono);color:var(--ink);transition:opacity .3s;opacity:.3;white-space:nowrap;overflow:hidden}
+.timeline div.on{opacity:1}
+.matrix td,.matrix th{text-align:center}
+.matrix td.ok{background:var(--ok-soft);color:var(--ok);font-weight:600}
+.matrix td.no{background:var(--bad-soft);color:var(--bad)}
+.matrix td.hl{outline:3px solid var(--accent);outline-offset:-3px}
+
+/* quiz */
+.q{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:.8rem 1rem;margin:.7rem 0}
+.q p.qt{font-weight:600;margin:.1rem 0 .5rem}
+.q .opts{display:grid;gap:.35rem}
+.q .opts button{text-align:left;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font:400 .9rem var(--f-body);padding:.45rem .7rem;border-radius:6px;cursor:pointer}
+.q .opts button.right{background:var(--ok-soft);border-color:var(--ok);color:var(--ok);font-weight:600}
+.q .opts button.wrong{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.q .why{font-size:.88rem;color:var(--muted);margin-top:.5rem}
+details{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:.55rem .9rem;margin:.6rem 0}
+details summary{cursor:pointer;font-weight:600}
+details[open] summary{margin-bottom:.4rem}
+
+/* lab specifics */
+.lab-head{display:flex;flex-wrap:wrap;gap:.5rem 1rem;align-items:baseline;justify-content:space-between}
+.lab-meta{display:flex;gap:.4rem;flex-wrap:wrap}
+.ticket{border:1px solid var(--line);border-left:4px solid var(--amber);background:var(--surface);border-radius:var(--r);padding:.8rem 1rem;margin:1rem 0}
+.ticket .tid{font:600 .76rem var(--f-mono);color:var(--amber);letter-spacing:.05em}
+.ticket h4{margin:.15rem 0 .3rem}
+.steps{counter-reset:s;list-style:none;padding:0;margin:1rem 0}
+.steps > li{counter-increment:s;position:relative;padding:.1rem 0 .9rem 2.6rem}
+.steps > li::before{content:counter(s);position:absolute;left:0;top:.05rem;width:1.8rem;height:1.8rem;border-radius:50%;background:var(--surface-2);border:1px solid var(--line);font:600 .8rem/1.8rem var(--f-mono);text-align:center;color:var(--ink)}
+.check{display:flex;gap:.55rem;align-items:flex-start;padding:.35rem 0;font-size:.93rem}
+.check input{margin-top:.3rem;accent-color:var(--accent);width:1rem;height:1rem;flex:none}
+.checklist{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:.6rem 1rem;margin:1rem 0}
+.checklist h4{margin:.2rem 0 .3rem;font-size:.86rem;font-family:var(--f-mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.vl{display:inline-block;width:.7rem;height:.7rem;border-radius:2px;vertical-align:middle;margin-right:.3rem}
+.legend{display:flex;flex-wrap:wrap;gap:.4rem 1rem;font:500 .78rem var(--f-mono);color:var(--muted);margin:.4rem 0}
+.devinfo{min-height:4.5rem;font-size:.9rem;background:var(--surface-2);border-radius:6px;padding:.6rem .8rem;margin-top:.6rem}
+.topo-node{cursor:pointer}
+.topo-node:hover rect{stroke:var(--accent);stroke-width:2.5}
+@media (max-width:900px){
+  .shell{grid-template-columns:minmax(0,1fr);gap:1rem}
+  .rail{position:static;max-height:none}
+  .rail nav{flex-direction:row;flex-wrap:nowrap;overflow-x:auto;gap:4px;padding-bottom:4px}
+  .rail a{white-space:nowrap;border-left:0;border-bottom:3px solid transparent;font-size:.84rem}
+  .rail a.on{border-bottom-color:var(--accent)}
+  .rail .rh{display:none}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div style="font:14px/1.4 Inter,-apple-system,Segoe UI,sans-serif;background:#0b1d3a;padding:10px 16px;"><a href="/teaching/switching-routing.html" style="color:#fbf9f3;text-decoration:none;">&larr; Switching &amp; Routing &middot; all units</a></div>
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand"><span class="eyebrow">Computer Networks · Unit 8 · Lab series · Packet Tracer</span><strong>WAN, ACL and NAT Labs</strong></div>
+    <span class="progress" id="progress">Lab tasks: 0 done</span>
+  </div>
+</header>
+
+<div class="shell" id="lab">
+  <aside class="rail">
+    <div class="rh">Lab index</div>
+    <nav>
+      <a href="#l-0"><span class="n">00</span>Scenario</a>
+      <a href="#l-1"><span class="n">01</span>Build, HDLC, routing</a>
+      <a href="#l-2"><span class="n">02</span>PPP with CHAP</a>
+      <a href="#l-3"><span class="n">03</span>Standard ACLs</a>
+      <a href="#l-4"><span class="n">04</span>Extended ACL</a>
+      <a href="#l-5"><span class="n">05</span>NAT &amp; PAT</a>
+      <a href="#l-6"><span class="n">06</span>Security &amp; troubleshooting</a>
+      <a href="#l-final"><span class="n">FC</span>Final configs</a>
+      <a href="#l-report"><span class="n">RP</span>Lab report</a>
+    </nav>
+  </aside>
+  <main>
+    <section class="unit hero" id="l-0">
+      <div class="sec-label">Unit 8 · Lab series · 6 short labs · about 4 hours</div>
+      <h1>Branch office to HQ to the internet</h1>
+      <p class="lead">A company has a <b>branch office</b> and a <b>head office (HQ)</b>, joined by a leased serial line. HQ also has a serial link to an <b>ISP</b>, which leads to the internet. You will bring up the WAN links (HDLC and PPP), filter traffic with ACLs, and use NAT so private PCs can reach an internet web server while HQ's own web server is published to the internet.</p>
+      <div class="meta">
+        <span class="chip">3 routers (1941 + HWIC-2T)</span>
+        <span class="chip">2 switches (2960, no config)</span>
+        <span class="chip">3 PCs · 2 Servers</span>
+        <span class="chip">Static routing only</span>
+      </div>
+      <h3>Topology</h3>
+      <div class="svgwrap"><svg id="topo8" viewBox="0 0 900 330" width="900" role="img" aria-label="PC-B1 and PC-B2 on SW-B to BRANCH router; serial PPP link to HQ router; HQ LAN with PC-HQ and SRV-HQ on SW-HQ; serial HDLC link from HQ to ISP; INTERNET-SRV on ISP"></svg></div>
+      <div class="devinfo" id="devinfo">Click a device in the diagram to see its addresses.</div>
+      <h3>Addressing table</h3>
+      <div class="tw"><table>
+        <thead><tr><th>Device</th><th>Interface</th><th>IP address / mask</th><th>Gateway</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td rowspan="2">BRANCH</td><td>G0/0</td><td>192.168.10.1 /24</td><td></td><td>Branch LAN</td></tr>
+          <tr><td>S0/0/0</td><td>10.1.1.1 /30</td><td></td><td>DTE · to HQ</td></tr>
+          <tr><td rowspan="3">HQ</td><td>G0/0</td><td>192.168.20.1 /24</td><td></td><td>HQ LAN · NAT inside</td></tr>
+          <tr><td>S0/0/0</td><td>10.1.1.2 /30</td><td></td><td><b>DCE</b> (clock rate) · NAT inside</td></tr>
+          <tr><td>S0/0/1</td><td>209.165.200.226 /29</td><td></td><td>DTE · to ISP · NAT outside</td></tr>
+          <tr><td rowspan="2">ISP</td><td>S0/0/0</td><td>209.165.200.225 /29</td><td></td><td><b>DCE</b> (clock rate)</td></tr>
+          <tr><td>G0/0</td><td>203.0.113.1 /24</td><td></td><td>"Internet"</td></tr>
+          <tr><td>PC-B1</td><td>NIC</td><td>192.168.10.10 /24</td><td>192.168.10.1</td><td>Branch staff</td></tr>
+          <tr><td>PC-B2</td><td>NIC</td><td>192.168.10.20 /24</td><td>192.168.10.1</td><td>Branch guest</td></tr>
+          <tr><td>PC-HQ</td><td>NIC</td><td>192.168.20.10 /24</td><td>192.168.20.1</td><td>HQ admin</td></tr>
+          <tr><td>SRV-HQ</td><td>NIC</td><td>192.168.20.100 /24</td><td>192.168.20.1</td><td>HQ web server · public 209.165.200.229</td></tr>
+          <tr><td>INTERNET-SRV</td><td>NIC</td><td>203.0.113.10 /24</td><td>203.0.113.1</td><td>Web server on the internet</td></tr>
+        </tbody>
+      </table></div>
+      <div class="note"><b>Build in Packet Tracer (15 min)</b>
+        <ol style="margin:.3rem 0 0 1.1rem;padding:0">
+          <li>Place three <b>1941</b> routers. For each: Physical tab → switch power off → drag <b>HWIC-2T</b> into a slot → power on. This adds S0/0/0 and S0/0/1.</li>
+          <li>Connect serial links with <b>Serial DCE</b> cable: click <b>HQ first</b> for the BRANCH–HQ link and <b>ISP first</b> for the HQ–ISP link. The first-clicked end becomes DCE (clock icon).</li>
+          <li>Use copper straight-through for PC/server ↔ switch ↔ router, and copper cross-over for INTERNET-SRV ↔ ISP G0/0.</li>
+          <li>Set each PC/server's IP, mask and gateway (Desktop → IP Configuration). Servers already run HTTP.</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- LAB 1 -->
+    <section class="unit" id="l-1">
+      <div class="lab-head"><div><div class="sec-label">Lab 1 · 40 min</div><h2>Bring up the WAN links (HDLC) and static routing</h2></div><div class="lab-meta"><span class="chip">8.1 · 8.2</span></div></div>
+      <div class="ticket"><div class="tid">TASK</div><h4>Make branch and HQ talk over the serial line</h4>Address all interfaces, provide the clock on the DCE ends, keep the default HDLC encapsulation, and add static routes.</div>
+      <div class="tabs" role="tablist" data-group="l1"><button aria-selected="true">BRANCH</button><button aria-selected="false">HQ</button><button aria-selected="false">ISP</button></div>
+      <div class="tabpanes" data-group="l1">
+<div class="cli" data-t="BRANCH"><pre>Router(config)# hostname BRANCH
+BRANCH(config)# no ip domain-lookup
+BRANCH(config)# interface g0/0
+BRANCH(config-if)# ip address 192.168.10.1 255.255.255.0
+BRANCH(config-if)# no shutdown
+BRANCH(config-if)# interface s0/0/0
+BRANCH(config-if)# ip address 10.1.1.1 255.255.255.252
+BRANCH(config-if)# no shutdown
+BRANCH(config-if)# exit
+BRANCH(config)# ip route 0.0.0.0 0.0.0.0 10.1.1.2</pre></div>
+<div class="cli" data-t="HQ" hidden><pre>Router(config)# hostname HQ
+HQ(config)# no ip domain-lookup
+HQ(config)# interface g0/0
+HQ(config-if)# ip address 192.168.20.1 255.255.255.0
+HQ(config-if)# no shutdown
+HQ(config-if)# interface s0/0/0
+HQ(config-if)# ip address 10.1.1.2 255.255.255.252
+HQ(config-if)# clock rate 128000          ! HQ holds the DCE end
+HQ(config-if)# no shutdown
+HQ(config-if)# interface s0/0/1
+HQ(config-if)# ip address 209.165.200.226 255.255.255.248
+HQ(config-if)# no shutdown
+HQ(config-if)# exit
+HQ(config)# ip route 192.168.10.0 255.255.255.0 10.1.1.1
+HQ(config)# ip route 0.0.0.0 0.0.0.0 209.165.200.225</pre></div>
+<div class="cli" data-t="ISP" hidden><pre>Router(config)# hostname ISP
+ISP(config)# no ip domain-lookup
+ISP(config)# interface s0/0/0
+ISP(config-if)# ip address 209.165.200.225 255.255.255.248
+ISP(config-if)# clock rate 128000         ! ISP holds the DCE end
+ISP(config-if)# no shutdown
+ISP(config-if)# interface g0/0
+ISP(config-if)# ip address 203.0.113.1 255.255.255.0
+ISP(config-if)# no shutdown
+! no routes to 192.168.x.x: the ISP never routes private addresses</pre></div>
+      </div>
+      <h3>Verify</h3>
+      <div class="cli" data-t="HQ"><pre>HQ# show ip interface brief           ! all used interfaces up / up
+HQ# show controllers serial 0/0/0     ! DCE V.35, clock rate 128000
+HQ# show interfaces serial 0/0/0      ! Encapsulation HDLC (the default)
+HQ# show ip route                     ! S* 0.0.0.0/0 via 209.165.200.225</pre></div>
+      <div class="tw"><table>
+        <thead><tr><th>Test</th><th>Expected</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td>PC-B1 ping 192.168.20.100</td><td class="y">Success</td><td>Static routes in both directions</td></tr>
+          <tr><td>HQ ping 203.0.113.10</td><td class="y">Success</td><td>Source is HQ's public address 209.165.200.226</td></tr>
+          <tr><td>PC-B1 ping 203.0.113.10</td><td class="n">Fails</td><td>The ISP has no route back to 192.168.10.0. Fixed by NAT in Lab 5.</td></tr>
+        </tbody>
+      </table></div>
+      <div class="checklist"><h4>Lab 1 done when</h4>
+        <label class="check"><input type="checkbox" id="c1-1"> Both serial links up/up with HDLC; clock rate set on the DCE ends</label>
+        <label class="check"><input type="checkbox" id="c1-2"> PC-B1 reaches SRV-HQ; HQ reaches INTERNET-SRV</label>
+        <label class="check"><input type="checkbox" id="c1-3"> Explained why PC-B1 cannot reach the internet yet</label>
+      </div>
+    </section>
+
+    <!-- LAB 2 -->
+    <section class="unit" id="l-2">
+      <div class="lab-head"><div><div class="sec-label">Lab 2 · 35 min</div><h2>PPP with CHAP authentication</h2></div><div class="lab-meta"><span class="chip">8.1 · 8.2</span></div></div>
+      <div class="ticket"><div class="tid">TASK</div><h4>Authenticate the branch link</h4>Change the BRANCH–HQ link to PPP and require CHAP so a rogue router cannot connect. Leave the HQ–ISP link on HDLC.</div>
+      <h3>Part A · Encapsulation mismatch (observe first)</h3>
+      <ol class="steps">
+        <li>On BRANCH only: <code>interface s0/0/0</code> → <code>encapsulation ppp</code>.</li>
+        <li><code>show interfaces s0/0/0</code> on both routers: <b>up, line protocol down</b>. One side speaks PPP, the other HDLC. PC-B1 can no longer reach HQ.</li>
+      </ol>
+      <h3>Part B · PPP + CHAP on both ends</h3>
+      <div class="tabs" role="tablist" data-group="l2"><button aria-selected="true">BRANCH</button><button aria-selected="false">HQ</button></div>
+      <div class="tabpanes" data-group="l2">
+<div class="cli" data-t="BRANCH"><pre>BRANCH(config)# username HQ password Cisco123
+BRANCH(config)# interface s0/0/0
+BRANCH(config-if)# encapsulation ppp
+BRANCH(config-if)# ppp authentication chap</pre></div>
+<div class="cli" data-t="HQ" hidden><pre>HQ(config)# username BRANCH password Cisco123
+HQ(config)# interface s0/0/0
+HQ(config-if)# encapsulation ppp
+HQ(config-if)# ppp authentication chap</pre></div>
+      </div>
+      <div class="cli" data-t="Verify on HQ"><pre>HQ# show interfaces serial 0/0/0
+Serial0/0/0 is up, line protocol is up
+  Encapsulation PPP, LCP Open
+  Open: IPCP, CDPCP
+HQ# show interfaces serial 0/0/1      ! still Encapsulation HDLC</pre></div>
+      <h3>Part C · Wrong password test</h3>
+      <ol class="steps">
+        <li>On HQ: <code>username BRANCH password wrong123</code>. Then <code>shutdown</code> / <code>no shutdown</code> on S0/0/0.</li>
+        <li>Run <code>debug ppp authentication</code> on HQ. The link stays <b>up / down</b> and CHAP fails.</li>
+        <li>Restore <code>username BRANCH password Cisco123</code>, then <code>undebug all</code>. Ping SRV-HQ from PC-B1 again.</li>
+      </ol>
+      <details><summary>Optional: PAP instead of CHAP</summary>
+        <div class="cli" data-t="Both routers (change the names on HQ)"><pre>BRANCH(config)# interface s0/0/0
+BRANCH(config-if)# ppp authentication pap
+BRANCH(config-if)# ppp pap sent-username BRANCH password Cisco123
+! HQ: ppp authentication pap + ppp pap sent-username HQ password Cisco123</pre></div>
+        <p>In Simulation mode, click a PAP packet: the password is visible in clear text. Switch back to CHAP afterwards.</p></details>
+      <div class="checklist"><h4>Lab 2 done when</h4>
+        <label class="check"><input type="checkbox" id="c2-1"> Saw up/down with an encapsulation mismatch</label>
+        <label class="check"><input type="checkbox" id="c2-2"> PPP + CHAP up: LCP Open, IPCP Open; PC-B1 reaches HQ again</label>
+        <label class="check"><input type="checkbox" id="c2-3"> Saw CHAP fail with a wrong password and fixed it</label>
+      </div>
+    </section>
+
+    <!-- LAB 3 -->
+    <section class="unit" id="l-3">
+      <div class="lab-head"><div><div class="sec-label">Lab 3 · 35 min</div><h2>Standard ACLs</h2></div><div class="lab-meta"><span class="chip">8.2</span></div></div>
+      <div class="ticket"><div class="tid">TASK</div><h4>Keep the guest out of HQ and lock down router access</h4>(1) PC-B2 (guest) must not reach the HQ LAN, but may still use the internet later. (2) Only PC-HQ may Telnet to the HQ router.</div>
+      <h3>Part A · Block the guest (placed near the destination)</h3>
+      <div class="cli" data-t="HQ"><pre>HQ(config)# ip access-list standard NO-GUEST
+HQ(config-std-nacl)# remark Guest PC may not enter HQ LAN
+HQ(config-std-nacl)# deny host 192.168.10.20
+HQ(config-std-nacl)# permit any
+HQ(config-std-nacl)# exit
+HQ(config)# interface g0/0
+HQ(config-if)# ip access-group NO-GUEST out</pre></div>
+      <p class="prose">Why on HQ G0/0 <b>out</b>? A standard ACL only sees the source. Placed at BRANCH, it would block the guest from <i>everything</i>, including the internet. Placed at the HQ LAN exit, it blocks only the HQ LAN.</p>
+      <div class="tw"><table>
+        <thead><tr><th>Test</th><th>Expected</th></tr></thead>
+        <tbody>
+          <tr><td>PC-B2 ping 192.168.20.100</td><td class="n">Fails (Destination host unreachable)</td></tr>
+          <tr><td>PC-B1 ping 192.168.20.100</td><td class="y">Success</td></tr>
+          <tr><td>HQ# show access-lists</td><td>Match counters increase on each line</td></tr>
+        </tbody>
+      </table></div>
+      <h3>Part B · Restrict Telnet to the router</h3>
+      <div class="cli" data-t="HQ"><pre>HQ(config)# enable secret Class123
+HQ(config)# line vty 0 4
+HQ(config-line)# password Telnet123
+HQ(config-line)# login
+HQ(config-line)# exit
+HQ(config)# access-list 5 permit host 192.168.20.10
+HQ(config)# line vty 0 4
+HQ(config-line)# access-class 5 in</pre></div>
+      <p class="prose">Test from each PC's Command Prompt: <code>telnet 192.168.20.1</code>. PC-HQ gets the password prompt; PC-B1 gets <i>Connection refused</i>.</p>
+      <div class="checklist"><h4>Lab 3 done when</h4>
+        <label class="check"><input type="checkbox" id="c3-1"> Guest blocked from HQ LAN, staff still allowed</label>
+        <label class="check"><input type="checkbox" id="c3-2"> Only PC-HQ can Telnet to HQ</label>
+        <label class="check"><input type="checkbox" id="c3-3"> Can explain why the standard ACL is on HQ, not BRANCH</label>
+      </div>
+    </section>
+
+    <!-- LAB 4 -->
+    <section class="unit" id="l-4">
+      <div class="lab-head"><div><div class="sec-label">Lab 4 · 35 min</div><h2>Extended ACL</h2></div><div class="lab-meta"><span class="chip">8.2</span></div></div>
+      <div class="ticket"><div class="tid">TASK</div><h4>Branch may use only the HQ web server</h4>Branch PCs may browse SRV-HQ (HTTP) and ping it for testing. All other traffic from the branch to the HQ LAN is denied. Internet traffic stays allowed. Filter at the branch so blocked packets never use the WAN link.</div>
+      <div class="cli" data-t="BRANCH"><pre>BRANCH(config)# ip access-list extended BRANCH-IN
+BRANCH(config-ext-nacl)# remark Branch to HQ: web server only
+BRANCH(config-ext-nacl)# permit tcp 192.168.10.0 0.0.0.255 host 192.168.20.100 eq www
+BRANCH(config-ext-nacl)# permit icmp 192.168.10.0 0.0.0.255 host 192.168.20.100 echo
+BRANCH(config-ext-nacl)# deny ip 192.168.10.0 0.0.0.255 192.168.20.0 0.0.0.255
+BRANCH(config-ext-nacl)# permit ip any any
+BRANCH(config-ext-nacl)# exit
+BRANCH(config)# interface g0/0
+BRANCH(config-if)# ip access-group BRANCH-IN in</pre></div>
+      <div class="tw"><table>
+        <thead><tr><th>Test from PC-B1</th><th>Expected</th><th>Matched line</th></tr></thead>
+        <tbody>
+          <tr><td>Web Browser → http://192.168.20.100</td><td class="y">Page loads</td><td>10 permit tcp … eq www</td></tr>
+          <tr><td>ping 192.168.20.100</td><td class="y">Success</td><td>20 permit icmp … echo</td></tr>
+          <tr><td>ping 192.168.20.10 (PC-HQ)</td><td class="n">Fails</td><td>30 deny ip … 192.168.20.0</td></tr>
+          <tr><td>telnet 192.168.20.1</td><td class="n">Fails</td><td>30 deny ip … 192.168.20.0</td></tr>
+          <tr><td>ping 10.1.1.2 (HQ serial)</td><td class="y">Success</td><td>40 permit ip any any</td></tr>
+        </tbody>
+      </table></div>
+      <div class="cli" data-t="BRANCH"><pre>BRANCH# show access-lists BRANCH-IN
+Extended IP access list BRANCH-IN
+    10 permit tcp 192.168.10.0 0.0.0.255 host 192.168.20.100 eq www (12 match(es))
+    20 permit icmp 192.168.10.0 0.0.0.255 host 192.168.20.100 echo (4 match(es))
+    30 deny ip 192.168.10.0 0.0.0.255 192.168.20.0 0.0.0.255 (8 match(es))
+    40 permit ip any any (4 match(es))
+BRANCH# show ip interface g0/0         ! Inbound access list is BRANCH-IN</pre></div>
+      <p class="prose">Try PC-B2 (guest) → http://192.168.20.100: BRANCH-IN permits it, but NO-GUEST at HQ blocks it. Two ACLs, two places, both working.</p>
+      <div class="checklist"><h4>Lab 4 done when</h4>
+        <label class="check"><input type="checkbox" id="c4-1"> All five tests give the expected result</label>
+        <label class="check"><input type="checkbox" id="c4-2"> Match counters checked with show access-lists</label>
+      </div>
+    </section>
+
+    <!-- LAB 5 -->
+    <section class="unit" id="l-5">
+      <div class="lab-head"><div><div class="sec-label">Lab 5 · 40 min</div><h2>NAT for internet access: PAT and static NAT</h2></div><div class="lab-meta"><span class="chip">8.3</span></div></div>
+      <div class="ticket"><div class="tid">TASK</div><h4>Get the private network onto the internet</h4>All branch and HQ PCs must share HQ's public address (PAT). SRV-HQ must be reachable from the internet at 209.165.200.229 (static NAT).</div>
+      <div class="cli" data-t="HQ"><pre>HQ(config)# interface g0/0
+HQ(config-if)# ip nat inside
+HQ(config-if)# interface s0/0/0
+HQ(config-if)# ip nat inside             ! branch traffic enters HQ here
+HQ(config-if)# interface s0/0/1
+HQ(config-if)# ip nat outside
+HQ(config-if)# exit
+HQ(config)# ip nat inside source static 192.168.20.100 209.165.200.229
+HQ(config)# access-list 1 permit 192.168.10.0 0.0.0.255
+HQ(config)# access-list 1 permit 192.168.20.0 0.0.0.255
+HQ(config)# ip nat inside source list 1 interface s0/0/1 overload</pre></div>
+      <div class="tw"><table>
+        <thead><tr><th>Test</th><th>Expected</th></tr></thead>
+        <tbody>
+          <tr><td>PC-B1 Web Browser → http://203.0.113.10</td><td class="y">Internet page loads (failed in Lab 1)</td></tr>
+          <tr><td>PC-HQ and PC-B2 → http://203.0.113.10</td><td class="y">Loads (the guest may use the internet)</td></tr>
+          <tr><td>INTERNET-SRV Web Browser → http://209.165.200.229</td><td class="y">SRV-HQ's page loads from the internet</td></tr>
+          <tr><td>INTERNET-SRV ping 192.168.20.100</td><td class="n">Fails: private addresses are not routed on the internet</td></tr>
+        </tbody>
+      </table></div>
+      <div class="cli" data-t="HQ"><pre>HQ# show ip nat translations
+Pro  Inside global         Inside local          Outside local       Outside global
+tcp  209.165.200.226:1025  192.168.10.10:1025    203.0.113.10:80     203.0.113.10:80
+tcp  209.165.200.226:1024  192.168.20.10:1025    203.0.113.10:80     203.0.113.10:80
+tcp  209.165.200.229:80    192.168.20.100:80     203.0.113.10:1026   203.0.113.10:1026
+---  209.165.200.229       192.168.20.100        ---                 ---
+HQ# show ip nat statistics      ! inside and outside interfaces, hits, misses
+HQ# clear ip nat translation *</pre></div>
+      <div class="note"><b>See it happen</b>Switch Packet Tracer to <b>Simulation</b> mode, filter on HTTP/TCP, and send a web request from PC-B1. Click the packet before and after HQ: the source changes from 192.168.10.10 to 209.165.200.226.</div>
+      <div class="checklist"><h4>Lab 5 done when</h4>
+        <label class="check"><input type="checkbox" id="c5-1"> All inside PCs reach INTERNET-SRV through PAT</label>
+        <label class="check"><input type="checkbox" id="c5-2"> SRV-HQ reachable from the internet at 209.165.200.229</label>
+        <label class="check"><input type="checkbox" id="c5-3"> Identified inside local, inside global and outside global in the translation table</label>
+      </div>
+    </section>
+
+    <!-- LAB 6 -->
+    <section class="unit" id="l-6">
+      <div class="lab-head"><div><div class="sec-label">Lab 6 · 45 min</div><h2>Secure the WAN edge, then troubleshoot</h2></div><div class="lab-meta"><span class="chip">8.3</span></div></div>
+      <h3>Part A · Harden HQ (10 min)</h3>
+      <div class="cli" data-t="HQ"><pre>HQ(config)# service password-encryption
+HQ(config)# interface s0/0/1
+HQ(config-if)# no cdp enable                 ! do not advertise to the ISP
+HQ(config-if)# exit
+HQ(config)# ip access-list extended OUTSIDE-IN
+HQ(config-ext-nacl)# remark Anti-spoofing: no private sources from the internet
+HQ(config-ext-nacl)# deny ip 10.0.0.0 0.255.255.255 any
+HQ(config-ext-nacl)# deny ip 172.16.0.0 0.15.255.255 any
+HQ(config-ext-nacl)# deny ip 192.168.0.0 0.0.255.255 any
+HQ(config-ext-nacl)# permit ip any any
+HQ(config-ext-nacl)# exit
+HQ(config)# interface s0/0/1
+HQ(config-if)# ip access-group OUTSIDE-IN in
+HQ(config-if)# end
+HQ# copy running-config startup-config</pre></div>
+      <p class="prose">Re-test Lab 5: internet access and the published server still work. <code>show running-config</code> now shows passwords as type 7 strings.</p>
+      <h3>Part B · Trouble tickets</h3>
+      <p class="prose">Work in pairs: one student secretly injects a fault, the other uses only show and debug commands to find it. Log: symptom → command → finding → fix.</p>
+      <div class="ctl"><button class="btn" id="tk-reveal-all">Reveal all solutions (instructor)</button><button class="btn" id="tk-hide-all">Hide all</button></div>
+      <div id="tickets"></div>
+      <div class="checklist"><h4>Lab 6 done when</h4>
+        <label class="check"><input type="checkbox" id="c6-1"> HQ hardened, services still working</label>
+        <label class="check"><input type="checkbox" id="c6-2"> All six tickets solved and logged</label>
+      </div>
+    </section>
+
+    <section class="unit" id="l-final">
+      <div class="sec-label">Reference</div>
+      <h2>Final configurations</h2>
+      <p class="lead">End state after Labs 1–6. Use it to check your work.</p>
+      <div class="tabs" role="tablist" data-group="fc"><button aria-selected="true">BRANCH</button><button aria-selected="false">HQ</button><button aria-selected="false">ISP</button></div>
+      <div class="tabpanes" data-group="fc">
+        <div class="cli" data-t="BRANCH" data-plain><pre id="fc-b"></pre></div>
+        <div class="cli" data-t="HQ" data-plain hidden><pre id="fc-h"></pre></div>
+        <div class="cli" data-t="ISP" data-plain hidden><pre id="fc-i"></pre></div>
+      </div>
+    </section>
+
+    <section class="unit" id="l-report">
+      <div class="sec-label">Assessment</div>
+      <h2>Lab report questions</h2>
+      <ol class="prose">
+        <li>Why did the serial link show "up, line protocol down" in Lab 2 Part A?</li>
+        <li>For CHAP, why must each router's <code>username</code> be the other router's hostname?</li>
+        <li>Why is NO-GUEST placed on HQ G0/0 outbound and not on BRANCH?</li>
+        <li>Why is BRANCH-IN placed on BRANCH G0/0 inbound?</li>
+        <li>Why could PC-B1 not reach INTERNET-SRV before NAT, but HQ could?</li>
+        <li>From your translation table, list the inside local, inside global and outside global addresses for one session.</li>
+        <li>Why is <code>ip nat inside</code> needed on HQ S0/0/0 as well as G0/0?</li>
+      </ol>
+      <div class="tw"><table>
+        <thead><tr><th>Criterion</th><th class="num">Marks</th></tr></thead>
+        <tbody>
+          <tr><td>Labs 1–5 working, with show-command screenshots</td><td class="num">50</td></tr>
+          <tr><td>Test tables completed (Labs 3–5)</td><td class="num">15</td></tr>
+          <tr><td>Hardening + troubleshooting log (Lab 6)</td><td class="num">20</td></tr>
+          <tr><td>Report questions</td><td class="num">15</td></tr>
+          <tr><td><b>Total</b></td><td class="num"><b>100</b></td></tr>
+        </tbody>
+      </table></div>
+      <div class="ctl"><button class="btn danger" id="reset-checks">Clear my lab checkboxes and notes</button><span id="reset-msg" style="font-size:.85rem;color:var(--muted)"></span></div>
+    </section>
+  </main>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const SVGNS="http://www.w3.org/2000/svg";
+function el(tag,attrs,parent,text){const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(text!=null)e.textContent=text;if(parent)parent.appendChild(e);return e;}
+const PROMPT=/^([A-Za-z][\w-]*(\([\w-]+\))?[#>])\s?(.*)$/;
+function highlight(pre){
+  const plain=pre.closest(".cli")&&pre.closest(".cli").hasAttribute("data-plain");
+  pre.innerHTML=pre.textContent.split("\n").map(l=>{
+    if(/^\s*!/.test(l))return '<span class="c">'+esc(l)+'</span>';
+    const m=l.match(PROMPT);
+    if(m){let rest=m[3],cm="";const i=rest.indexOf(" !");if(i>=0){cm=rest.slice(i);rest=rest.slice(0,i);}
+      return '<span class="p">'+esc(m[1])+'</span> '+esc(rest)+(cm?'<span class="c">'+esc(cm)+'</span>':"");}
+    if(plain)return esc(l);
+    return l.trim()?'<span class="o">'+esc(l)+'</span>':"";
+  }).join("\n");
+}
+function decorateCli(box){
+  if(box.dataset.done)return; box.dataset.done="1";
+  const pre=$("pre",box); if(!pre)return;
+  const bar=document.createElement("div"); bar.className="bar";
+  const t=document.createElement("span"); t.textContent=box.dataset.t||"CLI"; bar.appendChild(t);
+  const b=document.createElement("button"); b.className="copy"; b.type="button"; b.textContent="Copy";
+  b.addEventListener("click",()=>{
+    const cmds=[];let hasPrompt=false;
+    pre.textContent.split("\n").forEach(l=>{const m=l.match(PROMPT);if(m){hasPrompt=true;let c=m[3];const i=c.indexOf(" !");if(i>=0)c=c.slice(0,i);c=c.trimEnd();if(c)cmds.push(c);}});
+    const txt=hasPrompt?cmds.join("\n"):pre.textContent;
+    const done=()=>{b.textContent="Copied";setTimeout(()=>b.textContent="Copy",1400)};
+    const fallback=()=>{const r=document.createRange();r.selectNodeContents(pre);const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent="Selected";setTimeout(()=>b.textContent="Copy",1400)};
+    try{navigator.clipboard.writeText(txt).then(done,fallback)}catch(e){fallback()}
+  });
+  bar.appendChild(b); box.insertBefore(bar,pre); highlight(pre);
+}
+function initTabs(){
+  $$(".tabs[data-group]").forEach(tabs=>{
+    const panes=$('.tabpanes[data-group="'+tabs.dataset.group+'"]'); if(!panes)return;
+    const btns=$$("button",tabs), items=Array.from(panes.children);
+    btns.forEach((b,i)=>{b.type="button";b.setAttribute("role","tab");b.addEventListener("click",()=>{
+      btns.forEach((x,j)=>x.setAttribute("aria-selected",j===i?"true":"false"));items.forEach((p,j)=>p.hidden=j!==i);});});
+  });
+}
+function initRail(){
+  const map=new Map();$$(".rail a").forEach(a=>map.set(a.getAttribute("href").slice(1),a));
+  if(!("IntersectionObserver" in window))return;
+  const io=new IntersectionObserver(ents=>{ents.forEach(en=>{if(en.isIntersecting){const a=map.get(en.target.id);if(!a)return;$$("a",a.parentNode).forEach(x=>x.classList.remove("on"));a.classList.add("on");}});},{rootMargin:"-20% 0px -70% 0px"});
+  $$("section.unit[id]").forEach(s=>io.observe(s));
+}
+function initQuiz(QUIZ){
+  const box=$("#quiz"); if(!box)return; let tried=0,right=0;
+  QUIZ.forEach((q,qi)=>{const d=document.createElement("div");d.className="q";
+    d.innerHTML="<p class='qt'>"+(qi+1)+". "+esc(q[0])+"</p><div class='opts'></div><div class='why' hidden></div>";
+    const o=$(".opts",d);
+    q[1].forEach((t,i)=>{const b=document.createElement("button");b.type="button";b.textContent=String.fromCharCode(65+i)+". "+t;
+      b.addEventListener("click",()=>{if(d.dataset.done)return;d.dataset.done="1";tried++;
+        if(i===q[2]){b.classList.add("right");right++;}else{b.classList.add("wrong");o.children[q[2]].classList.add("right");}
+        const w=$(".why",d);w.hidden=false;w.textContent=(i===q[2]?"Correct. ":"Not quite. ")+q[3];
+        $("#qz-score").textContent=right+" / "+tried+" (of "+QUIZ.length+")";});
+      o.appendChild(b);});
+    box.appendChild(d);});
+  $("#qz-score").textContent="0 / 0 (of "+QUIZ.length+")";
+}
+function initPersist(key){
+  const get=()=>{try{return JSON.parse(localStorage.getItem(key)||"{}")}catch(e){return{}}};
+  const set=o=>{try{localStorage.setItem(key,JSON.stringify(o))}catch(e){}};
+  const fields=$$("main input[type=checkbox][id], main input[type=text][id].note-in");
+  const data=get();
+  fields.forEach(f=>{if(f.type==="checkbox")f.checked=!!data[f.id];else if(data[f.id])f.value=data[f.id];
+    f.addEventListener(f.type==="checkbox"?"change":"input",()=>{const d=get();d[f.id]=f.type==="checkbox"?f.checked:f.value;set(d);prog();});});
+  function prog(){const p=$("#progress");if(!p)return;const cb=$$("main input[type=checkbox][id]");p.textContent="Lab tasks: "+cb.filter(c=>c.checked).length+" / "+cb.length+" done";}
+  prog();
+  const r=$("#reset-checks");
+  if(r)r.addEventListener("click",()=>{if(r.dataset.arm!=="1"){r.dataset.arm="1";r.textContent="Click again to confirm";setTimeout(()=>{r.dataset.arm="";r.textContent="Clear my lab checkboxes and notes";},3000);return;}
+    set({});fields.forEach(f=>{if(f.type==="checkbox")f.checked=false;else f.value="";});r.dataset.arm="";r.textContent="Clear my lab checkboxes and notes";const m=$("#reset-msg");if(m)m.textContent="Cleared.";prog();});
+}
+
+/* ---------- topology ---------- */
+function initTopo8(){
+  const svg=$("#topo8"); if(!svg)return;
+  const info=$("#devinfo");
+  const N={
+    "PC-B1":{x:60,y:60,k:"pc",t:"192.168.10.10/24 · gw 192.168.10.1 · branch staff"},
+    "PC-B2":{x:60,y:170,k:"pc",t:"192.168.10.20/24 · gw 192.168.10.1 · branch guest"},
+    "SW-B":{x:170,y:115,k:"sw",t:"2960, no configuration needed"},
+    "BRANCH":{x:300,y:115,k:"rt",t:"G0/0 192.168.10.1/24 · S0/0/0 10.1.1.1/30 (DTE) · PPP + CHAP to HQ · extended ACL BRANCH-IN"},
+    "HQ":{x:520,y:115,k:"rt",t:"G0/0 192.168.20.1/24 · S0/0/0 10.1.1.2/30 (DCE) · S0/0/1 209.165.200.226/29 · NAT, standard ACLs, VTY ACL"},
+    "ISP":{x:740,y:115,k:"rt",t:"S0/0/0 209.165.200.225/29 (DCE, HDLC) · G0/0 203.0.113.1/24 · no routes to private networks"},
+    "INTERNET-SRV":{x:840,y:250,k:"srv",t:"203.0.113.10/24 · gw 203.0.113.1 · web server on the internet"},
+    "SW-HQ":{x:520,y:215,k:"sw",t:"2960, no configuration needed"},
+    "PC-HQ":{x:440,y:295,k:"pc",t:"192.168.20.10/24 · gw 192.168.20.1 · HQ admin (only PC allowed to Telnet to HQ)"},
+    "SRV-HQ":{x:610,y:295,k:"srv",t:"192.168.20.100/24 · gw 192.168.20.1 · HQ web server · public 209.165.200.229 (static NAT)"}
+  };
+  const L=[["PC-B1","SW-B"],["PC-B2","SW-B"],["SW-B","BRANCH"],["HQ","SW-HQ"],["SW-HQ","PC-HQ"],["SW-HQ","SRV-HQ"],["ISP","INTERNET-SRV"]];
+  L.forEach(([a,b])=>el("line",{x1:N[a].x,y1:N[a].y,x2:N[b].x,y2:N[b].y,stroke:"var(--mg)","stroke-width":2},svg));
+  const zig=(x1,x2,y,c)=>{const m=(x1+x2)/2;el("polyline",{points:x1+","+y+" "+(m-8)+","+y+" "+(m+4)+","+(y-12)+" "+(m-4)+","+(y+12)+" "+(m+8)+","+y+" "+x2+","+y,fill:"none",stroke:c,"stroke-width":3},svg);};
+  zig(300,520,115,"var(--accent)"); zig(520,740,115,"var(--amber)");
+  el("text",{x:410,y:92,"text-anchor":"middle",class:"svg-t",fill:"var(--accent)"},svg,"PPP + CHAP");
+  el("text",{x:410,y:146,"text-anchor":"middle",class:"svg-m"},svg,"10.1.1.0/30 · S0/0/0 ↔ S0/0/0");
+  el("text",{x:630,y:92,"text-anchor":"middle",class:"svg-t",fill:"var(--amber)"},svg,"HDLC");
+  el("text",{x:630,y:146,"text-anchor":"middle",class:"svg-m"},svg,"209.165.200.224/29");
+  el("text",{x:180,y:22,"text-anchor":"middle",class:"svg-m"},svg,"BRANCH LAN 192.168.10.0/24");
+  el("text",{x:520,y:325,"text-anchor":"middle",class:"svg-m"},svg,"HQ LAN 192.168.20.0/24 (NAT inside)");
+  el("text",{x:780,y:22,"text-anchor":"middle",class:"svg-m"},svg,"INTERNET 203.0.113.0/24");
+  el("text",{x:494,y:166,"text-anchor":"end",class:"svg-m"},svg,"DCE");el("text",{x:716,y:166,"text-anchor":"end",class:"svg-m"},svg,"DCE");
+  const fill={pc:"var(--accent-soft)",srv:"var(--ok-soft)",sw:"var(--surface-2)",rt:"var(--surface)"};
+  Object.entries(N).forEach(([n,d])=>{const g=el("g",{class:"topo-node",tabindex:0,role:"button","aria-label":n},svg);
+    const w=d.k==="rt"?96:d.k==="sw"?64:(n.length>7?108:76),h=d.k==="rt"?40:30;
+    if(d.k==="rt")el("rect",{x:d.x-w/2,y:d.y-h/2,width:w,height:h,rx:20,fill:fill[d.k],stroke:"var(--ink)","stroke-width":2},g);
+    else el("rect",{x:d.x-w/2,y:d.y-h/2,width:w,height:h,rx:5,fill:fill[d.k],stroke:"var(--ink)","stroke-width":1.2},g);
+    el("text",{x:d.x,y:d.y+4,"text-anchor":"middle",class:"svg-t","font-weight":d.k==="rt"?"600":"400"},g,n);
+    const act=()=>{info.innerHTML="<b>"+n+"</b><br><span style='font-family:var(--f-mono);font-size:.88rem'>"+esc(d.t)+"</span>";};
+    g.addEventListener("click",act);g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();act();}});});
+}
+
+/* ---------- tickets ---------- */
+const TICKETS8=[
+ {id:"TICKET 1",t:"Branch cut off after router replacement",s:"BRANCH and HQ both show S0/0/0 'up, line protocol down'.",inj:"BRANCH(config)# interface s0/0/0\nBRANCH(config-if)# encapsulation hdlc",diag:"show interfaces s0/0/0 on both: BRANCH says Encapsulation HDLC, HQ says PPP. Layer 1 is fine, Layer 2 does not match.",fix:"BRANCH(config)# interface s0/0/0\nBRANCH(config-if)# encapsulation ppp\nBRANCH(config-if)# ppp authentication chap",lesson:"Both ends of a serial link must use the same encapsulation."},
+ {id:"TICKET 2",t:"WAN link down after a password change",s:"Serial link up/down. Encapsulation is PPP on both ends.",inj:"HQ(config)# username BRANCH password Cisco999",diag:"debug ppp authentication on HQ shows CHAP failures. show running-config | include username on both routers: the secrets differ.",fix:"HQ(config)# username BRANCH password Cisco123",lesson:"CHAP secrets must be identical on both routers."},
+ {id:"TICKET 3",t:"Serial link to branch will not come up",s:"HQ S0/0/0 is down after HQ was reconfigured.",inj:"HQ(config)# interface s0/0/0\nHQ(config-if)# no clock rate",diag:"show controllers serial 0/0/0 on HQ: DCE cable attached, but no clock rate configured.",fix:"HQ(config)# interface s0/0/0\nHQ(config-if)# clock rate 128000",lesson:"The DCE end of a back-to-back serial link must supply the clock."},
+ {id:"TICKET 4",t:"Nobody can reach the HQ LAN",s:"Branch staff cannot open SRV-HQ, and PC-HQ has lost internet access too.",inj:"HQ(config)# ip access-list standard NO-GUEST\nHQ(config-std-nacl)# no permit any",diag:"show access-lists NO-GUEST: only 'deny host 192.168.10.20' remains. Everything else hits the implicit deny as it leaves G0/0, including internet replies to PC-HQ.",fix:"HQ(config)# ip access-list standard NO-GUEST\nHQ(config-std-nacl)# permit any",lesson:"Every ACL needs at least one permit; the implicit deny catches everything else."},
+ {id:"TICKET 5",t:"Branch has no internet, HQ does",s:"PC-HQ can browse 203.0.113.10, but PC-B1 and PC-B2 cannot.",inj:"HQ(config)# interface s0/0/0\nHQ(config-if)# no ip nat inside",diag:"show ip nat statistics: Inside interfaces lists only GigabitEthernet0/0. Packets from the branch arrive on S0/0/0, which is not marked inside, so they are not translated. show ip nat translations shows no 192.168.10.x entries.",fix:"HQ(config)# interface s0/0/0\nHQ(config-if)# ip nat inside",lesson:"Every interface where inside traffic enters needs ip nat inside."},
+ {id:"TICKET 6",t:"Branch can suddenly ping PC-HQ",s:"Security audit: branch PCs can now reach every HQ host, against policy.",inj:"BRANCH(config)# interface g0/0\nBRANCH(config-if)# no ip access-group BRANCH-IN in\nBRANCH(config-if)# ip access-group BRANCH-IN out",diag:"show ip interface g0/0 on BRANCH: Outgoing access list is BRANCH-IN, inbound is not set. Traffic from branch PCs enters G0/0 unfiltered; outbound packets towards the PCs have HQ sources, so only 'permit ip any any' matches.",fix:"BRANCH(config)# interface g0/0\nBRANCH(config-if)# no ip access-group BRANCH-IN out\nBRANCH(config-if)# ip access-group BRANCH-IN in",lesson:"Direction matters. Think from the router's point of view: in = arriving on that interface."}
+];
+function initTickets8(){
+  const box=$("#tickets"); if(!box)return;
+  box.innerHTML=TICKETS8.map((k,i)=>"<div class='ticket'><div class='tid'>"+k.id+"</div><h4>"+esc(k.t)+"</h4><p style='margin:.2rem 0'><b>Reported symptom:</b> "+esc(k.s)+"</p>"+
+    "<details class='tk'><summary>Instructor: fault to inject</summary><div class='cli' data-t='inject'><pre>"+esc(k.inj)+"</pre></div></details>"+
+    "<details class='tk'><summary>Diagnosis and fix</summary><p>"+esc(k.diag)+"</p><div class='cli' data-t='fix'><pre>"+esc(k.fix)+"</pre></div><p style='color:var(--muted);font-size:.9rem'><b>Lesson:</b> "+esc(k.lesson)+"</p></details>"+
+    "<label class='check'><input type='checkbox' id='tk-"+i+"'> Ticket solved and logged</label></div>").join("");
+  $("#tk-reveal-all").addEventListener("click",()=>$$("details.tk").forEach(d=>d.open=true));
+  $("#tk-hide-all").addEventListener("click",()=>$$("details.tk").forEach(d=>d.open=false));
+}
+
+/* ---------- final configs ---------- */
+function finalConfigs(){
+  const B=`hostname BRANCH
+!
+no ip domain-lookup
+username HQ password 7 <encrypted Cisco123>
+!
+interface GigabitEthernet0/0
+ ip address 192.168.10.1 255.255.255.0
+ ip access-group BRANCH-IN in
+!
+interface Serial0/0/0
+ ip address 10.1.1.1 255.255.255.252
+ encapsulation ppp
+ ppp authentication chap
+!
+ip route 0.0.0.0 0.0.0.0 10.1.1.2
+!
+ip access-list extended BRANCH-IN
+ remark Branch to HQ: web server only
+ permit tcp 192.168.10.0 0.0.0.255 host 192.168.20.100 eq www
+ permit icmp 192.168.10.0 0.0.0.255 host 192.168.20.100 echo
+ deny ip 192.168.10.0 0.0.0.255 192.168.20.0 0.0.0.255
+ permit ip any any
+!
+end`;
+  const H=`hostname HQ
+!
+enable secret 5 <hash of Class123>
+service password-encryption
+no ip domain-lookup
+username BRANCH password 7 <encrypted Cisco123>
+!
+interface GigabitEthernet0/0
+ ip address 192.168.20.1 255.255.255.0
+ ip access-group NO-GUEST out
+ ip nat inside
+!
+interface Serial0/0/0
+ ip address 10.1.1.2 255.255.255.252
+ encapsulation ppp
+ ppp authentication chap
+ ip nat inside
+ clock rate 128000
+!
+interface Serial0/0/1
+ ip address 209.165.200.226 255.255.255.248
+ ip access-group OUTSIDE-IN in
+ ip nat outside
+ no cdp enable
+!
+ip nat inside source static 192.168.20.100 209.165.200.229
+ip nat inside source list 1 interface Serial0/0/1 overload
+!
+ip route 192.168.10.0 255.255.255.0 10.1.1.1
+ip route 0.0.0.0 0.0.0.0 209.165.200.225
+!
+access-list 1 permit 192.168.10.0 0.0.0.255
+access-list 1 permit 192.168.20.0 0.0.0.255
+access-list 5 permit host 192.168.20.10
+!
+ip access-list standard NO-GUEST
+ remark Guest PC may not enter HQ LAN
+ deny host 192.168.10.20
+ permit any
+!
+ip access-list extended OUTSIDE-IN
+ remark Anti-spoofing: no private sources from the internet
+ deny ip 10.0.0.0 0.255.255.255 any
+ deny ip 172.16.0.0 0.15.255.255 any
+ deny ip 192.168.0.0 0.0.255.255 any
+ permit ip any any
+!
+line vty 0 4
+ access-class 5 in
+ password 7 <encrypted Telnet123>
+ login
+!
+end`;
+  const I=`hostname ISP
+!
+no ip domain-lookup
+!
+interface GigabitEthernet0/0
+ ip address 203.0.113.1 255.255.255.0
+!
+interface Serial0/0/0
+ ip address 209.165.200.225 255.255.255.248
+ clock rate 128000
+ ! encapsulation hdlc is the default and is not shown
+!
+! no routes to private networks
+end`;
+  [["#fc-b",B],["#fc-h",H],["#fc-i",I]].forEach(([s,t])=>{const p=$(s);if(p)p.textContent=t;});
+}
+
+initTopo8(); initTickets8(); finalConfigs();
+$$(".cli").forEach(decorateCli); initTabs(); initPersist("u8lab"); initRail();
+
+})();
+</script>
+</body>
+</html>

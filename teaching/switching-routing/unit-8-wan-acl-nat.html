@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Unit 8 WAN Theory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: NOC-console teaching tool — sticky top bar with Theory/Lab mode switch, left index rail, single reading column with embedded simulators. */
+:root{
+  --bg:#F3F5F6; --surface:#FFFFFF; --surface-2:#E9EEF1; --ink:#13212A; --muted:#566874; --line:#D3DCE1;
+  --accent:#0A6A8F; --accent-soft:#DCEEF5; --amber:#A85A06; --amber-soft:#FBEBD6;
+  --ok:#23784A; --ok-soft:#DDF1E5; --bad:#B3261E; --bad-soft:#FBE1DE;
+  --t4g:#2459B0; --t4g-soft:#E0E9F8; --t3g:#1D7E54; --t3g-soft:#DDF2E7; --t2g:#7340AA; --t2g-soft:#EEE5F8; --mg:#5F6E78; --mg-soft:#E7ECEF;
+  --code-bg:#0F1C24; --code-fg:#D3E1E8; --code-dim:#7F97A4; --code-prompt:#6FC3E4; --code-cmt:#E0A458; --code-out:#A9C4B5;
+  --f-display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --f-body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+  --r:8px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0D151A; --surface:#141F26; --surface-2:#1B2831; --ink:#E2EAEE; --muted:#93A4AE; --line:#27363F;
+  --accent:#58B6DB; --accent-soft:#16313D; --amber:#E7A04F; --amber-soft:#3A2A16;
+  --ok:#62C48F; --ok-soft:#173226; --bad:#F27A6F; --bad-soft:#3D1D1A;
+  --t4g:#78A6EC; --t4g-soft:#1A2943; --t3g:#62C99A; --t3g-soft:#163327; --t2g:#B694E2; --t2g-soft:#2A2040; --mg:#9AA8B1; --mg-soft:#222E35;
+  --code-bg:#091116; --code-fg:#D3E1E8; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0D151A; --surface:#141F26; --surface-2:#1B2831; --ink:#E2EAEE; --muted:#93A4AE; --line:#27363F;
+  --accent:#58B6DB; --accent-soft:#16313D; --amber:#E7A04F; --amber-soft:#3A2A16;
+  --ok:#62C48F; --ok-soft:#173226; --bad:#F27A6F; --bad-soft:#3D1D1A;
+  --t4g:#78A6EC; --t4g-soft:#1A2943; --t3g:#62C99A; --t3g-soft:#163327; --t2g:#B694E2; --t2g-soft:#2A2040; --mg:#9AA8B1; --mg-soft:#222E35;
+  --code-bg:#091116; --code-fg:#D3E1E8; color-scheme:dark;}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.6}
+a{color:var(--accent)}
+h1,h2,h3,h4{font-family:var(--f-display);line-height:1.2;text-wrap:balance;margin:0}
+h2{font-size:1.75rem;font-weight:800;letter-spacing:-.01em}
+h3{font-size:1.2rem;font-weight:700;margin-top:2rem}
+h4{font-size:1rem;font-weight:700;margin-top:1.25rem}
+p{margin:.6rem 0}
+code{font-family:var(--f-mono);font-size:.88em;background:var(--surface-2);padding:.08em .35em;border-radius:4px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* top bar */
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
+.topbar-in{max-width:1280px;margin:0 auto;padding:.6rem 16px;display:flex;flex-wrap:wrap;gap:.6rem 1.2rem;align-items:center}
+.brand{display:flex;flex-direction:column;min-width:0;flex:1 1 260px}
+.brand .eyebrow{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.brand strong{font-family:var(--f-display);font-size:1.15rem;font-weight:800}
+.modes{display:flex;background:var(--surface-2);border-radius:999px;padding:3px;gap:3px}
+.modes button{border:0;background:transparent;color:var(--muted);font:600 .92rem var(--f-body);padding:.42rem 1.1rem;border-radius:999px;cursor:pointer}
+.modes button[aria-selected="true"]{background:var(--ink);color:var(--surface)}
+.progress{font-family:var(--f-mono);font-size:.78rem;color:var(--muted);white-space:nowrap}
+
+/* shell */
+.shell{max-width:1280px;margin:0 auto;padding-inline:16px;padding-block:1.5rem 4rem;display:grid;grid-template-columns:230px minmax(0,1fr);gap:2.5rem}
+.rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px);align-self:start;max-height:calc(100vh - 100px);overflow:auto}
+.rail nav{display:flex;flex-direction:column;gap:2px}
+.rail .rh{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:.2rem 0 .5rem}
+.rail a{display:block;text-decoration:none;color:var(--ink);font-size:.9rem;padding:.38rem .6rem;border-radius:6px;border-left:3px solid transparent}
+.rail a:hover{background:var(--surface-2)}
+.rail a.on{border-left-color:var(--accent);background:var(--accent-soft);font-weight:600}
+.rail a .n{font-family:var(--f-mono);font-size:.78rem;color:var(--muted);margin-right:.35rem}
+main{min-width:0}
+section.unit{padding-block:.5rem 2.5rem;border-bottom:1px solid var(--line);margin-bottom:2rem;scroll-margin-top:90px}
+section.unit:last-child{border-bottom:0}
+.sec-label{font-family:var(--f-mono);font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:.35rem}
+.lead{font-size:1.06rem;color:var(--muted);max-width:68ch}
+.prose{max-width:72ch}
+.hero{padding:1.2rem 0 1.6rem;border-bottom:1px solid var(--line);margin-bottom:2rem}
+.hero h1{font-size:clamp(1.8rem,4vw,2.6rem);font-weight:800;letter-spacing:-.02em}
+.hero .meta{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.9rem}
+.chip{display:inline-flex;align-items:center;gap:.35rem;font:500 .78rem var(--f-mono);padding:.2rem .6rem;border-radius:999px;background:var(--surface-2);color:var(--ink);border:1px solid var(--line)}
+.chip.t4g{background:var(--t4g-soft);color:var(--t4g);border-color:transparent}
+.chip.t3g{background:var(--t3g-soft);color:var(--t3g);border-color:transparent}
+.chip.t2g{background:var(--t2g-soft);color:var(--t2g);border-color:transparent}
+.chip.mg{background:var(--mg-soft);color:var(--mg);border-color:transparent}
+.outcomes{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:.8rem;margin-top:1.2rem}
+.outcomes div{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:.8rem .9rem;font-size:.92rem}
+.outcomes b{display:block;font-family:var(--f-mono);font-size:.72rem;color:var(--accent);letter-spacing:.06em;text-transform:uppercase;margin-bottom:.2rem}
+
+/* tables */
+.tw{overflow-x:auto;margin:1rem 0;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{text-align:left;padding:.5rem .7rem;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--f-mono);font-size:.74rem;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);background:var(--surface-2);font-weight:600}
+tr:last-child td{border-bottom:0}
+td.num,th.num{font-variant-numeric:tabular-nums;text-align:right}
+.y{color:var(--ok);font-weight:600}.n{color:var(--bad);font-weight:600}
+
+/* callouts */
+.note{border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:.8rem 1rem;margin:1rem 0;font-size:.94rem}
+.note.key{background:var(--accent-soft);border-color:transparent}
+.note.warn{background:var(--amber-soft);border-color:transparent}
+.note.bad{background:var(--bad-soft);border-color:transparent}
+.note.tel{background:var(--surface);border-left:4px solid var(--t4g)}
+.note > b:first-child{display:block;font-family:var(--f-mono);font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.2rem}
+
+/* code */
+.cli{position:relative;background:var(--code-bg);color:var(--code-fg);border-radius:var(--r);margin:1rem 0;overflow:hidden}
+.cli .bar{display:flex;justify-content:space-between;align-items:center;gap:.5rem;padding:.35rem .5rem .35rem .8rem;background:rgba(255,255,255,.05);font:500 .72rem var(--f-mono);color:var(--code-dim);letter-spacing:.05em;text-transform:uppercase}
+.cli pre{margin:0;padding:.8rem 1rem;overflow-x:auto;font:400 .84rem/1.55 var(--f-mono);white-space:pre}
+.cli .p{color:var(--code-prompt)} .cli .c{color:var(--code-cmt)} .cli .o{color:var(--code-out)}
+.copy{border:1px solid rgba(255,255,255,.18);background:transparent;color:var(--code-fg);font:500 .72rem var(--f-mono);padding:.2rem .55rem;border-radius:4px;cursor:pointer}
+.copy:hover{background:rgba(255,255,255,.1)}
+.tabs{display:flex;flex-wrap:wrap;gap:4px;margin-top:1rem}
+.tabs button{border:1px solid var(--line);background:var(--surface);color:var(--muted);font:600 .8rem var(--f-mono);padding:.3rem .7rem;border-radius:6px 6px 0 0;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--code-bg);color:var(--code-fg);border-color:var(--code-bg)}
+.tabs + .tabpanes .cli{margin-top:0;border-top-left-radius:0}
+
+/* widgets */
+.widget{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:1rem;margin:1.4rem 0}
+.widget-h{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:.4rem 1rem;margin-bottom:.7rem}
+.widget-h h4{margin:0;font-size:1.02rem}
+.widget-h span{font:500 .72rem var(--f-mono);color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.ctl{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin:.5rem 0}
+.btn{border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font:600 .85rem var(--f-body);padding:.42rem .8rem;border-radius:6px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.btn.danger{background:var(--bad-soft);border-color:transparent;color:var(--bad)}
+select,input[type=text],input[type=number]{font:500 .86rem var(--f-mono);padding:.35rem .5rem;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);min-width:0}
+label.f{display:flex;flex-direction:column;gap:.2rem;font-size:.78rem;color:var(--muted);font-family:var(--f-mono)}
+.svgwrap{overflow-x:auto}
+.svgwrap svg{display:block;max-width:100%;height:auto;margin:0 auto}
+.svg-t{fill:var(--ink);font-family:var(--f-mono);font-size:12px}
+.svg-m{fill:var(--muted);font-family:var(--f-mono);font-size:10.5px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;align-items:start}
+.grid2 > *{min-width:0}
+.stat{display:flex;gap:1.2rem;flex-wrap:wrap;font-family:var(--f-mono);font-size:.82rem}
+.stat b{font-size:1.15rem;font-variant-numeric:tabular-nums;display:block;color:var(--ink)}
+.meter{height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden;margin-top:.25rem;width:140px}
+.meter i{display:block;height:100%;background:var(--ok);width:5%;transition:width .3s}
+.log{background:var(--code-bg);color:var(--code-out);font:400 .78rem/1.5 var(--f-mono);padding:.6rem .8rem;border-radius:6px;height:150px;overflow:auto;white-space:pre-wrap}
+.pill{display:inline-block;font:600 .74rem var(--f-mono);padding:.15rem .55rem;border-radius:999px}
+.pill.up{background:var(--ok-soft);color:var(--ok)} .pill.down{background:var(--bad-soft);color:var(--bad)} .pill.mid{background:var(--amber-soft);color:var(--amber)}
+.timeline{display:flex;height:34px;border-radius:6px;overflow:hidden;border:1px solid var(--line);margin:.5rem 0}
+.timeline div{display:flex;align-items:center;justify-content:center;font:600 .7rem var(--f-mono);color:var(--ink);transition:opacity .3s;opacity:.3;white-space:nowrap;overflow:hidden}
+.timeline div.on{opacity:1}
+.matrix td,.matrix th{text-align:center}
+.matrix td.ok{background:var(--ok-soft);color:var(--ok);font-weight:600}
+.matrix td.no{background:var(--bad-soft);color:var(--bad)}
+.matrix td.hl{outline:3px solid var(--accent);outline-offset:-3px}
+
+/* quiz */
+.q{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:.8rem 1rem;margin:.7rem 0}
+.q p.qt{font-weight:600;margin:.1rem 0 .5rem}
+.q .opts{display:grid;gap:.35rem}
+.q .opts button{text-align:left;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font:400 .9rem var(--f-body);padding:.45rem .7rem;border-radius:6px;cursor:pointer}
+.q .opts button.right{background:var(--ok-soft);border-color:var(--ok);color:var(--ok);font-weight:600}
+.q .opts button.wrong{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.q .why{font-size:.88rem;color:var(--muted);margin-top:.5rem}
+details{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:.55rem .9rem;margin:.6rem 0}
+details summary{cursor:pointer;font-weight:600}
+details[open] summary{margin-bottom:.4rem}
+
+/* lab specifics */
+.lab-head{display:flex;flex-wrap:wrap;gap:.5rem 1rem;align-items:baseline;justify-content:space-between}
+.lab-meta{display:flex;gap:.4rem;flex-wrap:wrap}
+.ticket{border:1px solid var(--line);border-left:4px solid var(--amber);background:var(--surface);border-radius:var(--r);padding:.8rem 1rem;margin:1rem 0}
+.ticket .tid{font:600 .76rem var(--f-mono);color:var(--amber);letter-spacing:.05em}
+.ticket h4{margin:.15rem 0 .3rem}
+.steps{counter-reset:s;list-style:none;padding:0;margin:1rem 0}
+.steps > li{counter-increment:s;position:relative;padding:.1rem 0 .9rem 2.6rem}
+.steps > li::before{content:counter(s);position:absolute;left:0;top:.05rem;width:1.8rem;height:1.8rem;border-radius:50%;background:var(--surface-2);border:1px solid var(--line);font:600 .8rem/1.8rem var(--f-mono);text-align:center;color:var(--ink)}
+.check{display:flex;gap:.55rem;align-items:flex-start;padding:.35rem 0;font-size:.93rem}
+.check input{margin-top:.3rem;accent-color:var(--accent);width:1rem;height:1rem;flex:none}
+.checklist{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:.6rem 1rem;margin:1rem 0}
+.checklist h4{margin:.2rem 0 .3rem;font-size:.86rem;font-family:var(--f-mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.vl{display:inline-block;width:.7rem;height:.7rem;border-radius:2px;vertical-align:middle;margin-right:.3rem}
+.legend{display:flex;flex-wrap:wrap;gap:.4rem 1rem;font:500 .78rem var(--f-mono);color:var(--muted);margin:.4rem 0}
+.devinfo{min-height:4.5rem;font-size:.9rem;background:var(--surface-2);border-radius:6px;padding:.6rem .8rem;margin-top:.6rem}
+.topo-node{cursor:pointer}
+.topo-node:hover rect{stroke:var(--accent);stroke-width:2.5}
+@media (max-width:900px){
+  .shell{grid-template-columns:minmax(0,1fr);gap:1rem}
+  .rail{position:static;max-height:none}
+  .rail nav{flex-direction:row;flex-wrap:nowrap;overflow-x:auto;gap:4px;padding-bottom:4px}
+  .rail a{white-space:nowrap;border-left:0;border-bottom:3px solid transparent;font-size:.84rem}
+  .rail a.on{border-bottom-color:var(--accent)}
+  .rail .rh{display:none}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div style="font:14px/1.4 Inter,-apple-system,Segoe UI,sans-serif;background:#0b1d3a;padding:10px 16px;"><a href="/teaching/switching-routing.html" style="color:#fbf9f3;text-decoration:none;">&larr; Switching &amp; Routing &middot; all units</a></div>
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand"><span class="eyebrow">Computer Networks · Unit 8 · 6 hours · Theory</span><strong>WAN Connectivity, ACLs and NAT</strong></div>
+    <span class="progress">Companion page: Unit 8 Labs</span>
+  </div>
+</header>
+
+<div class="shell" id="theory">
+  <aside class="rail">
+    <div class="rh">Theory index</div>
+    <nav>
+      <a href="#t-intro"><span class="n">00</span>Outcomes</a>
+      <a href="#t-81"><span class="n">8.1</span>WAN concepts</a>
+      <a href="#t-81b"><span class="n">8.1</span>Serial, HDLC, PPP</a>
+      <a href="#t-82"><span class="n">8.2</span>Point-to-point config</a>
+      <a href="#t-82b"><span class="n">8.2</span>ACL concepts</a>
+      <a href="#t-82c"><span class="n">8.2</span>Standard &amp; extended ACLs</a>
+      <a href="#t-83"><span class="n">8.3</span>NAT &amp; PAT</a>
+      <a href="#t-83b"><span class="n">8.3</span>WAN security</a>
+      <a href="#t-quiz"><span class="n">Q</span>Review quiz</a>
+    </nav>
+  </aside>
+  <main>
+    <section class="unit hero" id="t-intro">
+      <div class="sec-label">Unit 8 · Theory</div>
+      <h1>WAN Connectivity, ACLs and NAT</h1>
+      <p class="lead">A LAN ends at the building wall. To reach a branch office or the internet, a router sends traffic over a WAN link it usually rents from a service provider. This unit covers how routers talk over serial WAN links (HDLC and PPP), how access control lists decide which packets may pass, and how NAT lets a whole private network share a few public addresses.</p>
+      <div class="meta">
+        <span class="chip">RFC 1661 PPP · RFC 1994 CHAP</span>
+        <span class="chip">RFC 1918 private addressing</span>
+        <span class="chip">Cisco ISR routers · Packet Tracer</span>
+      </div>
+      <div class="outcomes">
+        <div><b>Outcome 1</b>Explain WAN connectivity and the role of DTE, DCE, CSU/DSU and the service provider.</div>
+        <div><b>Outcome 2</b>Compare HDLC and PPP encapsulation and configure PPP with PAP or CHAP.</div>
+        <div><b>Outcome 3</b>Describe how ACLs are processed and where to place them.</div>
+        <div><b>Outcome 4</b>Implement standard and extended ACLs, numbered and named.</div>
+        <div><b>Outcome 5</b>Explain NAT terms and configure static NAT and PAT.</div>
+      </div>
+      <div class="tw"><table>
+        <thead><tr><th>Syllabus item</th><th>Topic</th><th class="num">Suggested time</th></tr></thead>
+        <tbody>
+          <tr><td>8.1</td><td>Router WAN interfaces and encapsulations (PPP, HDLC)</td><td class="num">1.5 h</td></tr>
+          <tr><td>8.2</td><td>Point-to-point WAN configuration; access control lists (standard and extended)</td><td class="num">2.5 h</td></tr>
+          <tr><td>8.3</td><td>NAT (static NAT, PAT); security considerations for WAN networks</td><td class="num">2 h</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- 8.1 -->
+    <section class="unit" id="t-81">
+      <div class="sec-label">8.1</div>
+      <h2>WAN concepts</h2>
+      <div class="prose">
+        <p>A <b>WAN (Wide Area Network)</b> connects sites over large distances. Unlike a LAN, the organisation usually does not own the cables: it rents a link from a <b>service provider</b> (telecom operator or ISP). WANs work mainly at the <b>physical and data link layers</b>: the provider moves bits, and the routers at each end agree on a Layer 2 encapsulation such as HDLC or PPP.</p>
+      </div>
+      <h3>WAN terminology</h3>
+      <div class="tw"><table>
+        <thead><tr><th>Term</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td>CPE (Customer Premises Equipment)</td><td>Devices at the customer site: the router, CSU/DSU, modem.</td></tr>
+          <tr><td>Demarcation point</td><td>Where customer responsibility ends and the provider's begins.</td></tr>
+          <tr><td>Local loop (last mile)</td><td>The cable from the customer site to the provider's nearest office.</td></tr>
+          <tr><td>CO (Central Office)</td><td>The provider's local facility that connects the local loop to its network.</td></tr>
+          <tr><td>DTE (Data Terminal Equipment)</td><td>The customer device that sends data onto the WAN, usually the router.</td></tr>
+          <tr><td>DCE (Data Communications Equipment)</td><td>The device that provides <b>clocking</b> to the DTE and connects it to the provider, such as a CSU/DSU or modem. In a lab, one router's serial port plays DCE.</td></tr>
+          <tr><td>CSU/DSU</td><td>Channel/Data Service Unit: converts the router's serial signal to the digital line format of a leased line.</td></tr>
+          <tr><td>Toll network</td><td>The provider's internal network of switches and links.</td></tr>
+        </tbody>
+      </table></div>
+      <div class="svgwrap"><svg viewBox="0 0 760 170" width="760" role="img" aria-label="Customer router (DTE) connects through CSU/DSU (DCE) over the local loop to the provider central office and toll network">
+        <rect x="10" y="60" width="110" height="46" rx="6" fill="var(--accent-soft)" stroke="var(--accent)"/><text x="65" y="80" text-anchor="middle" class="svg-t">Router</text><text x="65" y="96" text-anchor="middle" class="svg-m">DTE</text>
+        <line x1="120" y1="83" x2="170" y2="83" stroke="var(--ink)" stroke-width="2"/><text x="145" y="74" text-anchor="middle" class="svg-m">serial</text>
+        <rect x="170" y="60" width="110" height="46" rx="6" fill="var(--amber-soft)" stroke="var(--amber)"/><text x="225" y="80" text-anchor="middle" class="svg-t">CSU/DSU</text><text x="225" y="96" text-anchor="middle" class="svg-m">DCE · clock</text>
+        <line x1="300" y1="20" x2="300" y2="150" stroke="var(--bad)" stroke-dasharray="5 4"/><text x="300" y="164" text-anchor="middle" class="svg-m">demarcation</text>
+        <line x1="280" y1="83" x2="420" y2="83" stroke="var(--ink)" stroke-width="2"/><text x="355" y="74" text-anchor="middle" class="svg-m">local loop</text>
+        <rect x="420" y="60" width="100" height="46" rx="6" fill="var(--surface-2)" stroke="var(--line)"/><text x="470" y="88" text-anchor="middle" class="svg-t">CO</text>
+        <line x1="520" y1="83" x2="560" y2="83" stroke="var(--ink)" stroke-width="2"/>
+        <ellipse cx="650" cy="83" rx="95" ry="50" fill="var(--surface-2)" stroke="var(--line)"/><text x="650" y="80" text-anchor="middle" class="svg-t">Provider</text><text x="650" y="96" text-anchor="middle" class="svg-m">toll network</text>
+        <text x="65" y="40" text-anchor="middle" class="svg-m">CUSTOMER PREMISES (CPE)</text><text x="560" y="20" text-anchor="middle" class="svg-m">SERVICE PROVIDER</text>
+      </svg></div>
+      <h3>WAN connection options</h3>
+      <div class="tw"><table>
+        <thead><tr><th>Type</th><th>How it works</th><th>Examples</th><th>Typical encapsulation</th></tr></thead>
+        <tbody>
+          <tr><td>Leased line (point-to-point)</td><td>Dedicated, always-on circuit between two sites; fixed bandwidth; expensive.</td><td>T1/E1, T3/E3</td><td>HDLC, PPP</td></tr>
+          <tr><td>Circuit-switched</td><td>A circuit is set up per call, then torn down.</td><td>Dial-up, ISDN</td><td>PPP</td></tr>
+          <tr><td>Packet-switched</td><td>Many customers share the provider network using virtual circuits or labels.</td><td>Frame Relay (legacy), MPLS</td><td>Frame Relay, Ethernet/MPLS</td></tr>
+          <tr><td>Internet-based broadband</td><td>Cheap shared access to the internet; secured with VPNs.</td><td>DSL, cable, fibre, 4G/5G</td><td>PPPoE, Ethernet</td></tr>
+          <tr><td>Metro Ethernet</td><td>Provider delivers an Ethernet hand-off between sites.</td><td>Carrier Ethernet</td><td>Ethernet (802.1Q)</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section class="unit" id="t-81b">
+      <div class="sec-label">8.1 continued</div>
+      <h2>Router serial interfaces, HDLC and PPP</h2>
+      <h3>Serial interfaces</h3>
+      <ul class="prose">
+        <li>Serial ports (S0/0/0, S0/0/1 on a WIC/HWIC module) send bits one after another and need a <b>clock</b>. The DCE end supplies it.</li>
+        <li>In a lab, two routers are joined back-to-back with a DCE/DTE cable. The router holding the <b>DCE end</b> must have <code>clock rate</code> configured; <code>show controllers serial 0/0/0</code> tells you which end you have.</li>
+        <li><code>bandwidth</code> (in kb/s) does not change the real speed; it only informs routing protocols and QoS.</li>
+      </ul>
+      <h3>HDLC vs PPP</h3>
+      <div class="tw"><table>
+        <thead><tr><th>Feature</th><th>Cisco HDLC</th><th>PPP</th></tr></thead>
+        <tbody>
+          <tr><td>Standard</td><td>ISO HDLC with a Cisco proprietary protocol field</td><td>Open standard (RFC 1661)</td></tr>
+          <tr><td>Default on Cisco serial?</td><td class="y">Yes</td><td>No, enable with <code>encapsulation ppp</code></td></tr>
+          <tr><td>Multivendor</td><td class="n">No: only Cisco to Cisco</td><td class="y">Yes</td></tr>
+          <tr><td>Authentication</td><td class="n">None</td><td class="y">PAP or CHAP</td></tr>
+          <tr><td>Multiple Layer 3 protocols</td><td>Yes (via Cisco type field)</td><td>Yes (via NCPs: IPCP, IPv6CP)</td></tr>
+          <tr><td>Extra options</td><td>Keepalives</td><td>Multilink (bundle links), compression, error detection / link quality monitoring, callback</td></tr>
+        </tbody>
+      </table></div>
+      <h4>Frame formats</h4>
+      <div class="svgwrap"><svg viewBox="0 0 760 140" width="760" role="img" aria-label="HDLC and PPP frame fields">
+        <text x="0" y="22" class="svg-t">Cisco HDLC</text>
+        <g font-family="IBM Plex Mono, monospace" font-size="11">
+          <rect x="100" y="8" width="70" height="26" fill="var(--surface-2)" stroke="var(--line)"/><text x="135" y="25" text-anchor="middle" class="svg-t">Flag 7E</text>
+          <rect x="170" y="8" width="80" height="26" fill="var(--surface-2)" stroke="var(--line)"/><text x="210" y="25" text-anchor="middle" class="svg-t">Address</text>
+          <rect x="250" y="8" width="80" height="26" fill="var(--surface-2)" stroke="var(--line)"/><text x="290" y="25" text-anchor="middle" class="svg-t">Control</text>
+          <rect x="330" y="8" width="90" height="26" fill="var(--amber-soft)" stroke="var(--amber)"/><text x="375" y="25" text-anchor="middle" class="svg-t">Protocol*</text>
+          <rect x="420" y="8" width="170" height="26" fill="var(--accent-soft)" stroke="var(--accent)"/><text x="505" y="25" text-anchor="middle" class="svg-t">Data (IP packet)</text>
+          <rect x="590" y="8" width="70" height="26" fill="var(--surface-2)" stroke="var(--line)"/><text x="625" y="25" text-anchor="middle" class="svg-t">FCS</text>
+          <rect x="660" y="8" width="70" height="26" fill="var(--surface-2)" stroke="var(--line)"/><text x="695" y="25" text-anchor="middle" class="svg-t">Flag 7E</text>
+        </g>
+        <text x="100" y="52" class="svg-m">* field added by Cisco, which is why Cisco HDLC does not work with other vendors' HDLC</text>
+        <text x="0" y="92" class="svg-t">PPP</text>
+        <rect x="100" y="78" width="70" height="26" fill="var(--surface-2)" stroke="var(--line)"/><text x="135" y="95" text-anchor="middle" class="svg-t">Flag 7E</text>
+        <rect x="170" y="78" width="80" height="26" fill="var(--surface-2)" stroke="var(--line)"/><text x="210" y="95" text-anchor="middle" class="svg-t">Addr FF</text>
+        <rect x="250" y="78" width="80" height="26" fill="var(--surface-2)" stroke="var(--line)"/><text x="290" y="95" text-anchor="middle" class="svg-t">Ctrl 03</text>
+        <rect x="330" y="78" width="90" height="26" fill="var(--ok-soft)" stroke="var(--ok)"/><text x="375" y="95" text-anchor="middle" class="svg-t">Protocol</text>
+        <rect x="420" y="78" width="170" height="26" fill="var(--accent-soft)" stroke="var(--accent)"/><text x="505" y="95" text-anchor="middle" class="svg-t">Data (IP, LCP, NCP…)</text>
+        <rect x="590" y="78" width="70" height="26" fill="var(--surface-2)" stroke="var(--line)"/><text x="625" y="95" text-anchor="middle" class="svg-t">FCS</text>
+        <rect x="660" y="78" width="70" height="26" fill="var(--surface-2)" stroke="var(--line)"/><text x="695" y="95" text-anchor="middle" class="svg-t">Flag 7E</text>
+        <text x="100" y="124" class="svg-m">Protocol field: 0x0021 IPv4 · 0xC021 LCP · 0x8021 IPCP · 0xC023 PAP · 0xC223 CHAP</text>
+      </svg></div>
+      <h3>PPP components and phases</h3>
+      <div class="grid2">
+        <div class="prose">
+          <ul>
+            <li><b>LCP (Link Control Protocol)</b>: sets up, tests, configures and terminates the link. Negotiates options such as authentication, compression, multilink.</li>
+            <li><b>NCPs (Network Control Protocols)</b>: one per Layer 3 protocol, e.g. <b>IPCP</b> for IPv4 and IPv6CP for IPv6.</li>
+            <li><b>Authentication</b> (optional): PAP or CHAP, after LCP and before NCP.</li>
+          </ul>
+        </div>
+        <ol class="steps">
+          <li><b>Link establishment</b>: LCP Configure-Request / Configure-Ack.</li>
+          <li><b>Link quality</b> (optional).</li>
+          <li><b>Authentication</b>: PAP or CHAP.</li>
+          <li><b>Network layer</b>: IPCP opens; IP traffic flows.</li>
+          <li><b>Termination</b>: LCP Terminate-Request.</li>
+        </ol>
+      </div>
+      <h3>PAP vs CHAP</h3>
+      <div class="tw"><table>
+        <thead><tr><th></th><th>PAP</th><th>CHAP</th></tr></thead>
+        <tbody>
+          <tr><td>Handshake</td><td>2-way: client sends username + password, server accepts or rejects</td><td>3-way: challenge, response, success/failure</td></tr>
+          <tr><td>Password on the wire</td><td class="n">Clear text</td><td class="y">Never; an MD5 hash of ID + secret + challenge is sent</td></tr>
+          <tr><td>Who controls</td><td>Remote node (client) controls attempts</td><td>Authenticator (server) controls the challenge</td></tr>
+          <tr><td>Repeated?</td><td>Only at link setup</td><td>Periodically during the session</td></tr>
+          <tr><td>Use today</td><td>Only when the peer does not support CHAP</td><td>Preferred</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="widget" id="w-ppp">
+        <div class="widget-h"><h4>PPP session step-through: BRANCH ↔ HQ</h4><span>Interactive</span></div>
+        <div class="ctl">
+          <label class="f">Authentication<select id="ppp-auth"><option value="chap">CHAP</option><option value="pap">PAP</option><option value="none">None</option></select></label>
+          <label class="f">Passwords<select id="ppp-pw"><option value="ok">match</option><option value="bad">mismatch</option></select></label>
+          <button class="btn pri" id="ppp-next">Next step</button>
+          <button class="btn" id="ppp-reset">Restart</button>
+          <span class="pill mid" id="ppp-phase">Phase: idle</span>
+        </div>
+        <div class="grid2">
+          <div class="svgwrap"><svg id="ppp-svg" viewBox="0 0 420 330" width="420" role="img" aria-label="PPP message sequence"></svg></div>
+          <div><div class="log" id="ppp-log" style="height:300px"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8.2 config -->
+    <section class="unit" id="t-82">
+      <div class="sec-label">8.2</div>
+      <h2>Point-to-point WAN configuration</h2>
+      <div class="grid2">
+        <div class="cli" data-t="HDLC (default) with clock on the DCE end"><pre>HQ(config)# interface s0/0/0
+HQ(config-if)# ip address 10.1.1.2 255.255.255.252
+HQ(config-if)# encapsulation hdlc        ! default, shown for clarity
+HQ(config-if)# clock rate 128000         ! only on the DCE end
+HQ(config-if)# bandwidth 128
+HQ(config-if)# no shutdown
+HQ# show controllers serial 0/0/0       ! DCE V.35, clock rate 128000</pre></div>
+        <div class="cli" data-t="PPP with CHAP (both routers)"><pre>BRANCH(config)# username HQ password Cisco123
+BRANCH(config)# interface s0/0/0
+BRANCH(config-if)# encapsulation ppp
+BRANCH(config-if)# ppp authentication chap
+HQ(config)# username BRANCH password Cisco123
+HQ(config)# interface s0/0/0
+HQ(config-if)# encapsulation ppp
+HQ(config-if)# ppp authentication chap</pre></div>
+      </div>
+      <p class="prose">For CHAP, each router needs a <code>username</code> equal to the <b>peer's hostname</b>, and the passwords must be identical on both sides. For PAP, each side also sends its own credentials: <code>ppp pap sent-username BRANCH password Cisco123</code>, plus <code>ppp authentication pap</code>.</p>
+      <div class="cli" data-t="Verification"><pre>HQ# show interfaces serial 0/0/0
+Serial0/0/0 is up, line protocol is up
+  Internet address is 10.1.1.2/30
+  MTU 1500 bytes, BW 128 Kbit/sec, DLY 20000 usec,
+  Encapsulation PPP, LCP Open
+  Open: IPCP, CDPCP
+HQ# show ip interface brief
+HQ# debug ppp authentication
+HQ# debug ppp negotiation</pre></div>
+      <h3>Reading the interface status</h3>
+      <div class="tw"><table>
+        <thead><tr><th>Status</th><th>Meaning</th><th>Common causes</th></tr></thead>
+        <tbody>
+          <tr><td>up / up</td><td>Layer 1 and Layer 2 working</td><td>Normal</td></tr>
+          <tr><td>up / down</td><td>Physical link fine, Layer 2 failing</td><td>Encapsulation mismatch (HDLC vs PPP), CHAP/PAP failure, no clock on the DCE end, keepalive problem</td></tr>
+          <tr><td>down / down</td><td>No physical connection</td><td>Cable unplugged or faulty, far end shut down</td></tr>
+          <tr><td>administratively down / down</td><td>Interface shut</td><td>Missing <code>no shutdown</code></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- ACL concepts -->
+    <section class="unit" id="t-82b">
+      <div class="sec-label">8.2 continued</div>
+      <h2>Access control lists: concepts</h2>
+      <div class="prose">
+        <p>An <b>ACL</b> is an ordered list of <code>permit</code> and <code>deny</code> statements that a router compares against packet headers. ACLs are used to <b>filter traffic</b> through an interface, restrict <b>remote management</b> (VTY lines), and <b>classify traffic</b> for other features such as NAT, QoS, VPNs and route filtering.</p>
+      </div>
+      <h3>How a router processes an ACL</h3>
+      <ol class="steps">
+        <li>Statements are checked <b>top-down</b>, in sequence-number order.</li>
+        <li>The <b>first match wins</b>; the router permits or denies and stops checking.</li>
+        <li>If nothing matches, the hidden <b>implicit <code>deny any</code></b> at the end drops the packet. An ACL therefore needs at least one <code>permit</code>.</li>
+        <li>Put <b>specific statements before general ones</b>, or the general line will catch everything first.</li>
+      </ol>
+      <div class="grid2">
+        <div class="note key"><b>The three Ps</b>One ACL <b>per protocol</b> (IPv4/IPv6), <b>per interface</b>, <b>per direction</b> (in or out).</div>
+        <div class="note"><b>Inbound vs outbound</b><b>In</b>: checked before the routing decision, so denied packets are not routed at all. <b>Out</b>: checked after routing, as the packet leaves the interface. Packets the router itself generates are not filtered by an outbound ACL.</div>
+      </div>
+      <h3>Wildcard masks</h3>
+      <p class="prose">A wildcard mask tells the router which address bits must match: <b>0 = must match</b>, <b>1 = ignore</b>. For a subnet, wildcard = <code>255.255.255.255 − subnet mask</code>. So /24 (255.255.255.0) gives 0.0.0.255, and /30 gives 0.0.0.3. Two shortcuts: <code>host 192.168.10.20</code> = 192.168.10.20 0.0.0.0, and <code>any</code> = 0.0.0.0 255.255.255.255.</p>
+      <div class="widget" id="w-wild">
+        <div class="widget-h"><h4>Wildcard mask calculator</h4><span>Type an address and a mask</span></div>
+        <div class="ctl">
+          <label class="f">Address<input type="text" id="wc-ip" value="192.168.10.0"></label>
+          <label class="f">Subnet mask or /prefix<input type="text" id="wc-mask" value="/24"></label>
+        </div>
+        <div id="wc-out" style="font-family:var(--f-mono);font-size:.92rem"></div>
+      </div>
+      <h3>Standard vs extended</h3>
+      <div class="tw"><table>
+        <thead><tr><th></th><th>Standard ACL</th><th>Extended ACL</th></tr></thead>
+        <tbody>
+          <tr><td>Numbers</td><td>1–99, 1300–1999</td><td>100–199, 2000–2699</td></tr>
+          <tr><td>Matches on</td><td>Source IP address only</td><td>Protocol, source and destination IP, source and destination port, ICMP type, TCP flags</td></tr>
+          <tr><td>Placement</td><td><b>Close to the destination</b>, because it cannot tell where the packet is going</td><td><b>Close to the source</b>, so unwanted traffic is dropped before it crosses the network</td></tr>
+          <tr><td>Typical use</td><td>VTY access, NAT address matching, simple source blocking</td><td>Allow web but block ping or Telnet, server protection, internet edge filtering</td></tr>
+        </tbody>
+      </table></div>
+      <div class="tw"><table>
+        <thead><tr><th>Port operator</th><th>Meaning</th><th>Common ports</th></tr></thead>
+        <tbody>
+          <tr><td><code>eq</code> / <code>neq</code></td><td>equal / not equal</td><td>20/21 FTP, 22 SSH, 23 Telnet, 25 SMTP, 53 DNS, 67/68 DHCP, 69 TFTP, 80 HTTP (<code>www</code>), 110 POP3, 443 HTTPS</td></tr>
+          <tr><td><code>gt</code> / <code>lt</code></td><td>greater / less than</td><td></td></tr>
+          <tr><td><code>range</code></td><td>inclusive range, e.g. <code>range 20 21</code></td><td></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section class="unit" id="t-82c">
+      <div class="sec-label">8.2 continued</div>
+      <h2>Configuring standard and extended ACLs</h2>
+      <div class="grid2">
+        <div class="cli" data-t="Standard ACL · numbered and named"><pre>! numbered: block one host, allow everyone else
+HQ(config)# access-list 10 remark Block guest PC
+HQ(config)# access-list 10 deny host 192.168.10.20
+HQ(config)# access-list 10 permit any
+HQ(config)# interface g0/0
+HQ(config-if)# ip access-group 10 out
+! named version
+HQ(config)# ip access-list standard NO-GUEST
+HQ(config-std-nacl)# deny host 192.168.10.20
+HQ(config-std-nacl)# permit any</pre></div>
+        <div class="cli" data-t="Extended ACL · named"><pre>BRANCH(config)# ip access-list extended BRANCH-IN
+BRANCH(config-ext-nacl)# permit tcp 192.168.10.0 0.0.0.255 host 192.168.20.100 eq 80
+BRANCH(config-ext-nacl)# permit icmp 192.168.10.0 0.0.0.255 host 192.168.20.100 echo
+BRANCH(config-ext-nacl)# deny ip 192.168.10.0 0.0.0.255 192.168.20.0 0.0.0.255
+BRANCH(config-ext-nacl)# permit ip any any
+BRANCH(config)# interface g0/0
+BRANCH(config-if)# ip access-group BRANCH-IN in</pre></div>
+      </div>
+      <div class="grid2">
+        <div class="cli" data-t="Restrict Telnet/SSH to the router"><pre>HQ(config)# access-list 5 permit host 192.168.20.10
+HQ(config)# line vty 0 4
+HQ(config-line)# access-class 5 in      ! access-class, not access-group</pre></div>
+        <div class="cli" data-t="Edit a named ACL with sequence numbers"><pre>HQ# show access-lists
+Standard IP access list NO-GUEST
+    10 deny   host 192.168.10.20 (4 match(es))
+    20 permit any (31 match(es))
+HQ(config)# ip access-list standard NO-GUEST
+HQ(config-std-nacl)# 15 deny host 192.168.10.21   ! inserted between 10 and 20
+HQ(config-std-nacl)# no 15                        ! remove one line</pre></div>
+      </div>
+      <div class="note warn"><b>Common mistakes</b>Forgetting a final <code>permit</code> (everything is denied by the implicit deny) · putting a broad line above a specific one · applying in the wrong direction · writing a subnet mask instead of a wildcard · using <code>access-group</code> on a VTY line instead of <code>access-class</code> · placing a standard ACL near the source, which blocks that host from every destination.</div>
+
+      <div class="widget" id="w-acl">
+        <div class="widget-h"><h4>ACL tester: which line matches?</h4><span>Edit the ACL or the packet</span></div>
+        <div class="ctl">
+          <label class="f">Preset<select id="acl-preset"><option value="ext">Extended: BRANCH-IN</option><option value="std">Standard: NO-GUEST</option><option value="bad">Mistake: broad line first</option></select></label>
+        </div>
+        <div class="grid2">
+          <div>
+            <label class="f" for="acl-text">ACL statements (one per line)</label>
+            <textarea id="acl-text" rows="7" style="width:100%;font:500 .82rem var(--f-mono);padding:.5rem;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)"></textarea>
+            <div class="ctl">
+              <label class="f">Protocol<select id="pk-proto"><option>tcp</option><option>udp</option><option>icmp</option></select></label>
+              <label class="f">Source IP<input type="text" id="pk-src" value="192.168.10.10" size="14"></label>
+              <label class="f">Destination IP<input type="text" id="pk-dst" value="192.168.20.100" size="14"></label>
+              <label class="f">Dest. port<input type="number" id="pk-port" value="80" min="0" max="65535" style="width:6rem"></label>
+            </div>
+            <div class="ctl" id="pk-quick"></div>
+          </div>
+          <div>
+            <p id="acl-verdict" style="font-weight:700;font-size:1.05rem;margin:.2rem 0"></p>
+            <div class="tw" style="margin-top:.4rem"><table><thead><tr><th>#</th><th>Statement</th><th>Result</th></tr></thead><tbody id="acl-rows"></tbody></table></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8.3 NAT -->
+    <section class="unit" id="t-83">
+      <div class="sec-label">8.3</div>
+      <h2>NAT: static NAT and PAT</h2>
+      <div class="prose">
+        <p>There are not enough public IPv4 addresses for every device, so organisations use <b>private addresses (RFC 1918)</b> inside and translate them at the edge router. Private ranges are not routed on the internet: <code>10.0.0.0/8</code>, <code>172.16.0.0/12</code>, <code>192.168.0.0/16</code>.</p>
+      </div>
+      <h3>NAT terms</h3>
+      <div class="tw"><table>
+        <thead><tr><th></th><th>Local (as seen from inside)</th><th>Global (as seen from outside)</th></tr></thead>
+        <tbody>
+          <tr><td><b>Inside</b> (our host)</td><td><b>Inside local</b>: the private address, e.g. 192.168.20.100</td><td><b>Inside global</b>: the public address it is translated to, e.g. 209.165.200.229</td></tr>
+          <tr><td><b>Outside</b> (remote host)</td><td><b>Outside local</b>: how the remote host appears to inside hosts (usually same as outside global)</td><td><b>Outside global</b>: the remote host's real public address, e.g. 203.0.113.10</td></tr>
+        </tbody>
+      </table></div>
+      <h3>Types of NAT</h3>
+      <div class="tw"><table>
+        <thead><tr><th>Type</th><th>Mapping</th><th>Use</th><th>Key command</th></tr></thead>
+        <tbody>
+          <tr><td><b>Static NAT</b></td><td>One private ↔ one public, permanent</td><td>Servers that must be reachable from the internet</td><td><code>ip nat inside source static 192.168.20.100 209.165.200.229</code></td></tr>
+          <tr><td>Dynamic NAT</td><td>Private addresses take a free address from a public pool, first come first served</td><td>When you have a pool of public addresses</td><td><code>ip nat pool</code> + <code>ip nat inside source list 1 pool NAME</code></td></tr>
+          <tr><td><b>PAT (NAT overload)</b></td><td>Many private → one public, separated by <b>port numbers</b></td><td>Most common: a whole LAN shares the router's public address</td><td><code>ip nat inside source list 1 interface s0/0/1 overload</code></td></tr>
+          <tr><td>Port forwarding (static PAT)</td><td>One public address + port → one private address + port</td><td>Publish one service when you only have one public address</td><td><code>ip nat inside source static tcp 192.168.20.100 80 209.165.200.226 80</code></td></tr>
+        </tbody>
+      </table></div>
+      <div class="grid2">
+        <div class="cli" data-t="Static NAT + PAT on HQ"><pre>HQ(config)# interface g0/0
+HQ(config-if)# ip nat inside
+HQ(config-if)# interface s0/0/0
+HQ(config-if)# ip nat inside            ! branch traffic arrives here
+HQ(config-if)# interface s0/0/1
+HQ(config-if)# ip nat outside
+HQ(config)# ip nat inside source static 192.168.20.100 209.165.200.229
+HQ(config)# access-list 1 permit 192.168.10.0 0.0.0.255
+HQ(config)# access-list 1 permit 192.168.20.0 0.0.0.255
+HQ(config)# ip nat inside source list 1 interface s0/0/1 overload</pre></div>
+        <div class="cli" data-t="Verification"><pre>HQ# show ip nat translations
+Pro  Inside global         Inside local          Outside local       Outside global
+tcp  209.165.200.226:1025  192.168.10.10:1025    203.0.113.10:80     203.0.113.10:80
+tcp  209.165.200.226:1026  192.168.20.10:1025    203.0.113.10:80     203.0.113.10:80
+---  209.165.200.229       192.168.20.100        ---                 ---
+HQ# show ip nat statistics
+HQ# clear ip nat translation *
+HQ# debug ip nat</pre></div>
+      </div>
+      <div class="widget" id="w-nat">
+        <div class="widget-h"><h4>NAT simulator: HQ edge router</h4><span>Send packets and watch the table</span></div>
+        <div class="ctl" id="nat-btns"></div>
+        <div class="grid2">
+          <div>
+            <div class="svgwrap"><svg id="nat-svg" viewBox="0 0 420 150" width="420" role="img" aria-label="Packet header before and after NAT"></svg></div>
+            <p id="nat-msg" style="font-size:.9rem;color:var(--muted)"></p>
+          </div>
+          <div class="cli" data-t="HQ# show ip nat translations"><pre id="nat-table"></pre></div>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="note"><b>Advantages</b>Conserves public IPv4 addresses · hides internal addressing · lets you change ISP without renumbering inside · adds flexibility.</div>
+        <div class="note warn"><b>Disadvantages</b>Breaks end-to-end addressing, so some applications and IPsec need workarounds · adds processing delay · makes tracing harder · NAT is <b>not</b> a firewall.</div>
+      </div>
+    </section>
+
+    <section class="unit" id="t-83b">
+      <div class="sec-label">8.3 continued</div>
+      <h2>Security considerations for WAN networks</h2>
+      <div class="tw"><table>
+        <thead><tr><th>Risk</th><th>Control</th><th>Example</th></tr></thead>
+        <tbody>
+          <tr><td>Rogue device on the WAN link</td><td>Authenticate the link</td><td>PPP CHAP instead of PAP or none</td></tr>
+          <tr><td>Unauthorised remote management</td><td>Restrict VTY access, use SSH, set timeouts</td><td><code>access-class 5 in</code>, <code>transport input ssh</code>, <code>exec-timeout 5 0</code>, <code>login local</code></td></tr>
+          <tr><td>Spoofed source addresses from the internet</td><td>Inbound edge ACL denying private and bogus sources</td><td><code>deny ip 10.0.0.0 0.255.255.255 any</code> etc. on the outside interface, inbound</td></tr>
+          <tr><td>Unwanted traffic between sites</td><td>Extended ACL near the source</td><td>Branch may reach only the web server at HQ</td></tr>
+          <tr><td>Information leakage</td><td>Disable unneeded services on outside interfaces</td><td><code>no cdp enable</code> on the ISP link; shut unused ports</td></tr>
+          <tr><td>Eavesdropping on internet paths</td><td>Encrypt traffic</td><td>Site-to-site IPsec VPN over the internet</td></tr>
+          <tr><td>Weak passwords in config</td><td>Encrypt secrets</td><td><code>enable secret</code>, <code>service password-encryption</code>, <code>security passwords min-length 10</code></td></tr>
+          <tr><td>Undetected attacks</td><td>Logging and monitoring</td><td><code>deny ip any any log</code> at the end of an edge ACL, syslog, SNMPv3</td></tr>
+        </tbody>
+      </table></div>
+      <div class="note key"><b>Remember</b>NAT hides addresses but does not inspect traffic. Edge protection comes from ACLs, firewalls and VPNs working together.</div>
+    </section>
+
+    <section class="unit" id="t-quiz">
+      <div class="sec-label">Review</div>
+      <h2>Review quiz</h2>
+      <p class="lead">Click an answer for instant feedback. Score: <b id="qz-score">0 / 0</b></p>
+      <div id="quiz"></div>
+      <h3>Short-answer questions</h3>
+      <details><summary>1. Why does one end of a back-to-back serial link need <code>clock rate</code>?</summary>Serial links are synchronous: the DCE supplies the clock that times each bit. In a lab there is no CSU/DSU, so the router holding the DCE cable end must provide it.</details>
+      <details><summary>2. A serial interface shows "up, line protocol down". Give three likely causes.</summary>Encapsulation mismatch (HDLC vs PPP), PPP authentication failure, missing clock rate on the DCE end.</details>
+      <details><summary>3. Why is CHAP more secure than PAP?</summary>CHAP never sends the password; it sends an MD5 hash of the ID, secret and a random challenge, and it re-challenges during the session. PAP sends the password in clear text once.</details>
+      <details><summary>4. Wildcard mask for 172.16.8.0/21?</summary>255.255.255.255 − 255.255.248.0 = 0.0.7.255.</details>
+      <details><summary>5. Where should standard and extended ACLs be placed, and why?</summary>Standard near the destination, because it only checks the source and would otherwise block that source everywhere. Extended near the source, to drop unwanted traffic early.</details>
+      <details><summary>6. What happens to a packet that matches no ACL statement?</summary>It is dropped by the implicit deny any at the end.</details>
+      <details><summary>7. In PAT, how does the router tell replies for two inside hosts apart when both use the same public address?</summary>By the source port number it assigned each session in the translation table.</details>
+      <details><summary>8. Name the four NAT address types.</summary>Inside local, inside global, outside local, outside global.</details>
+    </section>
+  </main>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const SVGNS="http://www.w3.org/2000/svg";
+function el(tag,attrs,parent,text){const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(text!=null)e.textContent=text;if(parent)parent.appendChild(e);return e;}
+const PROMPT=/^([A-Za-z][\w-]*(\([\w-]+\))?[#>])\s?(.*)$/;
+function highlight(pre){
+  const plain=pre.closest(".cli")&&pre.closest(".cli").hasAttribute("data-plain");
+  pre.innerHTML=pre.textContent.split("\n").map(l=>{
+    if(/^\s*!/.test(l))return '<span class="c">'+esc(l)+'</span>';
+    const m=l.match(PROMPT);
+    if(m){let rest=m[3],cm="";const i=rest.indexOf(" !");if(i>=0){cm=rest.slice(i);rest=rest.slice(0,i);}
+      return '<span class="p">'+esc(m[1])+'</span> '+esc(rest)+(cm?'<span class="c">'+esc(cm)+'</span>':"");}
+    if(plain)return esc(l);
+    return l.trim()?'<span class="o">'+esc(l)+'</span>':"";
+  }).join("\n");
+}
+function decorateCli(box){
+  if(box.dataset.done)return; box.dataset.done="1";
+  const pre=$("pre",box); if(!pre)return;
+  const bar=document.createElement("div"); bar.className="bar";
+  const t=document.createElement("span"); t.textContent=box.dataset.t||"CLI"; bar.appendChild(t);
+  const b=document.createElement("button"); b.className="copy"; b.type="button"; b.textContent="Copy";
+  b.addEventListener("click",()=>{
+    const cmds=[];let hasPrompt=false;
+    pre.textContent.split("\n").forEach(l=>{const m=l.match(PROMPT);if(m){hasPrompt=true;let c=m[3];const i=c.indexOf(" !");if(i>=0)c=c.slice(0,i);c=c.trimEnd();if(c)cmds.push(c);}});
+    const txt=hasPrompt?cmds.join("\n"):pre.textContent;
+    const done=()=>{b.textContent="Copied";setTimeout(()=>b.textContent="Copy",1400)};
+    const fallback=()=>{const r=document.createRange();r.selectNodeContents(pre);const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent="Selected";setTimeout(()=>b.textContent="Copy",1400)};
+    try{navigator.clipboard.writeText(txt).then(done,fallback)}catch(e){fallback()}
+  });
+  bar.appendChild(b); box.insertBefore(bar,pre); highlight(pre);
+}
+function initTabs(){
+  $$(".tabs[data-group]").forEach(tabs=>{
+    const panes=$('.tabpanes[data-group="'+tabs.dataset.group+'"]'); if(!panes)return;
+    const btns=$$("button",tabs), items=Array.from(panes.children);
+    btns.forEach((b,i)=>{b.type="button";b.setAttribute("role","tab");b.addEventListener("click",()=>{
+      btns.forEach((x,j)=>x.setAttribute("aria-selected",j===i?"true":"false"));items.forEach((p,j)=>p.hidden=j!==i);});});
+  });
+}
+function initRail(){
+  const map=new Map();$$(".rail a").forEach(a=>map.set(a.getAttribute("href").slice(1),a));
+  if(!("IntersectionObserver" in window))return;
+  const io=new IntersectionObserver(ents=>{ents.forEach(en=>{if(en.isIntersecting){const a=map.get(en.target.id);if(!a)return;$$("a",a.parentNode).forEach(x=>x.classList.remove("on"));a.classList.add("on");}});},{rootMargin:"-20% 0px -70% 0px"});
+  $$("section.unit[id]").forEach(s=>io.observe(s));
+}
+function initQuiz(QUIZ){
+  const box=$("#quiz"); if(!box)return; let tried=0,right=0;
+  QUIZ.forEach((q,qi)=>{const d=document.createElement("div");d.className="q";
+    d.innerHTML="<p class='qt'>"+(qi+1)+". "+esc(q[0])+"</p><div class='opts'></div><div class='why' hidden></div>";
+    const o=$(".opts",d);
+    q[1].forEach((t,i)=>{const b=document.createElement("button");b.type="button";b.textContent=String.fromCharCode(65+i)+". "+t;
+      b.addEventListener("click",()=>{if(d.dataset.done)return;d.dataset.done="1";tried++;
+        if(i===q[2]){b.classList.add("right");right++;}else{b.classList.add("wrong");o.children[q[2]].classList.add("right");}
+        const w=$(".why",d);w.hidden=false;w.textContent=(i===q[2]?"Correct. ":"Not quite. ")+q[3];
+        $("#qz-score").textContent=right+" / "+tried+" (of "+QUIZ.length+")";});
+      o.appendChild(b);});
+    box.appendChild(d);});
+  $("#qz-score").textContent="0 / 0 (of "+QUIZ.length+")";
+}
+function initPersist(key){
+  const get=()=>{try{return JSON.parse(localStorage.getItem(key)||"{}")}catch(e){return{}}};
+  const set=o=>{try{localStorage.setItem(key,JSON.stringify(o))}catch(e){}};
+  const fields=$$("main input[type=checkbox][id], main input[type=text][id].note-in");
+  const data=get();
+  fields.forEach(f=>{if(f.type==="checkbox")f.checked=!!data[f.id];else if(data[f.id])f.value=data[f.id];
+    f.addEventListener(f.type==="checkbox"?"change":"input",()=>{const d=get();d[f.id]=f.type==="checkbox"?f.checked:f.value;set(d);prog();});});
+  function prog(){const p=$("#progress");if(!p)return;const cb=$$("main input[type=checkbox][id]");p.textContent="Lab tasks: "+cb.filter(c=>c.checked).length+" / "+cb.length+" done";}
+  prog();
+  const r=$("#reset-checks");
+  if(r)r.addEventListener("click",()=>{if(r.dataset.arm!=="1"){r.dataset.arm="1";r.textContent="Click again to confirm";setTimeout(()=>{r.dataset.arm="";r.textContent="Clear my lab checkboxes and notes";},3000);return;}
+    set({});fields.forEach(f=>{if(f.type==="checkbox")f.checked=false;else f.value="";});r.dataset.arm="";r.textContent="Clear my lab checkboxes and notes";const m=$("#reset-msg");if(m)m.textContent="Cleared.";prog();});
+}
+
+/* ---------- PPP step-through ---------- */
+function initPPP(){
+  const svg=$("#ppp-svg"); if(!svg)return;
+  const A=70,B=350; let step=0,seq=[];
+  function build(){
+    const auth=$("#ppp-auth").value, ok=$("#ppp-pw").value==="ok";
+    const s=[
+      {ph:"Link establishment (LCP)",d:1,m:"LCP Configure-Request",log:"BRANCH proposes link options (MRU, magic number"+(auth!=="none"?", auth "+auth.toUpperCase():"")+")."},
+      {ph:"Link establishment (LCP)",d:-1,m:"LCP Configure-Ack",log:"HQ accepts BRANCH's options."},
+      {ph:"Link establishment (LCP)",d:-1,m:"LCP Configure-Request",log:"HQ proposes its options"+(auth!=="none"?", including authentication = "+auth.toUpperCase():"")+"."},
+      {ph:"Link establishment (LCP)",d:1,m:"LCP Configure-Ack",log:"LCP is Open. The link is established."}
+    ];
+    if(auth==="chap"){
+      s.push({ph:"Authentication (CHAP)",d:-1,m:"CHAP Challenge (ID, random)",log:"HQ sends a random challenge and its hostname. No password is sent."});
+      s.push({ph:"Authentication (CHAP)",d:1,m:"CHAP Response (MD5 hash)",log:"BRANCH looks up 'username HQ password …', computes MD5(ID + secret + challenge) and returns only the hash."});
+      if(ok)s.push({ph:"Authentication (CHAP)",d:-1,m:"CHAP Success",log:"HQ computes the same hash with its secret for BRANCH. Hashes match. (In the lab both routers also challenge each other.)"});
+      else{s.push({ph:"Authentication failed",d:-1,m:"CHAP Failure",log:"Hashes differ because the secrets differ.",bad:1});s.push({ph:"Link terminated",d:-1,m:"LCP Terminate-Request",log:"%LINEPROTO-5-UPDOWN: Line protocol on Interface Serial0/0/0, changed state to down\nShow interfaces: 'Serial0/0/0 is up, line protocol is down'",bad:1,end:1});}
+    }else if(auth==="pap"){
+      s.push({ph:"Authentication (PAP)",d:1,m:"PAP Auth-Request (BRANCH / Cisco123)",log:"BRANCH sends username and password in CLEAR TEXT. Anyone capturing the link can read it.",warn:1});
+      if(ok)s.push({ph:"Authentication (PAP)",d:-1,m:"PAP Auth-Ack",log:"HQ finds 'username BRANCH password Cisco123'. Accepted."});
+      else{s.push({ph:"Authentication failed",d:-1,m:"PAP Auth-Nak",log:"Password does not match.",bad:1});s.push({ph:"Link terminated",d:-1,m:"LCP Terminate-Request",log:"%LINEPROTO-5-UPDOWN: Line protocol on Interface Serial0/0/0, changed state to down",bad:1,end:1});}
+    }
+    if(!s[s.length-1].end){
+      s.push({ph:"Network layer (NCP)",d:1,m:"IPCP Configure-Request 10.1.1.1",log:"NCP phase: IPCP negotiates IPv4 on the link."});
+      s.push({ph:"Network layer (NCP)",d:-1,m:"IPCP Configure-Ack",log:"IPCP Open. (HQ does the same for 10.1.1.2.)"});
+      s.push({ph:"Data transfer",d:1,m:"IP packets (protocol 0x0021)",log:"%LINEPROTO-5-UPDOWN: Line protocol on Interface Serial0/0/0, changed state to up\nshow interfaces: Encapsulation PPP, LCP Open, Open: IPCP, CDPCP",good:1,end:1});
+    }
+    return s;
+  }
+  function draw(){
+    svg.innerHTML="";
+    el("text",{x:A,y:18,"text-anchor":"middle",class:"svg-t","font-weight":"600"},svg,"BRANCH");
+    el("text",{x:B,y:18,"text-anchor":"middle",class:"svg-t","font-weight":"600"},svg,"HQ");
+    el("line",{x1:A,y1:26,x2:A,y2:325,stroke:"var(--line)","stroke-width":2},svg);
+    el("line",{x1:B,y1:26,x2:B,y2:325,stroke:"var(--line)","stroke-width":2},svg);
+    seq.slice(0,step).forEach((s,i)=>{const y=46+i*25,x1=s.d>0?A:B,x2=s.d>0?B:A;
+      const c=s.bad?"var(--bad)":s.good?"var(--ok)":s.warn?"var(--amber)":"var(--accent)";
+      el("line",{x1,y1:y,x2:x2-(s.d>0?6:-6),y2:y,stroke:c,"stroke-width":2},svg);
+      el("polygon",{points:(x2)+","+y+" "+(x2-s.d*9)+","+(y-5)+" "+(x2-s.d*9)+","+(y+5),fill:c},svg);
+      el("text",{x:(A+B)/2,y:y-5,"text-anchor":"middle",class:"svg-m",fill:c},svg,s.m);});
+  }
+  function reset(){seq=build();step=0;$("#ppp-log").textContent="Press Next step. Encapsulation ppp is configured on both serial interfaces.";$("#ppp-phase").textContent="Phase: idle";$("#ppp-phase").className="pill mid";$("#ppp-next").disabled=false;draw();}
+  $("#ppp-next").addEventListener("click",()=>{if(step>=seq.length)return;const s=seq[step++];
+    const L=$("#ppp-log");L.textContent+="\n\n["+step+"] "+s.m+"\n"+s.log;L.scrollTop=L.scrollHeight;
+    const p=$("#ppp-phase");p.textContent="Phase: "+s.ph;p.className="pill "+(s.bad?"down":s.good?"up":"mid");
+    if(step>=seq.length)$("#ppp-next").disabled=true;draw();});
+  $("#ppp-reset").addEventListener("click",reset);
+  $("#ppp-auth").addEventListener("change",reset);$("#ppp-pw").addEventListener("change",reset);
+  reset();
+}
+
+/* ---------- IP helpers ---------- */
+const ip2n=s=>{const p=String(s).trim().split(".");if(p.length!==4)return null;let n=0;for(const x of p){if(!/^\d+$/.test(x)||+x>255)return null;n=n*256+(+x);}return n>>>0;};
+const n2ip=n=>[n>>>24,(n>>>16)&255,(n>>>8)&255,n&255].join(".");
+
+/* ---------- wildcard calculator ---------- */
+function initWild(){
+  if(!$("#w-wild"))return;
+  function upd(){
+    const ip=ip2n($("#wc-ip").value);let mv=$("#wc-mask").value.trim(),mask;
+    if(/^\/?\d{1,2}$/.test(mv)){const p=+mv.replace("/","");if(p>32){mask=null;}else mask=p===0?0:(0xFFFFFFFF<<(32-p))>>>0;}else mask=ip2n(mv);
+    const out=$("#wc-out");
+    if(ip===null||mask===null){out.innerHTML="<span style='color:var(--bad)'>Enter a valid IPv4 address and a mask such as 255.255.255.0 or /24.</span>";return;}
+    const inv=(~mask)>>>0; if(((inv+1)&inv)!==0){out.innerHTML="<span style='color:var(--bad)'>That mask is not contiguous.</span>";return;}
+    const net=(ip&mask)>>>0,bc=(net|inv)>>>0,prefix=32-Math.log2(inv+1);
+    const hosts=inv>1?inv-1:(inv===1?2:1);
+    const stmt=inv===0?"host "+n2ip(net):(mask===0?"any":n2ip(net)+" "+n2ip(inv));
+    out.innerHTML="Subnet mask &nbsp;&nbsp;"+n2ip(mask)+" (/"+prefix+")<br>Wildcard mask &nbsp;<b>"+n2ip(inv)+"</b> &nbsp;<span style='color:var(--muted)'>= 255.255.255.255 − "+n2ip(mask)+"</span><br>Matches &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+n2ip(net)+" – "+n2ip(bc)+" ("+(inv+1)+" addresses, "+hosts+" usable hosts)<br>ACL syntax &nbsp;&nbsp;&nbsp;<b>access-list 10 permit "+stmt+"</b>"+(net!==ip?"<br><span style='color:var(--amber)'>Note: "+n2ip(ip)+" is not the network address; IOS stores it as "+n2ip(net)+".</span>":"");
+  }
+  $("#wc-ip").addEventListener("input",upd);$("#wc-mask").addEventListener("input",upd);upd();
+}
+
+/* ---------- ACL tester ---------- */
+const PORTS={www:80,http:80,telnet:23,ftp:21,"ftp-data":20,smtp:25,domain:53,pop3:110,tftp:69,ssh:22,https:443,bootps:67,bootpc:68};
+function parseAddr(t,i){ // returns {net,wild,next} or null
+  if(t[i]==="any")return{net:0,wild:0xFFFFFFFF,next:i+1};
+  if(t[i]==="host"){const n=ip2n(t[i+1]);return n===null?null:{net:n,wild:0,next:i+2};}
+  const n=ip2n(t[i]);if(n===null)return null;
+  const w=ip2n(t[i+1]);if(w!==null)return{net:n,wild:w,next:i+2};
+  return{net:n,wild:0,next:i+1};
+}
+function parseAce(line){
+  const t=line.trim().toLowerCase().replace(/^\d+\s+/,"").split(/\s+/).filter(Boolean);
+  if(!t.length||t[0]==="remark")return{skip:1};
+  const act=t[0];if(act!=="permit"&&act!=="deny")return{err:"must start with permit or deny"};
+  const protos=["ip","tcp","udp","icmp"];
+  if(protos.includes(t[1])){
+    const proto=t[1];const s=parseAddr(t,2);if(!s)return{err:"bad source"};const d=parseAddr(t,s.next);if(!d)return{err:"bad destination"};
+    let i=d.next,port=null,icmp=null;
+    if(t[i]){if(proto==="icmp"){icmp=t[i];}
+      else{const op=t[i],pv=x=>PORTS[x]!==undefined?PORTS[x]:parseInt(x,10);
+        if(op==="range")port={op,a:pv(t[i+1]),b:pv(t[i+2])};else if(["eq","neq","gt","lt"].includes(op))port={op,a:pv(t[i+1])};else return{err:"unknown keyword '"+op+"'"};
+        if(port&&isNaN(port.a))return{err:"bad port"};}}
+    return{act,ext:1,proto,s,d,port,icmp};
+  }
+  const s=parseAddr(t,1);if(!s)return{err:"bad source address"};
+  return{act,ext:0,s};
+}
+function aceMatch(a,p){
+  const m=(addr,ip)=>((ip^addr.net)&~addr.wild)>>>0===0;
+  if(!m(a.s,p.src))return false;
+  if(!a.ext)return true;
+  if(a.proto!=="ip"&&a.proto!==p.proto)return false;
+  if(!m(a.d,p.dst))return false;
+  if(a.port){const x=p.port,o=a.port;if(o.op==="eq"&&x!==o.a)return false;if(o.op==="neq"&&x===o.a)return false;if(o.op==="gt"&&!(x>o.a))return false;if(o.op==="lt"&&!(x<o.a))return false;if(o.op==="range"&&!(x>=o.a&&x<=o.b))return false;}
+  if(a.icmp&&a.icmp!=="echo")return false; // tester sends ping (echo)
+  return true;
+}
+function initACL(){
+  if(!$("#w-acl"))return;
+  const PRE={
+    ext:"permit tcp 192.168.10.0 0.0.0.255 host 192.168.20.100 eq 80\npermit icmp 192.168.10.0 0.0.0.255 host 192.168.20.100 echo\ndeny ip 192.168.10.0 0.0.0.255 192.168.20.0 0.0.0.255\npermit ip any any",
+    std:"deny host 192.168.10.20\npermit any",
+    bad:"permit ip any any\ndeny tcp any host 192.168.20.100 eq 23"
+  };
+  const Q=[["Staff web → HQ server","tcp","192.168.10.10","192.168.20.100",80],["Staff ping → HQ server","icmp","192.168.10.10","192.168.20.100",0],["Staff Telnet → PC-HQ","tcp","192.168.10.10","192.168.20.10",23],["Guest web → HQ server","tcp","192.168.10.20","192.168.20.100",80],["Staff web → Internet","tcp","192.168.10.10","203.0.113.10",80],["Telnet → server","tcp","192.168.10.10","192.168.20.100",23]];
+  Q.forEach(q=>{const b=document.createElement("button");b.className="btn";b.type="button";b.textContent=q[0];
+    b.addEventListener("click",()=>{$("#pk-proto").value=q[1];$("#pk-src").value=q[2];$("#pk-dst").value=q[3];$("#pk-port").value=q[4];run();});$("#pk-quick").appendChild(b);});
+  function load(){$("#acl-text").value=PRE[$("#acl-preset").value];run();}
+  function run(){
+    const lines=$("#acl-text").value.split("\n").filter(l=>l.trim());
+    const p={proto:$("#pk-proto").value,src:ip2n($("#pk-src").value),dst:ip2n($("#pk-dst").value),port:parseInt($("#pk-port").value,10)||0};
+    const rows=[];let verdict=null,hit=-1,seq=10;
+    if(p.src===null||p.dst===null){$("#acl-verdict").textContent="Enter valid source and destination IP addresses.";$("#acl-verdict").style.color="var(--bad)";$("#acl-rows").innerHTML="";return;}
+    lines.forEach((l,i)=>{const a=parseAce(l);let res;
+      if(a.skip){res="remark";}
+      else if(a.err){res="<span style='color:var(--bad)'>syntax: "+esc(a.err)+"</span>";}
+      else if(verdict){res="<span style='color:var(--muted)'>not checked</span>";}
+      else if(aceMatch(a,p)){verdict=a.act;hit=i;res="<b style='color:"+(a.act==="permit"?"var(--ok)":"var(--bad)")+"'>MATCH → "+a.act.toUpperCase()+"</b>";}
+      else res="no match";
+      rows.push("<tr"+(i===hit?" style='background:var(--accent-soft)'":"")+"><td class='num'>"+seq+"</td><td style='font-family:var(--f-mono);font-size:.82rem'>"+esc(l.trim())+"</td><td>"+res+"</td></tr>");seq+=10;});
+    rows.push("<tr"+(verdict?"":" style='background:var(--bad-soft)'")+"><td></td><td style='font-family:var(--f-mono);font-size:.82rem;color:var(--muted)'>(implicit) deny any</td><td>"+(verdict?"<span style='color:var(--muted)'>not reached</span>":"<b style='color:var(--bad)'>MATCH → DENY</b>")+"</td></tr>");
+    $("#acl-rows").innerHTML=rows.join("");
+    const v=verdict||"deny";const V=$("#acl-verdict");
+    V.textContent="Packet "+(v==="permit"?"PERMITTED":"DENIED")+(verdict?" by line "+((hit+1)*10):" by the implicit deny at the end");
+    V.style.color=v==="permit"?"var(--ok)":"var(--bad)";
+  }
+  $("#acl-preset").addEventListener("change",load);
+  ["#acl-text","#pk-proto","#pk-src","#pk-dst","#pk-port"].forEach(s=>$(s).addEventListener("input",run));
+  load();
+}
+
+/* ---------- NAT simulator ---------- */
+function initNAT(){
+  if(!$("#w-nat"))return;
+  const PUB="209.165.200.226",STATICG="209.165.200.229",STATICL="192.168.20.100",WEB="203.0.113.10";
+  let tbl,cport;
+  const reset=()=>{tbl=[];cport={"192.168.10.10":1025,"192.168.20.10":1025,"192.168.10.20":1025};};
+  reset();
+  const used=p=>tbl.some(t=>t.ig===PUB&&t.igp===p);
+  function render(){
+    const head="Pro  Inside global         Inside local          Outside local       Outside global";
+    const rows=tbl.map(t=>(t.pro.padEnd(5))+((t.igp?t.ig+":"+t.igp:t.ig).padEnd(22))+((t.ilp?t.il+":"+t.ilp:t.il).padEnd(22))+(t.ol.padEnd(20))+t.ol);
+    rows.push("---  "+STATICG.padEnd(22)+STATICL.padEnd(22)+"---".padEnd(20)+"---");
+    const pre=$("#nat-table");pre.textContent=head+"\n"+rows.join("\n");
+  }
+  function hdr(before,after,dir){
+    const svg=$("#nat-svg");svg.innerHTML="";
+    const box=(x,title,s,d,changed)=>{el("text",{x:x+85,y:16,"text-anchor":"middle",class:"svg-m"},svg,title);
+      el("rect",{x,y:24,width:170,height:90,rx:6,fill:"var(--surface-2)",stroke:"var(--line)"},svg);
+      el("text",{x:x+10,y:52,class:"svg-t",fill:changed==="s"?"var(--amber)":"var(--ink)"},svg,"Src "+s);
+      el("text",{x:x+10,y:84,class:"svg-t",fill:changed==="d"?"var(--amber)":"var(--ink)"},svg,"Dst "+d);};
+    if(!before){el("text",{x:210,y:70,"text-anchor":"middle",class:"svg-t"},svg,"Send a packet to see the translation");return;}
+    box(0,dir==="out"?"Inside (before NAT)":"Outside (before NAT)",before[0],before[1]);
+    el("line",{x1:178,y1:69,x2:236,y2:69,stroke:"var(--accent)","stroke-width":2},svg);
+    el("polygon",{points:"244,69 234,64 234,74",fill:"var(--accent)"},svg);
+    el("text",{x:211,y:60,"text-anchor":"middle",class:"svg-m"},svg,"HQ");
+    if(after)box(248,dir==="out"?"Outside (after NAT)":"Inside (after NAT)",after[0],after[1],dir==="out"?"s":"d");
+    else{el("rect",{x:248,y:24,width:170,height:90,rx:6,fill:"var(--bad-soft)",stroke:"var(--bad)"},svg);el("text",{x:333,y:74,"text-anchor":"middle",class:"svg-t",fill:"var(--bad)"},svg,"DROPPED");}
+  }
+  function out(src,name){
+    const lp=cport[src]++;let gp=lp;while(used(gp))gp++;
+    tbl.push({pro:"tcp",ig:PUB,igp:gp,il:src,ilp:lp,ol:WEB+":80"});
+    hdr([src+":"+lp,WEB+":80"],[PUB+":"+gp,WEB+":80"],"out");
+    $("#nat-msg").innerHTML=name+" opens a web page on the internet. PAT (overload) replaces the private source with HQ's public address "+PUB+(gp!==lp?" and changes the port to <b>"+gp+"</b> because "+lp+" is already used by another inside host.":" and keeps port "+lp+".")+" Replies to "+PUB+":"+gp+" are sent back to "+src+".";
+    render();
+  }
+  const B=[
+    ["PC-B1 → Internet web",()=>out("192.168.10.10","PC-B1 (branch staff)")],
+    ["PC-HQ → Internet web",()=>out("192.168.20.10","PC-HQ")],
+    ["PC-B2 → Internet web",()=>out("192.168.10.20","PC-B2 (branch guest)")],
+    ["Internet user → 209.165.200.229:80",()=>{const p=1030+tbl.length;tbl.push({pro:"tcp",ig:STATICG,igp:80,il:STATICL,ilp:80,ol:WEB+":"+p});
+      hdr([WEB+":"+p,STATICG+":80"],[WEB+":"+p,STATICL+":80"],"in");$("#nat-msg").textContent="An internet user reaches the HQ web server through its static NAT entry. The destination 209.165.200.229 is translated to 192.168.20.100. Static NAT works in both directions; PAT entries only exist after an inside host starts a session.";render();}],
+    ["Internet user → 209.165.200.226:80",()=>{hdr([WEB+":1040",PUB+":80"],null,"in");$("#nat-msg").textContent="No translation exists for "+PUB+":80, so HQ has nowhere to send the packet. PAT alone does not let outside hosts start connections. You would need port forwarding (static PAT).";}],
+    ["clear ip nat translation *",()=>{reset();hdr(null);$("#nat-msg").textContent="Dynamic (PAT) entries are cleared. The static entry stays because it is part of the configuration.";render();}]
+  ];
+  B.forEach(([t,f])=>{const b=document.createElement("button");b.type="button";b.className="btn";b.textContent=t;b.addEventListener("click",f);$("#nat-btns").appendChild(b);});
+  hdr(null);render();$("#nat-msg").textContent="Inside: 192.168.10.0/24 (branch) and 192.168.20.0/24 (HQ). Outside: the ISP. The static entry for the web server is always present.";
+}
+
+const QUIZ8=[
+ ["Which device supplies the clock on a serial WAN link?",["DTE","DCE","Router LAN port","Switch"],1,"The DCE (CSU/DSU, or the router holding the DCE cable end in a lab) provides clocking."],
+ ["Default encapsulation on a Cisco serial interface?",["PPP","Frame Relay","Cisco HDLC","Ethernet"],2,"Cisco HDLC is the default; it adds a proprietary protocol field."],
+ ["You must connect a Cisco router to another vendor's router over a leased line. Which encapsulation?",["Cisco HDLC","PPP","ISL","802.1Q"],1,"PPP is an open standard; Cisco HDLC is not interoperable."],
+ ["Which PPP component negotiates authentication and link options?",["NCP","IPCP","LCP","CDPCP"],2,"LCP establishes and configures the link, including the authentication protocol."],
+ ["Which PPP component negotiates IPv4 settings?",["LCP","IPCP","CHAP","HDLC"],1,"IPCP is the NCP for IPv4."],
+ ["Which statement about CHAP is true?",["It sends the password in clear text","It uses a two-way handshake","It uses a three-way handshake with an MD5 hash","It cannot be used on Cisco routers"],2,"Challenge, response (hash), success/failure."],
+ ["For CHAP between BRANCH and HQ, what username must HQ configure?",["HQ","BRANCH","admin","Any name"],1,"Each router configures the peer's hostname with the shared secret."],
+ ["A serial interface is 'up, line protocol down'. Most likely cause?",["Cable unplugged","Interface shut down","Encapsulation mismatch","Wrong IP address"],2,"Layer 1 is up; Layer 2 fails. Encapsulation, authentication or clocking."],
+ ["How does a router process an ACL?",["Best match","Bottom-up","Top-down, first match","All lines, last match"],2,"Checking stops at the first matching statement."],
+ ["What is at the end of every ACL?",["permit any","An implicit deny any","Nothing","A log statement"],1,"Unmatched packets are denied, so an ACL needs at least one permit."],
+ ["Wildcard mask for 192.168.10.0/24?",["255.255.255.0","0.0.0.255","0.0.255.255","0.0.0.0"],1,"255.255.255.255 − 255.255.255.0."],
+ ["A standard ACL filters on…",["Destination address","Source address only","Port numbers","Protocol"],1,"That is why it goes close to the destination."],
+ ["Where should an extended ACL usually be placed?",["Close to the destination","Close to the source","On every interface","Only on VTY lines"],1,"Drop unwanted traffic before it uses WAN bandwidth."],
+ ["Which command applies ACL 5 to Telnet/SSH lines?",["ip access-group 5 in","access-class 5 in","access-list 5 vty","ip vty 5"],1,"access-class is used under line vty."],
+ ["Which number range is extended IPv4 ACL?",["1–99","100–199","200–299","1300–1999"],1,"Also 2000–2699. 1–99 and 1300–1999 are standard."],
+ ["In NAT, the private address of an inside host is the…",["Inside global","Inside local","Outside local","Outside global"],1,"Inside local = private address as seen inside."],
+ ["Which NAT type lets many hosts share one public address using port numbers?",["Static NAT","Dynamic NAT","PAT (overload)","NAT64"],2,"PAT is also called NAT overload."],
+ ["Which NAT type should be used for a web server that internet users must reach?",["PAT","Static NAT","Dynamic NAT","No NAT"],1,"Static NAT gives a permanent one-to-one mapping usable in both directions."],
+ ["Which command shows active translations?",["show nat","show ip nat translations","show ip route nat","debug nat table"],1,"show ip nat statistics shows counters and inside/outside interfaces."],
+ ["Which is NOT a valid WAN security measure?",["CHAP on PPP links","VTY access-class","Relying on NAT as a firewall","Inbound anti-spoofing ACL"],2,"NAT hides addresses but does not inspect or block traffic."]
+];
+
+initPPP(); initWild(); initACL(); initNAT();
+$$(".cli").forEach(decorateCli); initTabs(); initQuiz(QUIZ8); initRail();
+
+})();
+</script>
+</body>
+</html>
