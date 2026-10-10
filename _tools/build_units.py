@@ -129,6 +129,21 @@ for _f in ('unit-7-lab-series.html', 'unit-8-lab-series.html', 'unit-8-wan-acl-n
     PAGE_CSS[_f] = 'body{margin:0}'
 FIXED_BAR = {'unit-1-2-switching-vs-routing.html'}
 
+# Pages without their own side contents: they get the shared left panel on wide screens.
+# Every page gets the shared "Contents" drawer on narrow screens.
+WIDE_TOC = {
+    'unit-1-1-routers-and-switches.html', 'unit-1-2-ip-addressing-review.html', 'unit-1-3-cisco-ios-cli-basics.html',
+    'unit-2-2-switching-methods.html', 'unit-2-3-mac-address-table.html', 'unit-2-3-basic-switch-setup.html',
+    'unit-2-4-managing-switch-configuration.html', 'unit-3-1-vlan-concepts.html',
+    'unit-4-static-routing.html', 'unit-5-distance-vector-rip.html',
+}
+# Pages whose own sticky contents list must scroll on its own instead of running off screen.
+_SCROLL_OWN_TOC = '@media (min-width:901px){nav.toc{max-height:calc(100vh - 48px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}}'
+for _f in ('unit-1-number-systems.html', 'unit-4-combinational-logic.html', 'unit-5-combinational-logic-msi-lsi.html',
+           'unit-6-sequential-logic.html', 'unit-7-registers-and-counters.html',
+           'unit-6-link-state-and-hybrid-routing.html', 'unit-6-3-eigrp.html', 'unit-6-lab-ospf.html', 'unit-6-lab-eigrp.html'):
+    PAGE_CSS[_f] = PAGE_CSS.get(_f, '') + _SCROLL_OWN_TOC
+
 BAR_CSS = """
 #nkg-unitbar,#nkg-unitfoot{all:initial;display:block;box-sizing:border-box;position:relative;z-index:2147483000;align-self:stretch;justify-self:stretch;
   background:#0b1d3a;color:#fbf9f3;font:500 14px/1.2 Inter,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
@@ -162,12 +177,66 @@ BAR_CSS = """
   #nkg-unitbar .nkg-btn{padding:0 10px}
 }
 @media (max-width:760px){table{display:block;max-width:100%;overflow-x:auto}}
+#nkg-unitbar .nkg-tocbtn{display:none}
+html.nkg-toc-narrow #nkg-unitbar .nkg-tocbtn{display:inline-flex}
+#nkg-toc{all:initial;position:fixed;z-index:2147482990;left:12px;top:62px;width:260px;display:none;flex-direction:column;box-sizing:border-box;
+  background:#0b1d3a;color:#cdd5e3;border:1px solid rgba(201,161,74,.35);border-radius:12px;box-shadow:0 10px 30px rgba(6,18,42,.28);
+  font:500 13.5px/1.35 Inter,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden}
+#nkg-toc *{box-sizing:border-box}
+html.nkg-toc-wide #nkg-toc[data-wide="1"]{display:flex}
+#nkg-toc .nkg-toc-h{flex:none;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px 14px 12px 16px;
+  font:600 11px/1 Inter,-apple-system,"Segoe UI",sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#c9a14a;border-bottom:1px solid rgba(251,249,243,.1)}
+#nkg-toc .nkg-toc-x{display:none;place-items:center;width:30px;height:30px;border-radius:6px;border:1px solid rgba(251,249,243,.22);color:#fbf9f3;font:400 18px/1 Inter,sans-serif;cursor:pointer;background:none}
+#nkg-toc .nkg-toc-list{display:block;flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:8px 8px 14px;scrollbar-width:thin;scrollbar-color:#1c3a78 transparent}
+#nkg-toc a{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;color:#cdd5e3!important;text-decoration:none!important;
+  padding:7px 10px 7px 12px;margin:1px 0;border-left:2px solid transparent;border-radius:0 6px 6px 0;cursor:pointer}
+#nkg-toc a.l3{padding-left:24px;font-size:12.5px;color:#9fb0c8!important}
+#nkg-toc a:hover{background:rgba(251,249,243,.06);color:#fbf9f3!important}
+#nkg-toc a.on{border-left-color:#c9a14a;background:rgba(201,161,74,.13);color:#fbf9f3!important}
+html.nkg-toc-narrow #nkg-toc{z-index:2147483002;display:flex;left:0;top:0!important;bottom:0;height:auto!important;width:min(300px,86vw);border-radius:0 12px 12px 0;border-left:0;
+  transform:translateX(-105%);visibility:hidden;transition:transform .25s ease,visibility .25s}
+html.nkg-toc-narrow.nkg-toc-open #nkg-toc{transform:none;visibility:visible}
+html.nkg-toc-narrow #nkg-toc .nkg-toc-x{display:inline-grid}
+#nkg-toc-scrim{all:initial;display:none;position:fixed;inset:0;z-index:2147482989;background:rgba(6,18,42,.45)}
+html.nkg-toc-open #nkg-toc-scrim{display:block;z-index:2147483001}
+@media (prefers-reduced-motion:reduce){html.nkg-toc-narrow #nkg-toc{transition:none}}
 """
 
-BAR_JS = """(function(){try{var b=document.getElementById('nkg-unitbar'),f=document.getElementById('nkg-unitfoot'),cs=getComputedStyle(document.body),n=function(p){return parseFloat(cs[p])||0};
-var l=n('paddingLeft')+n('marginLeft'),r=n('paddingRight')+n('marginRight');
-if(b&&b.getAttribute('data-mode')!=='fixed'){var t=n('paddingTop')+n('marginTop');b.style.marginTop=-t+'px';b.style.marginLeft=-l+'px';b.style.marginRight=-r+'px';b.style.marginBottom=n('paddingTop')+'px';}
-if(f){f.style.marginLeft=(parseFloat(f.style.marginLeft)||0)-l+'px';f.style.marginRight=-r+'px';f.style.marginBottom=-(n('paddingBottom')+n('marginBottom'))+'px';}}catch(e){}})();"""
+BAR_JS = r"""(function(){
+var d=document,h=d.documentElement,B=d.body,bar=d.getElementById('nkg-unitbar'),ft=d.getElementById('nkg-unitfoot'),toc=d.getElementById('nkg-toc'),
+list=toc&&toc.querySelector('.nkg-toc-list'),hs=[],links=[],basePL=null,wideOK=toc&&toc.getAttribute('data-wide')==='1';
+function px(v){return parseFloat(v)||0}
+if(toc){try{
+  var all=[].slice.call(d.querySelectorAll('h2,h3')).filter(function(x){return !x.closest('#nkg-unitbar,#nkg-unitfoot,#nkg-toc')&&x.getClientRects().length&&x.textContent.trim()});
+  if(all.filter(function(x){return x.tagName==='H2'}).length>8)all=all.filter(function(x){return x.tagName==='H2'});
+  all.forEach(function(x,i){if(!x.id)x.id='nkg-s-'+(i+1);var a=d.createElement('a');a.href='#'+x.id;a.textContent=[].map.call(x.childNodes,function(c){return c.textContent}).join(' ').replace(/\s+/g,' ').trim();
+    a.className=x.tagName==='H3'?'l3':'l2';a.addEventListener('click',function(){h.classList.remove('nkg-toc-open')});list.appendChild(a);hs.push(x);links.push(a)});
+  if(!hs.length){toc.remove();toc=null;}
+}catch(e){toc=null}}
+function place(){if(!toc)return;
+  if(h.classList.contains('nkg-toc-wide')){var top=Math.max(12,(bar?bar.getBoundingClientRect().bottom:0)+12),bot=innerHeight-12;
+    if(ft){var fb=ft.getBoundingClientRect().top-12;if(fb<bot)bot=fb}toc.style.top=top+'px';toc.style.height=Math.max(140,bot-top)+'px'}
+  else{toc.style.top='';toc.style.height=''}
+  var cur=0;for(var i=0;i<hs.length;i++){if(hs[i].getBoundingClientRect().top<90)cur=i;else break}
+  for(var j=0;j<links.length;j++)links[j].classList.toggle('on',j===cur);
+  var a=links[cur];if(a&&list.clientHeight){if(a.offsetTop<list.scrollTop||a.offsetTop>list.scrollTop+list.clientHeight-40)list.scrollTop=a.offsetTop-list.clientHeight/3}}
+function layout(){try{
+  if(toc){if(basePL===null){B.style.removeProperty('padding-left');basePL=px(getComputedStyle(B).paddingLeft)}
+    var wide=wideOK&&innerWidth>=1200;h.classList.toggle('nkg-toc-wide',wide);h.classList.toggle('nkg-toc-narrow',innerWidth<1200);
+    if(wide){h.classList.remove('nkg-toc-open');B.style.setProperty('padding-left',(basePL+284)+'px','important')}else B.style.removeProperty('padding-left')}
+  var cs=getComputedStyle(B),l=px(cs.paddingLeft)+px(cs.marginLeft),r=px(cs.paddingRight)+px(cs.marginRight);
+  if(bar&&bar.getAttribute('data-mode')!=='fixed'){var t=px(cs.paddingTop)+px(cs.marginTop);bar.style.marginTop=-t+'px';bar.style.marginLeft=-l+'px';bar.style.marginRight=-r+'px';bar.style.marginBottom=px(cs.paddingTop)+'px'}
+  if(ft){ft.style.marginLeft=-l+'px';ft.style.marginRight=-r+'px';ft.style.marginBottom=-(px(cs.paddingBottom)+px(cs.marginBottom))+'px'}
+  place()}catch(e){}}
+var tick=false;function onScroll(){if(!tick){tick=true;requestAnimationFrame(function(){tick=false;place()})}}
+layout();addEventListener('resize',layout);addEventListener('scroll',onScroll,{passive:true});addEventListener('load',layout);
+if(toc){var btn=d.querySelector('#nkg-unitbar .nkg-tocbtn'),sc=d.getElementById('nkg-toc-scrim'),x=toc.querySelector('.nkg-toc-x');
+  function close(){h.classList.remove('nkg-toc-open')}
+  if(btn)btn.addEventListener('click',function(e){e.preventDefault();h.classList.toggle('nkg-toc-open');place()});
+  if(sc)sc.addEventListener('click',close);if(x)x.addEventListener('click',close);
+  d.addEventListener('keydown',function(e){if(e.key==='Escape')close()});}
+else{var b2=d.querySelector('#nkg-unitbar .nkg-tocbtn');if(b2)b2.remove()}
+})();"""
 
 FONT_LINK = '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600&amp;display=swap">'
 
@@ -216,8 +285,12 @@ def build_page(key, i, seq):
            f'<a class="nkg-mark" href="/teaching/" title="Teaching Hub">NKG</a>'
            f'<a class="nkg-subj" href="{hub}">{esc(sub["name"])}</a><span class="nkg-sep">/</span>'
            f'<span class="nkg-unit"><b>{esc(p["label"])}</b>{esc(p["topic"])}</span>'
-           f'<span class="nkg-nav">{prev_btn}<a class="nkg-btn" href="{hub}" title="All units">&#9776;<span> All units</span></a>{next_btn}</span>'
-           f'</span></nkg-unitbar><!--/nkg:bar-->')
+           f'<span class="nkg-nav"><a class="nkg-btn nkg-tocbtn" href="#" role="button" title="Contents">&#9776;<span> Contents</span></a>'
+           f'{prev_btn}<a class="nkg-btn" href="{hub}" title="All units">&#9638;<span> All units</span></a>{next_btn}</span>'
+           f'</span></nkg-unitbar>'
+           f'<nkg-toc id="nkg-toc" data-wide="{1 if p["file"] in WIDE_TOC else 0}" role="navigation" aria-label="Page contents">'
+           f'<span class="nkg-toc-h">Contents<button class="nkg-toc-x" type="button" aria-label="Close contents">&times;</button></span>'
+           f'<span class="nkg-toc-list"></span></nkg-toc><nkg-scrim id="nkg-toc-scrim"></nkg-scrim><!--/nkg:bar-->')
     cards = []
     if prev:
         cards.append(f'<a class="nkg-card prev" href="{href(prev)}"><span class="nkg-k">&#8249; Previous</span><span class="nkg-t">{esc(prev["label"] + " · " + prev["topic"])}</span></a>')
