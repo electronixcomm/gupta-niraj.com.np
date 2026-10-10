@@ -1,0 +1,1288 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body><div style="font:14px/1.4 Inter,-apple-system,Segoe UI,sans-serif;background:#0b1d3a;padding:10px 16px;"><a href="/teaching/digital-logic.html" style="color:#fbf9f3;text-decoration:none;">&larr; Digital Logic &middot; all units</a></div>
+<title>Unit 6 Sequential Logic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: lab-manual lesson page — sticky contents rail on the left, one reading column with full-width circuit benches */
+:root{
+  --bg:#f4f6f9; --surface:#ffffff; --ink:#17202b; --muted:#5a6575; --line:#d8dee7;
+  --accent:#1d5bb8; --tint:#e6eefa;
+  --hi:#d9480f; --hi-tint:#fdeadf; --wire:#9aa5b4;
+  --g1:#d9480f; --g2:#1f8a5b; --g3:#6f42c1; --g4:#c2255c;
+  --f-display:"Archivo", "Helvetica Neue", Arial, sans-serif;
+  --f-body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#10151c; --surface:#171f29; --ink:#e5eaf0; --muted:#9aa6b5; --line:#2a3442;
+  --accent:#74a3ee; --tint:#1a2940; --hi:#ff8a3d; --hi-tint:#3a2414; --wire:#4d5a6b;
+  --g1:#ff8a3d; --g2:#4cc38a; --g3:#a98bf0; --g4:#f06595; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#10151c; --surface:#171f29; --ink:#e5eaf0; --muted:#9aa6b5; --line:#2a3442;
+  --accent:#74a3ee; --tint:#1a2940; --hi:#ff8a3d; --hi-tint:#3a2414; --wire:#4d5a6b;
+  --g1:#ff8a3d; --g2:#4cc38a; --g3:#a98bf0; --g4:#f06595; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:17px/1.6 var(--f-body);margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:28px 80px;display:grid;grid-template-columns:230px minmax(0,1fr);gap:48px}
+@media (max-width:900px){.wrap{grid-template-columns:minmax(0,1fr);gap:20px;padding-inline:16px}}
+nav.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 20px);align-self:start;font-size:15px}
+nav.toc .code{font:600 12px var(--f-mono);letter-spacing:.06em;color:var(--muted)}
+nav.toc ol{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:2px}
+nav.toc a{display:flex;justify-content:space-between;gap:8px;color:var(--ink);text-decoration:none;padding:6px 10px;border-radius:6px}
+nav.toc a:hover,nav.toc a:focus-visible{background:var(--tint)}
+nav.toc a span{color:var(--muted);font:12px var(--f-mono);white-space:nowrap}
+nav.toc a.sub{padding-left:22px;font-size:14px;color:var(--muted)}
+@media (max-width:900px){nav.toc{position:static;border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--surface)}}
+main{min-width:0}
+.prose{max-width:68ch}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.15}
+h1{font-size:clamp(34px,5vw,52px);font-weight:800;margin:6px 0 12px;letter-spacing:-.01em}
+h2{font-size:30px;font-weight:800;margin:0 0 6px}
+h3{font-size:21px;font-weight:700;margin:36px 0 8px}
+.eyebrow{font:600 12px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+section.unit{padding-top:56px;margin-top:56px;border-top:2px solid var(--ink)}
+section.unit:first-of-type{border-top:0;margin-top:0;padding-top:0}
+.sylref{display:inline-block;font:600 12px var(--f-mono);color:var(--muted);margin-bottom:6px}
+p{margin:0 0 14px}
+.ex{font-family:var(--f-mono);font-size:.92em;white-space:nowrap}
+.eq{font-family:var(--f-mono);font-size:15px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 16px;margin:6px 0 16px;overflow-x:auto;line-height:1.9}
+.eq div{white-space:nowrap}
+.note{border-left:3px solid var(--accent);background:var(--tint);padding:10px 14px;border-radius:0 8px 8px 0;margin:10px 0 18px;font-size:16px}
+ol.steps{padding-left:22px;margin:0 0 16px}
+ol.steps li{margin:4px 0}
+.lead{font-size:19px;color:var(--muted);max-width:62ch}
+.meta{display:flex;flex-wrap:wrap;gap:8px 18px;font:13px var(--f-mono);color:var(--muted);margin:14px 0 22px}
+.outcomes{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:16px 0 8px}
+.outcomes div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:15px}
+.outcomes b{display:block;font:600 12px var(--f-mono);color:var(--accent);margin-bottom:2px}
+
+/* tables */
+.tw{overflow-x:auto;margin:6px 0 18px}
+table{border-collapse:collapse;font-family:var(--f-mono);font-size:14px;font-variant-numeric:tabular-nums}
+th,td{padding:4px 10px;text-align:center;border-bottom:1px solid var(--line)}
+th{font-weight:600;color:var(--muted);border-bottom:2px solid var(--ink)}
+td.sep,th.sep{border-left:2px solid var(--ink)}
+table.cmp{font-family:var(--f-body);font-size:15px;width:100%}
+table.cmp td,table.cmp th{text-align:left;vertical-align:top;padding:8px 10px}
+tr.dc td{color:var(--muted);font-style:italic}
+
+/* K-maps */
+.kmaps{display:flex;flex-wrap:wrap;gap:22px;margin:8px 0 18px}
+.km{min-width:0}
+.km table td{width:38px;height:34px;border:1px solid var(--line);background:var(--surface);font-weight:600}
+.km table th{border:0;font-size:12px;padding:2px 6px}
+.km .cap{font:13px var(--f-mono);margin-top:6px}
+.km .t{font:600 12px var(--f-mono);color:var(--muted);margin-bottom:4px}
+.km td.x{color:var(--muted)}
+
+/* simulator bench */
+.bench{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin:14px 0 22px;overflow:hidden}
+.bench header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px 16px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.bench header h4{margin:0;font:700 15px var(--f-display)}
+.bench header .tag{font:600 11px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--hi)}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
+.bit{font:600 15px var(--f-mono);border:1.5px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:6px 12px;cursor:pointer;display:inline-flex;gap:8px;align-items:center}
+.bit b{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:5px;background:var(--line);color:var(--ink)}
+.bit[aria-pressed="true"]{border-color:var(--hi)}
+.bit[aria-pressed="true"] b{background:var(--hi);color:#fff}
+.btn{font:600 13px var(--f-body);border:1px solid var(--line);background:transparent;color:var(--accent);border-radius:8px;padding:7px 12px;cursor:pointer}
+.btn:hover{background:var(--tint)}
+.bit:focus-visible,.btn:focus-visible,nav a:focus-visible,summary:focus-visible,tr.row:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.spacer{flex:1}
+.readout{font:14px var(--f-mono);padding:10px 16px;background:var(--hi-tint);border-bottom:1px solid var(--line)}
+.diag{padding:10px 8px 4px;overflow-x:auto}
+.diag .dt{font:600 12px var(--f-mono);color:var(--muted);padding:0 8px}
+.diag svg{display:block;width:100%;min-width:440px;height:auto}
+.simtable{padding:4px 16px 14px;overflow-x:auto}
+.simtable table{margin:0}
+tr.row{cursor:pointer}
+tr.row:hover td{background:var(--tint)}
+tr.row.cur td{background:var(--hi-tint);color:var(--ink)}
+tr.row.cur td:first-child{box-shadow:inset 3px 0 0 var(--hi)}
+svg text{font-family:var(--f-mono);fill:var(--ink)}
+svg .lab{font-size:10px;fill:var(--muted)}
+svg .w0{stroke:var(--wire);stroke-width:1.6;fill:none}
+svg .w1{stroke:var(--hi);stroke-width:2.2;fill:none}
+svg .gate{fill:var(--surface);stroke:var(--ink);stroke-width:1.6}
+svg .bub{fill:var(--surface);stroke:var(--ink);stroke-width:1.4}
+svg .dot0{fill:var(--wire)} svg .dot1{fill:var(--hi)}
+svg .led0{fill:var(--bg);stroke:var(--muted);stroke-width:1.4}
+svg .led1{fill:var(--hi);stroke:var(--hi);stroke-width:1.4}
+svg .blk{fill:var(--tint);stroke:var(--accent);stroke-width:1.6}
+svg .arrow{stroke:var(--ink);stroke-width:1.6;fill:none}
+
+/* six-step design card */
+.design{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin:12px 0 22px}
+.ds{display:grid;grid-template-columns:40px minmax(0,1fr);gap:14px;padding:16px;border-top:1px solid var(--line)}
+.ds:first-child{border-top:0}
+.dn{width:34px;height:34px;border-radius:50%;border:2px solid var(--accent);color:var(--accent);display:grid;place-items:center;font:800 16px var(--f-display);position:relative}
+.ds:not(:last-child) .dn::after{content:"";position:absolute;top:36px;left:50%;width:2px;height:calc(100% + 0px);background:var(--line)}
+.db{min-width:0}
+.db h5{margin:5px 0 8px;font:700 16px var(--f-display)}
+.db h5 small{display:block;font:600 11px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:2px}
+.db p:last-child,.db .eq:last-child,.db .tw:last-child,.db .kmaps:last-child{margin-bottom:0}
+.db .bench{margin:8px 0 0}
+table.io{font-family:var(--f-body);font-size:15px}
+table.io td,table.io th{text-align:left;padding:6px 12px}
+@media (max-width:520px){.ds{grid-template-columns:minmax(0,1fr);gap:6px}.ds:not(:last-child) .dn::after{display:none}}
+ol.mini{counter-reset:st;list-style:none;padding:0;margin:10px 0 4px;display:grid;gap:8px}
+ol.mini>li{counter-increment:st;position:relative;padding-left:64px;font-size:16px;min-width:0}
+ol.mini>li::before{content:"Step " counter(st);position:absolute;left:0;top:4px;font:600 11px var(--f-mono);color:var(--accent);letter-spacing:.04em}
+ol.mini b{font-weight:700}
+
+.eq .stp{display:inline-block;min-width:64px;font-size:11px;font-weight:600;color:var(--accent);letter-spacing:.04em}
+
+/* practice */
+.practice{margin:26px 0 8px}
+.practice h3{margin-top:0}
+details.q{background:var(--surface);border:1px solid var(--line);border-radius:10px;margin:8px 0}
+details.q summary{cursor:pointer;padding:12px 16px;list-style:none;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:baseline}
+details.q summary::-webkit-details-marker{display:none}
+details.q summary .n{font:600 12px var(--f-mono);color:var(--accent)}
+details.q summary .r{font:600 12px var(--f-mono);color:var(--muted);white-space:nowrap}
+details.q[open] summary .r{color:var(--hi)}
+details.q .ans{padding:2px 16px 14px 16px;border-top:1px dashed var(--line);margin:0 16px;padding-left:0;padding-right:0}
+details.q .ans p{margin:10px 0 6px}
+.src{font:12px var(--f-mono);color:var(--muted)}
+footer{margin-top:60px;font-size:14px;color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){svg .w1,svg .led1{transition:stroke .15s,fill .15s}}
+</style>
+
+<style>
+/* ---- Unit 6 additions ---- */
+h4.exh{font:700 17px var(--f-display);margin:26px 0 8px}
+ol.steps ul{margin:6px 0}
+
+:root{--opt:#7a5a12;--opt-tint:#fbf3df;--opt-line:#e2c98a}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--opt:#e8c06a;--opt-tint:#2b2414;--opt-line:#5e4a1f}}
+:root[data-theme="dark"]{--opt:#e8c06a;--opt-tint:#2b2414;--opt-line:#5e4a1f}
+
+.opt{border:1.5px dashed var(--opt-line);background:var(--opt-tint);border-radius:12px;padding:6px 18px 10px;margin:28px 0}
+.opt>h3:first-of-type,.opt>.optbadge+h3{margin-top:8px}
+.optbadge{display:inline-flex;gap:6px;align-items:center;font:600 11px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--opt);margin-top:10px}
+.optbadge::before{content:"";width:8px;height:8px;border-radius:50%;border:1.5px solid var(--opt)}
+.added{display:inline-block;font:600 11px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--g2);border:1px solid var(--g2);border-radius:999px;padding:1px 8px;margin-left:6px;vertical-align:middle}
+nav.toc a.opt-l{color:var(--opt)}
+nav.toc a.opt-l::after{content:"optional";font:11px var(--f-mono);color:var(--opt)}
+.opttoggle{display:flex;gap:8px;align-items:center;margin-top:14px;font-size:14px;color:var(--muted);cursor:pointer}
+.opttoggle input{accent-color:var(--accent);width:16px;height:16px}
+details.q.optq{border-style:dashed;border-color:var(--opt-line);background:var(--opt-tint)}
+body.hideopt .opt,body.hideopt nav.toc a.opt-l,body.hideopt .optq,body.hideopt tr.opt-row{display:none}
+.legend{display:flex;flex-wrap:wrap;gap:10px 22px;font-size:14px;color:var(--muted);margin:6px 0 16px}
+.legend span{display:inline-flex;gap:8px;align-items:center}
+.legend i{display:inline-block;width:22px;height:14px;border-radius:4px}
+.legend .lc{border:1px solid var(--line);background:var(--surface)}
+.legend .lo{border:1.5px dashed var(--opt-line);background:var(--opt-tint)}
+
+/* custom widgets */
+.wid .row2{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
+.wid .grp{display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap}
+.wid .grp>span.gl{font:600 13px var(--f-mono);color:var(--muted);min-width:22px}
+.wid .bit{padding:5px 9px;font-size:14px}
+.wid .bit b{width:22px;height:22px}
+.wid select,.wid input[type=text]{font:15px var(--f-mono);padding:6px 8px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+.wid input[type=text]{min-width:0;width:min(100%,320px)}
+.wid label{font-size:14px;color:var(--muted)}
+.wid .body{padding:12px 16px}
+.wid .err{color:var(--g4);font-size:14px;margin-top:6px}
+.stage{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:8px 0}
+.stage>div{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--bg);min-width:0}
+.stage .k{font:600 11px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.stage .v{font:600 20px var(--f-mono);margin-top:2px}
+.stage .s{font-size:14px;color:var(--muted)}
+.stage .hot{border-color:var(--hi);background:var(--hi-tint)}
+.circ{display:inline-grid;place-items:center;min-width:26px;height:26px;border-radius:50%;border:2px solid var(--hi);font-weight:600}
+table.impl td,table.impl th{padding:5px 10px}
+table.impl tr.inp td{font-weight:700;color:var(--accent);border-top:2px solid var(--ink)}
+.ok{color:var(--g2);font-weight:600}
+.fuse{width:44px;height:34px;border:1.5px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);font:600 15px var(--f-mono);cursor:pointer}
+.fuse[aria-pressed="false"]{color:var(--muted);background:var(--bg);text-decoration:line-through}
+tr.sel td{background:var(--hi-tint)}
+tr.brk td{border-top:2px solid var(--ink)}
+tr.hl td{background:var(--hi-tint)}
+.prog td,.prog th{padding:5px 12px}
+svg .fa{fill:var(--surface);stroke:var(--ink);stroke-width:1.6}
+svg .val{font-size:12px;font-weight:600}
+svg .v1{fill:var(--hi)}
+svg .v0{fill:var(--muted)}
+svg .sm{font-size:11px;fill:var(--muted)}
+
+svg .node{fill:var(--surface);stroke:var(--ink);stroke-width:1.6}
+svg .node.cur{fill:var(--hi-tint);stroke:var(--hi);stroke-width:2.6}
+svg .edge{stroke:var(--muted);stroke-width:1.5;fill:none}
+svg .edge.act{stroke:var(--hi);stroke-width:2.6}
+svg .elab{font-size:12px;fill:var(--ink)}
+svg .elab.act{fill:var(--hi);font-weight:700}
+svg .wv{stroke:var(--accent);stroke-width:2;fill:none}
+svg .wv.q{stroke:var(--hi)}
+svg .gl{stroke:var(--line);stroke-width:1}
+svg .ah{fill:var(--muted)} svg .ah1{fill:var(--hi)}
+.osc{color:var(--g4);font-weight:600}
+.wid input[type=range]{accent-color:var(--accent);width:min(100%,260px)}
+table.ct tr.cur td{background:var(--hi-tint)}
+.twocol{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;align-items:start}
+.twocol>div{min-width:0}
+s.gone{color:var(--muted)}
+</style>
+
+<div class="wrap">
+<nav class="toc" aria-label="Contents">
+  <div class="code">BT102CO · UNIT 6 · 6 HRS</div>
+  <ol>
+    <li><a href="#u61">Sequential vs combinational <span>6.1 · ½h</span></a></li>
+    <li><a href="#u62">Flip-flops <span>6.2 · 3h</span></a></li>
+    <li><a class="sub" href="#latch">Basic flip-flop (latch)</a></li>
+    <li><a class="sub" href="#rsff">RS flip-flop</a></li>
+    <li><a class="sub" href="#dff">D flip-flop</a></li>
+    <li><a class="sub" href="#jkff">JK flip-flop</a></li>
+    <li><a class="sub" href="#race">Race-around condition</a></li>
+    <li><a class="sub" href="#tff">T flip-flop</a></li>
+    <li><a class="sub" href="#trig">Triggering</a></li>
+    <li><a class="sub" href="#msff">Master-slave</a></li>
+    <li><a class="sub opt-l" href="#edge">Edge-triggered</a></li>
+    <li><a class="sub opt-l" href="#direct">Direct inputs</a></li>
+    <li><a class="sub" href="#excite">Excitation tables</a></li>
+    <li><a href="#u63">State equations &amp; design <span>6.3 · 2½h</span></a></li>
+    <li><a class="sub" href="#steq">State equation, table, diagram</a></li>
+    <li><a class="sub opt-l" href="#anjk">Analysis with JK</a></li>
+    <li><a class="sub opt-l" href="#mealy">Mealy and Moore</a></li>
+    <li><a class="sub" href="#reduce">State reduction</a></li>
+    <li><a class="sub" href="#assign">State assignment</a></li>
+    <li><a class="sub" href="#design">Design procedure</a></li>
+    <li><a class="sub" href="#desd">Design with D flip-flops</a></li>
+    <li><a class="sub" href="#desjk">Design with JK flip-flops</a></li>
+    <li><a class="sub opt-l" href="#unused">Unused states</a></li>
+    <li><a class="sub opt-l" href="#counter">Counter design</a></li>
+    <li><a href="#bank">Problem bank <span>exam</span></a></li>
+    <li><a href="#summary">Key results <span>revise</span></a></li>
+  </ol>
+  <label class="opttoggle" for="hideopt"><input type="checkbox" id="hideopt"> Hide optional topics</label>
+</nav>
+
+<main>
+<section class="unit" id="intro">
+  <div class="eyebrow">Digital Logic · BT102CO · Unit 6</div>
+  <h1>Sequential Logic</h1>
+  <p class="lead">Circuits with memory: flip-flops that store one bit, how they are clocked, and how to describe, simplify and design clocked sequential circuits with state equations, state tables and state diagrams.</p>
+  <div class="meta"><span>Syllabus: 6.1 – 6.3</span><span>Teaching: 6 hours</span><span>Reference: M. Morris Mano, Ch. 6</span></div>
+  <div class="legend">
+    <span><i class="lc"></i>Course content (syllabus)</span>
+    <span><i class="lo"></i>Optional, beyond the syllabus</span>
+  </div>
+  <div class="tw"><table class="cmp">
+    <tr><th>Syllabus</th><th>Covered here</th><th>Optional extras from Mano</th></tr>
+    <tr><td>6.1 Sequential vs combinational</td><td>Block diagram, synchronous/asynchronous, clocked circuits</td><td>–</td></tr>
+    <tr><td>6.2 RS, JK, T, D and master-slave flip-flops</td><td>Basic latch, clocked RS, D, JK, T; characteristic tables and equations; triggering; master-slave; excitation tables</td><td>Edge-triggered D flip-flop, direct preset/clear</td></tr>
+    <tr><td>6.3 Design with state equation and state reduction table</td><td>State equations, state table, state diagram, state reduction, state assignment, design procedure (D and JK)</td><td>Analysis with JK, Mealy/Moore, unused states, counter design</td></tr>
+  </table></div>
+  <p class="src">Use "Hide optional topics" in the contents menu to teach strictly to the syllabus.</p>
+</section>
+
+<!-- ============ 6.1 ============ -->
+<section class="unit" id="u61">
+  <span class="sylref">Syllabus 6.1</span>
+  <h2>Sequential and combinational circuits</h2>
+  <div class="prose">
+  <p>In Units 4 and 5 every circuit was <b>combinational</b>: its outputs depend only on the inputs present now. Most real systems also need <b>memory</b>. A <b>sequential circuit</b> is a combinational circuit plus memory elements connected in a feedback path. The bits stored in the memory elements at any time are the <b>state</b> of the circuit.</p>
+  <p>The outputs depend on the external inputs <i>and</i> the present state. The next state also depends on the inputs and the present state. So a sequential circuit is described by a <b>time sequence</b> of inputs, outputs and internal states.</p>
+  </div>
+  <div class="diag" style="max-width:560px"><svg viewBox="0 0 520 170" role="img" aria-label="Block diagram of a sequential circuit: inputs enter a combinational circuit, which drives the outputs and the memory elements; the memory elements feed back into the combinational circuit">
+    <rect class="blk" x="140" y="20" width="150" height="70" rx="6"/><text x="215" y="50" text-anchor="middle" font-size="13">Combinational</text><text x="215" y="68" text-anchor="middle" font-size="13">circuit</text>
+    <rect class="blk" x="320" y="95" width="120" height="55" rx="6"/><text x="380" y="119" text-anchor="middle" font-size="13">Memory</text><text x="380" y="136" text-anchor="middle" font-size="13">elements</text>
+    <g class="arrow"><path d="M30 40H140M290 40H500M290 70H330V95M440 122H470V162H110V70H140"/></g>
+    <text x="30" y="32" font-size="12">Inputs</text><text x="455" y="32" font-size="12">Outputs</text><text x="260" y="158" text-anchor="middle" class="sm">present state fed back</text>
+  </svg></div>
+  <div class="tw"><table class="cmp">
+    <tr><th>Combinational circuit</th><th>Sequential circuit</th></tr>
+    <tr><td>Output depends only on present inputs</td><td>Output depends on present inputs and the present state (past inputs)</td></tr>
+    <tr><td>No memory</td><td>Has memory elements (flip-flops)</td></tr>
+    <tr><td>No feedback path</td><td>Feedback from memory to the combinational part</td></tr>
+    <tr><td>Described by a truth table</td><td>Described by a state table or state diagram</td></tr>
+    <tr><td>No clock needed</td><td>Usually clocked (synchronous)</td></tr>
+    <tr><td>Adder, decoder, MUX, comparator</td><td>Flip-flops, registers, counters</td></tr>
+  </table></div>
+
+  <h3>Synchronous and asynchronous</h3>
+  <div class="prose">
+  <ul>
+    <li><b>Synchronous</b>: behaviour is defined by its signals at discrete instants of time. A <b>master-clock generator</b> produces a periodic train of <b>clock pulses</b>, and memory elements change only when a clock pulse arrives. Such circuits are called <b>clocked sequential circuits</b>; they are free of instability and are the kind studied in this unit.</li>
+    <li><b>Asynchronous</b>: behaviour depends on the order in which inputs change, at any instant. Memory comes from gate delays, and the feedback can make the circuit unstable.</li>
+  </ul>
+  <p>The memory elements of clocked sequential circuits are <b>flip-flops</b>. A flip-flop stores one bit and has two outputs: the normal value Q and its complement Q′.</p>
+  </div>
+
+  <div class="practice">
+    <h3>Check your understanding · 6.1</h3>
+    <details class="q"><summary><span class="n">Q1</span><span>State two differences between combinational and sequential circuits.</span><span class="r">Answer</span></summary><div class="ans"><p>A combinational circuit's output depends only on present inputs and it has no memory. A sequential circuit's output depends on present inputs and on the stored state, and it contains memory elements with feedback.</p></div></details>
+    <details class="q"><summary><span class="n">Q2</span><span>Why are clocked (synchronous) circuits preferred?</span><span class="r">Answer</span></summary><div class="ans"><p>All flip-flops change only at clock pulses, so timing splits into independent discrete steps that can be analysed one at a time, and the instability problems of asynchronous feedback do not occur.</p></div></details>
+  </div>
+</section>
+
+<!-- ============ 6.2 ============ -->
+<section class="unit" id="u62">
+  <span class="sylref">Syllabus 6.2</span>
+  <h2>Flip-flops: RS, D, JK, T and master-slave</h2>
+  <div class="prose">
+  <p>A flip-flop keeps its binary state as long as power is applied, until an input tells it to change. Flip-flop types differ in their inputs and in how those inputs affect the state. Each is described by:</p>
+  <ul>
+    <li>a <b>characteristic table</b>: next state Q(t+1) for every present state Q(t) and input,</li>
+    <li>a <b>characteristic equation</b>: Q(t+1) as a Boolean function, read from a K-map of that table,</li>
+    <li>a <b>graphic symbol</b>, and, for design, an <b>excitation table</b>.</li>
+  </ul>
+  <p>Two states: <b>set</b> (Q = 1, Q′ = 0) and <b>reset/clear</b> (Q = 0, Q′ = 1).</p>
+  </div>
+
+  <h3 id="latch">Basic flip-flop circuit (SR latch)</h3>
+  <div class="prose"><p>Two NOR gates (or two NAND gates) with each output fed back to the other gate's input. Because of this feedback the basic circuit is itself an asynchronous sequential circuit; all other flip-flops are built from it.</p>
+  <p><b>NOR version</b> (Mano Fig. 6-2). Inputs normally 0. A momentary 1 on S sets Q = 1; a momentary 1 on R resets Q = 0. When the input returns to 0 the state is <b>remembered</b>. S = R = 1 forces Q = Q′ = 0, which is not allowed.</p></div>
+  <div class="bench" data-sim="norlatch"></div>
+  <div class="twocol">
+    <div><p class="src" style="margin:0 0 6px"><b>Truth table</b> (Mano Fig. 6-2b), in the order the inputs are applied</p>
+    <div class="tw"><table><tr><th>S</th><th>R</th><th class="sep">Q</th><th>Q′</th><th style="text-align:left"></th></tr>
+      <tr><td>1</td><td>0</td><td class="sep">1</td><td>0</td><td style="text-align:left">set</td></tr>
+      <tr><td>0</td><td>0</td><td class="sep">1</td><td>0</td><td style="text-align:left">after S = 1, R = 0 (remembers set)</td></tr>
+      <tr><td>0</td><td>1</td><td class="sep">0</td><td>1</td><td style="text-align:left">reset</td></tr>
+      <tr><td>0</td><td>0</td><td class="sep">0</td><td>1</td><td style="text-align:left">after S = 0, R = 1 (remembers reset)</td></tr>
+      <tr><td>1</td><td>1</td><td class="sep">0</td><td>0</td><td style="text-align:left">not allowed</td></tr></table></div></div>
+    <div><p class="src" style="margin:0 0 6px"><b>Characteristic table</b> (NOR SR latch)</p>
+    <div class="tw"><table><tr><th>S</th><th>R</th><th class="sep">Q(t+1)</th><th style="text-align:left">Meaning</th></tr>
+      <tr><td>0</td><td>0</td><td class="sep">Q(t)</td><td style="text-align:left">The next state equals the present state, so the latch keeps its old value</td></tr>
+      <tr><td>0</td><td>1</td><td class="sep">0</td><td style="text-align:left">The next state is 0 (reset), whatever Q was before</td></tr>
+      <tr><td>1</td><td>0</td><td class="sep">1</td><td style="text-align:left">The next state is 1 (set), whatever Q was before</td></tr>
+      <tr><td>1</td><td>1</td><td class="sep">–</td><td style="text-align:left">Not allowed, because Q and Q′ would both be 0</td></tr></table></div></div>
+  </div>
+  <div class="prose"><p><b>NAND version</b> (Mano Fig. 6-3). Inputs normally 1 (active-low). A momentary 0 on S sets, a momentary 0 on R resets; S = R = 0 forces both outputs to 1, which is avoided.</p></div>
+  <div class="bench" data-sim="nandlatch"></div>
+  <div class="twocol">
+    <div><p class="src" style="margin:0 0 6px"><b>Truth table</b> (Mano Fig. 6-3b), in the order the inputs are applied</p>
+    <div class="tw"><table><tr><th>S</th><th>R</th><th class="sep">Q</th><th>Q′</th><th style="text-align:left"></th></tr>
+      <tr><td>1</td><td>0</td><td class="sep">0</td><td>1</td><td style="text-align:left">reset (R active, = 0)</td></tr>
+      <tr><td>1</td><td>1</td><td class="sep">0</td><td>1</td><td style="text-align:left">after S = 1, R = 0 (remembers reset)</td></tr>
+      <tr><td>0</td><td>1</td><td class="sep">1</td><td>0</td><td style="text-align:left">set (S active, = 0)</td></tr>
+      <tr><td>1</td><td>1</td><td class="sep">1</td><td>0</td><td style="text-align:left">after S = 0, R = 1 (remembers set)</td></tr>
+      <tr><td>0</td><td>0</td><td class="sep">1</td><td>1</td><td style="text-align:left">not allowed</td></tr></table></div></div>
+    <div><p class="src" style="margin:0 0 6px"><b>Characteristic table</b> (NAND SR latch, active-low inputs)</p>
+    <div class="tw"><table><tr><th>S</th><th>R</th><th class="sep">Q(t+1)</th><th style="text-align:left">Meaning</th></tr>
+      <tr><td>1</td><td>1</td><td class="sep">Q(t)</td><td style="text-align:left">The next state equals the present state, so the latch keeps its old value</td></tr>
+      <tr><td>1</td><td>0</td><td class="sep">0</td><td style="text-align:left">The next state is 0 (reset), whatever Q was before</td></tr>
+      <tr><td>0</td><td>1</td><td class="sep">1</td><td style="text-align:left">The next state is 1 (set), whatever Q was before</td></tr>
+      <tr><td>0</td><td>0</td><td class="sep">–</td><td style="text-align:left">Not allowed, because Q and Q′ would both be 1</td></tr></table></div></div>
+  </div>
+
+  <h3 id="rsff">RS flip-flop (clocked)</h3>
+  <div class="prose"><p>Mano Fig. 6-4: a NAND basic flip-flop plus two NAND gates (3 and 4) controlled by the <b>clock pulse CP</b>. While CP = 0, gates 3 and 4 output 1 and nothing changes. While CP = 1, S and R reach the basic flip-flop.</p></div>
+  <div class="bench" data-sim="rsff"></div>
+  <div class="twocol">
+    <div><p class="src" style="margin:0 0 6px"><b>Characteristic table (Mano Fig. 6-4b)</b></p><div class="tw" data-tt="ct_rs"></div></div>
+    <div><p class="src" style="margin:0 0 6px"><b>Characteristic equation</b></p><div class="kmaps"><div class="km" data-km="ch_rs"></div></div>
+      <div class="eq"><div>Q(t+1) = S + R′Q,  with SR = 0</div></div></div>
+  </div>
+  <div class="prose"><p>The two indeterminate rows (S = R = 1) are X's on the map, and the condition SR = 0 must be part of the equation. This indeterminate case makes the RS flip-flop hard to use, but it is the building block of all the others.</p></div>
+
+  <h3 id="dff">D flip-flop</h3>
+  <div class="prose"><p>Mano Fig. 6-5. D goes to S and its complement to R, so S and R can never both be 1. While CP = 1 the output follows D; when CP returns to 0 the last value of D is held. Also called a <b>gated D-latch</b>; "D" for <i>data</i>.</p></div>
+  <div class="bench" data-sim="dff"></div>
+  <div class="twocol">
+    <div><p class="src" style="margin:0 0 6px"><b>Characteristic table (Mano Fig. 6-5b)</b></p><div class="tw" data-tt="ct_d"></div></div>
+    <div><p class="src" style="margin:0 0 6px"><b>Characteristic equation</b></p><div class="kmaps"><div class="km" data-km="ch_d"></div></div><div class="eq"><div>Q(t+1) = D</div></div>
+    <p class="src">The next state equals D whatever the present state. A D flip-flop has no "no change" input combination.</p></div>
+  </div>
+
+  <h3 id="jkff">JK flip-flop</h3>
+  <div class="prose"><p>A refinement of RS: J acts as set and K as reset, and <b>J = K = 1 complements (toggles) the state</b> instead of being indeterminate. Mano Fig. 6-6 uses two cross-coupled NOR gates and two AND gates. Q is fed back to the K-gate and Q′ to the J-gate, so a pulse can only clear a set flip-flop or set a clear one.</p></div>
+  <div class="bench" data-sim="jkff"></div>
+  <div class="note"><b>Race problem.</b> Set J = K = 1 and hold CP = 1: because of the feedback, the output keeps complementing for as long as the pulse lasts. See the <a href="#race">race-around condition</a> below the tables.</div>
+  <div class="twocol">
+    <div><p class="src" style="margin:0 0 6px"><b>Characteristic table (Mano Fig. 6-6b)</b></p><div class="tw" data-tt="ct_jk"></div></div>
+    <div><p class="src" style="margin:0 0 6px"><b>Characteristic equation</b></p><div class="kmaps"><div class="km" data-km="ch_jk"></div></div><div class="eq"><div>Q(t+1) = JQ′ + K′Q</div></div></div>
+  </div>
+  <h4 class="exh" id="race">Race-around condition (J = K = 1)</h4>
+  <div class="prose">
+  <p>The JK flip-flop above is <b>level-triggered</b>: it responds for the whole time CP = 1. Set J = K = 1 and apply one clock pulse:</p>
+  <ol>
+    <li>CP goes to 1. With J = K = 1 the flip-flop complements, and Q changes after one propagation delay <b>Δt</b>.</li>
+    <li>The new Q and Q′ are fed back to the input AND gates. CP is <b>still 1</b>, so the gates see the new values and the flip-flop complements again after another Δt.</li>
+    <li>This repeats for as long as CP stays 1: Q oscillates 0 → 1 → 0 → 1 …, about <b>t<sub>p</sub> ÷ Δt</b> times, where t<sub>p</sub> is the pulse width.</li>
+    <li>When CP returns to 0 the oscillation stops, and Q is left at whatever value it had at that instant: <b>0 or 1, unpredictable</b>.</li>
+  </ol>
+  <p>The output "races around" the feedback loop several times in one pulse instead of toggling once. This is the <b>race-around condition</b>. It happens because <b>t<sub>p</sub> &gt; Δt</b>, and it occurs only in the toggle case: with JK = 00, 01 or 10 a second pass through the loop changes nothing.</p>
+  </div>
+  <div class="bench wid" data-w="race"></div>
+  <div class="note"><b>How to avoid it.</b> (1) Make the pulse narrower than the propagation delay: t<sub>p</sub> &lt; Δt &lt; T (T = clock period). This is hard to guarantee because Δt varies from chip to chip and with temperature. (2) Use a <a href="#msff"><b>master-slave</b></a> JK flip-flop: the master changes during CP = 1 and the slave (the output) only when CP returns to 0, so the new Q cannot reach the inputs within the same pulse. (3) Use an <a href="#edge"><b>edge-triggered</b></a> flip-flop, which responds only at the clock edge. Real JK flip-flops use (2) or (3).</div>
+
+  <h3 id="tff">T flip-flop</h3>
+  <div class="prose"><p>A single-input JK flip-flop: J and K tied together as T (Mano Fig. 6-7). "T" for <b>toggle</b>: T = 0 keeps the state, T = 1 complements it at each clock pulse. It has the same race problem as the JK and the same remedy.</p></div>
+  <div class="twocol">
+    <div><p class="src" style="margin:0 0 6px"><b>Characteristic table (Mano Fig. 6-7b)</b></p><div class="tw" data-tt="ct_t"></div></div>
+    <div><p class="src" style="margin:0 0 6px"><b>Characteristic equation</b></p><div class="kmaps"><div class="km" data-km="ch_t"></div></div><div class="eq"><div>Q(t+1) = TQ′ + T′Q = T ⊕ Q</div></div></div>
+  </div>
+
+  <h3>All four flip-flops side by side</h3>
+  <div class="prose"><p>Mano Table 6-3 gives the characteristic tables in a compact form. Choose a flip-flop type below, set its inputs, and apply clock pulses. The row of the table that applies is highlighted, and the timing diagram records every pulse.</p></div>
+  <div class="tw"><table class="cmp">
+    <tr><th>RS</th><th>D</th><th>JK</th><th>T</th></tr>
+    <tr><td>S R = 00 → Q (no change)<br>01 → 0 (reset)<br>10 → 1 (set)<br>11 → ? (not allowed)</td><td>D = 0 → 0 (reset)<br>D = 1 → 1 (set)</td><td>J K = 00 → Q (no change)<br>01 → 0 (reset)<br>10 → 1 (set)<br>11 → Q′ (complement)</td><td>T = 0 → Q (no change)<br>T = 1 → Q′ (complement)</td></tr>
+    <tr><td class="ex">Q(t+1) = S + R′Q, SR = 0</td><td class="ex">Q(t+1) = D</td><td class="ex">Q(t+1) = JQ′ + K′Q</td><td class="ex">Q(t+1) = TQ′ + T′Q</td></tr>
+  </table></div>
+  <div class="bench wid" data-w="ffx"></div>
+
+  <h3 id="trig">Triggering of flip-flops</h3>
+  <div class="prose">
+  <p>A momentary change of an input that switches a flip-flop is a <b>trigger</b>. Clocked flip-flops are triggered by <b>pulses</b>. A positive pulse goes 0 → 1 (the <b>positive edge</b>) and back 1 → 0 (the <b>negative edge</b>).</p>
+  </div>
+  <div class="diag" style="max-width:520px"><svg viewBox="0 0 480 130" role="img" aria-label="A positive pulse with its rising positive edge and falling negative edge marked">
+    <path class="wv" d="M30 95H120V35H250V95H440"/>
+    <path class="arrow" d="M120 120V100M250 120V100"/>
+    <text x="120" y="128" text-anchor="middle" font-size="12">positive edge (0→1)</text><text x="250" y="128" text-anchor="middle" font-size="12">negative edge (1→0)</text>
+    <text x="20" y="99" text-anchor="end" font-size="12">0</text><text x="20" y="39" text-anchor="end" font-size="12">1</text>
+  </svg></div>
+  <div class="prose">
+  <p>The flip-flops above respond to the <b>level</b> of CP: they change as soon as CP reaches 1 and keep responding while it stays 1. In a sequential circuit the flip-flop outputs feed back through gates to flip-flop inputs. If an output changes while the clock is still 1, the new value can reach another flip-flop's input in the same pulse and cause a second, unwanted change. The cure is to make the flip-flop change <b>only at a clock edge</b>: a <b>master-slave</b> or an <b>edge-triggered</b> flip-flop.</p>
+  </div>
+
+  <h3 id="msff">Master-slave flip-flop</h3>
+  <div class="prose">
+  <p>Two flip-flops in series: a <b>master</b> and a <b>slave</b>, with the clock inverted to the slave (Mano Fig. 6-9).</p>
+  <ul>
+    <li><b>CP = 1</b>: the master is enabled and follows the inputs (its output is Y). The slave is disabled, so Q does not change.</li>
+    <li><b>CP returns to 0</b>: the master is disabled, so input changes no longer matter. The slave is enabled and copies the master: Q = Y.</li>
+  </ul>
+  <p>So the output changes only at the <b>negative edge</b> of the pulse, and an output that feeds another flip-flop cannot affect it during the same pulse. In the <b>JK master-slave</b> flip-flop (Mano Fig. 6-11, nine NAND gates) the slave's Q and Q′ are fed back to the master's input gates; the master captures J and K on the positive edge and the slave takes the result on the negative edge, which removes the race for J = K = 1.</p>
+  </div>
+  <div class="diag" style="max-width:560px"><svg viewBox="0 0 520 170" role="img" aria-label="Master-slave flip-flop: S and R into the master, master outputs Y and Y prime into the slave, the clock goes to the master directly and to the slave through an inverter">
+    <rect class="fa" x="120" y="20" width="110" height="90" rx="4"/><text x="175" y="70" text-anchor="middle" font-size="14" font-weight="600">Master</text>
+    <rect class="fa" x="310" y="20" width="110" height="90" rx="4"/><text x="365" y="70" text-anchor="middle" font-size="14" font-weight="600">Slave</text>
+    <g class="arrow"><path d="M50 40H120M50 90H120M230 40H310M230 90H310M420 40H480M420 90H480M50 140H100V105H120M100 140H260"/></g>
+    <path class="gate" d="M260,130 L282,140 L260,150 Z"/><circle class="bub" cx="286" cy="140" r="4"/><path class="arrow" d="M290 140H300V105H310"/>
+    <text x="40" y="44" text-anchor="end" font-size="13">S</text><text x="40" y="94" text-anchor="end" font-size="13">R</text><text x="40" y="144" text-anchor="end" font-size="13">CP</text>
+    <text x="270" y="34" text-anchor="middle" font-size="12">Y</text><text x="270" y="84" text-anchor="middle" font-size="12">Y′</text>
+    <text x="488" y="44" font-size="13">Q</text><text x="488" y="94" font-size="13">Q′</text>
+    <text x="130" y="105" class="sm">C</text><text x="320" y="105" class="sm">C</text>
+  </svg></div>
+  <div class="prose"><p>Try it: set the inputs, raise CP and watch the master (Y) change while Q waits, then lower CP and watch Q copy Y. Change the inputs while CP = 0 and nothing happens.</p></div>
+  <div class="bench wid" data-w="ms"></div>
+
+  <div class="opt" id="edge">
+    <div class="optbadge">Optional · beyond syllabus</div>
+    <h3>Edge-triggered D flip-flop</h3>
+    <div class="prose">
+    <p>Mano Fig. 6-12 builds a positive-edge-triggered D flip-flop from three NAND basic flip-flops (six gates). Gates 1–4 produce internal signals S and R for the output latch (gates 5, 6):</p>
+    <ul>
+      <li>CP = 0: S = R = 1, so the output holds, whatever D is.</li>
+      <li>At the positive edge: if D = 1, S goes to 0 and Q becomes 1; if D = 0, R goes to 0 and Q becomes 0.</li>
+      <li>While CP stays 1, changes in D are locked out; the negative edge has no effect.</li>
+    </ul>
+    <p>D must be stable for a <b>setup time</b> before the edge and a <b>hold time</b> after it. In graphic symbols a small triangle (dynamic indicator) on the clock input means edge-triggered; a bubble before it means the negative edge.</p>
+    </div>
+    <div class="diag" style="max-width:560px"><svg viewBox="0 0 540 120" role="img" aria-label="Graphic symbols of RS, JK, D and T flip-flops, each a box with the clock marked by a triangle">
+      <g font-size="12">
+      <rect class="fa" x="20" y="15" width="80" height="80"/><text x="28" y="35">S</text><text x="28" y="85">R</text><text x="88" y="35" text-anchor="end">Q</text><text x="88" y="85" text-anchor="end">Q′</text><path class="gate" style="fill:none" d="M20,52 L30,58 L20,64"/>
+      <rect class="fa" x="155" y="15" width="80" height="80"/><text x="163" y="35">J</text><text x="163" y="85">K</text><text x="223" y="35" text-anchor="end">Q</text><text x="223" y="85" text-anchor="end">Q′</text><path class="gate" style="fill:none" d="M155,52 L165,58 L155,64"/>
+      <rect class="fa" x="290" y="15" width="80" height="80"/><text x="298" y="35">D</text><text x="358" y="35" text-anchor="end">Q</text><text x="358" y="85" text-anchor="end">Q′</text><path class="gate" style="fill:none" d="M290,52 L300,58 L290,64"/>
+      <rect class="fa" x="425" y="15" width="80" height="80"/><text x="433" y="35">T</text><text x="493" y="35" text-anchor="end">Q</text><text x="493" y="85" text-anchor="end">Q′</text><path class="gate" style="fill:none" d="M425,52 L435,58 L425,64"/>
+      <text x="60" y="112" text-anchor="middle">RS</text><text x="195" y="112" text-anchor="middle">JK</text><text x="330" y="112" text-anchor="middle">D</text><text x="465" y="112" text-anchor="middle">T</text></g>
+    </svg></div>
+  </div>
+
+  <div class="opt" id="direct">
+    <div class="optbadge">Optional · beyond syllabus</div>
+    <h3>Direct inputs (preset and clear)</h3>
+    <div class="prose"><p>IC flip-flops often have <b>direct preset</b> and <b>direct clear</b> inputs that set or clear the flip-flop <b>asynchronously</b>, without a clock pulse. They put all flip-flops into a known state at power-on. Mano Fig. 6-15: a negative-edge JK flip-flop with active-low clear.</p></div>
+    <div class="tw"><table><tr><th>Clear</th><th>Clock</th><th>J</th><th>K</th><th class="sep">Q</th><th>Q′</th></tr>
+      <tr><td>0</td><td>X</td><td>X</td><td>X</td><td class="sep">0</td><td>1</td></tr>
+      <tr><td>1</td><td>↓</td><td>0</td><td>0</td><td class="sep" colspan="2">no change</td></tr>
+      <tr><td>1</td><td>↓</td><td>0</td><td>1</td><td class="sep">0</td><td>1</td></tr>
+      <tr><td>1</td><td>↓</td><td>1</td><td>0</td><td class="sep">1</td><td>0</td></tr>
+      <tr><td>1</td><td>↓</td><td>1</td><td>1</td><td class="sep" colspan="2">toggle</td></tr></table></div>
+  </div>
+
+  <h3 id="excite">Flip-flop excitation tables</h3>
+  <div class="prose">
+  <p>The characteristic table answers "given the inputs, what is the next state?" (used in <b>analysis</b>). In <b>design</b> we know the transition we want, Q(t) → Q(t+1), and need the inputs that cause it. That reverse table is the <b>excitation table</b> (Mano Table 6-10). In simple terms it answers one question: <i>"My flip-flop is in this state now. What inputs must I apply so that it goes to the state I want after the next clock pulse?"</i></p>
+  <ul>
+    <li><b>Q(t)</b> (present state): the output now, 0 or 1.</li>
+    <li><b>Q(t+1)</b> (next state): the output we want after the next clock pulse, 0 or 1.</li>
+    <li><b>S, R, J, K, D, T</b> (inputs): the values that must be applied to each type of flip-flop to make that transition happen.</li>
+    <li><b>X</b> (don't-care): the input may be 0 or 1. The flip-flop reaches the required next state either way.</li>
+  </ul>
+  </div>
+  <div class="tw"><table>
+    <tr><th>Q(t)</th><th>Q(t+1)</th><th class="sep">S</th><th>R</th><th class="sep">J</th><th>K</th><th class="sep">D</th><th class="sep">T</th></tr>
+    <tr><td>0</td><td>0</td><td class="sep">0</td><td>X</td><td class="sep">0</td><td>X</td><td class="sep">0</td><td class="sep">0</td></tr>
+    <tr><td>0</td><td>1</td><td class="sep">1</td><td>0</td><td class="sep">1</td><td>X</td><td class="sep">1</td><td class="sep">1</td></tr>
+    <tr><td>1</td><td>0</td><td class="sep">0</td><td>1</td><td class="sep">X</td><td>1</td><td class="sep">0</td><td class="sep">1</td></tr>
+    <tr><td>1</td><td>1</td><td class="sep">X</td><td>0</td><td class="sep">X</td><td>0</td><td class="sep">1</td><td class="sep">0</td></tr>
+  </table></div>
+  <div class="prose">
+  <p><b>Row by row</b></p>
+  <ul>
+    <li><b>Row 1 · stay at 0 (0 → 0).</b>
+      <ul>
+        <li><b>RS / JK:</b> the set input must be off (S = 0, J = 0). The reset input does not matter (R = X, K = X): resetting a 0 leaves it at 0, and so does "no change".</li>
+        <li><b>D:</b> the D flip-flop copies its input, so to get 0 next we apply D = 0.</li>
+        <li><b>T:</b> T = 1 would change the state; we want no change, so T = 0.</li>
+      </ul></li>
+    <li><b>Row 2 · change from 0 to 1 (0 → 1).</b>
+      <ul>
+        <li><b>RS / JK:</b> the set input must be on (S = 1, J = 1). For RS, R must be 0, because S = R = 1 is not allowed. For JK, K = X: K = 0 sets it, and K = 1 toggles 0 to 1, which also gives 1.</li>
+        <li><b>D:</b> we want 1 next, so D = 1.</li>
+        <li><b>T:</b> the state changes, so T = 1.</li>
+      </ul></li>
+    <li><b>Row 3 · change from 1 to 0 (1 → 0).</b>
+      <ul>
+        <li><b>RS / JK:</b> the reset input must be on (R = 1, K = 1). For RS, S must be 0. For JK, J = X: J = 0 resets it, and J = 1 toggles 1 to 0, which also gives 0.</li>
+        <li><b>D:</b> we want 0 next, so D = 0.</li>
+        <li><b>T:</b> the state changes, so T = 1.</li>
+      </ul></li>
+    <li><b>Row 4 · stay at 1 (1 → 1).</b>
+      <ul>
+        <li><b>RS / JK:</b> the reset input must be off (R = 0, K = 0). The set input does not matter (S = X, J = X): setting a 1 leaves it at 1, and so does "no change".</li>
+        <li><b>D:</b> we want 1 next, so D = 1.</li>
+        <li><b>T:</b> no change, so T = 0.</li>
+      </ul></li>
+  </ul>
+  <p><b>Key takeaways</b></p>
+  <ul>
+    <li><b>D is the easiest:</b> the D column is an exact copy of the Q(t+1) column. What you want next is what you apply.</li>
+    <li><b>T is a change detector:</b> T = 1 only when the state changes (0 → 1 or 1 → 0), so T = Q(t) ⊕ Q(t+1).</li>
+    <li><b>RS and JK have X entries</b> because two different input combinations produce the same transition. In design these X's become don't-cares in the K-maps, which gives simpler input equations. JK has an X in every row, which is why it usually gives the simplest circuit.</li>
+  </ul>
+  </div>
+
+  <div class="practice">
+    <h3>Check your understanding · 6.2</h3>
+    <details class="q"><summary><span class="n">Q1</span><span>Why is the input S = R = 1 not allowed in an RS flip-flop?</span><span class="r">Answer</span></summary><div class="ans"><p>Both outputs are forced to the same value (0 for NOR, 1 for NAND), so Q′ is no longer the complement of Q. When the inputs return to normal, the final state depends on which gate is faster: it is indeterminate.</p></div></details>
+    <details class="q"><summary><span class="n">Q2</span><span>How does the JK flip-flop remove the RS restriction?</span><span class="r">Answer</span></summary><div class="ans"><p>Q is ANDed into the K gate and Q′ into the J gate. With J = K = 1 only the gate whose fed-back output is 1 passes the pulse, so the flip-flop is complemented instead of receiving set and reset together.</p></div></details>
+    <details class="q"><summary><span class="n">Q3</span><span>A JK flip-flop has Q = 1. Give Q after a pulse for JK = 00, 01, 10, 11.</span><span class="r">Answer</span></summary><div class="ans"><p>00 → 1 (no change), 01 → 0 (reset), 10 → 1 (set), 11 → 0 (complement).</p></div></details>
+    <details class="q"><summary><span class="n">Q4</span><span>Show that connecting T to the D input through an XOR with Q makes a T flip-flop.</span><span class="r">Mano 6-18</span></summary><div class="ans"><p>D = T ⊕ Q, and for a D flip-flop Q(t+1) = D = T ⊕ Q = TQ′ + T′Q, which is the T characteristic equation.</p></div></details>
+    <details class="q"><summary><span class="n">Q5</span><span>Why does a master-slave flip-flop avoid the race problem?</span><span class="r">Answer</span></summary><div class="ans"><p>The master accepts inputs only while CP = 1, and the slave (the visible output) changes only when CP returns to 0, after the master has been isolated. A change at the output can therefore never reach the master during the same pulse.</p></div></details>
+    <details class="q"><summary><span class="n">Q6</span><span>Write the excitation entries of a T flip-flop for the transition 1 → 0, and of an RS for 1 → 1.</span><span class="r">Answer</span></summary><div class="ans"><p>T: 1 → 0 needs T = 1 (complement). RS: 1 → 1 needs R = 0 and S = X.</p></div></details>
+  </div>
+</section>
+
+<!-- ============ 6.3 ============ -->
+<section class="unit" id="u63">
+  <span class="sylref">Syllabus 6.3</span>
+  <h2>Design with state equations and state reduction</h2>
+  <div class="prose"><p>To design a sequential circuit we first need the tools that describe one: <b>state equations</b>, the <b>state table</b> and the <b>state diagram</b>. They are introduced here by analysing a given circuit (Mano Section 6-4), then used in reverse for design.</p></div>
+
+  <h3 id="steq">State equation, state table and state diagram</h3>
+  <div class="prose">
+  <p><b>Example circuit</b> (Mano Fig. 6-16): two D flip-flops A and B, one input x, one output y. From the gates feeding the flip-flops, the <b>flip-flop input functions</b> are DA = Ax + Bx, DB = A′x and the output is y = (A + B)x′.</p>
+  </div>
+  <div class="diag" style="max-width:640px"><svg viewBox="0 0 650 580" role="img" aria-label="Mano Figure 6-16: two D flip-flops A and B with input x and output y. DA is the OR of Ax and Bx, DB is A prime x, and y is (A plus B) AND x prime."><path class="w0" d="M20,100 H200"/><path class="w0" d="M80,100 V550 H262"/><path class="w0" d="M80,140 H200"/><path class="w0" d="M80,360 H300"/><path class="w0" d="M540,120 V30 H110 V510 H303"/><path class="w0" d="M110,80 H200"/><path class="w0" d="M560,350 V290 H140"/><path class="w0" d="M200,160 H140 V490 H303"/><path class="w0" d="M240,90 H265 V110 H296"/><path class="w0" d="M240,150 H265 V130 H296"/><path class="w0" d="M338,120 H420"/><path class="w0" d="M500,120 H620"/><path class="w0" d="M500,170 H620"/><path class="w0" d="M580,170 V230 H280 V340 H300"/><path class="w0" d="M340,350 H420"/><path class="w0" d="M500,350 H620"/><path class="w0" d="M500,400 H620"/><path class="w0" d="M390,450 V160 H420"/><path class="w0" d="M390,390 H420"/><path class="w0" d="M342,500 H362 V495 H380"/><path class="w0" d="M294,550 H370 V515 H380"/><path class="w0" d="M420,505 H620"/><path class="gate" d="M200,70 h20 a20,20 0 0 1 0,40 h-20 z"/><path class="gate" d="M200,130 h20 a20,20 0 0 1 0,40 h-20 z"/><path class="gate" d="M296,100 q12,20 0,40 h12 q26,-4 38,-20 q-12,-16 -38,-20 z"/><path class="gate" d="M300,330 h20 a20,20 0 0 1 0,40 h-20 z"/><path class="gate" d="M303,480 q12,20 0,40 h12 q26,-4 38,-20 q-12,-16 -38,-20 z"/><path class="gate" d="M380,485 h20 a20,20 0 0 1 0,40 h-20 z"/><path class="gate" d="M262,538 L284,550 L262,562 Z"/><circle class="bub" cx="289" cy="550" r="4.5"/><rect class="fa" x="420" y="90" width="80" height="100" rx="3"/><path class="w0" d="M420,150 l9,-7 l-9,-7" transform="translate(0,7)"/><text x="428" y="125" text-anchor="start" font-size="13" font-style="italic">D</text><text x="492" y="125" text-anchor="end" font-size="13" font-style="italic">Q</text><text x="492" y="175" text-anchor="end" font-size="13" font-style="italic">Q′</text><rect class="fa" x="420" y="320" width="80" height="100" rx="3"/><path class="w0" d="M420,380 l9,-7 l-9,-7" transform="translate(0,7)"/><text x="428" y="355" text-anchor="start" font-size="13" font-style="italic">D</text><text x="492" y="355" text-anchor="end" font-size="13" font-style="italic">Q</text><text x="492" y="405" text-anchor="end" font-size="13" font-style="italic">Q′</text><circle class="dot0" cx="80" cy="100" r="3.2"/><circle class="dot0" cx="80" cy="140" r="3.2"/><circle class="dot0" cx="80" cy="360" r="3.2"/><circle class="dot0" cx="540" cy="120" r="3.2"/><circle class="dot0" cx="110" cy="80" r="3.2"/><circle class="dot0" cx="560" cy="350" r="3.2"/><circle class="dot0" cx="140" cy="290" r="3.2"/><circle class="dot0" cx="580" cy="170" r="3.2"/><circle class="dot0" cx="390" cy="390" r="3.2"/><text x="14" y="104" text-anchor="end" font-size="14" font-style="italic">x</text><text x="628" y="124" text-anchor="start" font-size="14" font-style="italic">A</text><text x="628" y="174" text-anchor="start" font-size="14" font-style="italic">A′</text><text x="628" y="354" text-anchor="start" font-size="14" font-style="italic">B</text><text x="628" y="404" text-anchor="start" font-size="14" font-style="italic">B′</text><text x="628" y="509" text-anchor="start" font-size="14" font-style="italic">y</text><text x="390" y="468" text-anchor="middle" font-size="14" font-style="italic">CP</text><text x="344" y="112" text-anchor="start" font-size="11" class="lab">D<tspan font-size="9" dy="3">A</tspan></text><text x="346" y="342" text-anchor="start" font-size="11" class="lab">D<tspan font-size="9" dy="3">B</tspan></text><text x="204" y="62" text-anchor="start" font-size="11" class="lab">Ax</text><text x="204" y="186" text-anchor="start" font-size="11" class="lab">Bx</text><text x="304" y="322" text-anchor="start" font-size="11" class="lab">A′x</text><text x="348" y="476" text-anchor="start" font-size="11" class="lab">A + B</text><text x="300" y="574" text-anchor="start" font-size="11" class="lab">x′</text></svg></div>
+  <p class="src" style="margin-top:0">Mano Fig. 6-16 · Example of a sequential circuit (redrawn). Small grey labels show the signal on each gate output.</p>
+  <div class="prose">
+  <p>A <b>state equation</b> gives the next state of a flip-flop as a Boolean function of the present state and inputs. For a D flip-flop Q(t+1) = D, so the state equations come straight from the D inputs:</p>
+  </div>
+  <div class="eq">
+    <div>A(t+1) = A(t)x(t) + B(t)x(t)   → written simply as   A(t+1) = Ax + Bx</div>
+    <div>B(t+1) = A′x</div>
+    <div>y = (A + B)x′   <span style="color:var(--muted)">(output depends on present state and input)</span></div>
+  </div>
+  <div class="prose"><p>The <b>state table</b> lists every combination of present state and input (2^(flip-flops + inputs) rows), then the next state and output from the equations (Mano Table 6-1):</p></div>
+  <div class="twocol">
+    <div><div class="tw" data-tt="st61"></div></div>
+    <div><p class="src" style="margin:0 0 6px">Second form (Mano Table 6-2): one row per present state.</p>
+      <div class="tw"><table>
+      <tr><th rowspan="2">Present state AB</th><th colspan="2" class="sep">Next state</th><th colspan="2" class="sep">Output y</th></tr>
+      <tr><th class="sep">x = 0</th><th>x = 1</th><th class="sep">x = 0</th><th>x = 1</th></tr>
+      <tr><td>00</td><td class="sep">00</td><td>01</td><td class="sep">0</td><td>0</td></tr>
+      <tr><td>01</td><td class="sep">00</td><td>11</td><td class="sep">1</td><td>0</td></tr>
+      <tr><td>10</td><td class="sep">00</td><td>10</td><td class="sep">1</td><td>0</td></tr>
+      <tr><td>11</td><td class="sep">00</td><td>10</td><td class="sep">1</td><td>0</td></tr></table></div></div>
+  </div>
+  <div class="prose"><p>The <b>state diagram</b> shows the same information as a picture: a circle per state, and an arrow per transition labelled <b>input/output</b>. The arrow from 00 to 01 marked 1/0 means: in state 00 with x = 1 the output is 0, and the next clock pulse moves the circuit to 01. Step through it below.</p></div>
+  <div class="bench wid" data-w="m616"></div>
+  <div class="note">A state table and a state diagram carry the same information. The table is easier to derive from a circuit; the diagram is easier for people to read. Here the diagram shows at a glance that, starting from 00, the output stays 0 while x = 1 and the first 0 after a run of 1s gives y = 1 and a return to 00.</div>
+
+  <div class="opt" id="anjk">
+    <div class="optbadge">Optional · beyond syllabus</div>
+    <h3>Analysis with JK flip-flops</h3>
+    <div class="prose">
+    <p>With JK, RS or T flip-flops the next state is not simply the input, so use two steps: (1) find the value of every flip-flop input from its input function; (2) apply the characteristic table. Mano Fig. 6-19 has two JK flip-flops, one input x and no output:</p>
+    </div>
+    <div class="eq"><div>JA = B   KA = Bx′   JB = x′   KB = A′x + Ax′ = A ⊕ x</div></div>
+    <div class="tw" data-tt="st64"></div>
+    <div class="bench wid" data-w="m619"></div>
+  </div>
+
+  <div class="opt" id="mealy">
+    <div class="optbadge">Optional · beyond syllabus</div>
+    <h3>Mealy and Moore models</h3>
+    <div class="prose">
+    <ul>
+      <li><b>Mealy model</b>: outputs depend on the present state <i>and</i> the inputs. Example: Fig. 6-16, y = (A + B)x′. Arrows are labelled input/output.</li>
+      <li><b>Moore model</b>: outputs depend on the present state only. Example: Fig. 6-19, where the flip-flop states are the outputs. Arrows carry only the input.</li>
+    </ul>
+    <p>Moore outputs change only with the clock. Mealy outputs can change whenever an input changes, so the inputs should be synchronised with the clock and the outputs sampled only at the clock transition.</p>
+    </div>
+  </div>
+
+  <h3 id="reduce">State reduction</h3>
+  <div class="prose">
+  <p>Design aims to minimise flip-flops and gates. <b>State reduction</b> lowers the number of states in a state table while keeping the external input-output behaviour the same. It applies when only the output sequences matter, not the state names (so states are written as letters, not binary values).</p>
+  <p><b>Rule</b> (Mano): <i>Two states are equivalent if, for each input, they give exactly the same output and send the circuit to the same state or to an equivalent state. One of two equivalent states can be removed.</i></p>
+  <p><b>Example</b> (Mano Fig. 6-21, Table 6-5): seven states a–g, input x, output y.</p>
+  </div>
+  <div class="twocol">
+    <div><p class="src" style="margin:0 0 6px"><b>Step 0.</b> State table (Table 6-5)</p><div class="tw" data-tt="red0"></div></div>
+    <div><p class="src" style="margin:0 0 6px"><b>Step 1.</b> e and g both go to a / f with outputs 0 / 1, so <b>g ≡ e</b>. Remove row g and write e wherever g appears.</p><div class="tw" data-tt="red1"></div></div>
+    <div><p class="src" style="margin:0 0 6px"><b>Step 2.</b> Now f goes to e / f with outputs 0 / 1, the same as d, so <b>f ≡ d</b>. Remove f, replace by d. No more equal rows: reduced table (Table 6-7).</p><div class="tw" data-tt="red2"></div></div>
+  </div>
+  <div class="prose"><p>The reduced circuit has 5 states instead of 7 and gives the <b>same output for any input sequence</b>. Check it with any sequence; Mano's example is 01010110100.</p></div>
+  <div class="bench wid" data-w="redrun"></div>
+  <div class="note">Fewer states does not always mean fewer flip-flops: 7 and 5 states both need 3 flip-flops (2³ = 8). But the 3 unused states become don't-cares, which usually simplifies the gates.</div>
+
+  <h3 id="assign">State assignment</h3>
+  <div class="prose"><p>Letter states must be given binary codes before the circuit can be built. The choice affects the cost of the combinational part, and there are many possibilities (140 distinct ones for this 5-state example); no method guarantees the cheapest. Mano Table 6-8 shows three choices, and Table 6-9 the reduced table with assignment 1:</p></div>
+  <div class="twocol">
+    <div><div class="tw"><table>
+      <tr><th>State</th><th class="sep">Assignment 1</th><th>Assignment 2</th><th>Assignment 3</th></tr>
+      <tr><td>a</td><td class="sep">001</td><td>000</td><td>000</td></tr>
+      <tr><td>b</td><td class="sep">010</td><td>010</td><td>100</td></tr>
+      <tr><td>c</td><td class="sep">011</td><td>011</td><td>010</td></tr>
+      <tr><td>d</td><td class="sep">100</td><td>101</td><td>101</td></tr>
+      <tr><td>e</td><td class="sep">101</td><td>111</td><td>011</td></tr></table></div></div>
+    <div><div class="tw"><table>
+      <tr><th rowspan="2">Present</th><th colspan="2" class="sep">Next state</th><th colspan="2" class="sep">Output</th></tr>
+      <tr><th class="sep">x = 0</th><th>x = 1</th><th class="sep">x = 0</th><th>x = 1</th></tr>
+      <tr><td>001</td><td class="sep">001</td><td>010</td><td class="sep">0</td><td>0</td></tr>
+      <tr><td>010</td><td class="sep">011</td><td>100</td><td class="sep">0</td><td>0</td></tr>
+      <tr><td>011</td><td class="sep">001</td><td>100</td><td class="sep">0</td><td>0</td></tr>
+      <tr><td>100</td><td class="sep">101</td><td>100</td><td class="sep">0</td><td>1</td></tr>
+      <tr><td>101</td><td class="sep">001</td><td>100</td><td class="sep">0</td><td>1</td></tr></table></div></div>
+  </div>
+
+  <h3 id="design">Design procedure</h3>
+  <div class="prose"><p>Design goes the other way: from a word description to a logic diagram. Once the flip-flop type and number are chosen, the sequential problem becomes a combinational one, solved with the methods of Units 3 and 4. Mano's procedure:</p></div>
+  <div class="design">
+    <div class="ds"><div class="dn">1</div><div class="db"><h5><small>Step 1</small>State the word description</h5><p>Possibly with a state diagram or timing diagram.</p></div></div>
+    <div class="ds"><div class="dn">2</div><div class="db"><h5><small>Step 2</small>Obtain the state table</h5></div></div>
+    <div class="ds"><div class="dn">3</div><div class="db"><h5><small>Step 3</small>Reduce the number of states</h5><p>If only the input-output behaviour matters.</p></div></div>
+    <div class="ds"><div class="dn">4</div><div class="db"><h5><small>Step 4</small>Assign binary values to the states</h5><p>If the states are letters.</p></div></div>
+    <div class="ds"><div class="dn">5</div><div class="db"><h5><small>Step 5</small>Determine the number of flip-flops</h5><p>m flip-flops give up to 2ᵐ states; name each flip-flop.</p></div></div>
+    <div class="ds"><div class="dn">6</div><div class="db"><h5><small>Step 6</small>Choose the flip-flop type</h5><p>D for data transfer, T for counters, JK for general use.</p></div></div>
+    <div class="ds"><div class="dn">7</div><div class="db"><h5><small>Step 7</small>Derive the excitation and output tables</h5><p>Use the flip-flop excitation table for each present → next transition.</p></div></div>
+    <div class="ds"><div class="dn">8</div><div class="db"><h5><small>Step 8</small>Simplify the flip-flop input functions and output functions</h5><p>K-maps, with unused states and X's as don't-cares.</p></div></div>
+    <div class="ds"><div class="dn">9</div><div class="db"><h5><small>Step 9</small>Draw the logic diagram</h5></div></div>
+  </div>
+  <div class="prose"><p>The excitation table is the <b>truth table of the combinational part</b>: its inputs are the present state and external inputs, its outputs are the flip-flop inputs and external outputs.</p></div>
+
+  <h3 id="desd">Design example 1 · with D flip-flops (state equations)</h3>
+  <div class="prose"><p>With D flip-flops, D = Q(t+1), so the flip-flop input functions are simply the <b>state equations</b> read from the next-state columns. No separate excitation table is needed.</p></div>
+  <div class="design">
+    <div class="ds"><div class="dn">1</div><div class="db"><h5><small>Steps 1–2</small>Description and state table</h5>
+      <p>Design the circuit of Mano Table 6-13: two flip-flops, one input x, one output y, following the state diagram below.</p>
+      <div class="tw" data-tt="st613"></div></div></div>
+    <div class="ds"><div class="dn">3</div><div class="db"><h5><small>Steps 3–6</small>Reduction, assignment, flip-flops</h5>
+      <p>States are already binary and none are equivalent. Four states need <b>2 flip-flops</b>, named A and B. Type: <b>D</b>.</p></div></div>
+    <div class="ds"><div class="dn">7</div><div class="db"><h5><small>Step 7</small>State equations (D inputs) and output</h5>
+      <p>From the next-state and output columns, as sums of minterms of (A, B, x):</p>
+      <div class="eq"><div>DA = A(t+1) = Σ(2, 4, 5, 6)</div><div>DB = B(t+1) = Σ(1, 3, 5, 6)</div><div>y = Σ(1, 5)</div></div></div></div>
+    <div class="ds"><div class="dn">8</div><div class="db"><h5><small>Step 8</small>Simplify</h5>
+      <div class="kmaps"><div class="km" data-km="dA"></div><div class="km" data-km="dB"></div><div class="km" data-km="dy"></div></div>
+      <div class="eq"><div>DA = AB′ + Bx′</div><div>DB = A′x + B′x + ABx′</div><div>y = B′x</div></div></div></div>
+    <div class="ds"><div class="dn">9</div><div class="db"><h5><small>Step 9</small>Logic diagram</h5>
+      <p>The gates below are the combinational part (Mano Fig. 6-28). Their inputs are the present state A, B and the input x; DA and DB go to the D inputs of the two flip-flops. Its truth table is exactly the state table above.</p>
+      <div class="bench" data-sim="desd"></div>
+      <p>Clock the complete circuit to confirm it follows the state diagram:</p>
+      <div class="bench wid" data-w="mdesd"></div></div></div>
+  </div>
+
+  <h3 id="desjk">Design example 2 · with JK flip-flops</h3>
+  <div class="design">
+    <div class="ds"><div class="dn">1</div><div class="db"><h5><small>Steps 1–2</small>Description and state table</h5>
+      <p>Design the circuit of Mano Fig. 6-23 with JK flip-flops. Arrows carry one bit only, so there is one input x and no output (the flip-flop states are the outputs).</p>
+      <div class="tw" data-tt="st611"></div></div></div>
+    <div class="ds"><div class="dn">3</div><div class="db"><h5><small>Steps 3–6</small>Reduction, assignment, flip-flops</h5>
+      <p>Binary states already assigned. <b>2 flip-flops</b> A and B, type <b>JK</b>.</p></div></div>
+    <div class="ds"><div class="dn">7</div><div class="db"><h5><small>Step 7</small>Excitation table</h5>
+      <p>For each row, look up the JK excitation table for A's transition (giving JA, KA) and for B's (giving JB, KB). Example, first row: A goes 0 → 0, so JA = 0, KA = X; B goes 0 → 0, so JB = 0, KB = X. (Mano Table 6-12.)</p>
+      <div style="display:flex;flex-wrap:wrap;gap:12px 28px;align-items:flex-start">
+        <div class="tw" data-tt="ex612" style="margin:0"></div>
+        <div style="min-width:0;flex:0 1 310px"><p class="src" style="margin:0 0 6px"><span style="display:inline-block;font:600 11px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--accent);border:1px solid var(--accent);border-radius:999px;padding:1px 8px;margin-right:6px">Hint</span>Flip-flop excitation table (use the J, K columns)</p>
+        <div class="tw" style="margin:0"><table><tr><th>Q(t)</th><th>Q(t+1)</th><th class="sep">S</th><th>R</th><th class="sep">J</th><th>K</th><th class="sep">D</th><th class="sep">T</th></tr><tr><td>0</td><td>0</td><td class="sep">0</td><td>X</td><td class="sep" style="background:var(--hi-tint)">0</td><td style="background:var(--hi-tint)">X</td><td class="sep">0</td><td class="sep">0</td></tr><tr><td>0</td><td>1</td><td class="sep">1</td><td>0</td><td class="sep" style="background:var(--hi-tint)">1</td><td style="background:var(--hi-tint)">X</td><td class="sep">1</td><td class="sep">1</td></tr><tr><td>1</td><td>0</td><td class="sep">0</td><td>1</td><td class="sep" style="background:var(--hi-tint)">X</td><td style="background:var(--hi-tint)">1</td><td class="sep">0</td><td class="sep">1</td></tr><tr><td>1</td><td>1</td><td class="sep">X</td><td>0</td><td class="sep" style="background:var(--hi-tint)">X</td><td style="background:var(--hi-tint)">0</td><td class="sep">1</td><td class="sep">0</td></tr></table></div></div>
+      </div></div></div>
+    <div class="ds"><div class="dn">8</div><div class="db"><h5><small>Step 8</small>Simplify the flip-flop input functions</h5>
+      <div class="kmaps"><div class="km" data-km="jA"></div><div class="km" data-km="kA"></div><div class="km" data-km="jB"></div><div class="km" data-km="kB"></div></div>
+      <div class="eq"><div>JA = Bx′   KA = Bx</div><div>JB = x     KB = (A ⊕ x)′ = A′x′ + Ax</div></div></div></div>
+    <div class="ds"><div class="dn">9</div><div class="db"><h5><small>Step 9</small>Logic diagram</h5>
+      <p>Mano Fig. 6-26: two JK flip-flops, two AND gates, one XNOR gate and one inverter. The combinational part:</p>
+      <div class="bench" data-sim="desjk"></div>
+      <div class="bench wid" data-w="mdesjk"></div></div></div>
+  </div>
+
+  <div class="opt" id="unused">
+    <div class="optbadge">Optional · beyond syllabus</div>
+    <h3>Design with unused states</h3>
+    <div class="prose">
+    <p>A circuit with m flip-flops may use fewer than 2ᵐ states. The unused states are don't-cares when simplifying. Mano Table 6-14 has five states 001–101 (000, 110, 111 unused) and is designed with RS flip-flops A, B, C:</p>
+    </div>
+    <div class="eq"><div>SA = Bx   RA = Cx′   SB = A′B′x   RB = BC + Bx   SC = x′   RC = x   y = Ax</div></div>
+    <div class="prose"><p>After designing, check what happens if the circuit ever lands in an unused state (at power-on or after noise). The table below is computed from these equations. Every unused state (highlighted) reaches a valid state within one or two clock pulses (110 → 111 → 001), so the circuit is <b>self-correcting</b>. A <b>master reset</b> is still used to start in a valid state (e.g. 001).</p></div>
+    <div class="tw" data-tt="unused"></div>
+  </div>
+
+  <div class="opt" id="counter">
+    <div class="optbadge">Optional · beyond syllabus (counters are Unit 7)</div>
+    <h3>Design of a 3-bit binary counter</h3>
+    <div class="prose"><p>A counter steps through a fixed sequence on each clock pulse; it has no input other than the pulses. For 000 → 001 → … → 111 → 000 with T flip-flops, T must be 1 for every bit that changes (Mano Table 6-15):</p></div>
+    <div class="tw" data-tt="cnt"></div>
+    <div class="eq"><div>TA₂ = A₁A₀   TA₁ = A₀   TA₀ = 1</div></div>
+  </div>
+
+  <div class="practice">
+    <h3>Check your understanding · 6.3</h3>
+    <details class="q"><summary><span class="n">Q1</span><span>What is a state equation, and why is it easy to write for D flip-flops?</span><span class="r">Answer</span></summary><div class="ans"><p>It gives the next state of a flip-flop as a Boolean function of the present state and inputs. For a D flip-flop Q(t+1) = D, so the state equation is just the D input function.</p></div></details>
+    <details class="q"><summary><span class="n">Q2</span><span>How many rows does the state table of a circuit with 3 flip-flops and 2 inputs have?</span><span class="r">Answer</span></summary><div class="ans"><p>2^(3+2) = 32 rows.</p></div></details>
+    <details class="q"><summary><span class="n">Q3</span><span>In the reduced table, why can f be replaced by d only after g has been replaced by e?</span><span class="r">Answer</span></summary><div class="ans"><p>Originally f went to g on x = 0 and d went to e. They were only equivalent if g ≡ e. Once g is replaced by e, f's row reads e, f / 0, 1, the same as d's row after f → d, so they are equivalent.</p></div></details>
+    <details class="q"><summary><span class="n">Q4</span><span>Why do JK designs usually need fewer gates than RS or D designs?</span><span class="r">Answer</span></summary><div class="ans"><p>Every row of the JK excitation table has one don't-care, so half of every J and K map is X, which allows large groups and simple functions.</p></div></details>
+    <details class="q"><summary><span class="n">Q5</span><span>Design the circuit of Fig. 6-23 with T flip-flops.</span><span class="r">Mano 6-24</span></summary><div class="ans"><p>T = 1 where the bit changes. From the state table: TA = Σ(2, 7), TB = Σ(1, 2, 5, 7) over (A, B, x).</p><p><span class="ex">TA = A′Bx′ + ABx = B(A ⊕ x)′</span>, <span class="ex">TB = B′x + Ax + A′Bx′</span>.</p></div></details>
+  </div>
+</section>
+
+<!-- ============ BANK ============ -->
+<section class="unit" id="bank">
+  <span class="sylref">Exam practice</span>
+  <h2>Problem bank</h2>
+  <div class="prose"><p>Problems from the end of Mano Chapter 6 with worked answers.</p></div>
+  <details class="q"><summary><span class="n">6-6</span><span>D flip-flops A, B; inputs x, y; output z. A(t+1) = x′y + xA, B(t+1) = x′B + xA, z = B. Derive the state table.</span><span class="r">Answer</span></summary><div class="ans"><div class="tw" data-tt="p66"></div><p>Read across: with x = 0 the circuit loads A from y and holds B; with x = 1 both flip-flops take the value of A.</p></div></details>
+  <details class="q"><summary><span class="n">6-10</span><span>A JN flip-flop: J acts like the J of a JK, and N = K′. Give its characteristic and excitation tables and show that tying J and N together gives a D flip-flop.</span><span class="r">Answer</span></summary><div class="ans">
+    <p>Characteristic: JN = 00 → 0 (reset, since K = 1); 01 → Q (no change); 10 → Q′ (complement); 11 → 1 (set).</p>
+    <p>Excitation: 0→0: J = 0, N = X · 0→1: J = 1, N = X · 1→0: J = X, N = 0 · 1→1: J = X, N = 1.</p>
+    <p>J = N = D: D = 0 gives row 00 → 0; D = 1 gives row 11 → 1. So Q(t+1) = D.</p></div></details>
+  <details class="q"><summary><span class="n">6-14</span><span>Reduce the state table: a: f, b / 0, 0; b: d, c / 0, 0; c: f, e / 0, 0; d: g, a / 1, 0; e: d, c / 0, 0; f: f, b / 1, 1; g: g, h / 0, 1; h: g, a / 1, 0.</span><span class="r">Answer</span></summary><div class="ans">
+    <p>b and e have identical rows → <b>e ≡ b</b>. d and h are identical → <b>h ≡ d</b>. After replacing e by b, c's row is f, b / 0, 0, the same as a → <b>c ≡ a</b>.</p>
+    <p>Reduced table (5 states): a: f, b / 0, 0 · b: d, a / 0, 0 · d: g, a / 1, 0 · f: f, b / 1, 1 · g: g, d / 0, 1.</p></div></details>
+  <details class="q"><summary><span class="n">6-15</span><span>Starting from state a of Problem 6-14, find the output sequence for input 01110010011.</span><span class="r">Answer</span></summary><div class="ans"><p>States: a f b c e d g h g g h (a). Outputs: <b>0 1 0 0 0 1 1 1 0 1 0</b>. Problem 6-16 (the reduced table) gives the same output sequence. Try it in the state-reduction runner by entering the table mentally, or check one step at a time.</p></div></details>
+  <details class="q"><summary><span class="n">6-20</span><span>Design with two D flip-flops A, B and input x: x = 0 holds the state; x = 1 steps 00 → 01 → 11 → 10 → 00.</span><span class="r">Answer</span></summary><div class="ans"><ol class="mini">
+    <li><b>State table.</b> 00: x0 → 00, x1 → 01 · 01: 01, 11 · 10: 10, 00 · 11: 11, 10.</li>
+    <li><b>Flip-flops.</b> Two D flip-flops A, B.</li>
+    <li><b>State equations.</b> DA = Σ(3, 4, 6, 7), DB = Σ(1, 2, 3, 6) over (A, B, x).</li>
+    <li><b>Simplified.</b> <span class="ex">DA = Ax′ + Bx</span>, <span class="ex">DB = A′x + Bx′</span>.</li>
+    <li><b>Logic diagram.</b> Four AND gates and two OR gates feeding the D inputs.</li></ol></div></details>
+  <details class="q"><summary><span class="n">6-23</span><span>Design the circuit of Fig. 6-23 with RS flip-flops.</span><span class="r">Answer</span></summary><div class="ans"><p>Use the RS excitation table on each transition. A: 0→0 (S0 R X) rows 000, 001, 011; 0→1 row 010; 1→1 rows 100, 101, 110; 1→0 row 111. B: 0→0 rows 000, 100; 0→1 rows 001, 101; 1→0 rows 010, 111; 1→1 rows 011, 110.</p><p>Maps over (A, B, x): SA = Σ(2) + d(4, 5, 6), RA = Σ(7) + d(0, 1, 3), SB = Σ(1, 5) + d(3, 6), RB = Σ(2, 7) + d(0, 4).</p><p><span class="ex">SA = Bx′</span>, <span class="ex">RA = Bx</span>, <span class="ex">SB = B′x</span>, <span class="ex">RB = A′x′ + ABx</span>. Check: no row has S = R = 1.</p></div></details>
+</section>
+
+<!-- ============ SUMMARY ============ -->
+<section class="unit" id="summary">
+  <span class="sylref">Revision</span>
+  <h2>Key results</h2>
+  <div class="tw"><table class="cmp">
+    <tr><th>Flip-flop</th><th>Characteristic equation</th><th>Excitation (0→0, 0→1, 1→0, 1→1)</th><th>Note</th></tr>
+    <tr><td>RS</td><td class="ex">Q(t+1) = S + R′Q, SR = 0</td><td class="ex">S R: 0X, 10, 01, X0</td><td>S = R = 1 not allowed</td></tr>
+    <tr><td>D</td><td class="ex">Q(t+1) = D</td><td class="ex">D: 0, 1, 0, 1</td><td>Data transfer; D = next state</td></tr>
+    <tr><td>JK</td><td class="ex">Q(t+1) = JQ′ + K′Q</td><td class="ex">J K: 0X, 1X, X1, X0</td><td>J = K = 1 complements</td></tr>
+    <tr><td>T</td><td class="ex">Q(t+1) = TQ′ + T′Q</td><td class="ex">T: 0, 1, 1, 0</td><td>Toggle; counters</td></tr>
+    <tr><td>Master-slave</td><td colspan="2">Master follows inputs while CP = 1; slave copies master when CP returns to 0</td><td>Removes race / feedback timing problems</td></tr>
+  </table></div>
+  <div class="tw"><table class="cmp">
+    <tr><th>Tool</th><th>What it gives</th></tr>
+    <tr><td>State equation</td><td>Next state of each flip-flop as a Boolean function of present state and inputs</td></tr>
+    <tr><td>State table</td><td>Present state, input, next state, output for all 2^(m+n) combinations</td></tr>
+    <tr><td>State diagram</td><td>Circles = states, arrows labelled input/output</td></tr>
+    <tr><td>State reduction</td><td>Equivalent states (same outputs, same/equivalent next states) are merged</td></tr>
+    <tr><td>Excitation table</td><td>Flip-flop inputs needed for each transition; the truth table of the combinational part</td></tr>
+  </table></div>
+  <footer>Content follows the BT102CO syllabus (Unit 6) and M. Morris Mano, <i>Digital Design</i>, Chapter 6, with the supplementary class note. Circuit benches are live: click inputs and clock pulses.</footer>
+</section>
+</main>
+</div>
+
+<script>
+(function(){
+const sub=k=>String(k).replace(/^([A-Za-z]+)(\d+)$/,'$1<sub>$2</sub>');
+const bits=(n,w)=>n.toString(2).padStart(w,'0').split('').map(Number);
+let UID=0;
+/* ---------- gate geometry ---------- */
+const HH=n=>n<=2?15:n===3?20:25;
+const SP=n=>n<=2?14:12;
+const OUTBUB=new Set(['NAND','NOR','XNOR']);
+const ANDISH=new Set(['AND','NAND']);
+const ORISH=new Set(['OR','NOR','XOR','XNOR']);
+function gW(g){
+  if(g.t==='NOT')return 32;if(g.t==='BUF')return 24;
+  let w=ANDISH.has(g.t)?20+HH(g.in.length):40;
+  if(OUTBUB.has(g.t))w+=8;return w;
+}
+function inPin(g,i){
+  const n=g.in.length;const y=g.y+(i-(n-1)/2)*SP(n);
+  return {x:ORISH.has(g.t)?g.x+2:g.x,y};
+}
+function outPin(g){return {x:g.x+gW(g),y:g.y}}
+function shape(g){
+  const x=g.x,y=g.y;
+  if(g.t==='NOT')return `<path class="gate" d="M${x},${y-12} L${x+24},${y} L${x},${y+12} Z"/><circle class="bub" cx="${x+28}" cy="${y}" r="4"/>`;
+  if(g.t==='BUF')return `<path class="gate" d="M${x},${y-12} L${x+24},${y} L${x},${y+12} Z"/>`;
+  const h=HH(g.in.length);let s='';
+  if(ANDISH.has(g.t))s+=`<path class="gate" d="M${x},${y-h} H${x+20} A${h},${h} 0 0 1 ${x+20},${y+h} H${x} Z"/>`;
+  else{s+=`<path class="gate" d="M${x},${y-h} Q${x+10},${y} ${x},${y+h} Q${x+26},${y+h} ${x+40},${y} Q${x+26},${y-h} ${x},${y-h} Z"/>`;
+    if(g.t==='XOR'||g.t==='XNOR')s+=`<path class="gate" style="fill:none" d="M${x-6},${y-h} Q${x+4},${y} ${x-6},${y+h}"/>`;}
+  const bw=ANDISH.has(g.t)?20+h:40;
+  if(OUTBUB.has(g.t))s+=`<circle class="bub" cx="${x+bw+4}" cy="${y}" r="4"/>`;
+  return s;
+}
+function op(t,a){
+  const all=a.every(v=>v),any=a.some(v=>v),par=a.reduce((p,v)=>p^v,0);
+  switch(t){case'AND':return +all;case'OR':return +any;case'XOR':return par;case'NOT':return 1-a[0];case'BUF':return a[0];
+  case'NAND':return all?0:1;case'NOR':return any?0:1;case'XNOR':return 1-par;}
+}
+const pretty=s=>s.split('#')[0].replace(/'/g,'′');
+function litVal(key,st){const nm=key.split('#')[0];if(nm==='0')return 0;if(nm==='1')return 1;const neg=nm.endsWith("'");const b=nm.replace("'","");return st[b]^(neg?1:0)}
+function step(d,st,v){const nv=Object.assign({},v);for(const k in d.lits)nv[k]=litVal(k,st);d.gates.forEach(g=>{nv[g.id]=op(g.t,g.in.map(i=>v[i]))});return nv;}
+function settle(d,st,prev){
+  let v=Object.assign({},prev||{});
+  for(const k in d.lits)v[k]=litVal(k,st);
+  d.gates.forEach(g=>{if(v[g.id]===undefined)v[g.id]=g.init||0;});
+  for(let it=0;it<40;it++){const nv=step(d,st,v);let ch=false;d.gates.forEach(g=>{if(nv[g.id]!==v[g.id])ch=true;});v=nv;if(!ch)return {v,osc:false};}
+  return {v,osc:true};
+}
+function renderDiag(d,v){
+  const byId={};d.gates.forEach(g=>byId[g.id]=g);
+  const ow=d.ow||28,ledX=d.w-ow-12;
+  const srcPt=k=>byId[k]?outPin(byId[k]):{x:34,y:d.lits[k]};
+  let wires='',dots='',gates='',texts='';
+  for(const k in d.lits)texts+=`<text x="28" y="${d.lits[k]+4}" text-anchor="end" font-size="13">${pretty(k)}</text>`;
+  const fan={};
+  d.gates.forEach(g=>g.in.forEach((s,i)=>{
+    const cls=v[s]?'w1':'w0';
+    if(g.p&&g.p[i]){wires+=`<path class="${cls}" d="${g.p[i]}"/>`;return;}
+    const a=srcPt(s),b=inPin(g,i);const mx=(g.mx&&g.mx[i]!=null)?g.mx[i]:b.x-12;
+    (fan[s]=fan[s]||[]).push({a,b,mx});
+  }));
+  for(const s in fan){
+    const list=fan[s],cls=v[s]?'w1':'w0';const isOut=byId[s]&&byId[s].out;
+    const maxMx=Math.max(...list.map(w=>w.mx)),cntMax=list.filter(w=>w.mx===maxMx).length;
+    list.forEach(w=>{
+      const p=w.a.y===w.b.y?`M${w.a.x},${w.a.y} H${w.b.x}`:`M${w.a.x},${w.a.y} H${w.mx} V${w.b.y} H${w.b.x}`;
+      wires+=`<path class="${cls}" d="${p}"/>`;
+      if((list.length>1||isOut)&&(w.mx<maxMx||cntMax>1||isOut)&&w.a.y!==w.b.y)dots+=`<circle class="dot${v[s]}" cx="${w.mx}" cy="${w.a.y}" r="3"/>`;
+    });
+  }
+  d.gates.forEach(g=>{
+    gates+=shape(g);const o=outPin(g);
+    if(g.lab)texts+=`<text class="lab" x="${g.labx!=null?g.labx:o.x+3}" y="${g.laby!=null?g.laby:o.y-6}">${g.lab}</text>`;
+    if(g.out){wires+=`<path class="${v[g.id]?'w1':'w0'}" d="M${o.x},${o.y} H${ledX-7}"/>`;
+      texts+=`<circle class="led${v[g.id]}" cx="${ledX}" cy="${o.y}" r="7"/><text x="${ledX+12}" y="${o.y+4}" font-size="13" font-weight="600">${g.out}</text>`;}
+  });
+  return `<svg viewBox="0 0 ${d.w} ${d.h}" role="img" aria-label="${d.title||'logic diagram'}">${wires}${dots}${gates}${texts}</svg>`;
+}
+function bitBtn(key,val,label){return `<button class="bit" data-k="${key}" aria-pressed="${val===1?'true':'false'}">${label}<b>${val}</b></button>`}
+const reduceMotion=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- bench ---------- */
+function mount(el,cfg){
+  const st={};cfg.inputs.forEach(k=>st[k]=0);if(cfg.init)Object.assign(st,cfg.init);
+  const n=cfg.inputs.length;let prev=cfg.diagrams.map(d=>{const o={};d.gates.forEach(g=>o[g.id]=g.init||0);return o;});
+  let flags={},timer=null;
+  el.innerHTML=`<header><h4>${cfg.title}</h4><span class="tag">Live circuit</span></header>
+  <div class="ctrl"></div><div class="readout" aria-live="polite"></div><div class="diags"></div>${cfg.table?'<div class="simtable"></div>':''}`;
+  const ctrl=el.querySelector('.ctrl'),ro=el.querySelector('.readout'),dg=el.querySelector('.diags'),tb=el.querySelector('.simtable');
+  ctrl.innerHTML=cfg.inputs.map(k=>`<button class="bit" data-k="${k}" aria-pressed="false">${sub(k)}<b>0</b></button>`).join('')+'<span class="spacer"></span>'+
+    (cfg.actions||[]).map((a,i)=>`<button class="btn" data-act="${i}">${a.label}</button>`).join('')+
+    (cfg.seq?'':`<button class="btn" data-a="next">Next input ▸</button><button class="btn" data-a="reset">Reset</button>`);
+  const idx=()=>cfg.inputs.reduce((a,k)=>a*2+st[k],0);
+  const setIdx=i=>{cfg.inputs.forEach((k,j)=>st[k]=(i>>(n-1-j))&1)};
+  ctrl.addEventListener('click',e=>{
+    const b=e.target.closest('button');if(!b)return;
+    if(b.dataset.k)st[b.dataset.k]^=1;
+    else if(b.dataset.act){cfg.actions[+b.dataset.act].fn(st,draw);return;}
+    else if(b.dataset.a==='next')setIdx((idx()+1)%(1<<n));
+    else setIdx(0);
+    draw();
+  });
+  if(tb){
+    const cols=cfg.table.cols;
+    let h='<table><thead><tr>'+cfg.inputs.map(k=>`<th>${sub(k)}</th>`).join('')+cols.map((c,i)=>`<th${i===0?' class="sep"':''}>${c[2]}</th>`).join('')+'</tr></thead><tbody>';
+    for(let i=0;i<(1<<n);i++){const s={};cfg.inputs.forEach((k,j)=>s[k]=(i>>(n-1-j))&1);
+      const vals=cfg.diagrams.map(d=>settle(d,s).v);
+      h+=`<tr class="row" data-i="${i}" tabindex="0">`+cfg.inputs.map(k=>`<td>${s[k]}</td>`).join('')+cols.map((c,ci)=>`<td${ci===0?' class="sep"':''}>${vals[c[0]][c[1]]}</td>`).join('')+'</tr>';}
+    tb.innerHTML=h+'</tbody></table>'+(cfg.table.note?`<div class="src" style="margin-top:6px">${cfg.table.note}</div>`:'');
+    tb.addEventListener('click',e=>{const r=e.target.closest('tr.row');if(r){setIdx(+r.dataset.i);draw();}});
+  }
+  function paint(vals){dg.innerHTML=cfg.diagrams.map((d,i)=>`<div class="diag">${renderDiag(d,vals[i])}</div>`).join('');}
+  function draw(){
+    if(timer){clearInterval(timer);timer=null;}
+    ctrl.querySelectorAll('.bit').forEach(b=>{const v=st[b.dataset.k];b.setAttribute('aria-pressed',v?'true':'false');b.querySelector('b').textContent=v;});
+    flags={osc:false,raced:false};
+    const vals=cfg.diagrams.map((d,i)=>{
+      let r=settle(d,st,prev[i]);
+      if(r.osc&&cfg.resolve){flags.raced=true;const seed=cfg.resolve(r.v);r=settle(d,st,seed);flags.r=r.v;}
+      else if(r.osc)flags.osc=true;
+      prev[i]=r.v;return r.v;});
+    paint(vals);
+    ro.innerHTML=cfg.readout?cfg.readout(st,vals[0],flags):'';
+    if(tb){const c=idx();tb.querySelectorAll('tr.row').forEach(r=>r.classList.toggle('cur',+r.dataset.i===c));}
+    if(flags.osc&&!reduceMotion){timer=setInterval(()=>{prev[0]=step(cfg.diagrams[0],st,prev[0]);paint([prev[0]]);},450);}
+  }
+  draw();
+}
+
+/* ---------- circuits ---------- */
+const S={};
+const coin=()=>Math.random()<0.5?1:0;
+S.norlatch={title:'Basic flip-flop with NOR gates (Mano Fig. 6-2)',inputs:['S','R'],seq:true,
+  diagrams:[{w:430,h:200,ow:30,lits:{R:53,S:157},gates:[
+    {id:'q1',t:'NOR',x:200,y:60,in:['R','q2'],init:0,out:'Q',lab:'1',labx:212,laby:40,p:[null,'M248,150 H262 V118 L182,88 V67 H202']},
+    {id:'q2',t:'NOR',x:200,y:150,in:['q1','S'],init:1,out:'Q′',lab:'2',labx:212,laby:130,p:['M248,60 H262 V92 L182,122 V143 H202',null]}]}],
+  actions:[{label:'Demo: S = R = 1, then drop both together',fn:(st,draw)=>{st.S=1;st.R=1;draw();setTimeout(()=>{st.S=0;st.R=0;draw();},1200);}}],
+  resolve:v=>{const r=coin();return Object.assign({},v,{q1:r,q2:1-r});},
+  readout:(s,v,f)=>{
+    if(f.raced)return `<span class="osc">S and R fell to 0 together: both gates raced.</span> This time Q settled to ${v.q1}, but the result is unpredictable. That is why S = R = 1 is not allowed.`;
+    if(s.S&&s.R)return `S = R = 1: both outputs forced to 0, so Q′ is not the complement of Q (not allowed).`;
+    if(s.S)return `S = 1: set, Q = ${v.q1}. Return S to 0 and Q stays 1.`;
+    if(s.R)return `R = 1: reset, Q = ${v.q1}. Return R to 0 and Q stays 0.`;
+    return `S = R = 0: no change, the flip-flop remembers Q = ${v.q1}. Click S to set or R to reset (click again to return the input to 0).`}};
+S.nandlatch={title:'Basic flip-flop with NAND gates (Mano Fig. 6-3)',inputs:['S','R'],seq:true,init:{S:1,R:1},
+  diagrams:[{w:430,h:200,ow:30,lits:{S:53,R:157},gates:[
+    {id:'q1',t:'NAND',x:200,y:60,in:['S','q2'],init:0,out:'Q',lab:'1',labx:212,laby:40,p:[null,'M243,150 H257 V118 L180,88 V67 H200']},
+    {id:'q2',t:'NAND',x:200,y:150,in:['q1','R'],init:1,out:'Q′',lab:'2',labx:212,laby:130,p:['M243,60 H257 V92 L180,122 V143 H200',null]}]}],
+  actions:[{label:'Demo: S = R = 0, then raise both together',fn:(st,draw)=>{st.S=0;st.R=0;draw();setTimeout(()=>{st.S=1;st.R=1;draw();},1200);}}],
+  resolve:v=>{const r=coin();return Object.assign({},v,{q1:r,q2:1-r});},
+  readout:(s,v,f)=>{
+    if(f.raced)return `<span class="osc">S and R rose to 1 together: both gates raced.</span> This time Q settled to ${v.q1}; the result is unpredictable.`;
+    if(!s.S&&!s.R)return `S = R = 0: both outputs forced to 1 (avoided in normal operation).`;
+    if(!s.S)return `S = 0: set, Q = ${v.q1}. Inputs are active-low.`;
+    if(!s.R)return `R = 0: reset, Q = ${v.q1}.`;
+    return `S = R = 1 (inactive): no change, Q = ${v.q1}.`}};
+const rsLatch=(g3in,g4in,extra)=>[...extra,
+  {id:'g3',t:'NAND',x:110,y:60,in:g3in,lab:'3'},
+  {id:'g4',t:'NAND',x:110,y:150,in:g4in,lab:'4'},
+  {id:'q1',t:'NAND',x:240,y:67,in:['g3','q2'],init:0,out:'Q',lab:'1',labx:252,laby:47,p:[null,'M283,143 H297 V118 L222,95 V74 H240']},
+  {id:'q2',t:'NAND',x:240,y:143,in:['q1','g4'],init:1,out:'Q′',lab:'2',labx:252,laby:123,p:['M283,67 H297 V92 L222,115 V136 H240',null]}];
+S.rsff={title:'Clocked RS flip-flop (Mano Fig. 6-4)',inputs:['S','R','CP'],seq:true,
+  diagrams:[{w:460,h:200,ow:30,lits:{S:53,CP:67,'CP#2':143,R:157},gates:rsLatch(['S','CP'],['CP#2','R'],[])}],
+  resolve:v=>{const r=coin();return Object.assign({},v,{q1:r,q2:1-r});},
+  readout:(s,v,f)=>{
+    if(f.raced)return `<span class="osc">CP returned to 0 with S = R = 1: indeterminate.</span> Q settled to ${v.q1} this time, but it depends on which gate is faster.`;
+    if(!s.CP)return `CP = 0: gates 3 and 4 output 1, so S and R are ignored. Q = ${v.q1} is held.`;
+    if(s.S&&s.R)return `CP = 1, S = R = 1: both Q and Q′ are 1. When CP returns to 0 the state is indeterminate.`;
+    return `CP = 1: ${s.S?'set':s.R?'reset':'no change'} → Q = ${v.q1}.`}};
+S.dff={title:'D flip-flop (Mano Fig. 6-5)',inputs:['D','CP'],seq:true,
+  diagrams:[{w:460,h:200,ow:30,lits:{D:53,CP:67,'CP#2':143,'D#2':157},gates:rsLatch(['D','CP'],['CP#2','nd'],[{id:'nd',t:'NOT',x:50,y:157,in:['D#2']}])}],
+  readout:(s,v)=>s.CP?`CP = 1: Q follows D → Q = ${v.q1}.`:`CP = 0: D is ignored; Q = ${v.q1} holds the last value of D.`};
+S.jkff={title:'JK flip-flop, level-clocked (Mano Fig. 6-6)',inputs:['J','K','CP'],seq:true,
+  diagrams:[{w:480,h:205,ow:30,lits:{K:60,CP:72,J:148,'CP#2':160},gates:[
+    {id:'a1',t:'AND',x:130,y:60,in:['q1','K','CP'],p:['M308,67 H320 V20 H110 V48 H130',null,null]},
+    {id:'a2',t:'AND',x:130,y:160,in:['J','CP#2','q2'],p:[null,null,'M308,153 H330 V192 H110 V172 H130']},
+    {id:'q1',t:'NOR',x:260,y:67,in:['a1','q2'],init:0,out:'Q',p:['M170,60 H262','M308,153 H320 V122 L245,96 V74 H262']},
+    {id:'q2',t:'NOR',x:260,y:153,in:['q1','a2'],init:1,out:'Q′',p:['M308,67 H320 V94 L245,120 V146 H262','M170,160 H262']}]}],
+  readout:(s,v,f)=>{
+    if(f.osc)return `<span class="osc">J = K = 1 with CP held at 1: Q keeps complementing (race).</span> The final value when CP drops depends on the pulse width. Master-slave and edge-triggered flip-flops fix this.`;
+    if(!s.CP)return `CP = 0: both AND gates output 0, Q = ${v.q1} is held.`;
+    const m=s.J&&s.K?'complement':s.J?'set':s.K?'reset':'no change';return `CP = 1, JK = ${s.J}${s.K}: ${m} → Q = ${v.q1}.`}};
+
+// design example combinational parts
+S.desd={title:'Combinational part: DA, DB and y (Mano Fig. 6-28)',inputs:['A','B','x'],
+  diagrams:[{w:480,h:360,lits:{A:33,"B'":47,B:88,"x'":102,"A'":153,x:167,"B'#2":208,'x#2':222,'A#3':263,'B#3':275,"x'#3":287,"B'#4":323,'x#4':337},gates:[
+    {id:'a1',t:'AND',x:130,y:40,in:['A',"B'"],lab:'AB′'},
+    {id:'a2',t:'AND',x:130,y:95,in:['B',"x'"],lab:'Bx′'},
+    {id:'da',t:'OR',x:290,y:67,in:['a1','a2'],mx:[245,258],out:'DA'},
+    {id:'a3',t:'AND',x:130,y:160,in:["A'",'x'],lab:'A′x'},
+    {id:'a4',t:'AND',x:130,y:215,in:["B'#2",'x#2'],lab:'B′x'},
+    {id:'a5',t:'AND',x:130,y:275,in:['A#3','B#3',"x'#3"],lab:'ABx′'},
+    {id:'db',t:'OR',x:290,y:215,in:['a3','a4','a5'],mx:[245,null,258],out:'DB'},
+    {id:'y',t:'AND',x:130,y:330,in:["B'#4",'x#4'],out:'y'}]}],
+  table:{cols:[[0,'da','DA = A(t+1)'],[0,'db','DB = B(t+1)'],[0,'y','y']],note:'This truth table is the state table of Mano Table 6-13.'}};
+S.desjk={title:'Combinational part: JA, KA, JB, KB (Mano Fig. 6-26)',inputs:['A','B','x'],
+  diagrams:[{w:430,h:240,lits:{B:33,"x'":47,'B#2':93,'x#2':107,'x#3':160,'A#4':203,'x#4':217},gates:[
+    {id:'ja',t:'AND',x:140,y:40,in:['B',"x'"],out:'JA'},
+    {id:'ka',t:'AND',x:140,y:100,in:['B#2','x#2'],out:'KA'},
+    {id:'jb',t:'BUF',x:150,y:160,in:['x#3'],out:'JB'},
+    {id:'kb',t:'XNOR',x:140,y:210,in:['A#4','x#4'],out:'KB'}]}],
+  table:{cols:[[0,'ja','JA'],[0,'ka','KA'],[0,'jb','JB'],[0,'kb','KB']],note:'Compare with the excitation table: every 0/1 entry matches; X entries took whatever value simplified best.'}};
+document.querySelectorAll('[data-sim]').forEach(el=>{const c=S[el.dataset.sim];if(c)mount(el,c);});
+
+/* ---------- static tables ---------- */
+const jkN=(q,j,k)=>(j&&!q)||(!k&&q)?1:0;
+const exJK=(q,n)=>q===0?[n,'X']:['X',1-n];
+const TT={};
+TT.ct_rs={h:['Q','S','R','Q(t+1)','Meaning'],sep:3,left:4,rows:[[0,0,0,0,'no change'],[0,0,1,0,'reset'],[0,1,0,1,'set'],[0,1,1,'indeterminate','not allowed'],[1,0,0,1,'no change'],[1,0,1,0,'reset'],[1,1,0,1,'set'],[1,1,1,'indeterminate','not allowed']]};
+TT.ct_d={h:['Q','D','Q(t+1)','Meaning'],sep:2,left:3,rows:[[0,0,0,'reset (Q follows D)'],[0,1,1,'set (Q follows D)'],[1,0,0,'reset (Q follows D)'],[1,1,1,'set (Q follows D)']]};
+TT.ct_jk={h:['Q','J','K','Q(t+1)','Meaning'],sep:3,left:4,rows:[...Array(8).keys()].map(i=>{const [q,j,k]=bits(i,3);return [q,j,k,jkN(q,j,k),['no change','reset','set','toggle (complement)'][j*2+k]]})};
+TT.ct_t={h:['Q','T','Q(t+1)','Meaning'],sep:2,left:3,rows:[[0,0,0,'no change'],[0,1,1,'toggle (complement)'],[1,0,1,'no change'],[1,1,0,'toggle (complement)']]};
+const f616=(A,B,x)=>[(A&x)|(B&x),(1-A)&x,(A|B)&(1-x)];
+TT.st61={h:['A','B','x','A(t+1)','B(t+1)','y'],sep:3,rows:[...Array(8).keys()].map(i=>{const [A,B,x]=bits(i,3);return [A,B,x,...f616(A,B,x)]})};
+const f619=(A,B,x)=>{const JA=B,KA=B&(1-x),JB=1-x,KB=A^x;return [jkN(A,JA,KA),jkN(B,JB,KB),JA,KA,JB,KB]};
+TT.st64={h:['A','B','x','A(t+1)','B(t+1)','JA','KA','JB','KB'],sep:3,rows:[...Array(8).keys()].map(i=>{const [A,B,x]=bits(i,3);return [A,B,x,...f619(A,B,x)]})};
+const RED0={a:['a','b',0,0],b:['c','d',0,0],c:['a','d',0,0],d:['e','f',0,1],e:['a','f',0,1],f:['g','f',0,1],g:['a','f',0,1]};
+const RED2={a:['a','b',0,0],b:['c','d',0,0],c:['a','d',0,0],d:['e','d',0,1],e:['a','d',0,1]};
+const rh=['Present','Next x=0','Next x=1','y x=0','y x=1'];
+TT.red0={h:rh,sep:1,rows:Object.entries(RED0).map(([k,r])=>[k,...r])};
+TT.red1={h:rh,sep:1,rows:Object.entries(RED0).map(([k,r])=>{
+  const nx=r.slice(0,2).map(t=>t==='g'?'<s class="gone">g</s> e':t);
+  return k==='g'?['<s class="gone">g</s>',...r.map(c=>`<s class="gone">${c}</s>`)]:[k,...nx,r[2],r[3]];})};
+TT.red2={h:rh,sep:1,rows:Object.entries(RED2).map(([k,r])=>[k,...r])};
+const t613=(A,B,x)=>{const n={'00':['00','01'],'01':['10','01'],'10':['10','11'],'11':['11','00']}[`${A}${B}`][x];const y=[[0,1],[0,0],[0,1],[0,0]][A*2+B][x];return [+n[0],+n[1],y]};
+TT.st613={grp:[['Present state',2],['Input',1],['Next state',2],['Output',1]],h:['A','B','x','A','B','y'],sep:3,rows:[...Array(8).keys()].map(i=>{const [A,B,x]=bits(i,3);return [A,B,x,...t613(A,B,x)]})};
+TT.st611={h:['Present AB','Next AB, x = 0','Next AB, x = 1'],sep:1,rows:[['00','00','01'],['01','10','01'],['10','10','11'],['11','11','00']]};
+TT.ex612={h:['A','B','x','A(t+1)','B(t+1)','JA','KA','JB','KB'],sep:3,rows:[...Array(8).keys()].map(i=>{const [A,B,x]=bits(i,3);const [nA,nB]=t613(A,B,x);return [A,B,x,nA,nB,...exJK(A,nA),...exJK(B,nB)]})};
+const rsN=(q,s,r)=>s&&r?'?':s?1:r?0:q;
+TT.unused={h:['A','B','C','x','A(t+1)','B(t+1)','C(t+1)','y',''],sep:4,rows:[...Array(16).keys()].map(i=>{const [A,B,C,x]=bits(i,4);
+  const nA=rsN(A,B&x,C&(1-x)),nB=rsN(B,(1-A)&(1-B)&x,(B&C)|(B&x)),nC=rsN(C,1-x,x);const st=`${A}${B}${C}`,un=['000','110','111'].includes(st);
+  const nun=['000','110','111'].includes(`${nA}${nB}${nC}`);return [A,B,C,x,nA,nB,nC,A&x,un?(nun?'unused → unused (one more pulse)':'unused → valid'):''];}),rowCls:r=>r[8]?'hl':''};
+TT.cnt={h:['A2','A1','A0','next A2','A1','A0','TA2','TA1','TA0'],sep:3,rows:[...Array(8).keys()].map(i=>{const p=bits(i,3),n=bits((i+1)%8,3);return [...p,...n,...p.map((b,j)=>b^n[j])]})};
+TT.p66={h:['A','B','x','y','A(t+1)','B(t+1)','z'],sep:4,rows:[...Array(16).keys()].map(i=>{const [A,B,x,y]=bits(i,4);return [A,B,x,y,((1-x)&y)|(x&A),((1-x)&B)|(x&A),B]})};
+document.querySelectorAll('[data-tt]').forEach(el=>{const t=TT[el.dataset.tt];if(!t)return;
+  let h='<table>'+(t.grp?(()=>{let c=0;return '<tr>'+t.grp.map(([g,n])=>{const s=c===t.sep;c+=n;return `<th colspan="${n}"${s?' class="sep"':''} style="text-align:center;border-bottom:1px solid var(--line)">${g}</th>`;}).join('')+'</tr>';})():'')+'<tr>'+t.h.map((x,i)=>`<th${i===t.sep?' class="sep"':''}${i===t.left?' style="text-align:left"':''}>${sub(x)}</th>`).join('')+'</tr>';
+  t.rows.forEach((r,ri)=>{const cls=t.rowCls?t.rowCls(r):'';h+=`<tr data-n="${ri}"${cls?` class="${cls}"`:''}>`+r.map((c,i)=>`<td${i===t.sep?' class="sep"':''}${i===t.left?' style="text-align:left"':''}>${c}</td>`).join('')+'</tr>';});
+  el.innerHTML=h+'</table>';});
+
+/* ---------- K-maps ---------- */
+const K={
+  ch_rs:{v:['Q','S','R'],ones:[2,4,6],dc:[3,7],g:[[2,3,6,7],[4,6]],t:'RS: Q(t+1)',e:'Q(t+1) = S + R′Q'},
+  ch_d:{v:['Q','D'],ones:[1,3],g:[[1,3]],t:'D: Q(t+1)',e:'Q(t+1) = D'},
+  ch_jk:{v:['Q','J','K'],ones:[2,3,4,6],g:[[2,3],[4,6]],t:'JK: Q(t+1)',e:'Q(t+1) = JQ′ + K′Q'},
+  ch_t:{v:['Q','T'],ones:[1,2],g:[],t:'T: Q(t+1)',e:'Q(t+1) = TQ′ + T′Q'},
+  dA:{v:['A','B','x'],ones:[2,4,5,6],g:[[4,5],[2,6]],t:'DA = Σ(2,4,5,6)',e:'DA = AB′ + Bx′'},
+  dB:{v:['A','B','x'],ones:[1,3,5,6],g:[[1,3],[1,5],[6]],t:'DB = Σ(1,3,5,6)',e:'DB = A′x + B′x + ABx′'},
+  dy:{v:['A','B','x'],ones:[1,5],g:[[1,5]],t:'y = Σ(1,5)',e:'y = B′x'},
+  jA:{v:['A','B','x'],ones:[2],dc:[4,5,6,7],g:[[2,6]],t:'JA',e:'JA = Bx′'},
+  kA:{v:['A','B','x'],ones:[7],dc:[0,1,2,3],g:[[3,7]],t:'KA',e:'KA = Bx'},
+  jB:{v:['A','B','x'],ones:[1,5],dc:[2,3,6,7],g:[[1,3,5,7]],t:'JB',e:'JB = x'},
+  kB:{v:['A','B','x'],ones:[2,7],dc:[0,1,4,5],g:[[0,2],[5,7]],t:'KB',e:'KB = A′x′ + Ax'}
+};
+const GC=['var(--g1)','var(--g2)','var(--g3)','var(--g4)'];
+const gray=[0,1,3,2],b2=n=>n.toString(2).padStart(2,'0');
+document.querySelectorAll('[data-km]').forEach(el=>{
+  const k=K[el.dataset.km];if(!k)return;
+  const nv=k.v.length,four=nv===4,rows=four?gray:[0,1],cols=nv===2?[0,1]:gray,rw=nv===2?2:4;
+  const vs=k.v.map(sub);
+  const rl=four?vs[0]+vs[1]:vs[0],cl=four?vs[2]+vs[3]:nv===3?vs[1]+vs[2]:vs[1];
+  let h=`<div class="t">${k.t}</div><div class="tw" style="margin:0"><table><tr><th>${rl}\\${cl}</th>${cols.map(c=>`<th>${nv===2?c:b2(c)}</th>`).join('')}</tr>`;
+  rows.forEach(r=>{h+=`<tr><th>${four?b2(r):r}</th>`;
+    cols.forEach(c=>{const m=r*rw+c,one=k.ones.includes(m),dc=(k.dc||[]).includes(m);
+      const sh=[];k.g.forEach((g,gi)=>{if(g.includes(m))sh.push(`inset 0 0 0 ${2+gi*2.5}px ${GC[gi%4]}`)});
+      h+=`<td class="${dc?'x':''}" title="m${m}" style="${sh.length?'box-shadow:'+sh.join(','):''}">${one?1:dc?'X':''}</td>`;});
+    h+='</tr>';});
+  el.innerHTML=h+`</table></div><div class="cap">${k.e}</div>`;
+});
+
+/* ---------- timing diagram ---------- */
+function wave(rows,hist){
+  const step=34,lw=46,rh=30,w=lw+Math.max(hist.length,1)*step+10,h=rows.length*rh+10;
+  let s=`<svg viewBox="0 0 ${Math.max(w,300)} ${h}" style="min-width:0;max-width:${Math.max(w,300)}px" role="img" aria-label="Timing diagram">`;
+  rows.forEach((r,ri)=>{const y0=ri*rh+8,hi=y0+4,lo=y0+22;
+    s+=`<text x="${lw-8}" y="${y0+18}" text-anchor="end" font-size="12">${r.label}</text><path class="gl" d="M${lw},${lo} H${w-6}"/>`;
+    let d='',unk='';
+    hist.forEach((hs,i)=>{const v=hs[r.k],x0=lw+i*step,x1=x0+step;
+      if(v==='?'){unk+=`<rect x="${x0}" y="${hi}" width="${step}" height="${lo-hi}" fill="var(--hi-tint)" stroke="var(--g4)" stroke-dasharray="3 3"/>`;d+=`M${x1},${lo} `;return;}
+      const y=v?hi:lo;d+=(i===0||hist[i-1][r.k]==='?'?`M${x0},${y} `:`V${y} `)+`H${x1} `;});
+    s+=unk+`<path class="wv${r.q?' q':''}" d="${d}"/>`;});
+  return s+'</svg>';
+}
+
+/* ---------- widgets ---------- */
+const W={};
+// flip-flop explorer
+W.ffx=function(el){
+  const T={RS:['S','R'],D:['D'],JK:['J','K'],T:['T']};
+  const nxt={RS:(q,i)=>i.S&&i.R?'?':i.S?1:i.R?0:q,D:(q,i)=>i.D,JK:(q,i)=>q==='?'?(i.J&&!i.K?1:!i.J&&i.K?0:'?'):(i.J&&i.K?1-q:i.J?1:i.K?0:q),T:(q,i)=>q==='?'?'?':(i.T?1-q:q)};
+  const st={type:'JK',q:0,in:{S:0,R:0,D:0,J:0,K:0,T:0},hist:[]};
+  el.innerHTML=`<header><h4>Flip-flop explorer</h4><span class="tag">Live circuit</span></header>
+  <div class="row2"><label for="ffx-type">Flip-flop</label><select id="ffx-type"><option>RS</option><option>D</option><option selected>JK</option><option>T</option></select></div>
+  <div class="ctrl"></div><div class="readout" aria-live="polite"></div><div class="body"></div>`;
+  const ctrl=el.querySelector('.ctrl'),ro=el.querySelector('.readout'),body=el.querySelector('.body'),sel=el.querySelector('#ffx-type');
+  const snap=cp=>{const o={CP:cp,Q:st.q};T[st.type].forEach(k=>o[k]=st.in[k]);st.hist.push(o);if(st.hist.length>16)st.hist.shift();};
+  sel.addEventListener('change',()=>{st.type=sel.value;st.hist=[];snap(0);draw();});
+  ctrl.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+    if(b.dataset.k){st.in[b.dataset.k]^=1;snap(0);}
+    else if(b.dataset.a==='clk'){snap(1);st.q=nxt[st.type](st.q,st.in);st.hist[st.hist.length-1].Q=st.hist[st.hist.length-1].Q;snap(0);st.last=true;}
+    else if(b.dataset.a==='rst'){st.q=0;Object.keys(st.in).forEach(k=>st.in[k]=0);st.hist=[];snap(0);}
+    draw();});
+  function charRows(){const ins=T[st.type],n=ins.length,rows=[];
+    for(let q=0;q<2;q++)for(let i=0;i<(1<<n);i++){const iv={};ins.forEach((k,j)=>iv[k]=(i>>(n-1-j))&1);rows.push({q,iv,nq:nxt[st.type](q,iv)});}return rows;}
+  function draw(){
+    const ins=T[st.type];
+    ctrl.innerHTML=ins.map(k=>bitBtn(k,st.in[k],k)).join('')+`<span class="spacer"></span><button class="btn" data-a="clk">Apply clock pulse ⎍</button><button class="btn" data-a="rst">Reset ↺</button>`;
+    const nq=nxt[st.type](st.q,st.in);
+    ro.innerHTML=`Present state Q = ${st.q}, ${ins.map(k=>`${k} = ${st.in[k]}`).join(', ')} → after the next pulse Q(t+1) = ${nq}${nq==='?'?' <span class="osc">(indeterminate: S = R = 1 not allowed)</span>':''}`;
+    const rows=charRows();
+    body.innerHTML=`<div class="twocol"><div><div class="tw" style="margin:0"><table class="ct"><tr><th>Q</th>${ins.map(k=>`<th>${k}</th>`).join('')}<th class="sep">Q(t+1)</th></tr>`+
+      rows.map(r=>`<tr class="${r.q===st.q&&ins.every(k=>r.iv[k]===st.in[k])?'cur':''}"><td>${r.q}</td>${ins.map(k=>`<td>${r.iv[k]}</td>`).join('')}<td class="sep">${r.nq==='?'?'indeterminate':r.nq}</td></tr>`).join('')+
+      `</table></div></div><div><p class="src" style="margin:0 0 4px">Timing diagram (each pulse shown as CP = 1; Q changes at the end of the pulse)</p><div class="tw" style="margin:0">${wave([{k:'CP',label:'CP'},...ins.map(k=>({k,label:k})),{k:'Q',label:'Q',q:1}],st.hist)}</div></div></div>`;
+  }
+  snap(0);draw();
+};
+// master-slave
+W.ms=function(el){
+  const st={type:'JK',J:0,K:0,S:0,R:0,CP:0,Y:0,Q:0,hist:[]};
+  el.innerHTML=`<header><h4>Master-slave flip-flop in action</h4><span class="tag">Live circuit</span></header>
+  <div class="row2"><label for="ms-type">Type</label><select id="ms-type"><option value="JK" selected>JK master-slave (Fig. 6-11)</option><option value="RS">RS master-slave (Fig. 6-9)</option></select></div>
+  <div class="ctrl"></div><div class="readout" aria-live="polite"></div><div class="body"></div>`;
+  const ctrl=el.querySelector('.ctrl'),ro=el.querySelector('.readout'),body=el.querySelector('.body'),sel=el.querySelector('#ms-type');
+  const ins=()=>st.type==='JK'?['J','K']:['S','R'];
+  function evalMS(){let msg;
+    if(st.CP){const [s,r]=st.type==='JK'?[st.J&&st.Q===0?1:0,st.K&&st.Q===1?1:0]:[st.S,st.R];
+      if(s&&r){st.Y='?';msg='CP = 1: S = R = 1 into the master: Y is indeterminate.';}
+      else if(s){st.Y=1;msg=`CP = 1: the master is enabled and ${st.type==='JK'?'J·Q′ = 1 sets':'S = 1 sets'} it, Y = 1. The slave is disabled, Q stays ${st.Q}.`;}
+      else if(r){st.Y=0;msg=`CP = 1: the master is enabled and ${st.type==='JK'?'K·Q = 1 resets':'R = 1 resets'} it, Y = 0. The slave is disabled, Q stays ${st.Q}.`;}
+      else msg=`CP = 1: the master is enabled but nothing changes it, Y = ${st.Y}. The slave holds Q = ${st.Q}.`;}
+    else{const old=st.Q;st.Q=st.Y;msg=`CP = 0: the master is isolated from the inputs. The slave is enabled and copies the master: Q = Y = ${st.Q}${old!==st.Q?' (changed at the negative edge)':''}.`;}
+    return msg;}
+  const snap=()=>{const o={CP:st.CP,Y:st.Y,Q:st.Q};ins().forEach(k=>o[k]=st[k]);st.hist.push(o);if(st.hist.length>18)st.hist.shift();};
+  sel.addEventListener('change',()=>{st.type=sel.value;st.Y=0;st.Q=0;st.CP=0;st.hist=[];st.msg=evalMS();snap();draw();});
+  ctrl.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+    if(b.dataset.a==='rst'){Object.assign(st,{J:0,K:0,S:0,R:0,CP:0,Y:0,Q:0,hist:[]});st.msg='Reset: all inputs 0, master Y = 0, slave Q = 0, timing diagram cleared.';snap();draw();return;}
+    st[b.dataset.k]^=1;st.msg=evalMS();snap();draw();});
+  function draw(){
+    ctrl.innerHTML=ins().map(k=>bitBtn(k,st[k],k)).join('')+bitBtn('CP',st.CP,'CP')+'<span class="spacer"></span><button class="btn" data-a="rst">Reset ↺</button>';
+    ro.innerHTML=st.msg;
+    const led=(v,x,y)=>`<circle class="led${v===1?1:0}" cx="${x}" cy="${y}" r="7"/><text x="${x+12}" y="${y+4}" font-size="13" font-weight="600">${v}</text>`;
+    const [a,b]=ins();
+    body.innerHTML=`<div class="tw" style="margin:0 0 10px"><svg viewBox="0 0 520 130" style="max-width:520px" role="img" aria-label="Master and slave blocks with current values">
+      <rect class="fa${st.CP?'':''}" x="110" y="15" width="120" height="80" rx="4" style="${st.CP?'stroke:var(--hi);stroke-width:2.4':''}"/><text x="170" y="45" text-anchor="middle" font-size="14" font-weight="600">Master</text><text x="170" y="64" text-anchor="middle" class="sm">${st.CP?'enabled':'disabled'}</text>
+      <rect class="fa" x="320" y="15" width="120" height="80" rx="4" style="${st.CP?'':'stroke:var(--hi);stroke-width:2.4'}"/><text x="380" y="45" text-anchor="middle" font-size="14" font-weight="600">Slave</text><text x="380" y="64" text-anchor="middle" class="sm">${st.CP?'disabled':'enabled'}</text>
+      <g class="arrow"><path d="M50 35H110M50 75H110M230 55H320M440 55H470"/></g>
+      <text x="40" y="39" text-anchor="end" font-size="13">${a}=${st[a]}</text><text x="40" y="79" text-anchor="end" font-size="13">${b}=${st[b]}</text>
+      <text x="262" y="48" font-size="12">Y</text>${led(st.Y,275,75)}<text x="474" y="40" font-size="12">Q</text>${led(st.Q,478,60)}
+      <text x="170" y="118" text-anchor="middle" font-size="12">CP = ${st.CP}</text><text x="380" y="118" text-anchor="middle" font-size="12">CP′ = ${1-st.CP}</text></svg></div>
+      <p class="src" style="margin:0 0 4px">Timing diagram: each button press is one time step.</p>
+      <div class="tw" style="margin:0">${wave([{k:'CP',label:'CP'},{k:a,label:a},{k:b,label:b},{k:'Y',label:'Y'},{k:'Q',label:'Q',q:1}],st.hist)}</div>`;
+  }
+  st.msg='Start: Q = 0. Set the inputs, then raise and lower CP.';snap();draw();
+};
+// state machine widget
+function sdiag(c,cur,x){
+  const R=24,id='m'+(++UID),pos=c.pos;const E={};
+  c.states.forEach(s=>(c.noX?[0]:[0,1]).forEach(xv=>{const t=c.next(s,xv);const k=s+'|'+t;
+    const lab=c.noX?'':(c.out?`${xv}/${c.out(s,xv)}`:`${xv}`);(E[k]=E[k]||{f:s,t,labs:[],act:false}).labs.push(lab);
+    if(s===cur&&(c.noX||xv===x))E[k].act=true;}));
+  let svg=`<svg viewBox="0 0 ${c.w} ${c.h}" style="max-width:${c.w}px;min-width:0" role="img" aria-label="State diagram"><defs>
+   <marker id="${id}a" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker>
+   <marker id="${id}b" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah1"/></marker></defs>`;
+  let labs='';
+  Object.values(E).forEach(e=>{const cls=e.act?'edge act':'edge',mk=`url(#${id}${e.act?'b':'a'})`,txt=e.labs.filter(Boolean).join(', ');
+    const [x1,y1]=pos[e.f];
+    if(e.f===e.t){const th=(c.loops[e.f]||-90)*Math.PI/180,a1=th-0.6,a2=th+0.6;
+      const sx=x1+R*Math.cos(a1),sy=y1+R*Math.sin(a1),ex=x1+R*Math.cos(a2),ey=y1+R*Math.sin(a2);
+      const c1x=x1+(R+46)*Math.cos(th-0.7),c1y=y1+(R+46)*Math.sin(th-0.7),c2x=x1+(R+46)*Math.cos(th+0.7),c2y=y1+(R+46)*Math.sin(th+0.7);
+      svg+=`<path class="${cls}" d="M${sx},${sy} C${c1x},${c1y} ${c2x},${c2y} ${ex},${ey}" marker-end="${mk}"/>`;
+      labs+=`<text class="elab${e.act?' act':''}" x="${x1+(R+52)*Math.cos(th)}" y="${y1+(R+52)*Math.sin(th)+4}" text-anchor="middle">${txt}</text>`;return;}
+    const [x2,y2]=pos[e.t],dx=x2-x1,dy=y2-y1,L=Math.hypot(dx,dy),ux=dx/L,uy=dy/L,nx=-uy,ny=ux;
+    const rev=E[e.t+'|'+e.f];const off=rev?9:0,bend=rev?26:0;
+    const sx=x1+ux*R+nx*off,sy=y1+uy*R+ny*off,ex=x2-ux*(R+1)+nx*off,ey=y2-uy*(R+1)+ny*off;
+    const mx=(x1+x2)/2+nx*bend,my=(y1+y2)/2+ny*bend;
+    svg+=`<path class="${cls}" d="M${sx},${sy} Q${mx},${my} ${ex},${ey}" marker-end="${mk}"/>`;
+    const lx=(x1+x2)/2+nx*(bend+14),ly=(y1+y2)/2+ny*(bend+14);
+    labs+=`<text class="elab${e.act?' act':''}" x="${lx}" y="${ly+4}" text-anchor="middle">${txt}</text>`;});
+  c.states.forEach(s=>{const [x1,y1]=pos[s];svg+=`<circle class="node${s===cur?' cur':''}" cx="${x1}" cy="${y1}" r="${R}"/><text x="${x1}" y="${y1+5}" text-anchor="middle" font-size="14" font-weight="600">${s}</text>`;});
+  return svg+labs+'</svg>';
+}
+function machine(el,c){
+  const st={s:c.start,x:0,hist:[]};
+  el.innerHTML=`<header><h4>${c.title}</h4><span class="tag">Live circuit</span></header><div class="ctrl"></div><div class="readout" aria-live="polite"></div><div class="body"></div>`;
+  const ctrl=el.querySelector('.ctrl'),ro=el.querySelector('.readout'),body=el.querySelector('.body');
+  ctrl.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+    if(b.dataset.k)st.x^=1;
+    else if(b.dataset.a==='clk'){const y=c.out?c.out(st.s,st.x):null;st.hist.push({s:st.s,x:st.x,y});if(st.hist.length>14)st.hist.shift();st.s=c.next(st.s,st.x);}
+    else{st.s=c.start;st.hist=[];}
+    draw();});
+  function draw(){
+    ctrl.innerHTML=(c.noX?'':bitBtn('x',st.x,'x'))+`<span class="spacer"></span><button class="btn" data-a="clk">Clock pulse ▸</button><button class="btn" data-a="rst">Reset to ${c.start}</button>`;
+    const ns=c.next(st.s,st.x),y=c.out?c.out(st.s,st.x):null;
+    ro.innerHTML=`Present state ${c.bits.join('')} = ${st.s}${c.noX?'':`, x = ${st.x}`} → ${y!==null?`output y = ${y}; `:''}next state after the clock pulse = ${ns}`;
+    const seq=st.hist.length?`<div class="tw" style="margin:8px 0 0"><table><tr><th>state</th>${st.hist.map(h=>`<td>${h.s}</td>`).join('')}<td><b>${st.s}</b></td></tr>${c.noX?'':`<tr><th>input x</th>${st.hist.map(h=>`<td>${h.x}</td>`).join('')}<td></td></tr>`}${c.out?`<tr><th>output y</th>${st.hist.map(h=>`<td>${h.y}</td>`).join('')}<td></td></tr>`:''}</table></div>`:'<p class="src" style="margin:8px 0 0">Press "Clock pulse" to record the state sequence.</p>';
+    body.innerHTML=`${c.info?`<p style="margin:0 0 8px;font:14px var(--f-mono)">${c.info(st.s,st.x)}</p>`:''}<div class="tw" style="margin:0">${sdiag(c,st.s,st.x)}</div>${seq}`;
+    if(c.tt)document.querySelectorAll(`[data-tt="${c.tt}"] tr[data-n]`).forEach(r=>r.classList.toggle('hl',+r.dataset.n===parseInt(st.s,2)*2+st.x));
+  }
+  draw();
+}
+const B2=s=>[+s[0],+s[1]];
+const sq={w:470,h:400,pos:{'00':[235,95],'01':[105,200],'11':[365,200],'10':[235,305]},loops:{'00':-90,'01':180,'11':0,'10':90}};
+W.m616=el=>machine(el,{title:'Analysis example: state diagram of Mano Fig. 6-16',bits:['A','B'],start:'00',states:['00','01','10','11'],w:440,h:370,
+  pos:{'00':[105,100],'10':[345,100],'01':[105,265],'11':[345,265]},loops:{'00':-90,'10':-90,'01':90,'11':90},tt:'st61',
+  next:(s,x)=>{const [A,B]=B2(s),r=f616(A,B,x);return `${r[0]}${r[1]}`},out:(s,x)=>{const [A,B]=B2(s);return f616(A,B,x)[2]},
+  info:(s,x)=>{const [A,B]=B2(s),r=f616(A,B,x);return `DA = Ax + Bx = ${r[0]} · DB = A′x = ${r[1]} · y = (A + B)x′ = ${r[2]}`}});
+W.m619=el=>machine(el,{title:'State diagram of Mano Fig. 6-19 (JK flip-flops)',bits:['A','B'],start:'00',states:['00','01','10','11'],w:440,h:370,
+  pos:{'00':[105,100],'11':[345,100],'01':[105,265],'10':[345,265]},loops:{'00':-90,'11':-90,'10':90,'01':90},tt:'st64',
+  next:(s,x)=>{const [A,B]=B2(s),r=f619(A,B,x);return `${r[0]}${r[1]}`},
+  info:(s,x)=>{const [A,B]=B2(s),r=f619(A,B,x);return `JA = B = ${r[2]}, KA = Bx′ = ${r[3]} → A(t+1) = ${r[0]} · JB = x′ = ${r[4]}, KB = A ⊕ x = ${r[5]} → B(t+1) = ${r[1]}`}});
+W.mdesd=el=>machine(el,Object.assign({title:'The designed circuit (D flip-flops), clocked',bits:['A','B'],start:'00',states:['00','01','10','11'],tt:'st613',
+  next:(s,x)=>{const [A,B]=B2(s);const DA=(A&(1-B))|(B&(1-x)),DB=((1-A)&x)|((1-B)&x)|(A&B&(1-x));return `${DA}${DB}`},
+  out:(s,x)=>{const [,B]=B2(s);return (1-B)&x},
+  info:(s,x)=>{const [A,B]=B2(s);const DA=(A&(1-B))|(B&(1-x)),DB=((1-A)&x)|((1-B)&x)|(A&B&(1-x));return `DA = AB′ + Bx′ = ${DA} · DB = A′x + B′x + ABx′ = ${DB} · y = B′x = ${(1-B)&x}`}},sq));
+W.mdesjk=el=>machine(el,Object.assign({title:'The designed circuit (JK flip-flops), clocked',bits:['A','B'],start:'00',states:['00','01','10','11'],tt:'ex612',
+  next:(s,x)=>{const [A,B]=B2(s);const JA=B&(1-x),KA=B&x,JB=x,KB=1-(A^x);return `${jkN(A,JA,KA)}${jkN(B,JB,KB)}`},
+  info:(s,x)=>{const [A,B]=B2(s);const JA=B&(1-x),KA=B&x,JB=x,KB=1-(A^x);return `JA = Bx′ = ${JA}, KA = Bx = ${KA} → A(t+1) = ${jkN(A,JA,KA)} · JB = x = ${JB}, KB = (A⊕x)′ = ${KB} → B(t+1) = ${jkN(B,JB,KB)}`}},sq));
+// state reduction runner
+W.redrun=function(el){
+  el.innerHTML=`<header><h4>Same input, same output: original vs reduced table</h4><span class="tag">Tool</span></header>
+  <div class="row2"><label for="rr-in">Input sequence</label><input type="text" id="rr-in" value="01010110100" inputmode="numeric"><span class="src">start in state a</span></div><div class="body" aria-live="polite"></div>`;
+  const inp=el.querySelector('#rr-in'),body=el.querySelector('.body');
+  const run=(T,s)=>{let st='a';const out=[];for(const ch of s){const x=+ch,r=T[st];out.push({st,x,y:r[2+x]});st=r[x];}out.push({st});return out;};
+  function draw(){const s=inp.value.trim();
+    if(!/^[01]+$/.test(s)){body.innerHTML='<div class="err">Enter a sequence of 0s and 1s.</div>';return;}
+    const a=run(RED0,s),b=run(RED2,s);const same=a.slice(0,-1).every((r,i)=>r.y===b[i].y);
+    const row=(lab,arr,k)=>`<tr><th style="text-align:left">${lab}</th>${arr.map(r=>`<td>${r[k]===undefined?'':r[k]}</td>`).join('')}</tr>`;
+    body.innerHTML=`<div class="tw" style="margin:0"><table>${row('input',a,'x')}${row('state (7-state table)',a,'st')}${row('output (7-state)',a,'y')}${row('state (reduced)',b,'st')}${row('output (reduced)',b,'y')}</table></div>
+    <p style="margin:10px 0 0">${same?'<span class="ok">✓ The output sequences are identical.</span> The state names differ only where g became e and f became d.':'Outputs differ.'}</p>`;}
+  inp.addEventListener('input',draw);draw();
+};
+// race-around in a level-triggered JK flip-flop (J = K = 1)
+W.race=function(el){
+  const st={tp:4.5,mode:'lvl',q0:0};
+  el.innerHTML=`<header><h4>Race-around: pulse width vs propagation delay</h4><span class="tag">Live timing</span></header>
+  <div class="row2"><label for="race-mode">Flip-flop</label><select id="race-mode"><option value="lvl" selected>Level-triggered JK (Fig. 6-6)</option><option value="ms">Master-slave JK (Fig. 6-11)</option></select></div>
+  <div class="row2"><label for="race-tp">Pulse width t<sub>p</sub></label><input type="range" id="race-tp" min="0.5" max="9.5" step="0.5" value="4.5"><span class="tpv" style="font:600 15px var(--f-mono)"></span></div>
+  <div class="ctrl"></div><div class="readout" aria-live="polite"></div><div class="body"></div>`;
+  const ctrl=el.querySelector('.ctrl'),ro=el.querySelector('.readout'),body=el.querySelector('.body'),rng=el.querySelector('#race-tp'),tpv=el.querySelector('.tpv'),sel=el.querySelector('#race-mode');
+  rng.addEventListener('input',()=>{st.tp=+rng.value;draw();});
+  sel.addEventListener('change',()=>{st.mode=sel.value;draw();});
+  ctrl.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.k==='q0')st.q0^=1;
+    if(b.dataset.a==='rst'){Object.assign(st,{tp:4.5,mode:'lvl',q0:0});rng.value='4.5';sel.value='lvl';}
+    draw();});
+  const T=12,N=3,LEAD=2,DT=1,SC=15,X0=58,END=LEAD+N*T;
+  function sim(){ // returns {q:[[t,v]...], y:[[t,v]...], counts:[..]}
+    let q=st.q0,y=st.q0;const qe=[[0,q]],ye=[[0,y]],counts=[];
+    for(let p=0;p<N;p++){const t0=LEAD+p*T;
+      if(st.mode==='lvl'){let n=0;for(let k=1;(k-1)*DT<st.tp;k++){q=1-q;qe.push([t0+k*DT,q]);n++;}counts.push(n);}
+      else{y=1-q;ye.push([t0+DT,y]);q=y;qe.push([t0+st.tp+DT,q]);counts.push(1);}}
+    return {qe,ye,counts};}
+  const path=(ev,yHi,yLo)=>{let d=`M${X0},${ev[0][1]?yHi:yLo}`;let v=ev[0][1];
+    ev.slice(1).forEach(([t,nv])=>{const x=X0+t*SC;d+=`H${x}V${nv?yHi:yLo}`;v=nv;});return d+`H${X0+END*SC}`;};
+  function draw(){
+    tpv.textContent=`= ${st.tp} Δt`+(st.tp<DT?'  (shorter than Δt)':'');
+    ctrl.innerHTML=bitBtn('q0',st.q0,'Q before first pulse')+'<span class="spacer"></span><span style="font-size:14px;color:var(--muted)">J = K = 1 throughout · Δt = propagation delay · T = 12 Δt</span><button class="btn" data-a="rst">Reset ↺</button>';
+    const {qe,ye,counts}=sim();const ms=st.mode==='ms';
+    const rows=[['CP'],['J'],['K']].concat(ms?[['Y']]:[]).concat([['Q']]);
+    const RH=46,top=14,H=top+rows.length*RH+30,W=X0+END*SC+10;
+    const yr=i=>[top+i*RH+6,top+i*RH+30];
+    let s=`<svg viewBox="0 0 ${W} ${H}" style="min-width:${W}px" role="img" aria-label="Timing diagram of CP, J, K${ms?', master Y':''} and Q for three clock pulses">`;
+    for(let p=0;p<N;p++){const a=X0+(LEAD+p*T)*SC,b=a+st.tp*SC;s+=`<path class="gl" stroke-dasharray="4 4" d="M${a} ${top-4}V${H-24}M${b} ${top-4}V${H-24}"/>`;}
+    const cp=[[0,0]];for(let p=0;p<N;p++){const t0=LEAD+p*T;cp.push([t0,1],[t0+st.tp,0]);}
+    const waves=[cp,[[0,1]],[[0,1]]].concat(ms?[ye]:[]).concat([qe]);
+    waves.forEach((ev,i)=>{const [hi,lo]=yr(i);const isQ=i===waves.length-1;
+      s+=`<text x="${X0-10}" y="${(hi+lo)/2+4}" text-anchor="end" font-size="13" font-weight="600">${rows[i][0]}</text>`;
+      s+=`<path class="wv${isQ?' q':''}" d="${path(ev,hi,lo)}"/>`;});
+    // tp and Δt annotations on first pulse
+    const a=X0+LEAD*SC,b=a+st.tp*SC,yA=H-12;
+    if(!ms){const [,lo]=yr(waves.length-1);const q1=a+DT*SC;s+=`<path class="arrow" d="M${a} ${lo+8}H${q1}"/><text x="${q1+4}" y="${lo+12}" class="sm">Δt</text>`;}
+    s+=`<path class="arrow" d="M${a} ${yA}H${b}"/><text x="${(a+b)/2}" y="${yA-4}" text-anchor="middle" class="sm">t<tspan font-size="9" dy="2">p</tspan></text>`;
+    // final Q after each pulse
+    for(let p=0;p<N;p++){const tEnd=LEAD+p*T+st.tp+DT+0.5;let v=qe[0][1];qe.forEach(([t,nv])=>{if(t<=tEnd)v=nv;});
+      const [hi]=yr(waves.length-1);s+=`<text x="${X0+(LEAD+p*T+st.tp+2)*SC}" y="${hi-2}" class="sm">Q=${v} (${counts[p]}×)</text>`;}
+    s+='</svg>';
+    body.innerHTML=`<div class="tw" style="margin:0">${s}</div>`;
+    const n=counts[0];
+    let msg;
+    if(ms)msg=`Master-slave: the master's output Y complements once during CP = 1; the slave copies it when CP returns to 0. <b>Exactly one toggle per pulse</b> for any pulse width.`;
+    else if(n===1)msg=`t<sub>p</sub> &lt; Δt: the new Q arrives after CP has already returned to 0, so it cannot re-trigger the gates. <b>One toggle per pulse</b>, as intended.`;
+    else msg=`<span class="osc">Race-around:</span> t<sub>p</sub> = ${st.tp} Δt, so Q toggles <b>${n} times</b> in each pulse instead of once. ${n%2?'An odd count happens to leave Q complemented, but only by luck':'An even count leaves Q where it started, as if J = K = 0'}: a slightly different Δt would change the result.`;
+    ro.innerHTML=msg;
+  }
+  draw();
+};
+document.querySelectorAll('[data-w]').forEach(el=>{const f=W[el.dataset.w];if(f)f(el);});
+
+/* ---------- optional-topic toggle ---------- */
+const box=document.getElementById('hideopt');
+try{if(localStorage.getItem('u6-hideopt')==='1'){box.checked=true;document.body.classList.add('hideopt');}}catch(e){}
+box.addEventListener('change',()=>{document.body.classList.toggle('hideopt',box.checked);try{localStorage.setItem('u6-hideopt',box.checked?'1':'0')}catch(e){}});
+})();
+</script>
+
+</body></html>

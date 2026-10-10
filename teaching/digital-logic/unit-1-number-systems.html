@@ -1,0 +1,2151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unit 1: Number Systems | Digital Logic BT102CO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EEF2F5; --card:#FFFFFF; --ink:#15223B; --ink-soft:#4A5870;
+  --grid:rgba(21,34,59,.055); --rule:#CBD4DF;
+  --trace:#0E7A69; --trace-soft:#DDEFEA;
+  --signal:#C98512; --signal-soft:#FBF0DB;
+  --alert:#B3322B; --alert-soft:#F8E3E1;
+  --serif:"Source Serif 4", Georgia, "Times New Roman", serif;
+  --mono:"JetBrains Mono", "Cascadia Mono", Consolas, "Courier New", monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0F1726; --card:#16223A; --ink:#E4EAF3; --ink-soft:#A3B0C4;
+    --grid:rgba(228,234,243,.045); --rule:#2B3A57;
+    --trace:#3FC4AB; --trace-soft:#153A39;
+    --signal:#EDB456; --signal-soft:#3A2E17;
+    --alert:#F07A70; --alert-soft:#3C1E22;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0F1726; --card:#16223A; --ink:#E4EAF3; --ink-soft:#A3B0C4;
+  --grid:rgba(228,234,243,.045); --rule:#2B3A57;
+  --trace:#3FC4AB; --trace-soft:#153A39;
+  --signal:#EDB456; --signal-soft:#3A2E17;
+  --alert:#F07A70; --alert-soft:#3C1E22;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{
+  margin:0; color:var(--ink); font-family:var(--serif); font-size:1.075rem; line-height:1.7;
+  background-color:var(--paper);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size:24px 24px;
+}
+img,svg{max-width:100%;height:auto}
+a{color:var(--trace)}
+a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible+label{outline:3px solid var(--signal);outline-offset:2px}
+.m,code{font-family:var(--mono);font-size:.92em;letter-spacing:.02em}
+sub{font-size:.7em}
+
+/* ---------- hero ---------- */
+.hero{max-width:1180px;margin:0 auto;padding:3.5rem 1.5rem 2rem}
+.hero .course{margin:0;color:var(--ink-soft);font-size:1rem}
+.hero h1{font-size:clamp(2.6rem,6vw,4.4rem);line-height:1.02;margin:.35rem 0 .6rem;font-weight:700;letter-spacing:-.02em}
+.hero p.lede{max-width:40rem;margin:0 0 1.5rem;font-size:1.2rem;color:var(--ink-soft)}
+.hero-wave{display:block;width:100%;background:var(--card);border:1px solid var(--rule);border-radius:6px;padding:10px 12px 4px}
+.h-grid{stroke:var(--rule);stroke-width:1}
+.h-sine{fill:none;stroke:var(--ink-soft);stroke-width:2;stroke-dasharray:1400;stroke-dashoffset:1400;animation:draw 2.2s ease-out forwards}
+.h-step{fill:none;stroke:var(--trace);stroke-width:3;opacity:0;animation:fade .8s ease-out 1.9s forwards}
+.h-dot{fill:var(--signal);opacity:0;animation:fade .6s ease-out 1.6s forwards}
+.h-code{font-family:var(--mono);font-size:13px;fill:var(--ink);text-anchor:middle;opacity:0;animation:fade .6s ease-out 2.4s forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes fade{to{opacity:1}}
+.hero .legend{display:flex;flex-wrap:wrap;gap:1.25rem;font-size:.92rem;color:var(--ink-soft);margin-top:.6rem}
+.legend span::before{content:"";display:inline-block;width:18px;height:3px;vertical-align:middle;margin-right:.45rem;background:currentColor}
+.legend .l1{color:var(--ink-soft)} .legend .l2{color:var(--trace)} .legend .l3{color:var(--signal)}
+.legend .l1,.legend .l2,.legend .l3{font-weight:600}
+
+/* ---------- layout ---------- */
+.layout{max-width:1180px;margin:0 auto;padding:0 1.5rem 4rem;display:grid;grid-template-columns:230px minmax(0,1fr);gap:3rem}
+nav.toc{position:sticky;top:1rem;align-self:start;font-size:.95rem;border-left:2px solid var(--rule);padding-left:1rem}
+nav.toc p{margin:0 0 .5rem;font-weight:700}
+nav.toc ol{list-style:none;margin:0;padding:0}
+nav.toc li{margin:.35rem 0}
+nav.toc a{color:var(--ink-soft);text-decoration:none;display:block;line-height:1.35}
+nav.toc a:hover{color:var(--trace)}
+nav.toc a .n{font-family:var(--mono);font-size:.85em;color:var(--trace);margin-right:.4rem}
+nav.toc .theme{margin-top:1.4rem;font:inherit;font-size:.88rem;background:none;border:1px solid var(--rule);color:var(--ink-soft);padding:.3rem .7rem;border-radius:4px;cursor:pointer}
+main{min-width:0;max-width:48rem}
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr;gap:1rem}
+  nav.toc{position:static;border-left:0;border-bottom:1px solid var(--rule);padding:0 0 1rem}
+  nav.toc ol{display:flex;flex-wrap:wrap;gap:.3rem 1.2rem}
+}
+
+/* ---------- sections ---------- */
+section.topic{padding-top:2.5rem}
+section.topic>h2{font-size:clamp(1.7rem,3.4vw,2.2rem);line-height:1.15;margin:0 0 1rem;display:flex;gap:.8rem;align-items:baseline;flex-wrap:wrap}
+section.topic>h2 .n{font-family:var(--mono);font-size:.6em;color:var(--card);background:var(--trace);padding:.15rem .55rem;border-radius:3px;font-weight:600}
+h3{font-size:1.35rem;margin:2.2rem 0 .6rem;line-height:1.25}
+h4{font-size:1.08rem;margin:1.6rem 0 .4rem}
+p{margin:.7rem 0}
+.why{background:var(--card);border-left:5px solid var(--signal);padding:1rem 1.25rem;border-radius:0 6px 6px 0;margin:1rem 0 1.5rem}
+.why h3{margin:0 0 .3rem;font-size:1.05rem;color:var(--signal)}
+.why p{margin:.4rem 0}
+.key{background:var(--trace-soft);border-radius:6px;padding:.9rem 1.2rem;margin:1.2rem 0}
+.key p{margin:.3rem 0}
+.formula{font-family:var(--mono);background:var(--card);border:1px dashed var(--trace);padding:.8rem 1rem;border-radius:6px;overflow-x:auto;white-space:nowrap;margin:1rem 0;font-size:.95rem}
+
+/* tables */
+.tw{overflow-x:auto;margin:1rem 0;border:1px solid var(--rule);border-radius:6px;background:var(--card)}
+table{border-collapse:collapse;width:100%;font-size:.96rem}
+th,td{padding:.45rem .75rem;text-align:left;border-bottom:1px solid var(--rule);vertical-align:top}
+th{background:var(--trace-soft);font-weight:600}
+tr:last-child td{border-bottom:0}
+table.c td,table.c th{text-align:center}
+td.m,th.m{white-space:nowrap}
+.hl{background:var(--signal-soft);color:var(--ink);padding:0 .15em;border-radius:2px}
+.bad{color:var(--alert);font-weight:600}
+
+/* figures */
+figure{margin:1.6rem 0;background:var(--card);border:1px solid var(--rule);border-radius:6px;padding:1rem}
+figure svg{display:block;margin:0 auto}
+figcaption{font-size:.92rem;color:var(--ink-soft);margin-top:.6rem;text-align:center}
+figcaption b{color:var(--ink)}
+svg text{font-family:var(--serif);fill:var(--ink)}
+.box{fill:var(--card);stroke:var(--ink);stroke-width:1.6}
+.box-t{fill:var(--trace-soft);stroke:var(--trace);stroke-width:1.6}
+.box-s{fill:var(--signal-soft);stroke:var(--signal);stroke-width:1.6}
+.wire{stroke:var(--ink);stroke-width:1.6;fill:none}
+.wire-t{stroke:var(--trace);stroke-width:2;fill:none}
+.arrowhead{fill:var(--ink)}
+.small{font-size:12px;fill:var(--ink-soft)}
+.mono{font-family:var(--mono)!important}
+.q-grid{stroke:var(--rule)} .q-lab{font-size:12px;fill:var(--ink-soft)} .q-code{font-family:var(--mono);font-size:13px;fill:var(--trace)}
+.q-sig{fill:none;stroke:var(--ink-soft);stroke-width:2} .q-step{fill:none;stroke:var(--trace);stroke-width:2.6}
+.w-bits{font-family:var(--mono)!important;font-size:13px} .w-val{font-size:14px;font-weight:600}
+.w-pos{fill:var(--trace-soft);stroke:var(--trace);stroke-width:1.5} .w-neg{fill:var(--signal-soft);stroke:var(--signal);stroke-width:1.5}
+.w-cut{stroke:var(--alert);stroke-width:2;stroke-dasharray:6 4} .w-note{font-size:13px;fill:var(--ink-soft)}
+.d-on{fill:var(--ink);stroke:var(--card);stroke-width:1.5} .d-off{fill:var(--card);stroke:var(--rule);stroke-width:1.5}
+.d-lab{font-family:var(--mono)!important;font-size:13px} .d-hub{fill:var(--paper);stroke:var(--rule)}
+
+/* worked examples */
+.ex{background:var(--card);border:1px solid var(--rule);border-top:4px solid var(--trace);border-radius:6px;padding:1rem 1.25rem 1.1rem;margin:1.4rem 0}
+.ex>h4{margin:0 0 .3rem;font-size:1rem;color:var(--trace)}
+.ex .q{font-weight:600;margin:.2rem 0 .7rem}
+.ex .ans{margin:.9rem 0 0;padding:.5rem .8rem;background:var(--trace-soft);border-radius:4px;font-weight:600}
+.ex ol,.ex ul{padding-left:1.3rem;margin:.4rem 0}
+.work{font-family:var(--mono);font-size:.93rem;line-height:1.55;background:var(--paper);border-radius:4px;padding:.7rem 1rem;overflow-x:auto;white-space:pre;margin:.6rem 0}
+.work .c{color:var(--signal)} .work .t{color:var(--trace);font-weight:600} .work .r{color:var(--alert);font-weight:600} .work .d{color:var(--ink-soft)}
+table.ladder td{font-family:var(--mono);text-align:center;padding:.3rem .8rem}
+table.ladder td:first-child{text-align:right}
+.bitrow{display:flex;flex-wrap:wrap;gap:.35rem;margin:.6rem 0;font-family:var(--mono)}
+.bitrow span{border:1px solid var(--rule);padding:.15rem .45rem;border-radius:3px;background:var(--paper)}
+.bitrow span.g1{border-color:var(--trace);background:var(--trace-soft)}
+.bitrow span.g2{border-color:var(--signal);background:var(--signal-soft)}
+.bitrow span.lab{border:0;background:none;color:var(--ink-soft);font-family:var(--serif)}
+
+/* exercises */
+.exercises{margin:2rem 0 0;background:var(--card);border:1px solid var(--rule);border-radius:6px;padding:1rem 1.25rem}
+.exercises h3{margin:0 0 .5rem;font-size:1.2rem}
+.exercises>ol{padding-left:1.4rem;margin:0}
+.exercises li{margin:.7rem 0}
+details{margin:.3rem 0 0}
+summary{cursor:pointer;color:var(--trace);font-size:.93rem;width:max-content}
+details[open] summary{margin-bottom:.3rem}
+details .a{background:var(--trace-soft);border-radius:4px;padding:.4rem .8rem;font-size:.97rem}
+
+/* MCQ */
+.quiz-bar{position:sticky;bottom:0;background:var(--card);border:1px solid var(--rule);border-radius:6px;padding:.7rem 1rem;display:flex;flex-wrap:wrap;gap:.8rem;align-items:center;justify-content:space-between;margin-top:1.4rem;box-shadow:0 -6px 18px rgba(0,0,0,.06)}
+.quiz-bar .score{font-weight:600}
+.btn{font:inherit;font-size:.97rem;border-radius:4px;padding:.45rem 1rem;cursor:pointer;border:1px solid var(--trace)}
+.btn.p{background:var(--trace);color:var(--card)} .btn.s{background:transparent;color:var(--trace)}
+.mcq{background:var(--card);border:1px solid var(--rule);border-radius:6px;padding:.9rem 1.2rem;margin:1rem 0}
+.mcq .qt{font-weight:600;margin:0 0 .5rem}
+.mcq .qt .qn{font-family:var(--mono);color:var(--trace);margin-right:.4rem;font-size:.9em}
+.mcq .opts{display:grid;gap:.35rem}
+.mcq label{display:flex;gap:.6rem;align-items:flex-start;padding:.35rem .6rem;border:1px solid var(--rule);border-radius:4px;cursor:pointer}
+.mcq label:hover{border-color:var(--trace)}
+.mcq input{margin-top:.45rem;accent-color:var(--trace)}
+.mcq label.right{border-color:var(--trace);background:var(--trace-soft)}
+.mcq label.wrong{border-color:var(--alert);background:var(--alert-soft)}
+.mcq .fb{display:none;margin-top:.55rem;font-size:.95rem;color:var(--ink-soft)}
+.mcq.done .fb{display:block}
+.mcq .fb b.ok{color:var(--trace)} .mcq .fb b.no{color:var(--alert)}
+fieldset.mcq legend{float:left;width:100%;padding:0}
+.mcq .opts{clear:both}
+main p, main li, .why p, .key p, details .a{text-align:justify;text-justify:inter-word;hyphens:auto;-webkit-hyphens:auto}
+figcaption, .mcq *{text-align:left}
+figcaption{text-align:center}
+ul.pts{padding-left:1.3rem;margin:.5rem 0 1rem}
+ul.pts li{margin:.35rem 0}
+ul.pts li::marker{color:var(--trace)}
+.outcomes{margin-top:2.5rem;background:var(--card);border:1px solid var(--rule);border-left:5px solid var(--trace);border-radius:0 6px 6px 0;padding:1rem 1.4rem}
+.outcomes h2{font-size:1.4rem;margin:0 0 .2rem}
+.outcomes .ref{font-family:var(--mono);font-size:.82em;color:var(--trace);white-space:nowrap}
+.phases{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem;margin:1.2rem 0 1.6rem;position:relative}
+.phase{background:var(--trace-soft);border:1px solid var(--trace);border-radius:6px;padding:.7rem .9rem;position:relative}
+.phase.v{background:var(--signal-soft);border-color:var(--signal)}
+.phase+.phase::before{content:"→";position:absolute;left:-1.15rem;top:50%;transform:translateY(-50%);color:var(--ink-soft);font-size:1.1rem}
+.phase .ph{margin:0 0 .3rem;font-weight:700}
+.phase ol{margin:0;padding-left:1.4rem;font-size:.95rem}
+.phase li{margin:.15rem 0;text-align:left}
+.stepcard{background:var(--card);border:1px solid var(--rule);border-left:5px solid var(--trace);border-radius:0 6px 6px 0;padding:.8rem 1.2rem;margin:1rem 0}
+.stepcard.v{border-left-color:var(--signal)}
+.stepcard h4{margin:0 0 .3rem;font-size:1.1rem}
+.stepcard .pn{font-family:var(--mono);font-size:.78em;color:var(--card);background:var(--trace);padding:.1rem .45rem;border-radius:3px;margin-right:.6rem;font-weight:600}
+.stepcard.v .pn{background:var(--signal)}
+.stepcard ol{padding-left:1.4rem;margin:.3rem 0}
+.stepcard li{margin:.5rem 0}
+.stepcard .tw{margin:.6rem 0 .2rem}
+@media (max-width:640px){.phases{grid-template-columns:1fr;gap:1.3rem}.phase+.phase::before{content:"↓";left:50%;top:-1.2rem;transform:translateX(-50%)}}
+.rules{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;margin:1rem 0 1.4rem}
+.rule{background:var(--card);border:1px solid var(--rule);border-top:4px solid var(--trace);border-radius:6px;padding:.7rem .9rem}
+.rule .rh{margin:0 0 .4rem;font-weight:700}
+.rule .tw{margin:.3rem 0;border:0}
+.rule td,.rule th{padding:.3rem .5rem}
+.rule tr.xtra td{background:var(--signal-soft)}
+.rule .rn{text-align:left;hyphens:manual;font-size:.93rem;margin:.5rem 0 0;color:var(--ink-soft)}
+@media (max-width:640px){.rules{grid-template-columns:1fr}}
+.okk{color:var(--trace);font-weight:600}
+.ovh{margin:.55rem 0 .15rem;font-weight:700;text-align:left!important}
+.ovl{margin:0;padding-left:1.2rem}
+.ovl li{margin:.15rem 0;text-align:left}
+footer{max-width:1180px;margin:0 auto;padding:1.5rem;color:var(--ink-soft);font-size:.9rem;border-top:1px solid var(--rule)}
+@media print{nav.toc,.quiz-bar{display:none}.layout{display:block}details{display:block}details .a{display:block}body{background:#fff}}
+</style>
+</head>
+<body><div style="font:14px/1.4 Inter,-apple-system,Segoe UI,sans-serif;background:#0b1d3a;padding:10px 16px;"><a href="/teaching/digital-logic.html" style="color:#fbf9f3;text-decoration:none;">&larr; Digital Logic &middot; all units</a></div>
+
+<header class="hero">
+  <p class="course">Digital Logic (BT102CO), Year I, Semester I. Unit 1 of 7, 5 lecture hours.</p>
+  <h1>Number systems</h1>
+  <p class="lede">How a machine that only knows “on” and “off” counts, stores negative numbers and fractions, and represents decimal digits, letters and error-proof messages.</p>
+  <svg class="hero-wave" viewBox="0 0 800 232" role="img" aria-label="A smooth analog wave sampled and quantised into 3-bit binary codes">
+<line x1="0" x2="800" y1="190.0" y2="190.0" class="h-grid"/><line x1="0" x2="800" y1="170.0" y2="170.0" class="h-grid"/><line x1="0" x2="800" y1="150.0" y2="150.0" class="h-grid"/><line x1="0" x2="800" y1="130.0" y2="130.0" class="h-grid"/><line x1="0" x2="800" y1="110.0" y2="110.0" class="h-grid"/><line x1="0" x2="800" y1="90.0" y2="90.0" class="h-grid"/><line x1="0" x2="800" y1="70.0" y2="70.0" class="h-grid"/><line x1="0" x2="800" y1="50.0" y2="50.0" class="h-grid"/><line x1="0" x2="800" y1="30.0" y2="30.0" class="h-grid"/><polyline points="0,82.0 4,78.8 8,75.7 12,72.7 16,69.7 20,66.9 24,64.2 28,61.5 32,59.0 36,56.6 40,54.4 44,52.2 48,50.2 52,48.3 56,46.6 60,45.0 64,43.6 68,42.3 72,41.2 76,40.3 80,39.5 84,38.9 88,38.4 92,38.1 96,38.0 100,38.1 104,38.3 108,38.6 112,39.2 116,39.9 120,40.8 124,41.8 128,43.0 132,44.4 136,45.9 140,47.5 144,49.4 148,51.3 152,53.4 156,55.6 160,57.9 164,60.4 168,63.0 172,65.7 176,68.5 180,71.4 184,74.3 188,77.4 192,80.5 196,83.7 200,87.0 204,90.3 208,93.7 212,97.1 216,100.5 220,104.0 224,107.5 228,111.0 232,114.4 236,117.9 240,121.4 244,124.8 248,128.2 252,131.5 256,134.8 260,138.0 264,141.2 268,144.3 272,147.3 276,150.3 280,153.1 284,155.8 288,158.5 292,161.0 296,163.4 300,165.6 304,167.8 308,169.8 312,171.7 316,173.4 320,175.0 324,176.4 328,177.7 332,178.8 336,179.7 340,180.5 344,181.1 348,181.6 352,181.9 356,182.0 360,181.9 364,181.7 368,181.4 372,180.8 376,180.1 380,179.2 384,178.2 388,177.0 392,175.6 396,174.1 400,172.5 404,170.6 408,168.7 412,166.6 416,164.4 420,162.1 424,159.6 428,157.0 432,154.3 436,151.5 440,148.6 444,145.7 448,142.6 452,139.5 456,136.3 460,133.0 464,129.7 468,126.3 472,122.9 476,119.5 480,116.0 484,112.5 488,109.0 492,105.6 496,102.1 500,98.6 504,95.2 508,91.8 512,88.5 516,85.2 520,82.0 524,78.8 528,75.7 532,72.7 536,69.7 540,66.9 544,64.2 548,61.5 552,59.0 556,56.6 560,54.4 564,52.2 568,50.2 572,48.3 576,46.6 580,45.0 584,43.6 588,42.3 592,41.2 596,40.3 600,39.5 604,38.9 608,38.4 612,38.1 616,38.0 620,38.1 624,38.3 628,38.6 632,39.2 636,39.9 640,40.8 644,41.8 648,43.0 652,44.4 656,45.9 660,47.5 664,49.4 668,51.3 672,53.4 676,55.6 680,57.9 684,60.4 688,63.0 692,65.7 696,68.5 700,71.4 704,74.3 708,77.4 712,80.5 716,83.7 720,87.0 724,90.3 728,93.7 732,97.1 736,100.5 740,104.0 744,107.5 748,111.0 752,114.4 756,117.9 760,121.4 764,124.8 768,128.2 772,131.5 776,134.8 780,138.0 784,141.2 788,144.3 792,147.3 796,150.3 800,153.1" class="h-sine"/><path d="M0,60.0 L50,60.0 L50,40.0 L100,40.0 L100,40.0 L150,40.0 L150,60.0 L200,60.0 L200,100.0 L250,100.0 L250,140.0 L300,140.0 L300,180.0 L350,180.0 L350,180.0 L400,180.0 L400,160.0 L450,160.0 L450,120.0 L500,120.0 L500,80.0 L550,80.0 L550,40.0 L600,40.0 L600,40.0 L650,40.0 L650,60.0 L700,60.0 L700,100.0 L750,100.0 L750,140.0 L800,140.0" class="h-step"/><circle cx="25" cy="60.0" r="3.2" class="h-dot"/><circle cx="75" cy="40.0" r="3.2" class="h-dot"/><circle cx="125" cy="40.0" r="3.2" class="h-dot"/><circle cx="175" cy="60.0" r="3.2" class="h-dot"/><circle cx="225" cy="100.0" r="3.2" class="h-dot"/><circle cx="275" cy="140.0" r="3.2" class="h-dot"/><circle cx="325" cy="180.0" r="3.2" class="h-dot"/><circle cx="375" cy="180.0" r="3.2" class="h-dot"/><circle cx="425" cy="160.0" r="3.2" class="h-dot"/><circle cx="475" cy="120.0" r="3.2" class="h-dot"/><circle cx="525" cy="80.0" r="3.2" class="h-dot"/><circle cx="575" cy="40.0" r="3.2" class="h-dot"/><circle cx="625" cy="40.0" r="3.2" class="h-dot"/><circle cx="675" cy="60.0" r="3.2" class="h-dot"/><circle cx="725" cy="100.0" r="3.2" class="h-dot"/><circle cx="775" cy="140.0" r="3.2" class="h-dot"/><text x="25" y="222" class="h-code">110</text><text x="75" y="222" class="h-code">111</text><text x="125" y="222" class="h-code">111</text><text x="175" y="222" class="h-code">110</text><text x="225" y="222" class="h-code">100</text><text x="275" y="222" class="h-code">010</text><text x="325" y="222" class="h-code">000</text><text x="375" y="222" class="h-code">000</text><text x="425" y="222" class="h-code">001</text><text x="475" y="222" class="h-code">011</text><text x="525" y="222" class="h-code">101</text><text x="575" y="222" class="h-code">111</text><text x="625" y="222" class="h-code">111</text><text x="675" y="222" class="h-code">110</text><text x="725" y="222" class="h-code">100</text><text x="775" y="222" class="h-code">010</text></svg>
+  <div class="legend"><span class="l1">Analog signal (continuous)</span><span class="l3">Sampling instants</span><span class="l2">Digital version (8 levels, 3 bits each)</span></div>
+</header>
+
+<div class="layout">
+<nav class="toc" aria-label="Unit contents">
+  <p>Unit 1 contents</p>
+  <ol>
+    <li><a href="#lo"><span class="n">✓</span>Learning outcomes</a></li>
+    <li><a href="#s11"><span class="n">1.1</span>Introduction</a></li>
+    <li><a href="#s12"><span class="n">1.2</span>Analog vs digital systems</a></li>
+    <li><a href="#s13"><span class="n">1.3</span>Number systems and conversion</a></li>
+    <li><a href="#s14"><span class="n">1.4</span>Signed numbers, fractions, arithmetic</a></li>
+    <li><a href="#workflow"><span class="n">⤷</span>Complement workflow</a></li>
+    <li><a href="#s15"><span class="n">1.5</span>Binary codes and error control</a></li>
+    <li><a href="#sheet"><span class="n">∑</span>Formula sheet</a></li>
+    <li><a href="#mcq"><span class="n">?</span>MCQ practice test</a></li>
+  </ol>
+  <button class="theme" type="button" id="themeBtn">Switch light/dark</button>
+</nav>
+
+<main>
+
+<!-- ======================= Learning outcomes ======================= -->
+<section class="outcomes" id="lo">
+<h2>Learning outcomes</h2>
+<p>After studying this unit you should be able to:</p>
+<ul class="pts">
+<li><b>Define:</b> explain what a digital system is, why binary is used, and find the number of bits needed to code a given number of items. <span class="ref">(1.1)</span></li>
+<li><b>Compare:</b> distinguish analog and digital systems, list the advantages and disadvantages of digital systems, and calculate ADC resolution. <span class="ref">(1.2)</span></li>
+<li><b>Convert:</b> change integers between decimal, binary, octal, hexadecimal and any other base. <span class="ref">(1.3)</span></li>
+<li><b>Represent:</b> write signed numbers in sign-magnitude, 1’s and 2’s complement form and state the range of each. <span class="ref">(1.4)</span></li>
+<li><b>Convert fractions:</b> change fractional and mixed numbers between bases, including non-terminating cases. <span class="ref">(1.4)</span></li>
+<li><b>Calculate:</b> add, subtract, multiply and divide in binary, subtract using complements, and detect overflow. <span class="ref">(1.4)</span></li>
+<li><b>Encode:</b> write and decode numbers and text in BCD, excess-3, Gray code and ASCII. <span class="ref">(1.5)</span></li>
+<li><b>Protect data:</b> generate and check parity bits, form a Hamming code, and locate and correct a single-bit error. <span class="ref">(1.5)</span></li>
+</ul>
+</section>
+
+<!-- ======================= 1.1 ======================= -->
+<section class="topic" id="s11">
+<h2><span class="n">1.1</span>Introduction</h2>
+
+<div class="why">
+  <h3>Background</h3>
+  <p>A mobile phone, an ATM, a digital watch and the computer in a car engine all look different, yet inside they do the same thing: they store and move patterns of 0s and 1s. The electronics that manipulate these patterns is called <b>digital logic</b>, and the first thing we must learn is how ordinary information such as numbers, letters and measurements is written as 0s and 1s.</p>
+</div>
+
+<p>A <b>digital system</b> is a system that processes <em>discrete</em> (separate, countable) values of information. The word comes from <em>digit</em>: information is represented by a limited set of symbols rather than by a smoothly varying quantity. The most common and useful digital systems use only two symbols, 0 and 1, and are called <b>binary</b> systems.</p>
+
+<p>Binary is chosen because physical devices with two stable states are cheap, fast and reliable to build. A switch is open or closed, a transistor is conducting or cut off, a capacitor is charged or discharged, a spot on a disk is magnetised one way or the other. For example, in a 5 V logic circuit a voltage between 0 and 0.8 V may be read as <b>0</b> and a voltage between 2 V and 5 V as <b>1</b>; the exact voltage does not matter as long as it falls inside the correct band.</p>
+
+<h3>Units of binary information</h3>
+<div class="tw"><table>
+<tr><th>Name</th><th>Size</th><th>Example</th></tr>
+<tr><td>Bit (binary digit)</td><td>1 binary digit</td><td class="m">1</td></tr>
+<tr><td>Nibble</td><td>4 bits</td><td class="m">1011</td></tr>
+<tr><td>Byte</td><td>8 bits</td><td class="m">1011 0110</td></tr>
+<tr><td>Word</td><td>group handled as one unit by a computer (commonly 16, 32 or 64 bits)</td><td class="m">1011 0110 0001 1111</td></tr>
+</table></div>
+
+<div class="key"><p><b>Key fact.</b> With <i>n</i> bits we can form 2<sup><i>n</i></sup> different patterns. To give a unique code to <i>N</i> different items we need the smallest <i>n</i> such that 2<sup><i>n</i></sup> ≥ <i>N</i>.</p></div>
+
+<div class="ex">
+<h4>Example 1.1.1</h4>
+<p class="q">How many different values can be represented with (a) 4 bits, (b) 8 bits, (c) 16 bits?</p>
+<div class="work">(a) 2<sup>4</sup>  = 16
+(b) 2<sup>8</sup>  = 256
+(c) 2<sup>16</sup> = 65 536</div>
+<p class="ans">16, 256 and 65 536 distinct values respectively.</p>
+</div>
+
+<div class="ex">
+<h4>Example 1.1.2</h4>
+<p class="q">A college has 1 500 students. What is the minimum number of bits needed to give every student a unique binary roll number?</p>
+<div class="work">2<sup>10</sup> = 1 024  <span class="r">&lt; 1 500</span>   (not enough)
+2<sup>11</sup> = 2 048  <span class="t">≥ 1 500</span>   (enough)</div>
+<p class="ans">11 bits are needed (and 2 048 − 1 500 = 548 codes remain unused).</p>
+</div>
+
+<h3>Structure of a digital computer</h3>
+<p>The best-known digital system is the general-purpose digital computer. Its main parts are shown below. Information enters through input devices, is stored in memory as binary words, is processed by the central processing unit (CPU), and leaves through output devices.</p>
+
+<figure>
+<svg viewBox="0 0 660 250" role="img" aria-label="Block diagram of a digital computer: input unit, CPU with ALU and control unit, memory, output unit">
+  <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="arrowhead"/></marker></defs>
+  <rect x="10" y="95" width="120" height="60" rx="4" class="box"/>
+  <text x="70" y="122" text-anchor="middle">Input unit</text><text x="70" y="141" text-anchor="middle" class="small">keyboard, sensor</text>
+  <rect x="200" y="60" width="260" height="130" rx="4" class="box-t"/>
+  <text x="330" y="82" text-anchor="middle" font-weight="600">Central processing unit</text>
+  <rect x="220" y="98" width="100" height="72" rx="4" class="box"/><text x="270" y="130" text-anchor="middle">ALU</text><text x="270" y="150" text-anchor="middle" class="small">arithmetic, logic</text>
+  <rect x="340" y="98" width="100" height="72" rx="4" class="box"/><text x="390" y="130" text-anchor="middle">Control</text><text x="390" y="150" text-anchor="middle" class="small">sequencing</text>
+  <rect x="530" y="95" width="120" height="60" rx="4" class="box"/>
+  <text x="590" y="122" text-anchor="middle">Output unit</text><text x="590" y="141" text-anchor="middle" class="small">display, printer</text>
+  <rect x="260" y="205" width="140" height="40" rx="4" class="box-s"/><text x="330" y="230" text-anchor="middle">Memory</text>
+  <line x1="130" y1="125" x2="198" y2="125" class="wire" marker-end="url(#ar)"/>
+  <line x1="460" y1="125" x2="528" y2="125" class="wire" marker-end="url(#ar)"/>
+  <line x1="315" y1="190" x2="315" y2="203" class="wire" marker-end="url(#ar)"/>
+  <line x1="345" y1="205" x2="345" y2="192" class="wire" marker-end="url(#ar)"/>
+  <text x="330" y="30" text-anchor="middle" class="small">All data paths carry binary words (groups of bits)</text>
+</svg>
+<figcaption><b>Fig 1.1</b> Block diagram of a digital computer</figcaption>
+</figure>
+</section>
+
+<!-- ======================= 1.2 ======================= -->
+<section class="topic" id="s12">
+<h2><span class="n">1.2</span>Comparison between analog and digital systems</h2>
+
+<div class="why">
+  <h3>Background</h3>
+  <p>A mercury thermometer shows temperature as a column that can stop at <em>any</em> height: that is analog. A digital thermometer shows “36.8 °C”: a value picked from a fixed set of steps. Most real-world quantities are analog, but they are almost always converted to digital form for processing, storing and transmitting. Understanding why tells us what digital systems are good (and bad) at.</p>
+</div>
+
+<p>An <b>analog system</b> handles signals that vary <em>continuously</em>: between any two values there are infinitely many others. A <b>digital system</b> handles signals that take only a <em>finite set of discrete values</em>, usually two. A real system often has both parts, joined by an analog-to-digital converter (ADC) and a digital-to-analog converter (DAC).</p>
+
+<figure>
+<svg viewBox="0 0 660 220" role="img" aria-label="Analog signal compared with a two-level digital signal">
+  <text x="160" y="22" text-anchor="middle" font-weight="600">Analog signal</text>
+  <text x="500" y="22" text-anchor="middle" font-weight="600">Digital (binary) signal</text>
+  <line x1="20" y1="190" x2="310" y2="190" class="wire"/><line x1="20" y1="40" x2="20" y2="190" class="wire"/>
+  <path d="M20,115 C50,45 80,45 105,95 S150,180 185,150 S240,55 270,80 S300,140 310,120" class="wire-t"/>
+  <text x="30" y="210" class="small">any value, any instant</text>
+  <line x1="360" y1="190" x2="650" y2="190" class="wire"/><line x1="360" y1="40" x2="360" y2="190" class="wire"/>
+  <path d="M360,160 H400 V70 H470 V160 H500 V70 H530 V70 H560 V160 H610 V70 H650" class="wire-t"/>
+  <text x="352" y="74" text-anchor="end" class="small">1</text><text x="352" y="164" text-anchor="end" class="small">0</text>
+  <text x="370" y="210" class="small">only two levels: 0 and 1</text>
+</svg>
+<figcaption><b>Fig 1.2</b> An analog signal varies smoothly; a binary digital signal jumps between two levels</figcaption>
+</figure>
+
+<div class="tw"><table>
+<tr><th>Basis of comparison</th><th>Analog system</th><th>Digital system</th></tr>
+<tr><td>Nature of signal</td><td>Continuous in value and time</td><td>Discrete values (0 and 1)</td></tr>
+<tr><td>Effect of noise</td><td>Noise adds directly to the signal and cannot be removed</td><td>Small noise is ignored because only the level band matters</td></tr>
+<tr><td>Accuracy and precision</td><td>Limited by component tolerance and drift</td><td>Set by number of bits; add bits for more precision</td></tr>
+<tr><td>Storage</td><td>Difficult, degrades with time (tape, film)</td><td>Easy and lossless (memory, disks)</td></tr>
+<tr><td>Design</td><td>Each circuit is custom, harder to design</td><td>Built from standard gates; easy to design, test and automate</td></tr>
+<tr><td>Programmability</td><td>Behaviour fixed by hardware</td><td>Behaviour can be changed by software</td></tr>
+<tr><td>Copies and transmission</td><td>Each copy loses quality</td><td>Copies are exact; errors can be detected and corrected</td></tr>
+<tr><td>Bandwidth needed</td><td>Lower</td><td>Higher (many bits per sample)</td></tr>
+<tr><td>Examples</td><td>Microphone, loudspeaker, dial gauge, old radio</td><td>Computer, calculator, mobile phone, digital watch</td></tr>
+</table></div>
+
+<h4>Advantages of digital systems</h4>
+<ul class="pts">
+<li><b>Easier to design:</b> only two voltage bands need to be distinguished, not exact values.</li>
+<li><b>Easy storage:</b> large amounts of information can be stored cheaply and without loss.</li>
+<li><b>Accuracy and precision:</b> can be increased simply by adding more bits.</li>
+<li><b>Programmable:</b> behaviour can be changed by software without changing hardware.</li>
+<li><b>Noise immunity:</b> small noise does not change a 0 or 1, and signals can be regenerated.</li>
+<li><b>Integration:</b> very many circuits can be fabricated on a single IC chip, reducing size and cost.</li>
+</ul>
+<h4>Disadvantages of digital systems</h4>
+<ul class="pts">
+<li><b>Conversion needed:</b> the real world is analog, so ADCs and DACs are required, adding time and cost.</li>
+<li><b>Quantisation error:</b> converting to a finite number of levels always loses a little information.</li>
+<li><b>Higher bandwidth:</b> transmitting many bits per sample needs more bandwidth than the analog signal.</li>
+<li><b>Power at high speed:</b> fast switching of many circuits consumes significant power.</li>
+</ul>
+
+<h3>A numerical look at conversion</h3>
+<p>An ADC with <i>n</i> bits divides its full input range into 2<sup><i>n</i></sup> equal steps. The size of one step is its <b>resolution</b>.</p>
+<div class="formula">resolution = full-scale range ÷ 2<sup>n</sup></div>
+
+<figure>
+<svg viewBox="0 0 640 290" role="img" aria-label="3-bit quantisation of a 0 to 5 volt signal into eight levels">
+<line x1="70" x2="560" y1="260.0" y2="260.0" class="q-grid"/><text x="62" y="264.0" class="q-lab" text-anchor="end">0.000 V</text><text x="568" y="249.0" class="q-code">000</text><line x1="70" x2="560" y1="230.0" y2="230.0" class="q-grid"/><text x="62" y="234.0" class="q-lab" text-anchor="end">0.625 V</text><text x="568" y="219.0" class="q-code">001</text><line x1="70" x2="560" y1="200.0" y2="200.0" class="q-grid"/><text x="62" y="204.0" class="q-lab" text-anchor="end">1.250 V</text><text x="568" y="189.0" class="q-code">010</text><line x1="70" x2="560" y1="170.0" y2="170.0" class="q-grid"/><text x="62" y="174.0" class="q-lab" text-anchor="end">1.875 V</text><text x="568" y="159.0" class="q-code">011</text><line x1="70" x2="560" y1="140.0" y2="140.0" class="q-grid"/><text x="62" y="144.0" class="q-lab" text-anchor="end">2.500 V</text><text x="568" y="129.0" class="q-code">100</text><line x1="70" x2="560" y1="110.0" y2="110.0" class="q-grid"/><text x="62" y="114.0" class="q-lab" text-anchor="end">3.125 V</text><text x="568" y="99.0" class="q-code">101</text><line x1="70" x2="560" y1="80.0" y2="80.0" class="q-grid"/><text x="62" y="84.0" class="q-lab" text-anchor="end">3.750 V</text><text x="568" y="69.0" class="q-code">110</text><line x1="70" x2="560" y1="50.0" y2="50.0" class="q-grid"/><text x="62" y="54.0" class="q-lab" text-anchor="end">4.375 V</text><text x="568" y="39.0" class="q-code">111</text><line x1="70" x2="560" y1="20.0" y2="20.0" class="q-grid"/><text x="62" y="24.0" class="q-lab" text-anchor="end">5.000 V</text><polyline points="70,140.0 73,130.5 76,121.2 79,112.4 82,104.4 85,97.2 88,90.9 91,85.7 94,81.4 97,78.1 100,75.5 103,73.6 106,72.1 109,70.7 112,69.4 115,67.8 118,65.9 121,63.6 124,60.7 127,57.3 130,53.5 133,49.4 136,45.2 139,41.1 142,37.3 145,34.0 148,31.5 151,30.0 154,29.6 157,30.4 160,32.4 163,35.7 166,40.1 169,45.5 172,51.7 175,58.5 178,65.5 181,72.7 184,79.7 187,86.3 190,92.5 193,98.0 196,102.9 199,107.1 202,110.8 205,114.1 208,117.1 211,120.0 214,123.1 217,126.6 220,130.6 223,135.3 226,140.7 229,147.0 232,154.0 235,161.8 238,170.1 241,178.7 244,187.5 247,196.2 250,204.5 253,212.1 256,219.0 259,224.9 262,229.7 265,233.2 268,235.7 271,237.0 274,237.4 277,236.9 280,235.9 283,234.4 286,232.9 289,231.3 292,230.0 295,229.1 298,228.6 301,228.6 304,229.0 307,229.7 310,230.7 313,231.6 316,232.3 319,232.5 322,232.2 325,230.9 328,228.7 331,225.4 334,220.9 337,215.3 340,208.6 343,201.1 346,192.8 349,184.0 352,175.0 355,165.9 358,157.2 361,148.9 364,141.2 367,134.3 370,128.3 373,123.1 376,118.7 379,115.0 382,111.7 385,108.9 388,106.1 391,103.2 394,100.1 397,96.6 400,92.5 403,87.7 406,82.4 409,76.5 412,70.2 415,63.7 418,57.0 421,50.6 424,44.6 427,39.2 430,34.8 433,31.3 436,29.1 439,28.1 442,28.4 445,29.8 448,32.3 451,35.8 454,39.9 457,44.5 460,49.3 463,54.2 466,58.8 469,63.1 472,66.9 475,70.2 478,72.9 481,75.2 484,77.2 487,78.9 490,80.8 493,82.8 496,85.3 499,88.4 502,92.3 505,97.2 508,102.9 511,109.7 514,117.4 517,125.8 520,134.8 523,144.2 526,153.7 529,163.1 532,172.1 535,180.5 538,188.1 541,194.8 544,200.5 547,205.0 550,208.6 553,211.3 556,213.2 559,214.6" class="q-sig"/><path d="M70,110.0 L105,110.0 L105,80.0 L140,80.0 L140,50.0 L175,50.0 L175,110.0 L210,110.0 L210,170.0 L245,170.0 L245,230.0 L280,230.0 L280,230.0 L315,230.0 L315,230.0 L350,230.0 L350,140.0 L385,140.0 L385,110.0 L420,110.0 L420,50.0 L455,50.0 L455,80.0 L490,80.0 L490,110.0 L525,110.0 L525,200.0 L560,200.0" class="q-step"/>
+<text x="315.0" y="284" class="q-lab" text-anchor="middle">time →</text></svg>
+<figcaption><b>Fig 1.3</b> A 3-bit converter maps 0 to 5 V into 8 levels (000 to 111), each 0.625 V wide</figcaption>
+</figure>
+
+<div class="ex">
+<h4>Example 1.2.1</h4>
+<p class="q">A 3-bit ADC has an input range of 0 to 5 V. Find its resolution, and the binary code produced for an input of 2.2 V (the converter truncates to the level below). What voltage does the code actually represent, and what is the error?</p>
+<div class="work">Resolution  = 5 V ÷ 2<sup>3</sup> = 5 ÷ 8 = <span class="t">0.625 V</span>
+Level       = 2.2 ÷ 0.625 = 3.52  →  truncate to level 3
+Code        = 3 in 3-bit binary = <span class="t">011</span>
+Represents  = 3 × 0.625 = 1.875 V
+Error       = 2.2 − 1.875 = <span class="r">0.325 V</span></div>
+<p class="ans">Resolution 0.625 V, code 011, represents 1.875 V, error 0.325 V.</p>
+</div>
+
+<div class="ex">
+<h4>Example 1.2.2</h4>
+<p class="q">The same 0 to 5 V signal is now converted by an 8-bit ADC. Find the new resolution and the code for 2.2 V.</p>
+<div class="work">Resolution = 5 ÷ 2<sup>8</sup> = 5 ÷ 256 = <span class="t">0.01953 V ≈ 19.5 mV</span>
+Level      = 2.2 ÷ 0.01953 = 112.64  →  level 112
+Code       = 112 in 8-bit binary = <span class="t">0111 0000</span>
+Represents = 112 × 0.01953 = 2.1875 V   error = <span class="r">0.0125 V</span></div>
+<p class="ans">Resolution ≈ 19.5 mV, code 01110000, error only 12.5 mV. Adding 5 bits cut the error by a factor of about 26: this is why digital precision is “bought” with bits.</p>
+</div>
+
+<div class="ex">
+<h4>Example 1.2.3 (noise immunity)</h4>
+<p class="q">A logic circuit outputs at least 2.4 V for a 1, and the next circuit accepts anything above 2.0 V as a 1. A 1 is sent along a wire that picks up 0.3 V of noise pulling it downward. Is the 1 still received correctly? What if the signal were analog?</p>
+<div class="work">Worst received voltage = 2.4 − 0.3 = 2.1 V
+2.1 V ≥ 2.0 V   →  still read as <span class="t">1</span>  (noise completely rejected)
+Largest tolerable noise = 2.4 − 2.0 = 0.4 V</div>
+<p class="ans">Yes, received correctly. An analog system would have passed on the 0.3 V error as part of the value, with no way to remove it.</p>
+</div>
+
+<div class="exercises">
+<h3>Exercises: 1.1 and 1.2</h3>
+<ol>
+<li>How many bits are needed to give a unique code to (a) the 26 capital letters, (b) 200 employees, (c) 5 000 books?
+<details><summary>Show answer</summary><div class="a">(a) 5 bits (2<sup>5</sup> = 32). (b) 8 bits (2<sup>8</sup> = 256). (c) 13 bits (2<sup>13</sup> = 8 192; 2<sup>12</sup> = 4 096 is too few).</div></details></li>
+<li>How many bytes, and how many nibbles, are there in a 64-bit word?
+<details><summary>Show answer</summary><div class="a">8 bytes and 16 nibbles.</div></details></li>
+<li>A 4-bit ADC has a range of 0 to 8 V. Find its resolution and the code for 5.3 V (truncating).
+<details><summary>Show answer</summary><div class="a">Resolution = 8 ÷ 16 = 0.5 V. 5.3 ÷ 0.5 = 10.6 → level 10 → code 1010.</div></details></li>
+<li>What is the smallest number of bits an ADC with a 0 to 10 V range needs for a resolution of 50 mV or better?
+<details><summary>Show answer</summary><div class="a">Need 10 ÷ 2<sup>n</sup> ≤ 0.05, so 2<sup>n</sup> ≥ 200. n = 8 (256 levels, resolution ≈ 39 mV).</div></details></li>
+<li>Give four points of comparison between analog and digital systems, with one example of each type.
+<details><summary>Show answer</summary><div class="a">Any four from the comparison table: nature of signal, noise effect, accuracy, storage, ease of design, programmability, copying, bandwidth. Examples: analog, dial thermometer; digital, calculator.</div></details></li>
+<li>Explain why a digital signal can be copied many times without loss, but an analog signal cannot.
+<details><summary>Show answer</summary><div class="a">At each copy a digital receiver only decides whether the voltage is in the 0 band or the 1 band and regenerates a clean level, so noise is removed each time. In an analog copy any noise becomes part of the value and accumulates.</div></details></li>
+</ol>
+</div>
+</section>
+
+<!-- ======================= 1.3 ======================= -->
+<section class="topic" id="s13">
+<h2><span class="n">1.3</span>Number systems and conversion</h2>
+
+<div class="why">
+  <h3>Background</h3>
+  <p>We count in tens because we have ten fingers. A computer has only two “fingers”, so it counts in twos. Long binary strings are hard for people to read and copy, so engineers write them in <b>octal</b> (base 8) or <b>hexadecimal</b> (base 16) as a shorthand. You meet hex every day: colour codes like <span class="m">#FF8800</span>, MAC addresses like <span class="m">3C:A6:F6:1B:04:9E</span>, and memory addresses in error messages.</p>
+</div>
+
+<h3>Positional number systems</h3>
+<p>In a positional system with <b>base</b> (or radix) <i>r</i>, a number uses <i>r</i> distinct digits, 0 to <i>r</i> − 1. Each position has a <b>weight</b> that is a power of <i>r</i>. A number with <i>n</i> integer digits and <i>m</i> fraction digits</p>
+<div class="formula">(a<sub>n−1</sub> a<sub>n−2</sub> … a<sub>1</sub> a<sub>0</sub> . a<sub>−1</sub> a<sub>−2</sub> … a<sub>−m</sub>)<sub>r</sub></div>
+<p>has the value</p>
+<div class="formula">N = a<sub>n−1</sub>·r<sup>n−1</sup> + … + a<sub>1</sub>·r<sup>1</sup> + a<sub>0</sub>·r<sup>0</sup> + a<sub>−1</sub>·r<sup>−1</sup> + … + a<sub>−m</sub>·r<sup>−m</sup></div>
+<p>The leftmost digit is the <b>most significant digit</b> (MSD, or MSB for bits) and the rightmost is the <b>least significant digit</b> (LSD or LSB).</p>
+
+<figure>
+<svg viewBox="0 0 640 170" role="img" aria-label="Positional weights of the binary number 1101.01">
+  <g font-family="JetBrains Mono, monospace">
+  <rect x="40"  y="40" width="80" height="54" rx="4" class="box-t"/><text x="80"  y="76" text-anchor="middle" font-size="26" class="mono">1</text>
+  <rect x="130" y="40" width="80" height="54" rx="4" class="box-t"/><text x="170" y="76" text-anchor="middle" font-size="26" class="mono">1</text>
+  <rect x="220" y="40" width="80" height="54" rx="4" class="box-t"/><text x="260" y="76" text-anchor="middle" font-size="26" class="mono">0</text>
+  <rect x="310" y="40" width="80" height="54" rx="4" class="box-t"/><text x="350" y="76" text-anchor="middle" font-size="26" class="mono">1</text>
+  <text x="402" y="80" text-anchor="middle" font-size="30">.</text>
+  <rect x="415" y="40" width="80" height="54" rx="4" class="box-s"/><text x="455" y="76" text-anchor="middle" font-size="26" class="mono">0</text>
+  <rect x="505" y="40" width="80" height="54" rx="4" class="box-s"/><text x="545" y="76" text-anchor="middle" font-size="26" class="mono">1</text>
+  </g>
+  <text x="80" y="118" text-anchor="middle">2³ = 8</text><text x="170" y="118" text-anchor="middle">2² = 4</text><text x="260" y="118" text-anchor="middle">2¹ = 2</text><text x="350" y="118" text-anchor="middle">2⁰ = 1</text>
+  <text x="455" y="118" text-anchor="middle">2⁻¹ = 0.5</text><text x="545" y="118" text-anchor="middle">2⁻² = 0.25</text>
+  <text x="80" y="28" text-anchor="middle" class="small">MSB</text><text x="545" y="28" text-anchor="middle" class="small">LSB</text>
+  <text x="215" y="152" text-anchor="middle" class="small">integer part</text><text x="500" y="152" text-anchor="middle" class="small">fraction part</text>
+</svg>
+<figcaption><b>Fig 1.4</b> Weights of each position in (1101.01)<sub>2</sub> = 8 + 4 + 0 + 1 + 0 + 0.25 = 13.25</figcaption>
+</figure>
+
+<div class="tw"><table>
+<tr><th>System</th><th>Base</th><th>Digits used</th><th>Where it is used</th></tr>
+<tr><td>Decimal</td><td>10</td><td>0 1 2 3 4 5 6 7 8 9</td><td>Everyday human counting</td></tr>
+<tr><td>Binary</td><td>2</td><td>0 1</td><td>All digital hardware</td></tr>
+<tr><td>Octal</td><td>8</td><td>0 1 2 3 4 5 6 7</td><td>Short form for binary, 1 digit = 3 bits</td></tr>
+<tr><td>Hexadecimal</td><td>16</td><td>0 to 9, A(10) B(11) C(12) D(13) E(14) F(15)</td><td>Short form for binary, 1 digit = 4 bits</td></tr>
+</table></div>
+
+<p>You should know the first sixteen values in all four systems by heart; almost every conversion uses them.</p>
+<div class="tw"><table class="c">
+<tr><th>Decimal</th><th>Binary</th><th>Octal</th><th>Hex</th><th>Decimal</th><th>Binary</th><th>Octal</th><th>Hex</th></tr>
+<tr><td>0</td><td class="m">0000</td><td>0</td><td>0</td><td>8</td><td class="m">1000</td><td>10</td><td>8</td></tr>
+<tr><td>1</td><td class="m">0001</td><td>1</td><td>1</td><td>9</td><td class="m">1001</td><td>11</td><td>9</td></tr>
+<tr><td>2</td><td class="m">0010</td><td>2</td><td>2</td><td>10</td><td class="m">1010</td><td>12</td><td>A</td></tr>
+<tr><td>3</td><td class="m">0011</td><td>3</td><td>3</td><td>11</td><td class="m">1011</td><td>13</td><td>B</td></tr>
+<tr><td>4</td><td class="m">0100</td><td>4</td><td>4</td><td>12</td><td class="m">1100</td><td>14</td><td>C</td></tr>
+<tr><td>5</td><td class="m">0101</td><td>5</td><td>5</td><td>13</td><td class="m">1101</td><td>15</td><td>D</td></tr>
+<tr><td>6</td><td class="m">0110</td><td>6</td><td>6</td><td>14</td><td class="m">1110</td><td>16</td><td>E</td></tr>
+<tr><td>7</td><td class="m">0111</td><td>7</td><td>7</td><td>15</td><td class="m">1111</td><td>17</td><td>F</td></tr>
+</table></div>
+
+<figure>
+<svg viewBox="0 0 640 330" role="img" aria-label="Map of conversion methods between decimal, binary, octal and hexadecimal">
+  <defs><marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="arrowhead"/></marker></defs>
+  <rect x="245" y="10" width="150" height="50" rx="25" class="box-s"/><text x="320" y="41" text-anchor="middle" font-weight="600">Decimal</text>
+  <rect x="245" y="150" width="150" height="50" rx="25" class="box-t"/><text x="320" y="181" text-anchor="middle" font-weight="600">Binary</text>
+  <rect x="20" y="265" width="150" height="50" rx="25" class="box"/><text x="95" y="296" text-anchor="middle" font-weight="600">Octal</text>
+  <rect x="470" y="265" width="150" height="50" rx="25" class="box"/><text x="545" y="296" text-anchor="middle" font-weight="600">Hexadecimal</text>
+  <line x1="300" y1="62" x2="300" y2="148" class="wire" marker-end="url(#ar2)"/>
+  <line x1="340" y1="148" x2="340" y2="62" class="wire" marker-end="url(#ar2)"/>
+  <text x="292" y="100" text-anchor="end" class="small">divide by 2 (integer)</text><text x="292" y="116" text-anchor="end" class="small">multiply by 2 (fraction)</text>
+  <text x="348" y="108" class="small">expand with weights</text>
+  <line x1="262" y1="195" x2="140" y2="263" class="wire" marker-end="url(#ar2)"/>
+  <line x1="160" y1="270" x2="280" y2="202" class="wire" marker-end="url(#ar2)"/>
+  <text x="150" y="220" text-anchor="middle" class="small">group 3 bits</text><text x="205" y="252" class="small">expand each digit</text>
+  <line x1="378" y1="195" x2="500" y2="263" class="wire" marker-end="url(#ar2)"/>
+  <line x1="480" y1="270" x2="360" y2="202" class="wire" marker-end="url(#ar2)"/>
+  <text x="492" y="220" text-anchor="middle" class="small">group 4 bits</text><text x="435" y="252" text-anchor="end" class="small">expand each digit</text>
+  <line x1="172" y1="298" x2="468" y2="298" class="wire" stroke-dasharray="5 4"/>
+  <text x="320" y="322" text-anchor="middle" class="small">octal ↔ hex: go through binary</text>
+</svg>
+<figcaption><b>Fig 1.5</b> Which method to use for each conversion. Octal and hex to decimal also use “expand with weights”; decimal to octal and hex use “divide by 8 or 16”.</figcaption>
+</figure>
+
+<h3>A. Any base to decimal: expand with weights</h3>
+<p>Multiply each digit by its positional weight and add the products.</p>
+
+<div class="ex">
+<h4>Example 1.3.1</h4>
+<p class="q">Convert (101101)<sub>2</sub> to decimal.</p>
+<div class="work">Position:   5   4   3   2   1   0
+Digit:      1   0   1   1   0   1
+= 1×2<sup>5</sup> + 0×2<sup>4</sup> + 1×2<sup>3</sup> + 1×2<sup>2</sup> + 0×2<sup>1</sup> + 1×2<sup>0</sup>
+= 32 + 0 + 8 + 4 + 0 + 1</div>
+<p class="ans">(101101)<sub>2</sub> = (45)<sub>10</sub></p>
+</div>
+
+<div class="ex">
+<h4>Example 1.3.2</h4>
+<p class="q">Convert (7254)<sub>8</sub> to decimal.</p>
+<div class="work">= 7×8<sup>3</sup> + 2×8<sup>2</sup> + 5×8<sup>1</sup> + 4×8<sup>0</sup>
+= 7×512 + 2×64 + 5×8 + 4×1
+= 3584 + 128 + 40 + 4</div>
+<p class="ans">(7254)<sub>8</sub> = (3756)<sub>10</sub></p>
+</div>
+
+<div class="ex">
+<h4>Example 1.3.3</h4>
+<p class="q">Convert (3FA7)<sub>16</sub> to decimal.</p>
+<div class="work">= 3×16<sup>3</sup> + F×16<sup>2</sup> + A×16<sup>1</sup> + 7×16<sup>0</sup>
+= 3×4096 + 15×256 + 10×16 + 7×1
+= 12288 + 3840 + 160 + 7</div>
+<p class="ans">(3FA7)<sub>16</sub> = (16295)<sub>10</sub></p>
+</div>
+
+<div class="ex">
+<h4>Example 1.3.4 (any base)</h4>
+<p class="q">Convert (212)<sub>3</sub> to decimal.</p>
+<div class="work">= 2×3<sup>2</sup> + 1×3<sup>1</sup> + 2×3<sup>0</sup> = 18 + 3 + 2</div>
+<p class="ans">(212)<sub>3</sub> = (23)<sub>10</sub></p>
+</div>
+
+<h3>B. Decimal to any base: repeated division</h3>
+<p>Divide the decimal integer by the new base <i>r</i> again and again, writing down each remainder, until the quotient becomes 0. The remainders read <b>from bottom to top</b> (last remainder first) give the answer. The first remainder is the least significant digit.</p>
+
+<div class="ex">
+<h4>Example 1.3.5</h4>
+<p class="q">Convert (157)<sub>10</sub> to binary.</p>
+<div class="tw"><table class="ladder">
+<tr><th>Divide</th><th>Quotient</th><th>Remainder</th></tr>
+<tr><td>157 ÷ 2</td><td>78</td><td>1 &nbsp;<span class="small">← LSB</span></td></tr>
+<tr><td>78 ÷ 2</td><td>39</td><td>0</td></tr>
+<tr><td>39 ÷ 2</td><td>19</td><td>1</td></tr>
+<tr><td>19 ÷ 2</td><td>9</td><td>1</td></tr>
+<tr><td>9 ÷ 2</td><td>4</td><td>1</td></tr>
+<tr><td>4 ÷ 2</td><td>2</td><td>0</td></tr>
+<tr><td>2 ÷ 2</td><td>1</td><td>0</td></tr>
+<tr><td>1 ÷ 2</td><td>0</td><td>1 &nbsp;<span class="small">← MSB</span></td></tr>
+</table></div>
+<p>Reading remainders bottom to top: 1 0 0 1 1 1 0 1. Check: 128 + 16 + 8 + 4 + 1 = 157 ✓</p>
+<p class="ans">(157)<sub>10</sub> = (10011101)<sub>2</sub></p>
+</div>
+
+<div class="ex">
+<h4>Example 1.3.6</h4>
+<p class="q">Convert (2025)<sub>10</sub> to octal.</p>
+<div class="work">2025 ÷ 8 = 253   remainder <span class="t">1</span>
+ 253 ÷ 8 =  31   remainder <span class="t">5</span>
+  31 ÷ 8 =   3   remainder <span class="t">7</span>
+   3 ÷ 8 =   0   remainder <span class="t">3</span>
+Check: 3×512 + 7×64 + 5×8 + 1 = 1536 + 448 + 40 + 1 = 2025 ✓</div>
+<p class="ans">(2025)<sub>10</sub> = (3751)<sub>8</sub></p>
+</div>
+
+<div class="ex">
+<h4>Example 1.3.7</h4>
+<p class="q">Convert (48879)<sub>10</sub> to hexadecimal.</p>
+<div class="work">48879 ÷ 16 = 3054   remainder 15 = <span class="t">F</span>
+ 3054 ÷ 16 =  190   remainder 14 = <span class="t">E</span>
+  190 ÷ 16 =   11   remainder 14 = <span class="t">E</span>
+   11 ÷ 16 =    0   remainder 11 = <span class="t">B</span>
+Check: 11×4096 + 14×256 + 14×16 + 15 = 45056 + 3584 + 224 + 15 = 48879 ✓</div>
+<p class="ans">(48879)<sub>10</sub> = (BEEF)<sub>16</sub></p>
+</div>
+
+<div class="ex">
+<h4>Example 1.3.8 (base to base, neither decimal)</h4>
+<p class="q">Convert (212)<sub>3</sub> to base 5.</p>
+<p>There is no direct route, so go through decimal. From Example 1.3.4, (212)<sub>3</sub> = 23.</p>
+<div class="work">23 ÷ 5 = 4  remainder <span class="t">3</span>
+ 4 ÷ 5 = 0  remainder <span class="t">4</span>
+Check: 4×5 + 3 = 23 ✓</div>
+<p class="ans">(212)<sub>3</sub> = (43)<sub>5</sub></p>
+</div>
+
+<h3>C. Binary ↔ octal and binary ↔ hexadecimal: grouping</h3>
+<p>Since 8 = 2<sup>3</sup> and 16 = 2<sup>4</sup>, each octal digit stands for exactly 3 bits and each hex digit for exactly 4 bits. To go from binary, split the bits into groups of 3 (octal) or 4 (hex) <b>starting at the binary point</b> and moving outward, pad the outermost groups with 0s, and replace each group by its digit. To go back, expand each digit into its 3 or 4 bits.</p>
+
+<div class="ex">
+<h4>Example 1.3.9</h4>
+<p class="q">Convert (1101011110010)<sub>2</sub> to octal and to hexadecimal.</p>
+<p>Groups of 3 from the right (pad two 0s on the left):</p>
+<div class="bitrow"><span class="g1">001</span><span class="g1">101</span><span class="g1">011</span><span class="g1">110</span><span class="g1">010</span></div>
+<div class="bitrow"><span class="lab">digits</span><span>1</span><span>5</span><span>3</span><span>6</span><span>2</span></div>
+<p>Groups of 4 from the right (pad three 0s on the left):</p>
+<div class="bitrow"><span class="g2">0001</span><span class="g2">1010</span><span class="g2">1111</span><span class="g2">0010</span></div>
+<div class="bitrow"><span class="lab">digits</span><span>1</span><span>A</span><span>F</span><span>2</span></div>
+<p>Check both through decimal: 1×4096 + 5×512 + 3×64 + 6×8 + 2 = 6898 and 1×4096 + 10×256 + 15×16 + 2 = 6898 ✓</p>
+<p class="ans">(1101011110010)<sub>2</sub> = (15362)<sub>8</sub> = (1AF2)<sub>16</sub></p>
+</div>
+
+<div class="ex">
+<h4>Example 1.3.10</h4>
+<p class="q">Convert (673)<sub>8</sub> and (2AC5)<sub>16</sub> to binary.</p>
+<div class="work">(673)<sub>8</sub>   :   6 → 110    7 → 111    3 → 011
+            = <span class="t">110 111 011</span>
+
+(2AC5)<sub>16</sub>  :   2 → 0010   A → 1010   C → 1100   5 → 0101
+            = <span class="t">0010 1010 1100 0101</span></div>
+<p class="ans">(673)<sub>8</sub> = (110111011)<sub>2</sub> and (2AC5)<sub>16</sub> = (10101011000101)<sub>2</sub> (leading 0s dropped)</p>
+</div>
+
+<h3>D. Octal ↔ hexadecimal</h3>
+<p>Go through binary: expand each digit into bits, then regroup.</p>
+
+<div class="ex">
+<h4>Example 1.3.11</h4>
+<p class="q">Convert (7254)<sub>8</sub> to hexadecimal.</p>
+<div class="work">Step 1, octal → binary :  7   2   5   4
+                          111 010 101 100
+Step 2, regroup in 4s  :  1110 1010 1100
+Step 3, binary → hex   :   E    A    C
+Check: 14×256 + 10×16 + 12 = 3584 + 160 + 12 = 3756  (same as Example 1.3.2) ✓</div>
+<p class="ans">(7254)<sub>8</sub> = (EAC)<sub>16</sub></p>
+</div>
+
+<div class="exercises">
+<h3>Exercises: 1.3</h3>
+<ol>
+<li>Convert to decimal: (a) (1110101)<sub>2</sub> (b) (574)<sub>8</sub> (c) (2BD)<sub>16</sub> (d) (1201)<sub>3</sub>
+<details><summary>Show answer</summary><div class="a">(a) 117 (b) 380 (c) 701 (d) 46</div></details></li>
+<li>Convert (250)<sub>10</sub> to binary, octal and hexadecimal.
+<details><summary>Show answer</summary><div class="a">(11111010)<sub>2</sub>, (372)<sub>8</sub>, (FA)<sub>16</sub></div></details></li>
+<li>Convert (1011011101)<sub>2</sub> to octal and hexadecimal.
+<details><summary>Show answer</summary><div class="a">Octal: 001 011 011 101 → (1335)<sub>8</sub>. Hex: 0010 1101 1101 → (2DD)<sub>16</sub>.</div></details></li>
+<li>Convert (5A3)<sub>16</sub> to octal.
+<details><summary>Show answer</summary><div class="a">0101 1010 0011 → 010 110 100 011 → (2643)<sub>8</sub></div></details></li>
+<li>Convert (1000)<sub>10</sub> to base 6.
+<details><summary>Show answer</summary><div class="a">1000 ÷ 6 = 166 r 4; 166 ÷ 6 = 27 r 4; 27 ÷ 6 = 4 r 3; 4 ÷ 6 = 0 r 4 → (4344)<sub>6</sub></div></details></li>
+<li>Find the base <i>r</i> if (121)<sub>r</sub> = (144)<sub>10</sub>.
+<details><summary>Show answer</summary><div class="a">r<sup>2</sup> + 2r + 1 = 144, so (r + 1)<sup>2</sup> = 144, r + 1 = 12, <b>r = 11</b>.</div></details></li>
+<li>What is the largest decimal number that can be written with (a) 6 binary digits, (b) 3 octal digits, (c) 3 hex digits?
+<details><summary>Show answer</summary><div class="a">(a) 2<sup>6</sup> − 1 = 63 (b) 8<sup>3</sup> − 1 = 511 (c) 16<sup>3</sup> − 1 = 4095</div></details></li>
+<li>Arrange in increasing order: (1011011)<sub>2</sub>, (133)<sub>8</sub>, (5C)<sub>16</sub>, (90)<sub>10</sub>.
+<details><summary>Show answer</summary><div class="a">In decimal: 91, 91, 92, 90. Order: (90)<sub>10</sub> &lt; (1011011)<sub>2</sub> = (133)<sub>8</sub> &lt; (5C)<sub>16</sub>.</div></details></li>
+</ol>
+</div>
+</section>
+
+<!-- ======================= 1.4 ======================= -->
+<section class="topic" id="s14">
+<h2><span class="n">1.4</span>Signed and unsigned numbers, fraction conversion and binary arithmetic</h2>
+
+<div class="why">
+  <h3>Background</h3>
+  <p>A thermometer in Jumla must show −12 °C; a bank balance can be overdrawn; a voltage reading may be 3.75 V. Hardware has no minus sign and no decimal point, only bits. This section shows how bits are made to carry a sign, how fractions are converted, and how a computer adds, subtracts, multiplies and divides. It also shows the trick every processor uses: <b>subtraction is done by adding a complement</b>, so one adder circuit handles both.</p>
+</div>
+
+<h3>Complements</h3>
+<p>Complements are used to represent negative numbers and to simplify subtraction. For every base <i>r</i> there are two types. For an <i>n</i>-digit number <i>N</i>:</p>
+<div class="tw"><table>
+<tr><th></th><th>(r − 1)’s complement (diminished radix)</th><th>r’s complement (radix)</th></tr>
+<tr><td>Definition</td><td class="m">(r<sup>n</sup> − 1) − N</td><td class="m">r<sup>n</sup> − N  =  (r − 1)’s complement + 1</td></tr>
+<tr><td>Decimal (r = 10)</td><td>9’s complement: subtract each digit from 9</td><td>10’s complement: 9’s complement + 1</td></tr>
+<tr><td>Binary (r = 2)</td><td>1’s complement: invert every bit</td><td>2’s complement: 1’s complement + 1</td></tr>
+</table></div>
+<div class="key"><p><b>Shortcut for 2’s complement.</b> Starting from the right, copy the bits up to and including the first 1, then invert all the remaining bits to the left. Example: 1101<b>100</b> → 0010<b>100</b>.</p></div>
+
+<div class="ex">
+<h4>Example 1.4.1</h4>
+<p class="q">Find (a) the 9’s and 10’s complement of 546700, (b) the 1’s and 2’s complement of 1101100.</p>
+<div class="work">(a)  999999 − 546700 = <span class="t">453299</span>   (9’s complement)
+     453299 + 1       = <span class="t">453300</span>   (10’s complement)
+
+(b)  1101100  → invert each bit    = <span class="t">0010011</span>  (1’s complement)
+     0010011 + 1                   = <span class="t">0010100</span>  (2’s complement)
+     shortcut: 1101<span class="c">100</span> → 0010<span class="c">100</span> ✓</div>
+<p class="ans">9’s: 453299, 10’s: 453300; 1’s: 0010011, 2’s: 0010100</p>
+</div>
+
+<h3>Unsigned numbers</h3>
+<p>In an <b>unsigned</b> number every bit contributes to the magnitude; there is no sign. An <i>n</i>-bit unsigned number ranges from 0 to 2<sup>n</sup> − 1. An 8-bit unsigned byte holds 0 to 255.</p>
+
+<h3>Signed numbers</h3>
+<p>For a <b>signed</b> number, the leftmost bit is the <b>sign bit</b>: 0 for positive, 1 for negative. Positive numbers are written the same way in all three systems below; the systems differ only in how they write negatives.</p>
+<ol>
+<li><b>Sign-magnitude:</b> sign bit followed by the magnitude in binary. −45 = 1 followed by 45.</li>
+<li><b>Signed 1’s complement:</b> a negative number is the 1’s complement of its positive form.</li>
+<li><b>Signed 2’s complement:</b> a negative number is the 2’s complement of its positive form. This is the system used in practically all computers.</li>
+</ol>
+
+<div class="tw"><table class="c">
+<tr><th>Bits</th><th>Unsigned</th><th>Sign-magnitude</th><th>1’s complement</th><th>2’s complement</th></tr>
+<tr><td class="m">1111</td><td>15</td><td>−7</td><td>−0</td><td>−1</td></tr>
+<tr><td class="m">1110</td><td>14</td><td>−6</td><td>−1</td><td>−2</td></tr>
+<tr><td class="m">1101</td><td>13</td><td>−5</td><td>−2</td><td>−3</td></tr>
+<tr><td class="m">1100</td><td>12</td><td>−4</td><td>−3</td><td>−4</td></tr>
+<tr><td class="m">1011</td><td>11</td><td>−3</td><td>−4</td><td>−5</td></tr>
+<tr><td class="m">1010</td><td>10</td><td>−2</td><td>−5</td><td>−6</td></tr>
+<tr><td class="m">1001</td><td>9</td><td>−1</td><td>−6</td><td>−7</td></tr>
+<tr><td class="m">1000</td><td>8</td><td>−0</td><td>−7</td><td>−8</td></tr>
+<tr><td class="m">0111</td><td>7</td><td>+7</td><td>+7</td><td>+7</td></tr>
+<tr><td class="m">0110</td><td>6</td><td>+6</td><td>+6</td><td>+6</td></tr>
+<tr><td class="m">0101</td><td>5</td><td>+5</td><td>+5</td><td>+5</td></tr>
+<tr><td class="m">0100</td><td>4</td><td>+4</td><td>+4</td><td>+4</td></tr>
+<tr><td class="m">0011</td><td>3</td><td>+3</td><td>+3</td><td>+3</td></tr>
+<tr><td class="m">0010</td><td>2</td><td>+2</td><td>+2</td><td>+2</td></tr>
+<tr><td class="m">0001</td><td>1</td><td>+1</td><td>+1</td><td>+1</td></tr>
+<tr><td class="m">0000</td><td>0</td><td>+0</td><td>+0</td><td>+0</td></tr>
+</table></div>
+<p>Notice from the table that sign-magnitude and 1’s complement both have two zeros (+0 and −0), which complicates hardware. 2’s complement has a single zero and one extra negative number (−8 for 4 bits).</p>
+
+<div class="tw"><table>
+<tr><th>Representation</th><th>Range with n bits</th><th>Range with 8 bits</th></tr>
+<tr><td>Unsigned</td><td class="m">0 to 2<sup>n</sup> − 1</td><td>0 to 255</td></tr>
+<tr><td>Sign-magnitude</td><td class="m">−(2<sup>n−1</sup> − 1) to +(2<sup>n−1</sup> − 1)</td><td>−127 to +127</td></tr>
+<tr><td>1’s complement</td><td class="m">−(2<sup>n−1</sup> − 1) to +(2<sup>n−1</sup> − 1)</td><td>−127 to +127</td></tr>
+<tr><td>2’s complement</td><td class="m">−2<sup>n−1</sup> to +(2<sup>n−1</sup> − 1)</td><td>−128 to +127</td></tr>
+</table></div>
+
+<figure>
+<svg viewBox="0 0 520 480" role="img" aria-label="Number wheel of 4-bit two's complement values from −8 to +7"><text x="260.0" y="64.0" class="w-bits" text-anchor="middle">0000</text><circle cx="260.0" cy="110.0" r="18" class="w-pos"/><text x="260.0" y="115.0" class="w-val" text-anchor="middle">0</text><text x="332.7" y="78.5" class="w-bits" text-anchor="middle">0001</text><circle cx="313.6" cy="120.7" r="18" class="w-pos"/><text x="313.6" y="125.7" class="w-val" text-anchor="middle">+1</text><text x="394.4" y="119.6" class="w-bits" text-anchor="middle">0010</text><circle cx="359.0" cy="151.0" r="18" class="w-pos"/><text x="359.0" y="156.0" class="w-val" text-anchor="middle">+2</text><text x="435.5" y="181.3" class="w-bits" text-anchor="middle">0011</text><circle cx="389.3" cy="196.4" r="18" class="w-pos"/><text x="389.3" y="201.4" class="w-val" text-anchor="middle">+3</text><text x="450.0" y="254.0" class="w-bits" text-anchor="middle">0100</text><circle cx="400.0" cy="250.0" r="18" class="w-pos"/><text x="400.0" y="255.0" class="w-val" text-anchor="middle">+4</text><text x="435.5" y="326.7" class="w-bits" text-anchor="middle">0101</text><circle cx="389.3" cy="303.6" r="18" class="w-pos"/><text x="389.3" y="308.6" class="w-val" text-anchor="middle">+5</text><text x="394.4" y="388.4" class="w-bits" text-anchor="middle">0110</text><circle cx="359.0" cy="349.0" r="18" class="w-pos"/><text x="359.0" y="354.0" class="w-val" text-anchor="middle">+6</text><text x="332.7" y="429.5" class="w-bits" text-anchor="middle">0111</text><circle cx="313.6" cy="379.3" r="18" class="w-pos"/><text x="313.6" y="384.3" class="w-val" text-anchor="middle">+7</text><text x="260.0" y="444.0" class="w-bits" text-anchor="middle">1000</text><circle cx="260.0" cy="390.0" r="18" class="w-neg"/><text x="260.0" y="395.0" class="w-val" text-anchor="middle">−8</text><text x="187.3" y="429.5" class="w-bits" text-anchor="middle">1001</text><circle cx="206.4" cy="379.3" r="18" class="w-neg"/><text x="206.4" y="384.3" class="w-val" text-anchor="middle">−7</text><text x="125.6" y="388.4" class="w-bits" text-anchor="middle">1010</text><circle cx="161.0" cy="349.0" r="18" class="w-neg"/><text x="161.0" y="354.0" class="w-val" text-anchor="middle">−6</text><text x="84.5" y="326.7" class="w-bits" text-anchor="middle">1011</text><circle cx="130.7" cy="303.6" r="18" class="w-neg"/><text x="130.7" y="308.6" class="w-val" text-anchor="middle">−5</text><text x="70.0" y="254.0" class="w-bits" text-anchor="middle">1100</text><circle cx="120.0" cy="250.0" r="18" class="w-neg"/><text x="120.0" y="255.0" class="w-val" text-anchor="middle">−4</text><text x="84.5" y="181.3" class="w-bits" text-anchor="middle">1101</text><circle cx="130.7" cy="196.4" r="18" class="w-neg"/><text x="130.7" y="201.4" class="w-val" text-anchor="middle">−3</text><text x="125.6" y="119.6" class="w-bits" text-anchor="middle">1110</text><circle cx="161.0" cy="151.0" r="18" class="w-neg"/><text x="161.0" y="156.0" class="w-val" text-anchor="middle">−2</text><text x="187.3" y="78.5" class="w-bits" text-anchor="middle">1111</text><circle cx="206.4" cy="120.7" r="18" class="w-neg"/><text x="206.4" y="125.7" class="w-val" text-anchor="middle">−1</text><line x1="273.7" y1="318.7" x2="303.9" y2="470.7" class="w-cut"/><text x="262" y="300" class="w-note" text-anchor="end">overflow</text><text x="262" y="316" class="w-note" text-anchor="end">boundary</text><text x="260" y="242" class="w-note" text-anchor="middle">+1 moves clockwise</text><text x="260" y="262" class="w-note" text-anchor="middle">−1 moves anticlockwise</text></svg>
+<figcaption><b>Fig 1.6</b> The 4-bit 2’s complement number wheel. Adding 1 moves one step clockwise. Crossing the dashed line from 0111 (+7) to 1000 (−8) is <b>overflow</b>.</figcaption>
+</figure>
+
+<div class="ex">
+<h4>Example 1.4.2</h4>
+<p class="q">Write +45 and −45 as 8-bit numbers in sign-magnitude, 1’s complement and 2’s complement.</p>
+<div class="work">+45 = 0010 1101   (same in all three systems)
+
+−45 sign-magnitude : sign 1, magnitude 010 1101      = <span class="t">1010 1101</span>
+−45 1’s complement : invert 0010 1101               = <span class="t">1101 0010</span>
+−45 2’s complement : 1101 0010 + 1                  = <span class="t">1101 0011</span></div>
+<p class="ans">+45 = 00101101; −45 = 10101101 (S-M), 11010010 (1’s), 11010011 (2’s)</p>
+</div>
+
+<div class="ex">
+<h4>Example 1.4.3</h4>
+<p class="q">What decimal value does the byte 1011 0110 represent if it is read as (a) unsigned, (b) sign-magnitude, (c) 1’s complement, (d) 2’s complement?</p>
+<div class="work">(a) unsigned       : 128 + 32 + 16 + 4 + 2           = <span class="t">182</span>
+(b) sign-magnitude : sign 1, magnitude 011 0110 = 54   = <span class="t">−54</span>
+(c) 1’s complement : sign 1, invert → 0100 1001 = 73   = <span class="t">−73</span>
+(d) 2’s complement : sign 1, 2’s comp → 0100 1010 = 74 = <span class="t">−74</span>
+    quick check     : 182 − 256 = −74 ✓</div>
+<p class="ans">182, −54, −73, −74. The same bits mean different things; the reader must know which system is in use.</p>
+</div>
+
+<h3>Fraction conversion</h3>
+<p><b>Decimal fraction to base <i>r</i>:</b> multiply the fraction by <i>r</i>. The integer part of the product (0 or 1 for binary) is the next digit after the point. Keep multiplying only the fractional part until it becomes 0 or enough digits are obtained. Read the integer digits <b>from top to bottom</b>. A number with both parts is converted as two separate problems.</p>
+<p><b>Base <i>r</i> fraction to decimal:</b> use the negative weights r<sup>−1</sup>, r<sup>−2</sup>, … and add.</p>
+
+<div class="ex">
+<h4>Example 1.4.4</h4>
+<p class="q">Convert (41.6875)<sub>10</sub> to binary.</p>
+<p>Integer part 41 by repeated division: 41 → 20 r1 → 10 r0 → 5 r0 → 2 r1 → 1 r0 → 0 r1, giving 101001. Fraction part by repeated multiplication:</p>
+<div class="tw"><table class="ladder">
+<tr><th>Multiply</th><th>Product</th><th>Integer digit</th></tr>
+<tr><td>0.6875 × 2</td><td>1.3750</td><td>1 &nbsp;<span class="small">← first after point</span></td></tr>
+<tr><td>0.3750 × 2</td><td>0.7500</td><td>0</td></tr>
+<tr><td>0.7500 × 2</td><td>1.5000</td><td>1</td></tr>
+<tr><td>0.5000 × 2</td><td>1.0000</td><td>1 &nbsp;<span class="small">fraction is now 0: stop</span></td></tr>
+</table></div>
+<p class="ans">(41.6875)<sub>10</sub> = (101001.1011)<sub>2</sub></p>
+</div>
+
+<div class="ex">
+<h4>Example 1.4.5 (a fraction that never ends)</h4>
+<p class="q">Convert (0.45)<sub>10</sub> to binary, correct to 8 places.</p>
+<div class="work">0.45 × 2 = 0.9  → <span class="t">0</span>
+0.90 × 2 = 1.8  → <span class="t">1</span>
+0.80 × 2 = 1.6  → <span class="t">1</span>
+0.60 × 2 = 1.2  → <span class="t">1</span>
+0.20 × 2 = 0.4  → <span class="t">0</span>
+0.40 × 2 = 0.8  → <span class="t">0</span>
+0.80 × 2 = 1.6  → <span class="t">1</span>   <span class="d">← 0.8 has appeared before: the pattern repeats</span>
+0.60 × 2 = 1.2  → <span class="t">1</span></div>
+<p>The digits 0011 repeat forever: 0.45 = 0.01<span class="hl">1100</span><span class="hl">1100</span>…<sub>2</sub>. A computer must stop somewhere, which is why some decimal fractions such as 0.45 or 0.1 cannot be stored exactly in binary.</p>
+<p class="ans">(0.45)<sub>10</sub> ≈ (0.01110011)<sub>2</sub></p>
+</div>
+
+<div class="ex">
+<h4>Example 1.4.6</h4>
+<p class="q">Convert (153.513)<sub>10</sub> to octal (6 fraction digits).</p>
+<div class="work">Integer: 153 ÷ 8 = 19 r <span class="t">1</span>;  19 ÷ 8 = 2 r <span class="t">3</span>;  2 ÷ 8 = 0 r <span class="t">2</span>   → 231
+
+Fraction:
+0.513 × 8 = 4.104  → <span class="t">4</span>
+0.104 × 8 = 0.832  → <span class="t">0</span>
+0.832 × 8 = 6.656  → <span class="t">6</span>
+0.656 × 8 = 5.248  → <span class="t">5</span>
+0.248 × 8 = 1.984  → <span class="t">1</span>
+0.984 × 8 = 7.872  → <span class="t">7</span></div>
+<p class="ans">(153.513)<sub>10</sub> ≈ (231.406517)<sub>8</sub></p>
+</div>
+
+<div class="ex">
+<h4>Example 1.4.7</h4>
+<p class="q">Convert to decimal: (a) (110101.101)<sub>2</sub> (b) (0.34)<sub>8</sub> (c) (0.A8)<sub>16</sub></p>
+<div class="work">(a) integer 110101 = 32+16+4+1 = 53
+    fraction .101   = 1×2<sup>−1</sup> + 0×2<sup>−2</sup> + 1×2<sup>−3</sup> = 0.5 + 0.125 = 0.625
+(b) 3×8<sup>−1</sup> + 4×8<sup>−2</sup>  = 0.375 + 0.0625  = 0.4375
+(c) A×16<sup>−1</sup> + 8×16<sup>−2</sup> = 10/16 + 8/256 = 0.625 + 0.03125 = 0.65625</div>
+<p class="ans">(a) 53.625 (b) 0.4375 (c) 0.65625</p>
+</div>
+
+<div class="ex">
+<h4>Example 1.4.8 (grouping with fractions)</h4>
+<p class="q">Convert (10110.0110101)<sub>2</sub> to octal and hexadecimal.</p>
+<p>Group outward from the binary point: integer bits leftward, fraction bits <b>rightward</b>, padding 0s at the outer ends.</p>
+<div class="bitrow"><span class="lab">octal</span><span class="g1">010</span><span class="g1">110</span><span class="lab">.</span><span class="g1">011</span><span class="g1">010</span><span class="g1">10<b>0</b></span><span class="lab">→ 2 6 . 3 2 4</span></div>
+<div class="bitrow"><span class="lab">hex</span><span class="g2">0001</span><span class="g2">0110</span><span class="lab">.</span><span class="g2">0110</span><span class="g2">101<b>0</b></span><span class="lab">→ 1 6 . 6 A</span></div>
+<p>Check: all three equal 22.4140625 in decimal.</p>
+<p class="ans">(10110.0110101)<sub>2</sub> = (26.324)<sub>8</sub> = (16.6A)<sub>16</sub></p>
+</div>
+
+<h3>Binary arithmetic</h3>
+<p>Binary arithmetic follows the same column-by-column methods as decimal arithmetic, but each column holds only 0 or 1, so every rule fits in a very small table. A <b>carry</b> passes 1 to the next higher column in addition; a <b>borrow</b> takes 1 from the next higher column in subtraction, where it is worth 2 (binary 10).</p>
+
+<div class="rules">
+<div class="rule">
+<p class="rh">Addition</p>
+<div class="tw"><table class="c">
+<tr><th>A + B</th><th>Sum</th><th>Carry</th></tr>
+<tr><td class="m">0 + 0</td><td>0</td><td>0</td></tr>
+<tr><td class="m">0 + 1</td><td>1</td><td>0</td></tr>
+<tr><td class="m">1 + 0</td><td>1</td><td>0</td></tr>
+<tr><td class="m">1 + 1</td><td>0</td><td>1</td></tr>
+<tr class="xtra"><td class="m">1 + 1 + 1</td><td>1</td><td>1</td></tr>
+</table></div>
+<p class="rn">The last row occurs when a carry comes in from the previous column: 1 + 1 + 1 = 3 = (11)<sub>2</sub>.</p>
+</div>
+
+<div class="rule">
+<p class="rh">Subtraction</p>
+<div class="tw"><table class="c">
+<tr><th>A − B</th><th>Difference</th><th>Borrow</th></tr>
+<tr><td class="m">0 − 0</td><td>0</td><td>0</td></tr>
+<tr><td class="m">1 − 0</td><td>1</td><td>0</td></tr>
+<tr><td class="m">1 − 1</td><td>0</td><td>0</td></tr>
+<tr><td class="m">0 − 1</td><td>1</td><td>1</td></tr>
+</table></div>
+<p class="rn">For 0 − 1, borrow 1 from the next column: (10)<sub>2</sub> − 1 = 1. Computers avoid borrowing by adding the 2’s complement instead (see the <a href="#workflow">workflow</a>).</p>
+</div>
+
+<div class="rule">
+<p class="rh">Multiplication</p>
+<div class="tw"><table class="c">
+<tr><th>A × B</th><th>Product</th></tr>
+<tr><td class="m">0 × 0</td><td>0</td></tr>
+<tr><td class="m">0 × 1</td><td>0</td></tr>
+<tr><td class="m">1 × 0</td><td>0</td></tr>
+<tr><td class="m">1 × 1</td><td>1</td></tr>
+</table></div>
+<p class="rn">Identical to the AND operation. Each partial product is either the multiplicand (bit 1) or all 0s (bit 0), so multiplication is <b>shift and add</b>.</p>
+</div>
+
+<div class="rule">
+<p class="rh">Division</p>
+<div class="tw"><table class="c">
+<tr><th>A ÷ B</th><th>Quotient</th></tr>
+<tr><td class="m">0 ÷ 1</td><td>0</td></tr>
+<tr><td class="m">1 ÷ 1</td><td>1</td></tr>
+<tr><td class="m">0 ÷ 0</td><td class="bad">undefined</td></tr>
+<tr><td class="m">1 ÷ 0</td><td class="bad">undefined</td></tr>
+</table></div>
+<p class="rn">At each step the divisor either fits (quotient bit 1, subtract it) or does not (quotient bit 0), so division is <b>shift and subtract</b>.</p>
+</div>
+</div>
+
+<div class="ex">
+<h4>Example 1.4.9 (addition)</h4>
+<p class="q">Add (101101)<sub>2</sub> and (011011)<sub>2</sub>.</p>
+<div class="work"><span class="c">carries   1 1 1 1 1 1  </span>
+            1 0 1 1 0 1     (45)
+        +   0 1 1 0 1 1     (27)
+        ───────────────
+          1 0 0 1 0 0 0     (72)</div>
+<p class="ans">101101 + 011011 = 1001000 (45 + 27 = 72 ✓)</p>
+</div>
+
+<div class="ex">
+<h4>Example 1.4.10 (subtraction with borrow)</h4>
+<p class="q">Subtract (010111)<sub>2</sub> from (110010)<sub>2</sub>.</p>
+<div class="work">            1 1 0 0 1 0     (50)
+        −   0 1 0 1 1 1     (23)
+        ───────────────
+            0 1 1 0 1 1     (27)
+<span class="d">Column 0 borrows from column 1. Column 1 then needs a borrow too, which
+ripples left through the 0s of columns 2 and 3 to the 1 in column 4.</span>
+Check by addition:  011011 + 010111 = 110010 ✓</div>
+<p class="ans">110010 − 010111 = 011011 (50 − 23 = 27 ✓)</p>
+</div>
+
+<div class="ex">
+<h4>Example 1.4.11 (multiplication)</h4>
+<p class="q">Multiply (1011)<sub>2</sub> by (1101)<sub>2</sub>.</p>
+<div class="work">              1 0 1 1        (11)
+          ×   1 1 0 1        (13)
+          ───────────
+              1 0 1 1        ← 1011 × 1
+            0 0 0 0          ← 1011 × 0, shifted 1
+          1 0 1 1            ← 1011 × 1, shifted 2
+        1 0 1 1              ← 1011 × 1, shifted 3
+        ─────────────
+        1 0 0 0 1 1 1 1      (143)</div>
+<p class="ans">1011 × 1101 = 10001111 (11 × 13 = 143 ✓). Binary multiplication is just shift and add.</p>
+</div>
+
+<div class="ex">
+<h4>Example 1.4.12 (division)</h4>
+<p class="q">Divide (110110)<sub>2</sub> by (101)<sub>2</sub>.</p>
+<div class="work">            1 0 1 0          ← quotient
+        ┌──────────
+  1 0 1 │ 1 1 0 1 1 0
+          1 0 1              110 ≥ 101 → 1
+          ─────
+            0 1 1            bring down 1: 11 &lt; 101 → 0
+              1 1 1          bring down 1: 111 ≥ 101 → 1
+              1 0 1
+              ─────
+                1 0 0        bring down 0: 100 &lt; 101 → 0
+                             remainder = 100</div>
+<p class="ans">110110 ÷ 101 = 1010 remainder 100 (54 ÷ 5 = 10 remainder 4 ✓)</p>
+</div>
+
+<h3>Subtraction using complements</h3>
+<p>To compute <i>M</i> − <i>N</i> with both numbers written with the same number of digits <i>n</i>:</p>
+<div class="tw"><table>
+<tr><th>Step</th><th>Using r’s complement (10’s or 2’s)</th><th>Using (r − 1)’s complement (9’s or 1’s)</th></tr>
+<tr><td>1</td><td>Add M to the r’s complement of N.</td><td>Add M to the (r − 1)’s complement of N.</td></tr>
+<tr><td>2: end carry produced (M ≥ N)</td><td>Discard the carry. The rest is M − N.</td><td>Remove the carry and <b>add it to the sum</b> (end-around carry). The result is M − N.</td></tr>
+<tr><td>3: no end carry (M &lt; N)</td><td>Answer is negative: take the r’s complement of the sum and put a minus sign in front.</td><td>Answer is negative: take the (r − 1)’s complement of the sum and put a minus sign in front.</td></tr>
+</table></div>
+
+<div class="ex">
+<h4>Example 1.4.13</h4>
+<p class="q">Using 10’s complement, find (a) 72532 − 3250, (b) 3250 − 72532.</p>
+<div class="work">(a) M = 72532,  N = 03250 (padded to 5 digits)
+    10’s complement of N = 99999 − 03250 + 1 = 96750
+      72532
+    + 96750
+    ───────
+     <span class="c">1</span>69282    end carry → discard → <span class="t">69282</span>
+
+(b) M = 03250,  N = 72532
+    10’s complement of N = 27468
+      03250
+    + 27468
+    ───────
+      30718    no end carry → negative
+    answer = −(10’s complement of 30718) = −(69281 + 1) = <span class="t">−69282</span></div>
+<p class="ans">(a) 69282 (b) −69282</p>
+</div>
+
+<div class="ex">
+<h4>Example 1.4.14</h4>
+<p class="q">Repeat 72532 − 3250 using 9’s complement.</p>
+<div class="work">9’s complement of 03250 = 96749
+      72532
+    + 96749
+    ───────
+     <span class="c">1</span>69281
+         +1   ← end-around carry
+    ───────
+      69282</div>
+<p class="ans">69282, the same result.</p>
+</div>
+
+<div class="ex">
+<h4>Example 1.4.15</h4>
+<p class="q">X = 1010100 and Y = 1000011. Find (a) X − Y and (b) Y − X using 2’s complement, then (c) and (d) the same using 1’s complement.</p>
+<div class="work">(a) X − Y :  2’s comp of Y = 0111101
+      1010100
+    + 0111101
+    ─────────
+     <span class="c">1</span>0010001   end carry → discard → <span class="t">0010001</span>   (84 − 67 = 17 ✓)
+
+(b) Y − X :  2’s comp of X = 0101100
+      1000011
+    + 0101100
+    ─────────
+      1101111   no end carry → −(2’s comp of 1101111) = <span class="t">−0010001</span>
+
+(c) X − Y :  1’s comp of Y = 0111100
+      1010100 + 0111100 = <span class="c">1</span>0010000
+      end-around carry: 0010000 + 1 = <span class="t">0010001</span>
+
+(d) Y − X :  1’s comp of X = 0101011
+      1000011 + 0101011 = 1101110   no carry
+      −(1’s comp of 1101110) = <span class="t">−0010001</span></div>
+<p class="ans">X − Y = 0010001 (17), Y − X = −0010001 (−17), by either method.</p>
+</div>
+
+<h3>Addition of signed 2’s complement numbers and overflow</h3>
+<p>In the signed 2’s complement system, add the two numbers <b>including their sign bits</b> and discard any carry out of the sign position. The result is automatically correct in sign and magnitude, provided it fits in the available bits. If it does not fit, <b>overflow</b> has occurred.</p>
+<div class="key">
+<p><b>Overflow rules (n-bit 2’s complement).</b> Overflow can only happen when both numbers have the same sign. It is detected when:</p>
+<p>• the result has a sign different from that of the two operands, or</p>
+<p>• equivalently, the carry <em>into</em> the sign bit differs from the carry <em>out of</em> the sign bit.</p>
+</div>
+
+<div class="ex">
+<h4>Example 1.4.16</h4>
+<p class="q">Perform in 8-bit 2’s complement and state whether overflow occurs: (a) (+45) + (−63), (b) (−35) + (−20), (c) (+70) + (+80).</p>
+<div class="work">(a)   +45 = 0010 1101
+      −63 = 1100 0001
+            ─────────
+            1110 1110   sign 1 → negative;  2’s comp = 0001 0010 = 18  → <span class="t">−18 ✓</span>
+
+(b)   −35 = 1101 1101
+      −20 = 1110 1100
+            ─────────
+          <span class="c">1</span> 1100 1001   discard carry → 1100 1001 = <span class="t">−55 ✓</span>
+          carry into sign = 1, carry out = 1  → equal → no overflow
+
+(c)   +70 = 0100 0110
+      +80 = 0101 0000
+            ─────────
+            1001 0110   = −106 ?!   <span class="r">OVERFLOW</span>
+          carry into sign = 1, carry out = 0  → different
+          two positives gave a negative; true answer 150 &gt; +127</div>
+<p class="ans">(a) −18, no overflow (b) −55, no overflow (c) overflow; 150 cannot be held in 8-bit signed form. On the number wheel (Fig 1.6) the sum has wrapped past the dashed line.</p>
+</div>
+
+
+<h3 id="workflow">Workflow: understand, calculate, verify</h3>
+<p>Every complement calculation, whether unsigned subtraction or signed 2’s complement arithmetic, can be done with the same nine steps in three phases. Understand the problem before touching the bits, calculate mechanically, then verify the answer independently.</p>
+
+<div class="phases" role="img" aria-label="Three phases: understand, calculate, verify">
+  <div class="phase">
+    <p class="ph">Understand</p>
+    <ol start="1"><li>Estimate in decimal</li><li>Choose n bits</li><li>Write both in n bits</li></ol>
+  </div>
+  <div class="phase">
+    <p class="ph">Calculate</p>
+    <ol start="4"><li>A − B → A + (−B)</li><li>Add, note carries</li><li>Keep n bits</li></ol>
+  </div>
+  <div class="phase v">
+    <p class="ph">Verify</p>
+    <ol start="7"><li>Check overflow</li><li>Read the result</li><li>Reverse check</li></ol>
+  </div>
+</div>
+
+<h4>First, identify the mode</h4>
+<p>The same bits are read differently in the two modes. Most mistakes come from mixing them up.</p>
+<div class="tw"><table>
+<tr><th>Basis of comparison</th><th>Mode U: unsigned subtraction (M − N)</th><th>Mode S: signed 2’s complement</th></tr>
+<tr><td>Operands</td><td>Plain magnitudes</td><td>Numbers with a sign bit</td></tr>
+<tr><td>Word length n</td><td>Length of the longer operand</td><td>Given word size, or enough for the result plus a sign bit</td></tr>
+<tr><td>Sign of answer from</td><td><b>End carry</b>: carry → positive, no carry → negative</td><td><b>MSB of result</b>: 0 → positive, 1 → negative</td></tr>
+<tr><td>End carry</td><td>Tells the sign, then discarded</td><td>Always discarded, carries no meaning</td></tr>
+<tr><td>Overflow check</td><td>Not needed: n is chosen to fit both operands, and the end carry only tells the sign</td><td>Required: while adding, compare C<sub>in</sub> (carry <em>into</em> the MSB) with C<sub>out</sub> (carry <em>out of</em> the MSB)
+<p class="ovh okk">No overflow:</p>
+<ul class="ovl"><li>C<sub>in</sub> and C<sub>out</sub> <b>same</b> (0 and 0, or 1 and 1)</li><li>the n-bit result is correct; read it by its MSB</li></ul>
+<p class="ovh bad">Overflow:</p>
+<ul class="ovl"><li>C<sub>in</sub> and C<sub>out</sub> <b>differ</b> (1 and 0, or 0 and 1)</li><li>the n-bit result is wrong; redo with a larger n</li></ul></td></tr>
+</table></div>
+
+<div class="stepcard">
+<h4><span class="pn">Phase 1</span>Understand</h4>
+<ol start="1">
+<li><b>Estimate in decimal:</b> convert the operands and work out the expected answer. This is the target for Phase 3.</li>
+<li><b>Choose n:</b> in Mode U, use the number of digits of the longer operand. In Mode S, use the given word size and confirm that both operands <em>and the expected answer</em> lie in −2<sup>n−1</sup> … +(2<sup>n−1</sup> − 1); if the answer does not fit, increase n or expect overflow.</li>
+<li><b>Write both operands in n bits:</b> pad positive numbers with leading 0s. In Mode S, pad negative numbers with leading 1s (<b>sign extension</b>): −5 is 1011 in 4 bits but 1111 1011 in 8 bits.</li>
+</ol>
+</div>
+
+<div class="stepcard">
+<h4><span class="pn">Phase 2</span>Calculate</h4>
+<ol start="4">
+<li><b>Turn subtraction into addition:</b> A − B = A + (2’s complement of B). Shortcut: copy bits from the right up to the first 1, invert the rest.</li>
+<li><b>Add column by column:</b> write each carry above its column, and note the carry <em>into</em> the MSB and the carry <em>out of</em> it.</li>
+<li><b>Keep n bits:</b> separate the end carry from the n-bit result and record whether it was present.</li>
+</ol>
+</div>
+
+<div class="stepcard v">
+<h4><span class="pn">Phase 3</span>Verify</h4>
+<ol start="7">
+<li><b>Check overflow (Mode S only):</b> look at the carry column of the MSB in step 5 and compare C<sub>in</sub> (carry into the MSB) with C<sub>out</sub> (carry out of the MSB). Operands lying in range do not guarantee the result does; only two numbers of the same sign (after turning subtraction into addition) can overflow. All four possible cases:
+  <div class="tw"><table class="c">
+  <tr><th>C<sub>in</sub></th><th>C<sub>out</sub></th><th>Verdict</th><th>What happened</th><th>Example</th></tr>
+  <tr><td>0</td><td>0</td><td><span class="okk">No overflow</span></td><td>Result correct</td><td>(+45) + (−63), Ex 1.4.16(a)</td></tr>
+  <tr><td>1</td><td>1</td><td><span class="okk">No overflow</span></td><td>Result correct; end carry discarded</td><td>(−35) − (+20), Ex 1.4.19</td></tr>
+  <tr><td>1</td><td>0</td><td><span class="bad">Overflow</span></td><td>Two positives gave a “negative” result</td><td>(+5) − (−4), Ex 1.4.20</td></tr>
+  <tr><td>0</td><td>1</td><td><span class="bad">Overflow</span></td><td>Two negatives gave a “positive” result</td><td>(−100) − (+40), Practice 5</td></tr>
+  </table></div>
+  In short: <b>same → correct, differ → overflow</b>. Equivalently, C<sub>in</sub> ⊕ C<sub>out</sub> = 1 signals overflow. If overflow occurs, redo the problem with a larger n.</li>
+<li><b>Read the result:</b> apply the rule for the mode, then convert to decimal with place values.
+  <div class="tw"><table class="c">
+  <tr><th>Mode</th><th>Condition</th><th>Answer</th></tr>
+  <tr><td>U</td><td>End carry present</td><td>+ result</td></tr>
+  <tr><td>U</td><td>No end carry</td><td>−(2’s complement of result)</td></tr>
+  <tr><td>S</td><td>MSB = 0</td><td>+ result</td></tr>
+  <tr><td>S</td><td>MSB = 1</td><td>−(2’s complement of result)</td></tr>
+  </table></div></li>
+<li><b>Reverse check:</b> compare with the estimate from step 1, then confirm in binary that result + B = A.</li>
+</ol>
+</div>
+
+<div class="ex">
+<h4>Example 1.4.17 (Mode U, M ≥ N)</h4>
+<p class="q">Using the workflow, find 1101 − 111.</p>
+<div class="work"><span class="d">1  Estimate  :</span> 13 − 7 = 6
+<span class="d">2  n         :</span> longer operand has 4 bits → n = 4
+<span class="d">3  Pad       :</span> N = 0111
+<span class="d">4  Complement:</span> 2’s comp of 0111 = 1001
+<span class="d">5  Add       :</span>   1101
+               + 1001
+               ──────
+                <span class="c">1</span>0110
+<span class="d">6  Keep 4    :</span> 0110, end carry present
+<span class="d">8  Read      :</span> carry → positive → 0110 = 4 + 2 = 6
+<span class="d">9  Reverse   :</span> 0110 + 0111 = 1101 ✓   matches estimate ✓</div>
+<p class="ans">1101 − 111 = 0110 = 6</p>
+</div>
+
+<div class="ex">
+<h4>Example 1.4.18 (Mode U, M &lt; N)</h4>
+<p class="q">Using the workflow, find 0111 − 1101.</p>
+<div class="work"><span class="d">1  Estimate  :</span> 7 − 13 = −6
+<span class="d">2–4        :</span> n = 4; 2’s comp of 1101 = 0011
+<span class="d">5  Add       :</span>   0111
+               + 0011
+               ──────
+                 1010
+<span class="d">6  Keep 4    :</span> 1010, no end carry
+<span class="d">8  Read      :</span> no carry → negative → −(2’s comp of 1010) = −0110 = −6
+<span class="d">9  Reverse   :</span> matches estimate ✓</div>
+<p class="ans">0111 − 1101 = −0110 = −6</p>
+</div>
+
+<div class="ex">
+<h4>Example 1.4.19 (Mode S, 8-bit)</h4>
+<p class="q">Using the workflow, find (−35) − (+20) in 8-bit 2’s complement.</p>
+<div class="work"><span class="d">1  Estimate  :</span> −35 − 20 = −55, inside −128 … +127 ✓
+<span class="d">2–3        :</span> n = 8;  A = −35 = 1101 1101,  B = +20 = 0001 0100
+<span class="d">4  Complement:</span> −B = 1110 1100
+<span class="d">5  Add       :</span> <span class="c">carries  1 1 1 1 1 0 0</span>
+                   1 1 0 1 1 1 0 1
+                 + 1 1 1 0 1 1 0 0
+                 ─────────────────
+                 <span class="c">1</span> 1 1 0 0 1 0 0 1
+<span class="d">6  Keep 8    :</span> 1100 1001 (end carry ignored in Mode S)
+<span class="d">7  Overflow  :</span> carry into MSB = 1, out of MSB = 1 → same → <span class="t">no overflow</span>
+<span class="d">8  Read      :</span> MSB = 1 → negative; 2’s comp = 0011 0111 = 32+16+4+2+1 = 55 → −55
+<span class="d">9  Reverse   :</span> 1100 1001 + 0001 0100 = 1101 1101 = −35 ✓</div>
+<p class="ans">(−35) − (+20) = 1100 1001 = −55</p>
+</div>
+
+<div class="ex">
+<h4>Example 1.4.20 (Mode S, overflow caught)</h4>
+<p class="q">Using the workflow, find (+5) − (−4) in 4-bit 2’s complement.</p>
+<div class="work"><span class="d">1  Estimate  :</span> 5 + 4 = +9, but the 4-bit range is −8 … +7  → <span class="r">expect overflow</span>
+<span class="d">4  Complement:</span> −(−4) = +4 = 0100
+<span class="d">5  Add       :</span>   0101
+               + 0100
+               ──────
+                 1001
+<span class="d">7  Overflow  :</span> carry into MSB = 1, out of MSB = 0 → different → <span class="r">OVERFLOW</span>
+<span class="d">   Redo n = 5:</span> 00101 + 00100 = 01001 = +9 ✓</div>
+<p class="ans">Not possible in 4 bits (the estimate warned before any bits were added); with n = 5 the answer is 01001 = +9.</p>
+</div>
+
+<div class="key"><p><b>Memory aid.</b> Estimate → fix n → pad → complement and add → keep n bits → check overflow → read the sign → convert → reverse check.</p></div>
+
+<div class="exercises" id="wf-practice">
+<h3>Workflow practice: complements</h3>
+<p>Solve each problem using the nine-step workflow. Write the step number beside every line of working, exactly as in Examples 1.4.17 to 1.4.20. State the mode (U or S) before you start.</p>
+<ol>
+<li><b>Mode U:</b> 10110 − 1101
+<details><summary>Show solution</summary><div class="a"><div class="work"><span class="d">1   </span>22 − 13 = 9
+<span class="d">2–3 </span>n = 5; N = 01101
+<span class="d">4   </span>2’s comp of N = 10011
+<span class="d">5   </span>10110 + 10011 = <span class="c">1</span>01001
+<span class="d">6   </span>keep 01001; end carry present
+<span class="d">8   </span>carry → positive → 01001 = 8 + 1 = <span class="t">9</span>
+<span class="d">9   </span>01001 + 01101 = 10110 ✓</div></div></details></li>
+
+<li><b>Mode U:</b> 1001 − 11100
+<details><summary>Show solution</summary><div class="a"><div class="work"><span class="d">1   </span>9 − 28 = −19
+<span class="d">2–3 </span>n = 5 (longer operand); M = 01001
+<span class="d">4   </span>2’s comp of 11100 = 00100
+<span class="d">5   </span>01001 + 00100 = 01101
+<span class="d">6   </span>no end carry
+<span class="d">8   </span>negative → −(2’s comp of 01101) = −10011 = <span class="t">−19</span>
+<span class="d">9   </span>matches estimate ✓</div></div></details></li>
+
+<li><b>Mode S, 8-bit:</b> (+58) − (+91)
+<details><summary>Show solution</summary><div class="a"><div class="work"><span class="d">1   </span>58 − 91 = −33, inside −128 … +127
+<span class="d">2–3 </span>A = 0011 1010, B = 0101 1011
+<span class="d">4   </span>−B = 1010 0101
+<span class="d">5   </span>0011 1010 + 1010 0101 = 1101 1111   (no end carry)
+<span class="d">7   </span>carry into MSB = 0, out = 0 → no overflow
+<span class="d">8   </span>MSB 1 → negative; 2’s comp = 0010 0001 = <span class="t">−33</span>
+<span class="d">9   </span>1101 1111 + 0101 1011 = 0011 1010 (+58) ✓</div></div></details></li>
+
+<li><b>Mode S, 8-bit:</b> (−70) + (−45)
+<details><summary>Show solution</summary><div class="a"><div class="work"><span class="d">1   </span>−115, inside −128 … +127 (close to the limit)
+<span class="d">2–3 </span>−70 = 1011 1010, −45 = 1101 0011
+<span class="d">5   </span>1011 1010 + 1101 0011 = <span class="c">1</span> 1000 1101
+<span class="d">6   </span>keep 1000 1101 (end carry ignored in Mode S)
+<span class="d">7   </span>carry into MSB = 1, out = 1 → no overflow
+<span class="d">8   </span>MSB 1 → 2’s comp = 0111 0011 = 115 → <span class="t">−115</span>
+<span class="d">9   </span>matches estimate ✓</div></div></details></li>
+
+<li><b>Mode S, 8-bit (watch out):</b> (−100) − (+40)
+<details><summary>Show solution</summary><div class="a"><div class="work"><span class="d">1   </span>−140, <span class="r">outside −128 … +127 → expect overflow</span>
+<span class="d">2–4 </span>−100 = 1001 1100;  −(+40) = 1101 1000
+<span class="d">5   </span>1001 1100 + 1101 1000 = <span class="c">1</span> 0111 0100
+<span class="d">7   </span>carry into MSB = 0, out = 1 → <span class="r">OVERFLOW</span> (0111 0100 reads as +116)
+<span class="d">    </span>Redo with n = 9: 1 1001 1100 + 1 1101 1000 = <span class="c">1</span> 1 0111 0100
+<span class="d">8   </span>keep 1 0111 0100; MSB 1 → 2’s comp = 0 1000 1100 = 140 → <span class="t">−140</span></div></div></details></li>
+
+<li><b>Mode S, sign extension:</b> −6 is stored in a 4-bit register as 1010. Add it to +20 in an 8-bit register.
+<details><summary>Show solution</summary><div class="a"><div class="work"><span class="d">1   </span>−6 + 20 = +14
+<span class="d">3   </span>extend 1010 with 1s → 1111 1010;  +20 = 0001 0100
+<span class="d">5   </span>1111 1010 + 0001 0100 = <span class="c">1</span> 0000 1110
+<span class="d">7   </span>carry into MSB = 1, out = 1 → no overflow
+<span class="d">8   </span>MSB 0 → <span class="t">+14</span>
+<span class="d">    </span>(padding with 0s instead, 0000 1010 = +10, would give 30 ✗)</div></div></details></li>
+</ol>
+</div>
+
+<div class="exercises">
+<h3>Exercises: 1.4</h3>
+<ol>
+<li>Find the 9’s and 10’s complements of (a) 25000 (b) 00000 (c) 9087, and the 1’s and 2’s complements of (d) 10110000 (e) 00000001.
+<details><summary>Show answer</summary><div class="a">(a) 74999, 75000 (b) 99999, 00000 (carry discarded) (c) 0912, 0913 (d) 01001111, 01010000 (e) 11111110, 11111111</div></details></li>
+<li>Represent −100 as an 8-bit number in sign-magnitude, 1’s complement and 2’s complement.
+<details><summary>Show answer</summary><div class="a">+100 = 01100100. S-M: 11100100; 1’s: 10011011; 2’s: 10011100</div></details></li>
+<li>Give the decimal value of 1110 0111 read as unsigned, sign-magnitude, 1’s complement and 2’s complement.
+<details><summary>Show answer</summary><div class="a">231, −103, −24, −25</div></details></li>
+<li>Convert to binary: (a) 0.8125 (b) 27.375 (c) 0.3 (to 6 places). Also write (b) in octal and hex.
+<details><summary>Show answer</summary><div class="a">(a) 0.1101 (b) 11011.011 = (33.3)<sub>8</sub> = (1B.6)<sub>16</sub> (c) 0.010011… (repeats 0011)</div></details></li>
+<li>Convert to decimal: (a) (0.1101)<sub>2</sub> (b) (7.54)<sub>8</sub> (c) (B.4)<sub>16</sub>
+<details><summary>Show answer</summary><div class="a">(a) 0.8125 (b) 7.6875 (c) 11.25</div></details></li>
+<li>Perform in binary: (a) 110111 + 101101 (b) 1011010 − 100111 (c) 10110 × 110 (d) 111011 ÷ 111
+<details><summary>Show answer</summary><div class="a">(a) 1100100 (55 + 45 = 100) (b) 110011 (90 − 39 = 51) (c) 10000100 (22 × 6 = 132) (d) quotient 1000, remainder 11 (59 ÷ 7 = 8 r 3)</div></details></li>
+<li>Using 10’s complement, find (a) 5250 − 321 (b) 20 − 1000 (use 4 digits).
+<details><summary>Show answer</summary><div class="a">(a) 5250 + 9679 = 14929 → discard carry → 4929 (b) 0020 + 9000 = 9020, no carry → −(10’s comp of 9020) = −0980</div></details></li>
+<li>Subtract 1101001 from 1010110 using (a) 2’s complement (b) 1’s complement.
+<details><summary>Show answer</summary><div class="a">(a) 1010110 + 0010111 = 1101101, no carry → −0010011 (b) 1010110 + 0010110 = 1101100, no carry → −(0010011) = −0010011. Check: 86 − 105 = −19.</div></details></li>
+<li>In 8-bit 2’s complement, compute and check for overflow: (a) (+100) + (+50) (b) (−100) + (−50) (c) (−100) + (+50)
+<details><summary>Show answer</summary><div class="a">(a) 01100100 + 00110010 = 10010110 → overflow (b) 10011100 + 11001110 = 1 01101010 → result positive from two negatives → overflow (c) 10011100 + 00110010 = 11001110 = −50, no overflow</div></details></li>
+<li>What range of numbers can a 12-bit register hold as (a) unsigned (b) signed 2’s complement?
+<details><summary>Show answer</summary><div class="a">(a) 0 to 4095 (b) −2048 to +2047</div></details></li>
+</ol>
+</div>
+</section>
+
+<!-- ======================= 1.5 ======================= -->
+<section class="topic" id="s15">
+<h2><span class="n">1.5</span>Binary codes: BCD, Gray, alphanumeric, error detection and correction</h2>
+
+<div class="why">
+  <h3>Background</h3>
+  <p>Not every group of bits is a number to calculate with. The display of a calculator needs each <em>decimal digit</em> separately (BCD). A shaft angle sensor must never give a wildly wrong reading while it moves between positions (Gray code). A keyboard must send letters and symbols (ASCII). And a message sent over a noisy wire or stored in memory must reveal, or even repair, a flipped bit (parity and Hamming codes). A <b>binary code</b> is any agreed assignment of bit patterns to items of information.</p>
+</div>
+
+<p>An <i>n</i>-bit code can represent up to 2<sup><i>n</i></sup> distinct items. To code the ten decimal digits we need at least 4 bits (2<sup>3</sup> = 8 is too few); 6 of the 16 combinations are then left unused.</p>
+
+<h3>1. Binary coded decimal (BCD)</h3>
+<p>In <b>BCD</b> (also called the 8421 code, after its bit weights) each decimal digit is replaced by its own 4-bit binary equivalent. A number with <i>k</i> decimal digits needs 4<i>k</i> bits. The combinations 1010 to 1111 are <b>invalid</b> in BCD.</p>
+
+<div class="tw"><table class="c">
+<tr><th>Decimal digit</th><th>BCD (8421)</th><th>Decimal digit</th><th>BCD (8421)</th></tr>
+<tr><td>0</td><td class="m">0000</td><td>5</td><td class="m">0101</td></tr>
+<tr><td>1</td><td class="m">0001</td><td>6</td><td class="m">0110</td></tr>
+<tr><td>2</td><td class="m">0010</td><td>7</td><td class="m">0111</td></tr>
+<tr><td>3</td><td class="m">0011</td><td>8</td><td class="m">1000</td></tr>
+<tr><td>4</td><td class="m">0100</td><td>9</td><td class="m">1001</td></tr>
+</table></div>
+
+<div class="key"><p><b>BCD is not binary.</b> Converting a number to binary uses the whole value; converting to BCD codes each digit separately. BCD wastes some bits but makes decimal input and display simple.</p></div>
+
+<div class="ex">
+<h4>Example 1.5.1</h4>
+<p class="q">Write (396)<sub>10</sub> in BCD.</p>
+<div class="bitrow"><span class="lab">digit</span><span>3</span><span>9</span><span>6</span></div>
+<div class="bitrow"><span class="lab">BCD</span><span class="g1">0011</span><span class="g1">1001</span><span class="g1">0110</span></div>
+<p class="ans">(396)<sub>10</sub> = (0011 1001 0110)<sub>BCD</sub>, 3 digits × 4 = 12 bits</p>
+</div>
+
+<div class="ex">
+<h4>Example 1.5.2</h4>
+<p class="q">Compare the BCD and straight binary forms of (185)<sub>10</sub>.</p>
+<div class="work">BCD    : 1 → 0001   8 → 1000   5 → 0101   = <span class="t">0001 1000 0101</span>   (12 bits)
+Binary : 185 = 128 + 32 + 16 + 8 + 1        = <span class="t">1011 1001</span>        (8 bits)</div>
+<p class="ans">BCD needs 12 bits, binary only 8. The bit patterns are completely different.</p>
+</div>
+
+<div class="ex">
+<h4>Example 1.5.3</h4>
+<p class="q">Decode the BCD numbers (a) 0100 0111 0010 1001 (b) 0101 1010 0011.</p>
+<div class="work">(a) 0100 | 0111 | 0010 | 1001
+     4      7      2      9        → <span class="t">4729</span>
+(b) 0101 | 1010 | 0011
+     5      ?      3               → <span class="r">1010 is not a valid BCD digit</span></div>
+<p class="ans">(a) 4729 (b) invalid BCD number</p>
+</div>
+
+<h4>Other decimal codes</h4>
+<p>BCD is one of several 4-bit codes for decimal digits. Two others are worth knowing. The <b>2421 code</b> is weighted like BCD but with weights 2, 4, 2, 1. The <b>excess-3 code</b> is unweighted: each digit is coded as its BCD value plus 3. Both are <b>self-complementing</b>: inverting all four bits of the code for <i>d</i> gives the code for 9 − <i>d</i> (for example, excess-3 of 3 is 0110, inverted 1001, which is excess-3 of 6).</p>
+<div class="tw"><table class="c">
+<tr><th>Digit</th><th>BCD 8421</th><th>2421</th><th>Excess-3</th></tr>
+<tr><td>0</td><td class="m">0000</td><td class="m">0000</td><td class="m">0011</td></tr>
+<tr><td>1</td><td class="m">0001</td><td class="m">0001</td><td class="m">0100</td></tr>
+<tr><td>2</td><td class="m">0010</td><td class="m">0010</td><td class="m">0101</td></tr>
+<tr><td>3</td><td class="m">0011</td><td class="m">0011</td><td class="m">0110</td></tr>
+<tr><td>4</td><td class="m">0100</td><td class="m">0100</td><td class="m">0111</td></tr>
+<tr><td>5</td><td class="m">0101</td><td class="m">1011</td><td class="m">1000</td></tr>
+<tr><td>6</td><td class="m">0110</td><td class="m">1100</td><td class="m">1001</td></tr>
+<tr><td>7</td><td class="m">0111</td><td class="m">1101</td><td class="m">1010</td></tr>
+<tr><td>8</td><td class="m">1000</td><td class="m">1110</td><td class="m">1011</td></tr>
+<tr><td>9</td><td class="m">1001</td><td class="m">1111</td><td class="m">1100</td></tr>
+</table></div>
+
+<div class="ex">
+<h4>Example 1.5.4</h4>
+<p class="q">Write (58)<sub>10</sub> in excess-3 code.</p>
+<div class="work">5 + 3 = 8 → <span class="t">1000</span>        8 + 3 = 11 → <span class="t">1011</span></div>
+<p class="ans">(58)<sub>10</sub> = (1000 1011)<sub>XS-3</sub></p>
+</div>
+
+<h3>2. Gray code (reflected binary code)</h3>
+<p>In the <b>Gray code</b> only <b>one bit changes</b> between any two successive values (including the wrap from the last value back to the first). It is not a weighted code, so it is not used for arithmetic.</p>
+<p><b>Why it matters.</b> In ordinary binary, going from 7 (0111) to 8 (1000) changes all four bits. Real switches never change at exactly the same instant; if the rightmost bit changes late, the reading passes briefly through 1001 (9), a false value. In Gray code, 7 is 0100 and 8 is 1100: only one bit changes, so no false intermediate reading is possible. This is why Gray code is used in shaft (rotary) encoders, position sensors and in the labelling of Karnaugh maps (Unit 3).</p>
+
+<div class="tw"><table class="c">
+<tr><th>Decimal</th><th>Binary</th><th>Gray</th></tr>
+<tr><td>0</td><td class="m">0000</td><td class="m">0000</td></tr>
+<tr><td>1</td><td class="m">0001</td><td class="m">0001</td></tr>
+<tr><td>2</td><td class="m">0010</td><td class="m">0011</td></tr>
+<tr><td>3</td><td class="m">0011</td><td class="m">0010</td></tr>
+<tr><td>4</td><td class="m">0100</td><td class="m">0110</td></tr>
+<tr><td>5</td><td class="m">0101</td><td class="m">0111</td></tr>
+<tr><td>6</td><td class="m">0110</td><td class="m">0101</td></tr>
+<tr><td>7</td><td class="m">0111</td><td class="m">0100</td></tr>
+<tr><td>8</td><td class="m">1000</td><td class="m">1100</td></tr>
+<tr><td>9</td><td class="m">1001</td><td class="m">1101</td></tr>
+<tr><td>10</td><td class="m">1010</td><td class="m">1111</td></tr>
+<tr><td>11</td><td class="m">1011</td><td class="m">1110</td></tr>
+<tr><td>12</td><td class="m">1100</td><td class="m">1010</td></tr>
+<tr><td>13</td><td class="m">1101</td><td class="m">1011</td></tr>
+<tr><td>14</td><td class="m">1110</td><td class="m">1001</td></tr>
+<tr><td>15</td><td class="m">1111</td><td class="m">1000</td></tr>
+</table></div>
+
+<p><b>Construction by reflection.</b> The <i>n</i>-bit Gray code is built from the (<i>n</i> − 1)-bit code: write the list, then write it again in reverse order (the “mirror”), then put 0 in front of the first half and 1 in front of the second half.</p>
+<figure>
+<svg viewBox="0 0 560 250" role="img" aria-label="Building 1, 2 and 3 bit Gray codes by reflection">
+  <g font-family="JetBrains Mono, monospace" font-size="16">
+  <text x="40" y="30" text-anchor="middle" font-weight="600" font-family="Source Serif 4, serif">1-bit</text>
+  <text x="40" y="60" text-anchor="middle" class="mono">0</text><text x="40" y="82" text-anchor="middle" class="mono">1</text>
+  <text x="220" y="30" text-anchor="middle" font-weight="600" font-family="Source Serif 4, serif">2-bit</text>
+  <text x="220" y="60" text-anchor="middle" class="mono">00</text><text x="220" y="82" text-anchor="middle" class="mono">01</text>
+  <text x="220" y="116" text-anchor="middle" class="mono">11</text><text x="220" y="138" text-anchor="middle" class="mono">10</text>
+  <text x="430" y="30" text-anchor="middle" font-weight="600" font-family="Source Serif 4, serif">3-bit</text>
+  <text x="430" y="60" text-anchor="middle" class="mono">000</text><text x="430" y="80" text-anchor="middle" class="mono">001</text>
+  <text x="430" y="100" text-anchor="middle" class="mono">011</text><text x="430" y="120" text-anchor="middle" class="mono">010</text>
+  <text x="430" y="154" text-anchor="middle" class="mono">110</text><text x="430" y="174" text-anchor="middle" class="mono">111</text>
+  <text x="430" y="194" text-anchor="middle" class="mono">101</text><text x="430" y="214" text-anchor="middle" class="mono">100</text>
+  </g>
+  <line x1="185" y1="98" x2="255" y2="98" class="wire-t" stroke-dasharray="5 3"/><text x="262" y="102" class="small">mirror</text>
+  <line x1="390" y1="136" x2="470" y2="136" class="wire-t" stroke-dasharray="5 3"/><text x="477" y="140" class="small">mirror</text>
+  <text x="88" y="76" text-anchor="middle" font-size="22">→</text><text x="325" y="120" text-anchor="middle" font-size="22">→</text>
+  <text x="385" y="92" text-anchor="end" class="small">prefix 0</text><text x="385" y="186" text-anchor="end" class="small">prefix 1</text>
+  <text x="175" y="72" text-anchor="end" class="small">prefix 0</text><text x="175" y="130" text-anchor="end" class="small">prefix 1</text>
+</svg>
+<figcaption><b>Fig 1.7</b> Reflecting the code about the mirror line and prefixing 0 and 1 doubles its length</figcaption>
+</figure>
+
+<h4>Binary to Gray conversion</h4>
+<p>The MSB of the Gray code equals the MSB of the binary number. Every other Gray bit is the exclusive-OR (⊕) of the binary bit in the same position and the binary bit to its left. (⊕ means: 0 ⊕ 0 = 0, 0 ⊕ 1 = 1, 1 ⊕ 0 = 1, 1 ⊕ 1 = 0, i.e. 1 when the bits differ.)</p>
+<div class="formula">
+  G<sub>n−1</sub> = B<sub>n−1</sub><br>
+  G<sub>i</sub> = B<sub>i+1</sub> ⊕ B<sub>i</sub>
+</div>
+<figure>
+<svg viewBox="0 0 520 210" role="img" aria-label="Binary 1011 converted to Gray 1110 by exclusive-OR of adjacent bits">
+  <defs><marker id="ar3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="arrowhead"/></marker></defs>
+  <text x="20" y="42" class="small">Binary</text><text x="20" y="190" class="small">Gray</text>
+  <g font-size="22">
+  <rect x="100" y="16" width="44" height="40" rx="4" class="box-t"/><text x="122" y="44" text-anchor="middle" class="mono">1</text>
+  <rect x="200" y="16" width="44" height="40" rx="4" class="box-t"/><text x="222" y="44" text-anchor="middle" class="mono">0</text>
+  <rect x="300" y="16" width="44" height="40" rx="4" class="box-t"/><text x="322" y="44" text-anchor="middle" class="mono">1</text>
+  <rect x="400" y="16" width="44" height="40" rx="4" class="box-t"/><text x="422" y="44" text-anchor="middle" class="mono">1</text>
+  <rect x="100" y="162" width="44" height="40" rx="4" class="box-s"/><text x="122" y="190" text-anchor="middle" class="mono">1</text>
+  <rect x="200" y="162" width="44" height="40" rx="4" class="box-s"/><text x="222" y="190" text-anchor="middle" class="mono">1</text>
+  <rect x="300" y="162" width="44" height="40" rx="4" class="box-s"/><text x="322" y="190" text-anchor="middle" class="mono">1</text>
+  <rect x="400" y="162" width="44" height="40" rx="4" class="box-s"/><text x="422" y="190" text-anchor="middle" class="mono">0</text>
+  </g>
+  <line x1="122" y1="56" x2="122" y2="160" class="wire" marker-end="url(#ar3)"/>
+  <circle cx="222" cy="110" r="15" class="box"/><text x="222" y="117" text-anchor="middle" font-size="20">⊕</text>
+  <circle cx="322" cy="110" r="15" class="box"/><text x="322" y="117" text-anchor="middle" font-size="20">⊕</text>
+  <circle cx="422" cy="110" r="15" class="box"/><text x="422" y="117" text-anchor="middle" font-size="20">⊕</text>
+  <line x1="122" y1="75" x2="209" y2="102" class="wire"/><line x1="222" y1="56" x2="222" y2="95" class="wire"/>
+  <line x1="222" y1="75" x2="309" y2="102" class="wire"/><line x1="322" y1="56" x2="322" y2="95" class="wire"/>
+  <line x1="322" y1="75" x2="409" y2="102" class="wire"/><line x1="422" y1="56" x2="422" y2="95" class="wire"/>
+  <line x1="222" y1="125" x2="222" y2="160" class="wire" marker-end="url(#ar3)"/>
+  <line x1="322" y1="125" x2="322" y2="160" class="wire" marker-end="url(#ar3)"/>
+  <line x1="422" y1="125" x2="422" y2="160" class="wire" marker-end="url(#ar3)"/>
+</svg>
+<figcaption><b>Fig 1.8</b> Binary 1011 → Gray 1110. Each Gray bit (except the first) compares two neighbouring binary bits.</figcaption>
+</figure>
+
+<div class="ex">
+<h4>Example 1.5.5</h4>
+<p class="q">Convert binary 1011 0110 to Gray code.</p>
+<div class="tw"><table class="c">
+<tr><th>Position</th><th>7</th><th>6</th><th>5</th><th>4</th><th>3</th><th>2</th><th>1</th><th>0</th></tr>
+<tr><td>Binary B</td><td>1</td><td>0</td><td>1</td><td>1</td><td>0</td><td>1</td><td>1</td><td>0</td></tr>
+<tr><td>Rule</td><td>copy</td><td>1⊕0</td><td>0⊕1</td><td>1⊕1</td><td>1⊕0</td><td>0⊕1</td><td>1⊕1</td><td>1⊕0</td></tr>
+<tr><td>Gray G</td><td><b>1</b></td><td><b>1</b></td><td><b>1</b></td><td><b>0</b></td><td><b>1</b></td><td><b>1</b></td><td><b>0</b></td><td><b>1</b></td></tr>
+</table></div>
+<p class="ans">(10110110)<sub>2</sub> = (11101101)<sub>Gray</sub></p>
+</div>
+
+<h4>Gray to binary conversion</h4>
+<p>The MSB is copied. Each following binary bit is the ⊕ of the <b>binary bit just found</b> (to its left) and the Gray bit in the same position. Note the difference: here we use the <em>new binary</em> bit, not the neighbouring Gray bit.</p>
+<div class="formula">B<sub>n−1</sub> = G<sub>n−1</sub>  <br>      B<sub>i</sub> = B<sub>i+1</sub> ⊕ G<sub>i</sub></div>
+
+<div class="ex">
+<h4>Example 1.5.6</h4>
+<p class="q">Convert Gray codes (a) 1101 and (b) 1101 1010 to binary.</p>
+<div class="work">(a) G : 1    1    0    1
+    B : 1 → 1⊕1=0 → 0⊕0=0 → 0⊕1=1          = <span class="t">1001</span>
+
+(b) G : 1  1  0  1  1  0  1  0
+    B₇ = 1
+    B₆ = 1⊕1 = 0      B₅ = 0⊕0 = 0      B₄ = 0⊕1 = 1
+    B₃ = 1⊕1 = 0      B₂ = 0⊕0 = 0      B₁ = 0⊕1 = 1      B₀ = 1⊕0 = 1
+                                                      = <span class="t">1001 0011</span></div>
+<p class="ans">(a) 1001 (b) 10010011. Check (a) by converting back: 1001 → 1, 1⊕0 = 1, 0⊕0 = 0, 0⊕1 = 1 → 1101 ✓</p>
+</div>
+
+<figure>
+<svg viewBox="-30 -10 460 420" role="img" aria-label="Three-bit Gray code rotary encoder disk with eight sectors"><path d="M200.0,30.0 A170,170 0 0 1 320.2,79.8 L288.4,111.6 A125,125 0 0 0 200.0,75.0 Z" class="d-off"/><path d="M200.0,75.0 A125,125 0 0 1 288.4,111.6 L256.6,143.4 A80,80 0 0 0 200.0,120.0 Z" class="d-off"/><path d="M200.0,120.0 A80,80 0 0 1 256.6,143.4 L228.3,171.7 A40,40 0 0 0 200.0,160.0 Z" class="d-off"/><text x="273.5" y="26.6" class="d-lab" text-anchor="middle">000</text><path d="M320.2,79.8 A170,170 0 0 1 370.0,200.0 L325.0,200.0 A125,125 0 0 0 288.4,111.6 Z" class="d-on"/><path d="M288.4,111.6 A125,125 0 0 1 325.0,200.0 L280.0,200.0 A80,80 0 0 0 256.6,143.4 Z" class="d-off"/><path d="M256.6,143.4 A80,80 0 0 1 280.0,200.0 L240.0,200.0 A40,40 0 0 0 228.3,171.7 Z" class="d-off"/><text x="377.4" y="130.5" class="d-lab" text-anchor="middle">001</text><path d="M370.0,200.0 A170,170 0 0 1 320.2,320.2 L288.4,288.4 A125,125 0 0 0 325.0,200.0 Z" class="d-on"/><path d="M325.0,200.0 A125,125 0 0 1 288.4,288.4 L256.6,256.6 A80,80 0 0 0 280.0,200.0 Z" class="d-on"/><path d="M280.0,200.0 A80,80 0 0 1 256.6,256.6 L228.3,228.3 A40,40 0 0 0 240.0,200.0 Z" class="d-off"/><text x="377.4" y="277.5" class="d-lab" text-anchor="middle">011</text><path d="M320.2,320.2 A170,170 0 0 1 200.0,370.0 L200.0,325.0 A125,125 0 0 0 288.4,288.4 Z" class="d-off"/><path d="M288.4,288.4 A125,125 0 0 1 200.0,325.0 L200.0,280.0 A80,80 0 0 0 256.6,256.6 Z" class="d-on"/><path d="M256.6,256.6 A80,80 0 0 1 200.0,280.0 L200.0,240.0 A40,40 0 0 0 228.3,228.3 Z" class="d-off"/><text x="273.5" y="381.4" class="d-lab" text-anchor="middle">010</text><path d="M200.0,370.0 A170,170 0 0 1 79.8,320.2 L111.6,288.4 A125,125 0 0 0 200.0,325.0 Z" class="d-off"/><path d="M200.0,325.0 A125,125 0 0 1 111.6,288.4 L143.4,256.6 A80,80 0 0 0 200.0,280.0 Z" class="d-on"/><path d="M200.0,280.0 A80,80 0 0 1 143.4,256.6 L171.7,228.3 A40,40 0 0 0 200.0,240.0 Z" class="d-on"/><text x="126.5" y="381.4" class="d-lab" text-anchor="middle">110</text><path d="M79.8,320.2 A170,170 0 0 1 30.0,200.0 L75.0,200.0 A125,125 0 0 0 111.6,288.4 Z" class="d-on"/><path d="M111.6,288.4 A125,125 0 0 1 75.0,200.0 L120.0,200.0 A80,80 0 0 0 143.4,256.6 Z" class="d-on"/><path d="M143.4,256.6 A80,80 0 0 1 120.0,200.0 L160.0,200.0 A40,40 0 0 0 171.7,228.3 Z" class="d-on"/><text x="22.6" y="277.5" class="d-lab" text-anchor="middle">111</text><path d="M30.0,200.0 A170,170 0 0 1 79.8,79.8 L111.6,111.6 A125,125 0 0 0 75.0,200.0 Z" class="d-on"/><path d="M75.0,200.0 A125,125 0 0 1 111.6,111.6 L143.4,143.4 A80,80 0 0 0 120.0,200.0 Z" class="d-off"/><path d="M120.0,200.0 A80,80 0 0 1 143.4,143.4 L171.7,171.7 A40,40 0 0 0 160.0,200.0 Z" class="d-on"/><text x="22.6" y="130.5" class="d-lab" text-anchor="middle">101</text><path d="M79.8,79.8 A170,170 0 0 1 200.0,30.0 L200.0,75.0 A125,125 0 0 0 111.6,111.6 Z" class="d-off"/><path d="M111.6,111.6 A125,125 0 0 1 200.0,75.0 L200.0,120.0 A80,80 0 0 0 143.4,143.4 Z" class="d-off"/><path d="M143.4,143.4 A80,80 0 0 1 200.0,120.0 L200.0,160.0 A40,40 0 0 0 171.7,171.7 Z" class="d-on"/><text x="126.5" y="26.6" class="d-lab" text-anchor="middle">100</text><circle cx="200" cy="200" r="36" class="d-hub"/></svg>
+<figcaption><b>Fig 1.9</b> A 3-bit Gray code rotary encoder disk (dark = 1; inner ring = MSB, outer ring = LSB). Three sensors read one radius. Crossing any sector boundary changes only one ring, so a misaligned sensor can be off by at most one position.</figcaption>
+</figure>
+
+<h3>3. Alphanumeric codes</h3>
+<p>Computers must also handle letters, punctuation and control signals. An <b>alphanumeric code</b> assigns a bit pattern to each of these. The standard is <b>ASCII</b> (American Standard Code for Information Interchange), a <b>7-bit code</b> with 2<sup>7</sup> = 128 characters: 95 printable characters (letters, digits, punctuation and the space) and 33 control characters such as line feed and carriage return. It is usually stored in an 8-bit i.e 1 byte, with the eighth bit set to 0 or used as a parity bit.</p>
+
+<div class="tw"><table>
+<tr><th>Characters</th><th>Hex range</th><th>Binary pattern</th><th>Examples</th></tr>
+<tr><td>Control characters</td><td class="m">00 to 1F, 7F</td><td class="m">00x xxxx</td><td>NUL 00, LF 0A, CR 0D, ESC 1B, DEL 7F</td></tr>
+<tr><td>Space and punctuation</td><td class="m">20 to 2F …</td><td class="m">010 xxxx</td><td>space 20, ! 21, - 2D, . 2E</td></tr>
+<tr><td>Digits 0 to 9</td><td class="m">30 to 39</td><td class="m">011 dddd</td><td>0 = 30, 5 = 35, 9 = 39</td></tr>
+<tr><td>Capital letters A to Z</td><td class="m">41 to 5A</td><td class="m">10x xxxx</td><td>A = 41, D = 44, Z = 5A</td></tr>
+<tr><td>Small letters a to z</td><td class="m">61 to 7A</td><td class="m">11x xxxx</td><td>a = 61, z = 7A</td></tr>
+</table></div>
+<div class="key">
+<p><b>Useful patterns.</b> The low 4 bits of a digit character are its BCD value: ‘7’ = 011 <b>0111</b>. A small letter is its capital plus 20<sub>16</sub> (32): ‘A’ = 100 0001, ‘a’ = 110 0001; only one bit differs.</p>
+</div>
+<p>Other alphanumeric codes include <b>EBCDIC</b> (Extended BCD Interchange Code), an 8-bit code used on IBM mainframes, and <b>Unicode</b>, which extends the idea to cover every writing system, including Devanagari; its first 128 characters are identical to ASCII.</p>
+
+<div class="ex">
+<h4>Example 1.5.7</h4>
+<p class="q">Encode the text <span class="m">Hi 5!</span> in ASCII (hex and 7-bit binary).</p>
+<div class="tw"><table class="c">
+<tr><th>Character</th><th>H</th><th>i</th><th>(space)</th><th>5</th><th>!</th></tr>
+<tr><td>Hex</td><td class="m">48</td><td class="m">69</td><td class="m">20</td><td class="m">35</td><td class="m">21</td></tr>
+<tr><td>Binary</td><td class="m">1001000</td><td class="m">1101001</td><td class="m">0100000</td><td class="m">0110101</td><td class="m">0100001</td></tr>
+</table></div>
+<p class="ans">48 69 20 35 21 (hex), 5 characters × 7 bits = 35 bits</p>
+</div>
+
+<div class="ex">
+<h4>Example 1.5.8</h4>
+<p class="q">Decode the ASCII bit stream 1000100 1001100 0101101 0110001.</p>
+<div class="work">1000100 = 44₁₆ = <span class="t">D</span>
+1001100 = 4C₁₆ = <span class="t">L</span>
+0101101 = 2D₁₆ = <span class="t">-</span>
+0110001 = 31₁₆ = <span class="t">1</span>   (low 4 bits 0001 = digit 1)</div>
+<p class="ans">“DL-1”</p>
+</div>
+
+<h3>4. Error detection codes: parity</h3>
+<p>Noise on a line, or a fault in memory, can flip a bit from 0 to 1 or 1 to 0. The simplest defence is a <b>parity bit</b>: one extra bit added to the message so that the total number of 1s is always <b>even</b> (even parity) or always <b>odd</b> (odd parity). The sender generates the parity bit; the receiver counts the 1s again. If the count has the wrong parity, an error is detected and the receiver can request retransmission.</p>
+
+<figure>
+<svg viewBox="0 0 660 170" role="img" aria-label="Parity bit generated at sender, sent over noisy channel, checked at receiver">
+  <defs><marker id="ar4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="arrowhead"/></marker></defs>
+  <rect x="10" y="60" width="110" height="50" rx="4" class="box"/><text x="65" y="84" text-anchor="middle">Message</text><text x="65" y="101" text-anchor="middle" class="small mono">1000011</text>
+  <rect x="160" y="55" width="120" height="60" rx="4" class="box-t"/><text x="220" y="82" text-anchor="middle">Parity</text><text x="220" y="100" text-anchor="middle">generator</text>
+  <rect x="320" y="55" width="140" height="60" rx="4" class="box-s"/><text x="390" y="82" text-anchor="middle">Channel</text><text x="390" y="100" text-anchor="middle" class="small">noise may flip bits</text>
+  <rect x="500" y="55" width="140" height="60" rx="4" class="box-t"/><text x="570" y="82" text-anchor="middle">Parity</text><text x="570" y="100" text-anchor="middle">checker</text>
+  <line x1="120" y1="85" x2="158" y2="85" class="wire" marker-end="url(#ar4)"/>
+  <line x1="280" y1="85" x2="318" y2="85" class="wire" marker-end="url(#ar4)"/>
+  <line x1="460" y1="85" x2="498" y2="85" class="wire" marker-end="url(#ar4)"/>
+  <line x1="570" y1="115" x2="570" y2="148" class="wire" marker-end="url(#ar4)"/>
+  <text x="300" y="42" text-anchor="middle" class="small mono">1 1000011</text><text x="300" y="28" text-anchor="middle" class="small">P + message (4 ones: even)</text>
+  <text x="570" y="165" text-anchor="middle" class="small">error flag if count of 1s is odd</text>
+  <path d="M360,40 q10,-14 20,0 t20,0" class="wire" stroke-dasharray="3 2"/>
+</svg>
+<figcaption><b>Fig 1.10</b> Even-parity error detection</figcaption>
+</figure>
+
+<div class="ex">
+<h4>Example 1.5.9</h4>
+<p class="q">Find the even and odd parity bits for the messages (a) 1011001 (b) 1000011 (c) 0000000.</p>
+<div class="work">          number of 1s    even-parity P    odd-parity P
+(a) 1011001      4               0               1
+(b) 1000011      3               1               0
+(c) 0000000      0               0               1</div>
+<p class="ans">Even parity P makes the total count of 1s even; odd parity P is always its complement.</p>
+</div>
+
+<div class="ex">
+<h4>Example 1.5.10</h4>
+<p class="q">The ASCII character ‘C’ (1000011) is sent with an even-parity bit in the MSB position. What is sent? Show what the receiver concludes if (a) one bit is flipped, (b) two bits are flipped.</p>
+<div class="work">Sent            : <span class="t">1</span> 1000011        four 1s → even ✓
+(a) received    : 1 100<span class="r">1</span>011        five 1s → odd  → <span class="r">error detected</span>
+(b) received    : 1 100<span class="r">11</span>11        six 1s  → even → <span class="r">error NOT detected</span></div>
+<p class="ans">Sent 11000011. A single parity bit detects any <b>odd</b> number of flipped bits but misses an even number, and it can never tell <em>which</em> bit is wrong.</p>
+</div>
+
+<h3>5. Error correction codes: the Hamming code</h3>
+<p>Detection is enough when the message can be sent again. When it cannot (data read from memory, signals from a space probe), the receiver must find and <b>correct</b> the wrong bit itself. The <b>Hamming code</b> does this for any single-bit error by adding several parity bits, each checking a different overlapping group of positions. If one bit goes wrong, it breaks exactly the groups that contain it, and the pattern of broken groups spells out the position of the bad bit.</p>
+
+<h4>How many parity bits?</h4>
+<p>With <i>m</i> data bits and <i>p</i> parity bits the <i>p</i> checks must be able to name every one of the <i>m</i> + <i>p</i> positions, plus “no error”:</p>
+<div class="formula">The minimum number of <b>parity bits p</b> required to detect and correct a single-bit error in <i>m</i> data bits is given by :<br>2<sup>p</sup> ≥ m + p + 1</div>
+<div class="tw"><table class="c">
+<tr><th>Data bits m</th><th>Parity bits p</th><th>Check</th><th>Code length</th></tr>
+<tr><td>4</td><td>3</td><td>2<sup>3</sup> = 8 ≥ 8</td><td>7</td></tr>
+<tr><td>8</td><td>4</td><td>2<sup>4</sup> = 16 ≥ 13</td><td>12</td></tr>
+<tr><td>11</td><td>4</td><td>2<sup>4</sup> = 16 ≥ 16</td><td>15</td></tr>
+<tr><td>16</td><td>5</td><td>2<sup>5</sup> = 32 ≥ 22</td><td>21</td></tr>
+<tr><td>26</td><td>5</td><td>2<sup>5</sup> = 32 ≥ 32</td><td>31</td></tr>
+<tr><td>32</td><td>6</td><td>2<sup>6</sup> = 64 ≥ 39</td><td>38</td></tr>
+</table></div>
+<p>For a given <i>p</i>, the largest number of data bits that can be protected is 2<sup>p</sup> − p − 1. This gives the classic codes (7,4), (15,11) and (31,26).</p>
+
+<h4>Rule 1: where the parity bits go</h4>
+<p>Number the code positions 1, 2, 3, … from the left. Parity bits go in the positions that are <b>powers of 2</b> (1, 2, 4, 8, 16, …). Data bits fill all the other positions in order.</p>
+
+<h4>Rule 2: which positions does P<sub>k</sub> check? (the bit rule)</h4>
+<p>Write every position number in binary as b<sub>8</sub>b<sub>4</sub>b<sub>2</sub>b<sub>1</sub>. Parity bit P<sub>k</sub> checks <b>every position whose binary number has a 1 in the bit place worth <i>k</i></b>. In short:</p>
+<ul>
+<li><b>P1</b> checks the positions whose LSB (b<sub>1</sub>) is 1.</li>
+<li><b>P2</b> checks the positions whose second bit (b<sub>2</sub>) is 1.</li>
+<li><b>P4</b> checks the positions whose third bit (b<sub>4</sub>) is 1.</li>
+<li><b>P8</b> checks the positions whose fourth bit (b<sub>8</sub>) is 1.</li>
+</ul>
+<div class="tw"><table class="c">
+<tr><th>Position</th><th>b<sub>8</sub></th><th>b<sub>4</sub></th><th>b<sub>2</sub></th><th>b<sub>1</sub></th><th>Checked by</th></tr>
+<tr><td>1</td><td>0</td><td>0</td><td>0</td><td>1</td><td>P1</td></tr>
+<tr><td>2</td><td>0</td><td>0</td><td>1</td><td>0</td><td>P2</td></tr>
+<tr><td>3</td><td>0</td><td>0</td><td>1</td><td>1</td><td>P1, P2</td></tr>
+<tr><td>4</td><td>0</td><td>1</td><td>0</td><td>0</td><td>P4</td></tr>
+<tr><td>5</td><td>0</td><td>1</td><td>0</td><td>1</td><td>P1, P4</td></tr>
+<tr><td>6</td><td>0</td><td>1</td><td>1</td><td>0</td><td>P2, P4</td></tr>
+<tr><td>7</td><td>0</td><td>1</td><td>1</td><td>1</td><td>P1, P2, P4</td></tr>
+<tr><td>8</td><td>1</td><td>0</td><td>0</td><td>0</td><td>P8</td></tr>
+<tr><td>9</td><td>1</td><td>0</td><td>0</td><td>1</td><td>P1, P8</td></tr>
+<tr><td>10</td><td>1</td><td>0</td><td>1</td><td>0</td><td>P2, P8</td></tr>
+<tr><td>11</td><td>1</td><td>0</td><td>1</td><td>1</td><td>P1, P2, P8</td></tr>
+<tr><td>12</td><td>1</td><td>1</td><td>0</td><td>0</td><td>P4, P8</td></tr>
+</table></div>
+<p>Reading the table by columns gives the groups. Reading it by rows shows which parity bits watch each position: position 11 = 1011 = 8 + 2 + 1 is watched by P8, P2 and P1. Every position has a different binary number, so every position has a different set of watchers, and this is what lets the receiver pinpoint a single wrong bit.</p>
+<div class="tw"><table class="c">
+<tr><th>Parity bit</th><th>Rule</th><th>Checks positions (7-bit code)</th><th>Checks positions (12-bit code)</th></tr>
+<tr><td>P1</td><td>b<sub>1</sub> = 1 (…xxx1)</td><td>1, 3, 5, 7</td><td>1, 3, 5, 7, 9, 11</td></tr>
+<tr><td>P2</td><td>b<sub>2</sub> = 1 (…xx1x)</td><td>2, 3, 6, 7</td><td>2, 3, 6, 7, 10, 11</td></tr>
+<tr><td>P4</td><td>b<sub>4</sub> = 1 (…x1xx)</td><td>4, 5, 6, 7</td><td>4, 5, 6, 7, 12</td></tr>
+<tr><td>P8</td><td>b<sub>8</sub> = 1 (…1xxx)</td><td>not used</td><td>8, 9, 10, 11, 12</td></tr>
+</table></div>
+
+<h4>Shortcut: “check k, skip k”</h4>
+<p>The bit rule can be applied without writing binary numbers. For P<sub>k</sub>, <b>start at position k, check k positions, skip k positions</b>, and repeat until the end of the code word. This works because bit b<sub>k</sub> stays 1 for <i>k</i> positions, then 0 for <i>k</i> positions, over and over.</p>
+<div class="tw"><table class="c">
+<tr><th>Position</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th></tr>
+<tr><td>P1 (check 1, skip 1)</td><td>✓</td><td>–</td><td>✓</td><td>–</td><td>✓</td><td>–</td><td>✓</td><td>–</td><td>✓</td><td>–</td><td>✓</td><td>–</td></tr>
+<tr><td>P2 (check 2, skip 2)</td><td>–</td><td>✓</td><td>✓</td><td>–</td><td>–</td><td>✓</td><td>✓</td><td>–</td><td>–</td><td>✓</td><td>✓</td><td>–</td></tr>
+<tr><td>P4 (check 4, skip 4)</td><td>–</td><td>–</td><td>–</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>–</td><td>–</td><td>–</td><td>–</td><td>✓</td></tr>
+<tr><td>P8 (check 8, skip 8)</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td></tr>
+</table></div>
+<p>Common slips: starting every group at position 1 (P<sub>k</sub> starts at position <i>k</i>), and running past the last position of the code word (P4 in a 12-bit code checks only position 12 in its second block). In a 15-bit code P4 checks 4, 5, 6, 7, 12, 13, 14, 15.</p>
+
+<div class="key"><p><b>Why the parity bits do not depend on each other.</b> A parity position such as 2 = 0010 has a single 1 in its binary number, so it is checked only by its own parity bit. P1’s group therefore never contains P2, P4 or P8, and the same holds for every other parity bit. Each parity bit can be calculated directly from the data bits, in any order.</p></div>
+
+<h4>Rule 3: computing the parity bits (encoding)</h4>
+<ol>
+<li>Find <i>p</i> from 2<sup>p</sup> ≥ m + p + 1 and mark the power-of-2 positions as parity positions.</li>
+<li>Write the data bits into the remaining positions, in order.</li>
+<li>For each P<sub>k</sub>, list its group using the bit rule (or check k, skip k).</li>
+<li>Count the 1s among the <b>other</b> positions of the group, which are all data bits. P<sub>k</sub> itself is the unknown being found, so it is not counted.</li>
+<li>Even count: P<sub>k</sub> = 0. Odd count: P<sub>k</sub> = 1. The whole group, P<sub>k</sub> included, now holds an even number of 1s.</li>
+</ol>
+
+<div class="ex">
+<h4>Example 1.5.11 (encoding, 4 data bits)</h4>
+<p class="q">Form the 7-bit even-parity Hamming code for data 1011.</p>
+<div class="tw"><table class="c">
+<tr><th>Position</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th></tr>
+<tr><td>Role</td><td>P1</td><td>P2</td><td>D</td><td>P4</td><td>D</td><td>D</td><td>D</td></tr>
+<tr><td>Data placed</td><td>?</td><td>?</td><td>1</td><td>?</td><td>0</td><td>1</td><td>1</td></tr>
+</table></div>
+<div class="work">P1 : positions 3,5,7 = 1,0,1  → two 1s   → P1 = <span class="t">0</span>
+P2 : positions 3,6,7 = 1,1,1  → three 1s → P2 = <span class="t">1</span>
+P4 : positions 5,6,7 = 0,1,1  → two 1s   → P4 = <span class="t">0</span>
+Code (positions 1 to 7) : 0 1 1 0 0 1 1
+Check (full groups, parity bit included):
+P1 group 1,3,5,7 = 0,1,0,1 → two 1s   ✓ even
+P2 group 2,3,6,7 = 1,1,1,1 → four 1s  ✓ even
+P4 group 4,5,6,7 = 0,0,1,1 → two 1s   ✓ even</div>
+<p class="ans">Hamming code = 0110011</p>
+</div>
+
+<figure>
+<svg viewBox="0 0 540 380" role="img" aria-label="Venn diagram of three parity groups for the 7-bit Hamming code 0110011">
+  <circle cx="220" cy="150" r="95" fill="none" stroke="var(--trace)" stroke-width="2.2"/>
+  <circle cx="320" cy="150" r="95" fill="none" stroke="var(--signal)" stroke-width="2.2"/>
+  <circle cx="270" cy="235" r="95" fill="none" stroke="var(--ink-soft)" stroke-width="2.2"/>
+  <text x="110" y="55" font-weight="600" fill="var(--trace)">Group P1</text>
+  <text x="365" y="55" font-weight="600" fill="var(--signal)">Group P2</text>
+  <text x="270" y="355" text-anchor="middle" font-weight="600" fill="var(--ink-soft)">Group P4</text>
+  <g text-anchor="middle">
+  <text x="168" y="118" class="mono" font-size="18">0</text><text x="168" y="136" class="small">pos 1</text>
+  <text x="372" y="118" class="mono" font-size="18">1</text><text x="372" y="136" class="small">pos 2</text>
+  <text x="270" y="108" class="mono" font-size="18">1</text><text x="270" y="126" class="small">pos 3</text>
+  <text x="270" y="300" class="mono" font-size="18">0</text><text x="270" y="318" class="small">pos 4</text>
+  <text x="214" y="212" class="mono" font-size="18">0</text><text x="214" y="230" class="small">pos 5</text>
+  <text x="326" y="212" class="mono" font-size="18">1</text><text x="326" y="230" class="small">pos 6</text>
+  <text x="270" y="176" class="mono" font-size="18">1</text><text x="270" y="194" class="small">pos 7</text>
+  </g>
+</svg>
+<figcaption><b>Fig 1.11</b> The three parity groups of the 7-bit Hamming code as overlapping circles. Every circle holds an even number of 1s. A single wrong bit makes exactly the circles containing it odd, and the pattern of odd circles points to one region.</figcaption>
+</figure>
+
+<h4>Rule 4: checking and correcting at the receiver (decoding)</h4>
+<ol>
+<li>Recount each group, this time <b>including</b> the parity bit, because every bit now has a value and the parity bit itself might be the wrong one.</li>
+<li>Even number of 1s: C<sub>k</sub> = 0. Odd number: C<sub>k</sub> = 1.</li>
+<li>Read C<sub>8</sub>C<sub>4</sub>C<sub>2</sub>C<sub>1</sub> as a binary number. This is the <b>syndrome</b>.</li>
+<li>Syndrome = 0: no error detected. Syndrome ≠ 0: it equals the <b>position of the wrong bit</b>. Flip that bit.</li>
+<li>Read the data bits from the non-power-of-2 positions.</li>
+</ol>
+<div class="tw"><table class="c">
+<tr><th>Stage</th><th>Is P<sub>k</sub> counted?</th><th>Reason</th></tr>
+<tr><td>Encoding</td><td>No</td><td>P<sub>k</sub> is the unknown being found</td></tr>
+<tr><td>Decoding</td><td>Yes</td><td>P<sub>k</sub> has a value and may itself be the wrong bit</td></tr>
+</table></div>
+
+<h4>Applying the rules step by step: detect, locate and correct</h4>
+<p>Each step below states the rule first and then applies it to one running example, the 12-bit code of Example 1.5.15 (data 1011 0110, code word 1110 0110 0110). The word received is <b>1110 0110 0010</b>.</p>
+
+<div class="ex">
+<h4>Example 1.5.11A (full walkthrough)</h4>
+<p class="q">A 12-bit even-parity Hamming code word is received as 1110 0110 0010. Detect the error, locate it, correct it and recover the data.</p>
+
+<p><b>Step 1. Write the received bits against their position numbers.</b><br>Rule: position 1 is the leftmost bit.</p>
+<div class="tw"><table class="c">
+<tr><th>Position</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th></tr>
+<tr><td>Received bit</td><td>1</td><td>1</td><td>1</td><td>0</td><td>0</td><td>1</td><td>1</td><td>0</td><td>0</td><td>0</td><td>1</td><td>0</td></tr>
+</table></div>
+
+<p><b>Step 2. List the positions each check bit covers.</b><br>Rule: C<sub>k</sub> covers every position whose binary number has a 1 in the place worth <i>k</i> (check k, skip k). The 12-bit code needs C1, C2, C4 and C8.</p>
+<div class="tw"><table class="c">
+<tr><th>Check</th><th>Rule</th><th>Positions covered</th></tr>
+<tr><td>C1</td><td>LSB b<sub>1</sub> = 1</td><td>1, 3, 5, 7, 9, 11</td></tr>
+<tr><td>C2</td><td>b<sub>2</sub> = 1</td><td>2, 3, 6, 7, 10, 11</td></tr>
+<tr><td>C4</td><td>b<sub>4</sub> = 1</td><td>4, 5, 6, 7, 12</td></tr>
+<tr><td>C8</td><td>b<sub>8</sub> = 1</td><td>8, 9, 10, 11, 12</td></tr>
+</table></div>
+
+<p><b>Step 3. Copy the received bits into each group and count the 1s.</b><br>Rule: this time the parity bit <b>is included</b> in the count. An even count gives C<sub>k</sub> = 0 (group passes), and an odd count gives C<sub>k</sub> = 1 (group fails).</p>
+<div class="tw"><table class="c">
+<tr><th>Check</th><th>Positions</th><th>Bits in those positions</th><th>Number of 1s</th><th>Result</th></tr>
+<tr><td>C1</td><td>1, 3, 5, 7, 9, 11</td><td>1, 1, 0, 1, 0, 1</td><td>4 (even)</td><td>C1 = 0, passes</td></tr>
+<tr><td>C2</td><td>2, 3, 6, 7, 10, 11</td><td>1, 1, 1, 1, 0, 1</td><td>5 (odd)</td><td>C2 = <span class="r">1</span>, fails</td></tr>
+<tr><td>C4</td><td>4, 5, 6, 7, 12</td><td>0, 0, 1, 1, 0</td><td>2 (even)</td><td>C4 = 0, passes</td></tr>
+<tr><td>C8</td><td>8, 9, 10, 11, 12</td><td>0, 0, 0, 1, 0</td><td>1 (odd)</td><td>C8 = <span class="r">1</span>, fails</td></tr>
+</table></div>
+<p><b>Detection:</b> some groups failed, so the word contains an error. Had all four groups passed, we would stop here: no error detected.</p>
+
+<p><b>Step 4. Write the syndrome and convert it to decimal.</b><br>Rule: arrange the check bits as C<sub>8</sub>C<sub>4</sub>C<sub>2</sub>C<sub>1</sub> and read the result as a binary number.</p>
+<div class="tw"><table class="c">
+<tr><th></th><th>C8</th><th>C4</th><th>C2</th><th>C1</th></tr>
+<tr><td>Weight</td><td>8</td><td>4</td><td>2</td><td>1</td></tr>
+<tr><td>Value</td><td>1</td><td>0</td><td>1</td><td>0</td></tr>
+</table></div>
+<div class="work">Syndrome = 1010 (binary) = 8 + 0 + 2 + 0 = <span class="r">10</span></div>
+
+<p><b>Step 5. Locate the wrong bit.</b><br>Rule: the syndrome is the position number of the wrong bit. Only the groups that contain the wrong bit fail, and each failed group contributes a 1 to the binary number of that position. Here C8 and C2 failed while C4 and C1 passed, and the only position that is in groups P8 and P2 but not in P4 or P1 is 1010 = position 10.</p>
+<p>Is position 10 a power of 2? No, so it is a <b>data bit</b>. (If the syndrome were 1, 2, 4 or 8, the wrong bit would be a parity bit and the data would be undamaged.)</p>
+
+<p><b>Step 6. Correct it by flipping that bit.</b></p>
+<div class="work">Received  : 1 1 1 0  0 1 1 0  0 <span class="r">0</span> 1 0
+Flip bit 10 (0 → 1)
+Corrected : 1 1 1 0  0 1 1 0  0 <span class="t">1</span> 1 0   = 1110 0110 0110</div>
+
+<p><b>Step 7. Verify.</b><br>Rule: recount all four groups on the corrected word. Every group must now be even, giving syndrome 0000.</p>
+<div class="work">C1 : 1,3,5,7,9,11  = 1,1,0,1,0,1 → four 1s → 0 ✓
+C2 : 2,3,6,7,10,11 = 1,1,1,1,1,1 → six 1s  → 0 ✓
+C4 : 4,5,6,7,12    = 0,0,1,1,0   → two 1s  → 0 ✓
+C8 : 8,9,10,11,12  = 0,0,1,1,0   → two 1s  → 0 ✓
+Syndrome = 0000 → no error remains</div>
+
+<p><b>Step 8. Read the data bits.</b><br>Rule: take the bits in the non-power-of-2 positions 3, 5, 6, 7, 9, 10, 11, 12.</p>
+<div class="work">Positions 3 5 6 7 9 10 11 12
+Bits      1 0 1 1 0 1  1  0   → 1011 0110</div>
+<p class="ans">Error in position 10 (a data bit); corrected code 1110 0110 0110; data 1011 0110 recovered.</p>
+</div>
+
+<h4>Reading the syndrome quickly</h4>
+<div class="tw"><table class="c">
+<tr><th>Syndrome</th><th>Failed groups</th><th>Meaning</th></tr>
+<tr><td>0000</td><td>none</td><td>no error detected</td></tr>
+<tr><td>power of 2 (1, 2, 4, 8)</td><td>exactly one</td><td>that <b>parity bit</b> is wrong, data is fine</td></tr>
+<tr><td>any other non-zero value</td><td>two or more</td><td>the <b>data bit</b> at that position is wrong</td></tr>
+</table></div>
+<p>For the 7-bit code the failed groups map straight to the position:</p>
+<div class="tw"><table class="c">
+<tr><th>Failed groups</th><th>C4 C2 C1</th><th>Wrong position</th></tr>
+<tr><td>C1 only</td><td>001</td><td>1 (P1)</td></tr>
+<tr><td>C2 only</td><td>010</td><td>2 (P2)</td></tr>
+<tr><td>C1, C2</td><td>011</td><td>3</td></tr>
+<tr><td>C4 only</td><td>100</td><td>4 (P4)</td></tr>
+<tr><td>C1, C4</td><td>101</td><td>5</td></tr>
+<tr><td>C2, C4</td><td>110</td><td>6</td></tr>
+<tr><td>C1, C2, C4</td><td>111</td><td>7</td></tr>
+</table></div>
+
+<div class="ex">
+<h4>Example 1.5.12 (correcting an error)</h4>
+<p class="q">The code 0110011 from Example 1.5.11 is received as 0110001. Find and correct the error.</p>
+<div class="work">Received  : pos 1 2 3 4 5 6 7  =  0 1 1 0 0 0 1
+C1 : positions 1,3,5,7 = 0,1,0,1 → even → C1 = 0
+C2 : positions 2,3,6,7 = 1,1,0,1 → odd  → C2 = <span class="r">1</span>
+C4 : positions 4,5,6,7 = 0,0,0,1 → odd  → C4 = <span class="r">1</span>
+Syndrome C4 C2 C1 = 1 1 0 = <span class="r">6</span>  → bit 6 is wrong
+Flip bit 6 : 0110 0<span class="t">0→1</span> 1  → 0110011
+Data bits (positions 3,5,6,7) = 1 0 1 1</div>
+<p class="ans">Error in position 6; corrected code 0110011; data 1011 recovered.</p>
+</div>
+
+<div class="ex">
+<h4>Example 1.5.13 (8 data bits)</h4>
+<p class="q">Form the 12-bit Hamming code for the data byte 1100 0100.</p>
+<div class="tw"><table class="c">
+<tr><th>Position</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th></tr>
+<tr><td>Role</td><td>P1</td><td>P2</td><td>D</td><td>P4</td><td>D</td><td>D</td><td>D</td><td>P8</td><td>D</td><td>D</td><td>D</td><td>D</td></tr>
+<tr><td>Bit</td><td>?</td><td>?</td><td>1</td><td>?</td><td>1</td><td>0</td><td>0</td><td>?</td><td>0</td><td>1</td><td>0</td><td>0</td></tr>
+</table></div>
+<div class="work">P1 = parity of 3,5,7,9,11  = 1,1,0,0,0 → two 1s → <span class="t">0</span>
+P2 = parity of 3,6,7,10,11 = 1,0,0,1,0 → two 1s → <span class="t">0</span>
+P4 = parity of 5,6,7,12    = 1,0,0,0   → one 1   → <span class="t">1</span>
+P8 = parity of 9,10,11,12  = 0,1,0,0   → one 1   → <span class="t">1</span>
+Code: 0 0 1 1 1 0 0 1 0 1 0 0</div>
+<p class="ans">Hamming code = 0011 1001 0100</p>
+</div>
+
+<div class="ex">
+<h4>Example 1.5.14</h4>
+<p class="q">The code of Example 1.5.13 is received as 0011 0001 0100. Locate the error.</p>
+<div class="work">pos :  1 2 3 4 5 6 7 8 9 10 11 12
+bit :  0 0 1 1 0 0 0 1 0 1  0  0
+C1 : 1,3,5,7,9,11  = 0,1,0,0,0,0 → one 1  → <span class="r">1</span>
+C2 : 2,3,6,7,10,11 = 0,1,0,0,1,0 → two 1s → 0
+C4 : 4,5,6,7,12    = 1,0,0,0,0   → one 1  → <span class="r">1</span>
+C8 : 8,9,10,11,12  = 1,0,1,0,0   → two 1s → 0
+Syndrome C8 C4 C2 C1 = 0 1 0 1 = <span class="r">5</span></div>
+<p class="ans">Bit 5 is in error; flipping it gives back 001110010100.</p>
+</div>
+
+<div class="ex">
+<h4>Example 1.5.15 (encoding 10110110)</h4>
+<p class="q">Form the 12-bit Hamming code for the data byte 1011 0110.</p>
+<div class="tw"><table class="c">
+<tr><th>Position</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th></tr>
+<tr><td>Role</td><td>P1</td><td>P2</td><td>D</td><td>P4</td><td>D</td><td>D</td><td>D</td><td>P8</td><td>D</td><td>D</td><td>D</td><td>D</td></tr>
+<tr><td>Bit</td><td>?</td><td>?</td><td>1</td><td>?</td><td>0</td><td>1</td><td>1</td><td>?</td><td>0</td><td>1</td><td>1</td><td>0</td></tr>
+</table></div>
+<div class="work">P1 : 3,5,7,9,11  = 1,0,1,0,1 → three 1s → P1 = <span class="t">1</span>
+P2 : 3,6,7,10,11 = 1,1,1,1,1 → five 1s  → P2 = <span class="t">1</span>
+P4 : 5,6,7,12    = 0,1,1,0   → two 1s   → P4 = <span class="t">0</span>
+P8 : 9,10,11,12  = 0,1,1,0   → two 1s   → P8 = <span class="t">0</span>
+Code: 1 1 1 0 0 1 1 0 0 1 1 0</div>
+<p class="ans">Hamming code = 1110 0110 0110</p>
+</div>
+
+<div class="ex">
+<h4>Example 1.5.16 (error in a data bit and in a parity bit)</h4>
+<p class="q">The code of Example 1.5.15 is sent. (a) It is received as 1110 0110 0010. (b) It is received as 1111 0110 0110. Find the error in each case.</p>
+<div class="work"><b>(a)</b> pos : 1 2 3 4 5 6 7 8 9 10 11 12
+      bit : 1 1 1 0 0 1 1 0 0 0  1  0
+C1 : 1,3,5,7,9,11  = 1,1,0,1,0,1 → four 1s  → 0
+C2 : 2,3,6,7,10,11 = 1,1,1,1,0,1 → five 1s  → <span class="r">1</span>
+C4 : 4,5,6,7,12    = 0,0,1,1,0   → two 1s   → 0
+C8 : 8,9,10,11,12  = 0,0,0,1,0   → one 1    → <span class="r">1</span>
+Syndrome C8 C4 C2 C1 = 1 0 1 0 = <span class="r">10</span> → data bit 10 is wrong
+Flip bit 10 → 1110 0110 0110, data (3,5,6,7,9,10,11,12) = 1011 0110
+
+<b>(b)</b> pos : 1 2 3 4 5 6 7 8 9 10 11 12
+      bit : 1 1 1 1 0 1 1 0 0 1  1  0
+C1 = 0, C2 = 0, C8 = 0   (these groups do not contain position 4)
+C4 : 4,5,6,7,12 = 1,0,1,1,0 → three 1s → <span class="r">1</span>
+Syndrome = 0 1 0 0 = <span class="r">4</span> → parity bit P4 is wrong
+Flip bit 4 → 1110 0110 0110; the data bits were never damaged.</div>
+<p class="ans">(a) Error in position 10 (a data bit). (b) Error in position 4 (the parity bit P4). In both cases the syndrome is the position of the wrong bit.</p>
+</div>
+
+<h4>Shortcut: the XOR method</h4>
+<p>The syndrome equals the XOR of the <b>position numbers of all the 1s</b> in the received word. A valid code word gives 0. This also gives the parity bits directly: XOR the positions of the 1s among the <i>data</i> bits, and the result b<sub>8</sub>b<sub>4</sub>b<sub>2</sub>b<sub>1</sub> is the parity pattern P8 P4 P2 P1.</p>
+<div class="ex">
+<h4>Example 1.5.17</h4>
+<p class="q">Use the XOR shortcut method to find the parity bits for the data 1011 0110 (Example 1.5.15).</p>
+
+<p><b>Step 1: Number the Hamming positions.</b> For 8 data bits, four parity bits are needed, at positions 1, 2, 4, 8. The data bits occupy positions 3, 5, 6, 7, 9, 10, 11, 12.</p>
+
+<p><b>Step 2: Find the positions containing data bit 1.</b> We only need the positions where the data bit is 1.</p>
+<div class="tw"><table class="c">
+<tr><th>Hamming position</th><th>3</th><th>5</th><th>6</th><th>7</th><th>9</th><th>10</th><th>11</th><th>12</th></tr>
+<tr><td>Data bit</td><td>1</td><td>0</td><td>1</td><td>1</td><td>0</td><td>1</td><td>1</td><td>0</td></tr>
+</table></div>
+<p>Positions with a 1: <b>3, 6, 7, 10, 11</b></p>
+
+<p><b>Step 3: Convert these positions to binary</b> (four bits, in the order P8 P4 P2 P1).</p>
+<div class="tw"><table class="c">
+<tr><th>Position</th><th>P8</th><th>P4</th><th>P2</th><th>P1</th></tr>
+<tr><td>3</td><td>0</td><td>0</td><td>1</td><td>1</td></tr>
+<tr><td>6</td><td>0</td><td>1</td><td>1</td><td>0</td></tr>
+<tr><td>7</td><td>0</td><td>1</td><td>1</td><td>1</td></tr>
+<tr><td>10</td><td>1</td><td>0</td><td>1</td><td>0</td></tr>
+<tr><td>11</td><td>1</td><td>0</td><td>1</td><td>1</td></tr>
+</table></div>
+
+<p><b>Step 4: XOR the positions containing 1.</b> Instead of finding P1, P2, P4 and P8 separately, XOR the binary positions directly.</p>
+<div class="work">3 = 0011
+0011 ⊕ 0110 = 0101
+0101 ⊕ 0111 = 0010
+0010 ⊕ 1010 = 1000
+1000 ⊕ 1011 = <span class="t">0011</span></div>
+
+<p><b>Final XOR result:</b> 0011, read as P8 P4 P2 P1.</p>
+<div class="tw"><table class="c">
+<tr><th>Parity bit</th><th>P8</th><th>P4</th><th>P2</th><th>P1</th></tr>
+<tr><td>Value</td><td><b>0</b></td><td><b>0</b></td><td><b>1</b></td><td><b>1</b></td></tr>
+</table></div>
+<p class="ans">P1 = 1, P2 = 1, P4 = 0, P8 = 0. Same result as the table method.</p>
+<div class="key"><p><b>XOR shortcut rule.</b> Find the positions of all data bits that are 1, convert those positions to binary, and XOR them together. The final result is directly the parity pattern P8 P4 P2 P1.</p></div>
+</div>
+
+<div class="ex">
+<h4>Example 1.5.18 (two errors fool the code)</h4>
+<p class="q">The code 1110 0110 0110 is received as 1100 1110 0110, with positions 3 and 5 both wrong. What does the decoder do?</p>
+<div class="work">pos : 1 2 3 4 5 6 7 8 9 10 11 12
+bit : 1 1 0 0 1 1 1 0 0 1  1  0
+C1 : 1,3,5,7,9,11  = 1,0,1,1,0,1 → four 1s  → 0
+C2 : 2,3,6,7,10,11 = 1,0,1,1,1,1 → five 1s  → <span class="r">1</span>
+C4 : 4,5,6,7,12    = 0,1,1,1,0   → three 1s → <span class="r">1</span>
+C8 : 8,9,10,11,12  = 0,0,1,1,0   → two 1s   → 0
+Syndrome = 0 1 1 0 = <span class="r">6</span>
+Check: 0011 ⊕ 0101 = 0110 = 6 (the positions of the two real errors)</div>
+<p class="ans">The decoder flips position 6, which was correct, and the data comes out as 0101 0110 instead of 1011 0110. The basic Hamming code cannot detect two errors.</p>
+</div>
+
+<div class="key"><p><b>Limit of the basic Hamming code.</b> It corrects one wrong bit but cannot handle two: a double error produces a non-zero syndrome that points to the wrong place (Example 1.5.18). Adding one more parity bit over the whole code word gives a code that corrects single errors and also <em>detects</em> double errors (SEC-DED), as used in ECC computer memory.</p></div>
+
+<h4>Summary of the rules</h4>
+<div class="tw"><table class="c">
+<tr><th>Item</th><th>Rule</th></tr>
+<tr><td>Number of parity bits</td><td>2<sup>p</sup> ≥ m + p + 1</td></tr>
+<tr><td>Parity positions</td><td>1, 2, 4, 8, … (powers of 2)</td></tr>
+<tr><td>Data positions</td><td>all other positions, filled in order</td></tr>
+<tr><td>P1 checks</td><td>positions with b<sub>1</sub> = 1: 1, 3, 5, 7, 9, 11, … (check 1, skip 1)</td></tr>
+<tr><td>P2 checks</td><td>positions with b<sub>2</sub> = 1: 2, 3, 6, 7, 10, 11, … (check 2, skip 2)</td></tr>
+<tr><td>P4 checks</td><td>positions with b<sub>4</sub> = 1: 4–7, 12–15, … (check 4, skip 4)</td></tr>
+<tr><td>P8 checks</td><td>positions with b<sub>8</sub> = 1: 8–15, … (check 8, skip 8)</td></tr>
+<tr><td>Encoding</td><td>count the 1s in the group without P<sub>k</sub>; choose P<sub>k</sub> to make the group even</td></tr>
+<tr><td>Decoding</td><td>recount each group with P<sub>k</sub>; C<sub>k</sub> = 0 if even, 1 if odd</td></tr>
+<tr><td>Syndrome C<sub>8</sub>C<sub>4</sub>C<sub>2</sub>C<sub>1</sub></td><td>0 = no error; otherwise the position of the wrong bit, so flip it</td></tr>
+</table></div>
+
+<div class="exercises">
+<h3>Exercises: 1.5</h3>
+<ol>
+<li>Write (8407)<sub>10</sub> in BCD and in excess-3.
+<details><summary>Show answer</summary><div class="a">BCD: 1000 0100 0000 0111. Excess-3: 1011 0111 0011 1010.</div></details></li>
+<li>Decode the BCD numbers (a) 0110 1001 0101 (b) 1001 1100.
+<details><summary>Show answer</summary><div class="a">(a) 695 (b) invalid, since 1100 is not a BCD digit.</div></details></li>
+<li>How many bits are needed to write (9999)<sub>10</sub> in (a) BCD (b) binary?
+<details><summary>Show answer</summary><div class="a">(a) 4 digits × 4 = 16 bits (b) 14 bits (2<sup>13</sup> = 8192 &lt; 9999 ≤ 16383)</div></details></li>
+<li>Convert binary to Gray: (a) 10011 (b) 1101011.
+<details><summary>Show answer</summary><div class="a">(a) 11010 (b) 1011110</div></details></li>
+<li>Convert Gray to binary: (a) 11100 (b) 1010101.
+<details><summary>Show answer</summary><div class="a">(a) 10111 (b) 1100110</div></details></li>
+<li>Write the text <span class="m">EE-1</span> in 7-bit ASCII.
+<details><summary>Show answer</summary><div class="a">E = 1000101, E = 1000101, - = 0101101, 1 = 0110001 (hex 45 45 2D 31)</div></details></li>
+<li>Find the even and the odd parity bit for 1101010.
+<details><summary>Show answer</summary><div class="a">Four 1s: even parity bit 0, odd parity bit 1.</div></details></li>
+<li>Form 7-bit Hamming codes (even parity) for data (a) 1101 (b) 0110.
+<details><summary>Show answer</summary><div class="a">(a) 1010101 (b) 1100110
+<div class="work"><b>(a)</b> Data 1101 goes to positions 3, 5, 6, 7 as 1, 1, 0, 1
+P1 : 3,5,7 = 1,1,1 → three 1s → P1 = 1
+P2 : 3,6,7 = 1,0,1 → two 1s   → P2 = 0
+P4 : 5,6,7 = 1,0,1 → two 1s   → P4 = 0
+Code (1 to 7) : 1 0 1 0 1 0 1
+
+<b>(b)</b> Data 0110 goes to positions 3, 5, 6, 7 as 0, 1, 1, 0
+P1 : 3,5,7 = 0,1,0 → one 1  → P1 = 1
+P2 : 3,6,7 = 0,1,0 → one 1  → P2 = 1
+P4 : 5,6,7 = 1,1,0 → two 1s → P4 = 0
+Code (1 to 7) : 1 1 0 0 1 1 0</div></div></details></li>
+
+<li>A 7-bit Hamming code word is received as 0110010. Find the error, the corrected word and the data.
+<details><summary>Show answer</summary><div class="a">Error in position 7; corrected word 0110011; data 1011.
+<div class="work">pos : 1 2 3 4 5 6 7
+bit : 0 1 1 0 0 1 0
+C1 : 1,3,5,7 = 0,1,0,0 → one 1    → 1
+C2 : 2,3,6,7 = 1,1,1,0 → three 1s → 1
+C4 : 4,5,6,7 = 0,0,1,0 → one 1    → 1
+Syndrome C4 C2 C1 = 1 1 1 = 7 → bit 7 is wrong
+Flip bit 7 : 0110010 → 0110011
+Data (positions 3,5,6,7) = 1 0 1 1</div></div></details></li>
+
+<li>How many parity bits are needed for a Hamming code with 16 data bits? Form the 12-bit code for data 1001 1010.
+<details><summary>Show answer</summary><div class="a">5 parity bits (2<sup>5</sup> = 32 ≥ 22). Code for 10011010: 0111 0010 1010.
+<div class="work"><b>Parity bits for 16 data bits</b>
+p = 4 : 2<sup>4</sup> = 16 ≥ 16 + 4 + 1 = 21 ? No
+p = 5 : 2<sup>5</sup> = 32 ≥ 16 + 5 + 1 = 22 ? Yes → 5 parity bits
+
+<b>Code for the byte 1001 1010</b> (8 data bits, so p = 4, length 12)
+Data goes to positions 3,5,6,7,9,10,11,12 as 1,0,0,1,1,0,1,0
+P1 : 3,5,7,9,11  = 1,0,1,1,1 → four 1s  → P1 = 0
+P2 : 3,6,7,10,11 = 1,0,1,0,1 → three 1s → P2 = 1
+P4 : 5,6,7,12    = 0,0,1,0   → one 1    → P4 = 1
+P8 : 9,10,11,12  = 1,0,1,0   → two 1s   → P8 = 0
+Code (1 to 12) : 0 1 1 1 0 0 1 0 1 0 1 0</div></div></details></li>
+
+<li>(a) How many parity bits and what code length are needed for 11 data bits? (b) Which positions does P4 check in the resulting code?
+<details><summary>Show answer</summary><div class="a">(a) 4 parity bits, length 15. (b) 4, 5, 6, 7, 12, 13, 14, 15.
+<div class="work"><b>(a)</b> p = 3 : 2<sup>3</sup> = 8 ≥ 11 + 3 + 1 = 15 ? No
+p = 4 : 2<sup>4</sup> = 16 ≥ 11 + 4 + 1 = 16 ? Yes
+Code length = 11 + 4 = 15
+
+<b>(b)</b> P4 starts at position 4: check 4, skip 4, check 4, skip 4
+Check 4,5,6,7 → skip 8,9,10,11 → check 12,13,14,15
+(binary check: these are the positions with b<sub>4</sub> = 1)</div></div></details></li>
+
+<li>The 12-bit word 1111 0110 0110 is received with a single error. Find the error and the data sent.
+<details><summary>Show answer</summary><div class="a">Error in position 4 (parity bit P4); corrected word 1110 0110 0110; data 1011 0110.
+<div class="work">pos : 1 2 3 4 5 6 7 8 9 10 11 12
+bit : 1 1 1 1 0 1 1 0 0 1  1  0
+C1 : 1,3,5,7,9,11  = 1,1,0,1,0,1 → four 1s  → 0
+C2 : 2,3,6,7,10,11 = 1,1,1,1,1,1 → six 1s   → 0
+C4 : 4,5,6,7,12    = 1,0,1,1,0   → three 1s → 1
+C8 : 8,9,10,11,12  = 0,0,1,1,0   → two 1s   → 0
+Syndrome C8 C4 C2 C1 = 0 1 0 0 = 4
+Position 4 is a parity position, so the data is unharmed.
+Flip bit 4 → 1110 0110 0110
+Data (3,5,6,7,9,10,11,12) = 1,0,1,1,0,1,1,0 = 1011 0110</div></div></details></li>
+
+<li>Form the 12-bit Hamming code for the data byte 0110 1001.
+<details><summary>Show answer</summary><div class="a">0101 1100 1001
+<div class="work">Data goes to positions 3,5,6,7,9,10,11,12 as 0,1,1,0,1,0,0,1
+P1 : 3,5,7,9,11  = 0,1,0,1,0 → two 1s   → P1 = 0
+P2 : 3,6,7,10,11 = 0,1,0,0,0 → one 1    → P2 = 1
+P4 : 5,6,7,12    = 1,1,0,1   → three 1s → P4 = 1
+P8 : 9,10,11,12  = 1,0,0,1   → two 1s   → P8 = 0
+Code (1 to 12) : 0 1 0 1 1 1 0 0 1 0 0 1
+Check, full groups:
+P1: 1,3,5,7,9,11  = 0,0,1,0,1,0 → two 1s  ✓
+P2: 2,3,6,7,10,11 = 1,0,1,0,0,0 → two 1s  ✓
+P4: 4,5,6,7,12    = 1,1,1,0,1   → four 1s ✓
+P8: 8,9,10,11,12  = 0,1,0,0,1   → two 1s  ✓</div></div></details></li>
+
+<li>The code of Exercise 13 is received as 0101 1100 0001. Find the error and recover the data.
+<details><summary>Show answer</summary><div class="a">Error in position 9; corrected word 0101 1100 1001; data 0110 1001.
+<div class="work">pos : 1 2 3 4 5 6 7 8 9 10 11 12
+bit : 0 1 0 1 1 1 0 0 0 0  0  1
+C1 : 1,3,5,7,9,11  = 0,0,1,0,0,0 → one 1   → 1
+C2 : 2,3,6,7,10,11 = 1,0,1,0,0,0 → two 1s  → 0
+C4 : 4,5,6,7,12    = 1,1,1,0,1   → four 1s → 0
+C8 : 8,9,10,11,12  = 0,0,0,0,1   → one 1   → 1
+Syndrome C8 C4 C2 C1 = 1 0 0 1 = 9
+Flip bit 9 (0 → 1) : 0101 1100 1001
+Data (3,5,6,7,9,10,11,12) = 0,1,1,0,1,0,0,1 = 0110 1001
+XOR check: 1s at positions 2,4,5,6,12 give a non-zero result,
+but the syndrome 9 = 1001 is exactly the XOR of those positions
+(0010 ⊕ 0100 ⊕ 0101 ⊕ 0110 ⊕ 1100 = 1001).</div></div></details></li>
+</ol>
+</div>
+</section>
+
+<!-- ======================= Formula sheet ======================= -->
+<section class="topic" id="sheet">
+<h2><span class="n">∑</span>Formula sheet for Unit 1</h2>
+<div class="tw"><table>
+<tr><th>Item</th><th>Rule</th></tr>
+<tr><td>Patterns with n bits</td><td class="m">2<sup>n</sup></td></tr>
+<tr><td>Bits to code N items</td><td>smallest n with 2<sup>n</sup> ≥ N</td></tr>
+<tr><td>ADC resolution</td><td class="m">range ÷ 2<sup>n</sup></td></tr>
+<tr><td>Value of a base-r number</td><td class="m">Σ a<sub>i</sub>·r<sup>i</sup> (i negative after the point)</td></tr>
+<tr><td>Decimal integer → base r</td><td>repeated ÷ r, remainders read bottom to top</td></tr>
+<tr><td>Decimal fraction → base r</td><td>repeated × r, integer parts read top to bottom</td></tr>
+<tr><td>Binary ↔ octal / hex</td><td>groups of 3 / 4 bits outward from the point</td></tr>
+<tr><td>(r − 1)’s complement</td><td class="m">(r<sup>n</sup> − 1) − N</td></tr>
+<tr><td>r’s complement</td><td class="m">r<sup>n</sup> − N = (r − 1)’s complement + 1</td></tr>
+<tr><td>Unsigned range</td><td class="m">0 … 2<sup>n</sup> − 1</td></tr>
+<tr><td>Sign-magnitude, 1’s comp. range</td><td class="m">−(2<sup>n−1</sup> − 1) … +(2<sup>n−1</sup> − 1)</td></tr>
+<tr><td>2’s complement range</td><td class="m">−2<sup>n−1</sup> … +(2<sup>n−1</sup> − 1)</td></tr>
+<tr><td>Reading a complement result</td><td>Unsigned: end carry → +result, no carry → −(2’s comp). Signed: MSB 0 → +result, MSB 1 → −(2’s comp)</td></tr>
+<tr><td>Overflow (2’s comp.)</td><td>C<sub>in</sub> = C<sub>out</sub> (00 or 11) → no overflow; C<sub>in</sub> ≠ C<sub>out</sub> (10 or 01) → overflow</td></tr>
+<tr><td>Binary → Gray</td><td class="m">G<sub>msb</sub> = B<sub>msb</sub>,  G<sub>i</sub> = B<sub>i+1</sub> ⊕ B<sub>i</sub></td></tr>
+<tr><td>Gray → binary</td><td class="m">B<sub>msb</sub> = G<sub>msb</sub>,  B<sub>i</sub> = B<sub>i+1</sub> ⊕ G<sub>i</sub></td></tr>
+<tr><td>Hamming parity bits</td><td class="m">2<sup>p</sup> ≥ m + p + 1; parity at positions 1, 2, 4, 8 …</td></tr>
+<tr><td>Hamming check groups</td><td>P<sub>k</sub> checks every position whose binary number has a 1 in the place worth k (check k, skip k); encoding: P<sub>k</sub> makes its group even without counting itself</td></tr>
+<tr><td>Hamming syndrome</td><td>C8C4C2C1 = position of the wrong bit (0 = no error)</td></tr>
+</table></div>
+</section>
+
+<!-- ======================= MCQ ======================= -->
+<section class="topic" id="mcq">
+<h2><span class="n">?</span>MCQ practice test</h2>
+<p>Choose one answer for each question, then press <b>Check answers</b> to see your score and an explanation for every question. Work the numerical questions on paper first.</p>
+<div id="quiz"></div>
+<div class="quiz-bar">
+  <span class="score" id="score" aria-live="polite">0 of 28 answered</span>
+  <span>
+    <button class="btn p" type="button" id="checkBtn">Check answers</button>
+    <button class="btn s" type="button" id="resetBtn">Start again</button>
+  </span>
+</div>
+</section>
+
+</main>
+</div>
+
+<footer>
+  Digital Logic (BT102CO), Unit 1: Number systems. Prepared according to the course syllabus: 1.1 Introduction, 1.2 Analog vs digital systems, 1.3 Number systems and conversion, 1.4 Signed and unsigned numbers, fraction conversion and binary arithmetic, 1.5 BCD, Gray, alphanumeric, error detection and correction codes. Reference: M. Morris Mano, Digital Logic and Computer Design; Floyd and Jain, Digital Fundamentals.
+</footer>
+
+<script>
+const Q = [
+ ["Which of the following is a discrete (digital) quantity?", ["Room temperature","Number of students in a class","Speed of a moving car","Height of a tree"],1,"A head-count can only take whole-number values; the others vary continuously."],
+ ["The main reason digital systems are preferred over analog systems is:", ["They need less bandwidth","They are more immune to noise","They need no conversion","They process signals of any value"],1,"Only the level band (0 or 1) matters, so small noise is ignored. Digital actually needs more bandwidth and needs ADC/DAC."],
+ ["Minimum number of bits needed to give a unique code to 1 500 items:", ["10","11","12","15"],1,"2¹⁰ = 1024 is too few; 2¹¹ = 2048 ≥ 1500."],
+ ["A 3-bit ADC with a range of 0 to 5 V has a resolution of:", ["0.5 V","0.625 V","1.25 V","1.67 V"],1,"5 ÷ 2³ = 5 ÷ 8 = 0.625 V."],
+ ["(1011.01)₂ in decimal is:", ["11.25","11.5","13.25","11.01"],0,"8 + 0 + 2 + 1 + 0 + 0.25 = 11.25."],
+ ["(3FA7)₁₆ in decimal is:", ["16247","16295","15783","16303"],1,"3×4096 + 15×256 + 10×16 + 7 = 12288 + 3840 + 160 + 7 = 16295."],
+ ["(157)₁₀ in binary is:", ["10011101","10111001","10011011","11011001"],0,"Repeated division gives remainders 1,0,1,1,1,0,0,1; read upward: 10011101."],
+ ["(7254)₈ in hexadecimal is:", ["EAC","E5C","7AC","DAC"],0,"111 010 101 100 regrouped as 1110 1010 1100 = EAC."],
+ ["(212)₃ written in base 5 is:", ["32","43","34","122"],1,"(212)₃ = 23; 23 = 4×5 + 3 = (43)₅."],
+ ["The largest digit that can appear in an octal number is:", ["8","7","9","F"],1,"A base-r system uses digits 0 to r − 1."],
+ ["The range of an 8-bit signed 2's complement number is:", ["−127 to +127","−128 to +127","−127 to +128","0 to 255"],1,"−2⁷ to 2⁷ − 1."],
+ ["The 2's complement of 01101100 is:", ["10010011","10010100","10011100","01101101"],1,"Copy up to the first 1 from the right (100), invert the rest: 10010100."],
+ ["The 8-bit 2's complement number 11010011 represents:", ["−45","−44","−83","211"],0,"211 − 256 = −45 (or: its 2's complement is 00101101 = 45)."],
+ ["Which system has two representations of zero?", ["Unsigned binary","2's complement","1's complement","Gray code"],2,"1's complement has 0000… (+0) and 1111… (−0). Sign-magnitude also has two zeros."],
+ ["−45 in 8-bit sign-magnitude form is:", ["11010011","11010010","10101101","00101101"],2,"Sign bit 1 followed by 45 = 0101101."],
+ ["In 2's complement addition, overflow is indicated when:", ["There is an end carry","Carry into the sign bit differs from carry out of it","The result is negative","Both numbers are negative"],1,"An end carry alone is normal and discarded; overflow is the mismatch of the two sign-position carries."],
+ ["In 8-bit 2's complement, (+70) + (+80) gives:", ["+150","−106 with overflow","+106","−150"],1,"01000110 + 01010000 = 10010110 which reads as −106; two positives gave a negative, so overflow."],
+ ["(0.625)₁₀ in binary is:", ["0.011","0.101","0.110","0.1001"],1,"0.625×2 = 1.25 → 1, 0.25×2 = 0.5 → 0, 0.5×2 = 1.0 → 1."],
+ ["The 9's complement of 3250 (4 digits) is:", ["6750","6749","7650","6759"],1,"9999 − 3250 = 6749."],
+ ["1011 × 101 in binary equals:", ["110111","101111","110011","111011"],0,"11 × 5 = 55 = 110111."],
+ ["(59)₁₀ in BCD is:", ["0011 1011","0101 1001","0111 1011","0101 1010"],1,"5 → 0101, 9 → 1001; each digit is coded separately."],
+ ["Which of these is NOT a valid BCD digit?", ["1001","0111","1011","0000"],2,"1010 to 1111 are unused in BCD; 1011 (eleven) is invalid."],
+ ["The Gray code of binary 1011 is:", ["1101","1110","1001","0111"],1,"1, 1⊕0 = 1, 0⊕1 = 1, 1⊕1 = 0 → 1110."],
+ ["The key property of the Gray code is that:", ["It is weighted","It is self-complementing","Successive values differ in only one bit","It detects errors"],2,"Only one bit changes per step, which prevents false readings during transitions."],
+ ["Standard ASCII is a code of:", ["6 bits","7 bits","8 bits","16 bits"],1,"7 bits give 128 characters; the 8th bit of a byte is spare or used for parity."],
+ ["The even parity bit for the message 1101001 is:", ["0","1","Either","Cannot be found"],0,"The message has four 1s, already even, so P = 0."],
+ ["A single parity bit can:", ["Correct one error","Detect any odd number of bit errors","Detect all errors","Locate the wrong bit"],1,"An even number of flips keeps parity correct and goes unnoticed; the bit's position is never known."],
+ ["In a 7-bit Hamming code, check bits C4C2C1 = 110 mean:", ["No error","Error in bit 3","Error in bit 6","Two bits in error"],2,"The syndrome read as a binary number, 110 = 6, gives the position of the wrong bit."]
+];
+const quiz = document.getElementById('quiz'), scoreEl = document.getElementById('score');
+const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+function build(){
+  quiz.innerHTML = Q.map((q,i)=>`
+   <fieldset class="mcq" id="q${i}" style="margin-inline:0">
+     <legend class="qt"><span class="qn">Q${i+1}</span>${esc(q[0])}</legend>
+     <div class="opts">${q[1].map((o,j)=>`
+       <label><input type="radio" name="q${i}" value="${j}"><span>${String.fromCharCode(97+j)}) ${esc(o)}</span></label>`).join('')}
+     </div>
+     <div class="fb"></div>
+   </fieldset>`).join('');
+  quiz.addEventListener('change', count);
+  count();
+}
+function count(){
+  const n = Q.filter((_,i)=>document.querySelector(`input[name=q${i}]:checked`)).length;
+  scoreEl.textContent = `${n} of ${Q.length} answered`;
+}
+function check(){
+  let right = 0;
+  Q.forEach((q,i)=>{
+    const box = document.getElementById('q'+i), sel = box.querySelector('input:checked');
+    box.classList.add('done');
+    box.querySelectorAll('label').forEach((l,j)=>{
+      l.classList.remove('right','wrong');
+      if (j===q[2]) l.classList.add('right');
+      else if (sel && +sel.value===j) l.classList.add('wrong');
+    });
+    const ok = sel && +sel.value===q[2]; if (ok) right++;
+    box.querySelector('.fb').innerHTML = (ok?'<b class="ok">Correct.</b> ':(sel?'<b class="no">Not quite.</b> ':'<b class="no">Not answered.</b> ')) +
+      `Answer: ${String.fromCharCode(97+q[2])}) ${esc(q[1][q[2]])}. ${esc(q[3])}`;
+  });
+  scoreEl.textContent = `Score: ${right} of ${Q.length} (${Math.round(100*right/Q.length)}%)`;
+}
+function reset(){ quiz.innerHTML=''; build(); document.getElementById('mcq').scrollIntoView(); }
+document.getElementById('checkBtn').addEventListener('click', check);
+document.getElementById('resetBtn').addEventListener('click', reset);
+build();
+
+// theme toggle (remembered per viewer)
+const root = document.documentElement, btn = document.getElementById('themeBtn');
+try { const t = localStorage.getItem('dl-theme'); if (t) root.dataset.theme = t; } catch(e){}
+btn.addEventListener('click', ()=>{
+  const dark = root.dataset.theme ? root.dataset.theme==='dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  root.dataset.theme = dark ? 'light' : 'dark';
+  try { localStorage.setItem('dl-theme', root.dataset.theme); } catch(e){}
+});
+</script>
+</body>
+</html>

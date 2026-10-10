@@ -1,0 +1,1449 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Unit 5 Combinational Logic with MSI and LSI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: lab-manual lesson page — sticky contents rail on the left, one reading column with full-width circuit benches */
+:root{
+  --bg:#f4f6f9; --surface:#ffffff; --ink:#17202b; --muted:#5a6575; --line:#d8dee7;
+  --accent:#1d5bb8; --tint:#e6eefa;
+  --hi:#d9480f; --hi-tint:#fdeadf; --wire:#9aa5b4;
+  --g1:#d9480f; --g2:#1f8a5b; --g3:#6f42c1; --g4:#c2255c;
+  --f-display:"Archivo", "Helvetica Neue", Arial, sans-serif;
+  --f-body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#10151c; --surface:#171f29; --ink:#e5eaf0; --muted:#9aa6b5; --line:#2a3442;
+  --accent:#74a3ee; --tint:#1a2940; --hi:#ff8a3d; --hi-tint:#3a2414; --wire:#4d5a6b;
+  --g1:#ff8a3d; --g2:#4cc38a; --g3:#a98bf0; --g4:#f06595; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#10151c; --surface:#171f29; --ink:#e5eaf0; --muted:#9aa6b5; --line:#2a3442;
+  --accent:#74a3ee; --tint:#1a2940; --hi:#ff8a3d; --hi-tint:#3a2414; --wire:#4d5a6b;
+  --g1:#ff8a3d; --g2:#4cc38a; --g3:#a98bf0; --g4:#f06595; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:17px/1.6 var(--f-body);margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:28px 80px;display:grid;grid-template-columns:230px minmax(0,1fr);gap:48px}
+@media (max-width:900px){.wrap{grid-template-columns:minmax(0,1fr);gap:20px;padding-inline:16px}}
+nav.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 20px);align-self:start;font-size:15px}
+nav.toc .code{font:600 12px var(--f-mono);letter-spacing:.06em;color:var(--muted)}
+nav.toc ol{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:2px}
+nav.toc a{display:flex;justify-content:space-between;gap:8px;color:var(--ink);text-decoration:none;padding:6px 10px;border-radius:6px}
+nav.toc a:hover,nav.toc a:focus-visible{background:var(--tint)}
+nav.toc a span{color:var(--muted);font:12px var(--f-mono);white-space:nowrap}
+nav.toc a.sub{padding-left:22px;font-size:14px;color:var(--muted)}
+@media (max-width:900px){nav.toc{position:static;border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--surface)}}
+main{min-width:0}
+.prose{max-width:68ch}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.15}
+h1{font-size:clamp(34px,5vw,52px);font-weight:800;margin:6px 0 12px;letter-spacing:-.01em}
+h2{font-size:30px;font-weight:800;margin:0 0 6px}
+h3{font-size:21px;font-weight:700;margin:36px 0 8px}
+.eyebrow{font:600 12px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+section.unit{padding-top:56px;margin-top:56px;border-top:2px solid var(--ink)}
+section.unit:first-of-type{border-top:0;margin-top:0;padding-top:0}
+.sylref{display:inline-block;font:600 12px var(--f-mono);color:var(--muted);margin-bottom:6px}
+p{margin:0 0 14px}
+.ex{font-family:var(--f-mono);font-size:.92em;white-space:nowrap}
+.eq{font-family:var(--f-mono);font-size:15px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 16px;margin:6px 0 16px;overflow-x:auto;line-height:1.9}
+.eq div{white-space:nowrap}
+.note{border-left:3px solid var(--accent);background:var(--tint);padding:10px 14px;border-radius:0 8px 8px 0;margin:10px 0 18px;font-size:16px}
+ol.steps{padding-left:22px;margin:0 0 16px}
+ol.steps li{margin:4px 0}
+.lead{font-size:19px;color:var(--muted);max-width:62ch}
+.meta{display:flex;flex-wrap:wrap;gap:8px 18px;font:13px var(--f-mono);color:var(--muted);margin:14px 0 22px}
+.outcomes{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:16px 0 8px}
+.outcomes div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:15px}
+.outcomes b{display:block;font:600 12px var(--f-mono);color:var(--accent);margin-bottom:2px}
+
+/* tables */
+.tw{overflow-x:auto;margin:6px 0 18px}
+table{border-collapse:collapse;font-family:var(--f-mono);font-size:14px;font-variant-numeric:tabular-nums}
+th,td{padding:4px 10px;text-align:center;border-bottom:1px solid var(--line)}
+th{font-weight:600;color:var(--muted);border-bottom:2px solid var(--ink)}
+td.sep,th.sep{border-left:2px solid var(--ink)}
+table.cmp{font-family:var(--f-body);font-size:15px;width:100%}
+table.cmp td,table.cmp th{text-align:left;vertical-align:top;padding:8px 10px}
+tr.dc td{color:var(--muted);font-style:italic}
+
+/* K-maps */
+.kmaps{display:flex;flex-wrap:wrap;gap:22px;margin:8px 0 18px}
+.km{min-width:0}
+.km table td{width:38px;height:34px;border:1px solid var(--line);background:var(--surface);font-weight:600}
+.km table th{border:0;font-size:12px;padding:2px 6px}
+.km .cap{font:13px var(--f-mono);margin-top:6px}
+.km .t{font:600 12px var(--f-mono);color:var(--muted);margin-bottom:4px}
+.km td.x{color:var(--muted)}
+
+/* simulator bench */
+.bench{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin:14px 0 22px;overflow:hidden}
+.bench header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px 16px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.bench header h4{margin:0;font:700 15px var(--f-display)}
+.bench header .tag{font:600 11px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--hi)}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
+.bit{font:600 15px var(--f-mono);border:1.5px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:6px 12px;cursor:pointer;display:inline-flex;gap:8px;align-items:center}
+.bit b{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:5px;background:var(--line);color:var(--ink)}
+.bit[aria-pressed="true"]{border-color:var(--hi)}
+.bit[aria-pressed="true"] b{background:var(--hi);color:#fff}
+.btn{font:600 13px var(--f-body);border:1px solid var(--line);background:transparent;color:var(--accent);border-radius:8px;padding:7px 12px;cursor:pointer}
+.btn:hover{background:var(--tint)}
+.bit:focus-visible,.btn:focus-visible,nav a:focus-visible,summary:focus-visible,tr.row:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.spacer{flex:1}
+.readout{font:14px var(--f-mono);padding:10px 16px;background:var(--hi-tint);border-bottom:1px solid var(--line)}
+.diag{padding:10px 8px 4px;overflow-x:auto}
+.diag .dt{font:600 12px var(--f-mono);color:var(--muted);padding:0 8px}
+.diag svg{display:block;width:100%;min-width:440px;height:auto}
+.simtable{padding:4px 16px 14px;overflow-x:auto}
+.simtable table{margin:0}
+tr.row{cursor:pointer}
+tr.row:hover td{background:var(--tint)}
+tr.row.cur td{background:var(--hi-tint);color:var(--ink)}
+tr.row.cur td:first-child{box-shadow:inset 3px 0 0 var(--hi)}
+svg text{font-family:var(--f-mono);fill:var(--ink)}
+svg .lab{font-size:10px;fill:var(--muted)}
+svg .w0{stroke:var(--wire);stroke-width:1.6;fill:none}
+svg .w1{stroke:var(--hi);stroke-width:2.2;fill:none}
+svg .gate{fill:var(--surface);stroke:var(--ink);stroke-width:1.6}
+svg .bub{fill:var(--surface);stroke:var(--ink);stroke-width:1.4}
+svg .dot0{fill:var(--wire)} svg .dot1{fill:var(--hi)}
+svg .led0{fill:var(--bg);stroke:var(--muted);stroke-width:1.4}
+svg .led1{fill:var(--hi);stroke:var(--hi);stroke-width:1.4}
+svg .blk{fill:var(--tint);stroke:var(--accent);stroke-width:1.6}
+svg .arrow{stroke:var(--ink);stroke-width:1.6;fill:none}
+
+/* six-step design card */
+.design{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin:12px 0 22px}
+.ds{display:grid;grid-template-columns:40px minmax(0,1fr);gap:14px;padding:16px;border-top:1px solid var(--line)}
+.ds:first-child{border-top:0}
+.dn{width:34px;height:34px;border-radius:50%;border:2px solid var(--accent);color:var(--accent);display:grid;place-items:center;font:800 16px var(--f-display);position:relative}
+.ds:not(:last-child) .dn::after{content:"";position:absolute;top:36px;left:50%;width:2px;height:calc(100% + 0px);background:var(--line)}
+.db{min-width:0}
+.db h5{margin:5px 0 8px;font:700 16px var(--f-display)}
+.db h5 small{display:block;font:600 11px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:2px}
+.db p:last-child,.db .eq:last-child,.db .tw:last-child,.db .kmaps:last-child{margin-bottom:0}
+.db .bench{margin:8px 0 0}
+table.io{font-family:var(--f-body);font-size:15px}
+table.io td,table.io th{text-align:left;padding:6px 12px}
+@media (max-width:520px){.ds{grid-template-columns:minmax(0,1fr);gap:6px}.ds:not(:last-child) .dn::after{display:none}}
+ol.mini{counter-reset:st;list-style:none;padding:0;margin:10px 0 4px;display:grid;gap:8px}
+ol.mini>li{counter-increment:st;position:relative;padding-left:64px;font-size:16px;min-width:0}
+ol.mini>li::before{content:"Step " counter(st);position:absolute;left:0;top:4px;font:600 11px var(--f-mono);color:var(--accent);letter-spacing:.04em}
+ol.mini b{font-weight:700}
+
+.eq .stp{display:inline-block;min-width:64px;font-size:11px;font-weight:600;color:var(--accent);letter-spacing:.04em}
+
+/* practice */
+.practice{margin:26px 0 8px}
+.practice h3{margin-top:0}
+details.q{background:var(--surface);border:1px solid var(--line);border-radius:10px;margin:8px 0}
+details.q summary{cursor:pointer;padding:12px 16px;list-style:none;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:baseline}
+details.q summary::-webkit-details-marker{display:none}
+details.q summary .n{font:600 12px var(--f-mono);color:var(--accent)}
+details.q summary .r{font:600 12px var(--f-mono);color:var(--muted);white-space:nowrap}
+details.q[open] summary .r{color:var(--hi)}
+details.q .ans{padding:2px 16px 14px 16px;border-top:1px dashed var(--line);margin:0 16px;padding-left:0;padding-right:0}
+details.q .ans p{margin:10px 0 6px}
+.src{font:12px var(--f-mono);color:var(--muted)}
+footer{margin-top:60px;font-size:14px;color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){svg .w1,svg .led1{transition:stroke .15s,fill .15s}}
+</style>
+
+<style>
+/* ---- Unit 5 additions ---- */
+h4.exh{font:700 17px var(--f-display);margin:26px 0 8px}
+ol.steps ul{margin:6px 0}
+
+:root{--opt:#7a5a12;--opt-tint:#fbf3df;--opt-line:#e2c98a}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--opt:#e8c06a;--opt-tint:#2b2414;--opt-line:#5e4a1f}}
+:root[data-theme="dark"]{--opt:#e8c06a;--opt-tint:#2b2414;--opt-line:#5e4a1f}
+
+.opt{border:1.5px dashed var(--opt-line);background:var(--opt-tint);border-radius:12px;padding:6px 18px 10px;margin:28px 0}
+.opt>h3:first-of-type,.opt>.optbadge+h3{margin-top:8px}
+.optbadge{display:inline-flex;gap:6px;align-items:center;font:600 11px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--opt);margin-top:10px}
+.optbadge::before{content:"";width:8px;height:8px;border-radius:50%;border:1.5px solid var(--opt)}
+.added{display:inline-block;font:600 11px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--g2);border:1px solid var(--g2);border-radius:999px;padding:1px 8px;margin-left:6px;vertical-align:middle}
+nav.toc a.opt-l{color:var(--opt)}
+nav.toc a.opt-l::after{content:"optional";font:11px var(--f-mono);color:var(--opt)}
+.opttoggle{display:flex;gap:8px;align-items:center;margin-top:14px;font-size:14px;color:var(--muted);cursor:pointer}
+.opttoggle input{accent-color:var(--accent);width:16px;height:16px}
+details.q.optq{border-style:dashed;border-color:var(--opt-line);background:var(--opt-tint)}
+body.hideopt .opt,body.hideopt nav.toc a.opt-l,body.hideopt .optq,body.hideopt tr.opt-row{display:none}
+.legend{display:flex;flex-wrap:wrap;gap:10px 22px;font-size:14px;color:var(--muted);margin:6px 0 16px}
+.legend span{display:inline-flex;gap:8px;align-items:center}
+.legend i{display:inline-block;width:22px;height:14px;border-radius:4px}
+.legend .lc{border:1px solid var(--line);background:var(--surface)}
+.legend .lo{border:1.5px dashed var(--opt-line);background:var(--opt-tint)}
+
+/* custom widgets */
+.wid .row2{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
+.wid .grp{display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap}
+.wid .grp>span.gl{font:600 13px var(--f-mono);color:var(--muted);min-width:22px}
+.wid .bit{padding:5px 9px;font-size:14px}
+.wid .bit b{width:22px;height:22px}
+.wid select,.wid input[type=text]{font:15px var(--f-mono);padding:6px 8px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+.wid input[type=text]{min-width:0;width:min(100%,320px)}
+.wid label{font-size:14px;color:var(--muted)}
+.wid .body{padding:12px 16px}
+.wid .err{color:var(--g4);font-size:14px;margin-top:6px}
+.stage{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:8px 0}
+.stage>div{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--bg);min-width:0}
+.stage .k{font:600 11px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.stage .v{font:600 20px var(--f-mono);margin-top:2px}
+.stage .s{font-size:14px;color:var(--muted)}
+.stage .hot{border-color:var(--hi);background:var(--hi-tint)}
+.circ{display:inline-grid;place-items:center;min-width:26px;height:26px;border-radius:50%;border:2px solid var(--hi);font-weight:600}
+table.impl td,table.impl th{padding:5px 10px}
+table.impl tr.inp td{font-weight:700;color:var(--accent);border-top:2px solid var(--ink)}
+.ok{color:var(--g2);font-weight:600}
+.fuse{width:44px;height:34px;border:1.5px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);font:600 15px var(--f-mono);cursor:pointer}
+.fuse[aria-pressed="false"]{color:var(--muted);background:var(--bg);text-decoration:line-through}
+tr.sel td{background:var(--hi-tint)}
+tr.brk td{border-top:2px solid var(--ink)}
+tr.hl td{background:var(--hi-tint)}
+.prog td,.prog th{padding:5px 12px}
+svg .fa{fill:var(--surface);stroke:var(--ink);stroke-width:1.6}
+svg .val{font-size:12px;font-weight:600}
+svg .v1{fill:var(--hi)}
+svg .v0{fill:var(--muted)}
+svg .sm{font-size:11px;fill:var(--muted)}
+</style>
+
+</head><body><div style="font:14px/1.4 Inter,-apple-system,Segoe UI,sans-serif;background:#0b1d3a;padding:10px 16px;"><a href="/teaching/digital-logic.html" style="color:#fbf9f3;text-decoration:none;">&larr; Digital Logic &middot; all units</a></div>
+<div class="wrap">
+<nav class="toc" aria-label="Contents">
+  <div class="code">BT102CO · UNIT 5 · 8 HRS</div>
+  <ol>
+    <li><a href="#intro">MSI and LSI circuits <span>intro</span></a></li>
+    <li><a href="#u51">Binary parallel adder <span>5.1 · 1h</span></a></li>
+    <li><a class="sub opt-l" href="#addsub">Adder-subtractor</a></li>
+    <li><a class="sub opt-l" href="#cla">Carry look-ahead</a></li>
+    <li><a href="#u52">Decimal (BCD) adder <span>5.2 · 1h</span></a></li>
+    <li><a href="#u53">Magnitude comparator <span>5.3 · 1h</span></a></li>
+    <li><a href="#u54">Decoders &amp; encoders <span>5.4 · 1½h</span></a></li>
+    <li><a class="sub" href="#dec38">3-to-8 decoder</a></li>
+    <li><a class="sub" href="#decimpl">Circuits from a decoder</a></li>
+    <li><a class="sub" href="#decen">Decoder with enable</a></li>
+    <li><a class="sub opt-l" href="#decexp">Bigger decoders</a></li>
+    <li><a class="sub" href="#enc">Encoder</a></li>
+    <li><a class="sub opt-l" href="#prio">Priority encoder</a></li>
+    <li><a href="#u55">MUX &amp; DEMUX <span>5.5 · 1½h</span></a></li>
+    <li><a class="sub" href="#mux41">4-to-1 multiplexer</a></li>
+    <li><a class="sub" href="#muximpl">Functions with a MUX</a></li>
+    <li><a class="sub opt-l" href="#quadmux">Quadruple MUX</a></li>
+    <li><a class="sub" href="#demux">Demultiplexer</a></li>
+    <li><a href="#u56">ROM and PLA <span>5.6 · 2h</span></a></li>
+    <li><a class="sub" href="#rom">Read-only memory</a></li>
+    <li><a class="sub" href="#romex">ROM lookup-table example</a></li>
+    <li><a class="sub" href="#pla">PLA</a></li>
+    <li><a class="sub opt-l" href="#pal">PAL</a></li>
+    <li><a href="#bank">Problem bank <span>exam</span></a></li>
+    <li><a href="#summary">Key results <span>revise</span></a></li>
+  </ol>
+  <label class="opttoggle" for="hideopt"><input type="checkbox" id="hideopt"> Hide optional topics</label>
+</nav>
+
+<main>
+<!-- ============ INTRO ============ -->
+<section class="unit" id="intro">
+  <div class="eyebrow">Digital Logic · BT102CO · Unit 5</div>
+  <h1>Combinational Logic with MSI and LSI</h1>
+  <p class="lead">Ready-made building blocks: parallel and BCD adders, comparators, decoders, encoders, multiplexers, demultiplexers, ROMs and PLAs, and how to build any Boolean function from them.</p>
+  <div class="meta"><span>Syllabus: 5.1 – 5.6</span><span>Teaching: 8 hours</span><span>Reference: M. Morris Mano, Ch. 5</span></div>
+
+  <div class="legend">
+    <span><i class="lc"></i>Course content (syllabus + encoder and demultiplexer)</span>
+    <span><i class="lo"></i>Optional, beyond the syllabus</span>
+  </div>
+  <div class="tw"><table class="cmp">
+    <tr><th>Syllabus</th><th>Covered here</th><th>Optional extras from Mano</th></tr>
+    <tr><td>5.1 Binary parallel adder</td><td>4-bit parallel adder, carry propagation</td><td>Adder-subtractor, carry look-ahead</td></tr>
+    <tr><td>5.2 Decimal adder</td><td>BCD adder with correction logic</td><td>–</td></tr>
+    <tr><td>5.3 Magnitude comparator</td><td>2-bit design, 4-bit algorithm</td><td>–</td></tr>
+    <tr><td>5.4 Decoders</td><td>3-to-8 decoder, circuits from decoders, enable input, <b>encoder</b> <span class="added">added</span></td><td>4×16 from two 3×8, priority encoder</td></tr>
+    <tr><td>5.5 Multiplexers</td><td>4-to-1 MUX, functions with a MUX, <b>demultiplexer</b> <span class="added">added</span></td><td>Quadruple 2-to-1 MUX</td></tr>
+    <tr><td>5.6 ROM, PLA</td><td>ROM, types of ROM, PLA program table</td><td>PAL</td></tr>
+  </table></div>
+  <p class="src">Use "Hide optional topics" in the contents menu to teach strictly to the syllabus.</p>
+
+  <h3>Why MSI and LSI?</h3>
+  <div class="prose">
+  <p>In Unit 4 the goal was to use the fewest gates. With integrated circuits that is no longer the right measure. Cost depends on the <b>number and type of ICs</b> and the <b>number of interconnections</b>, not the gate count.</p>
+  <p>ICs are grouped by how many gates they contain: <b>SSI</b> (small, a few independent gates), <b>MSI</b> (medium, a complete function such as an adder or decoder), <b>LSI</b> (large, e.g. ROM, PLA) and <b>VLSI</b>. MSI functions such as adders, comparators, decoders, encoders and multiplexers are standard building blocks, and they also appear inside larger LSI and VLSI chips.</p>
+  </div>
+  <div class="note">Design procedure in this unit: where a block is designed from a word statement (decoder, encoder, MUX, DEMUX, comparator, BCD correction logic) we use the same <b>six steps</b> as Unit 4. Where an existing block is <i>used</i> to build a function (decoder + OR, MUX, ROM, PLA) we follow that block's own implementation procedure.</div>
+</section>
+
+<!-- ============ 5.1 ============ -->
+<section class="unit" id="u51">
+  <span class="sylref">Syllabus 5.1</span>
+  <h2>Binary parallel adder</h2>
+  <div class="prose">
+  <p>A full adder (Unit 4) adds two bits and a carry. To add two <b>n-bit</b> numbers A and B there are two methods:</p>
+  <ul>
+    <li><b>Serial addition</b>: one full adder plus a storage element for the carry. Bit pairs pass through it one at a time, least significant first.</li>
+    <li><b>Parallel addition</b>: n full adders, all bits applied at the same time. The carry-out of each full adder feeds the carry-in of the next one to its left.</li>
+  </ul>
+  <p>A <b>binary parallel adder</b> is n full adders connected in a chain. Mano's example adds A = 1011 and B = 0011:</p>
+  </div>
+  <div class="tw"><table>
+    <tr><th style="text-align:left">Subscript i</th><th>4</th><th>3</th><th>2</th><th>1</th><th class="sep"></th></tr>
+    <tr><td style="text-align:left">Input carry</td><td>0</td><td>1</td><td>1</td><td>0</td><td class="sep">Cᵢ</td></tr>
+    <tr><td style="text-align:left">Augend</td><td>1</td><td>0</td><td>1</td><td>1</td><td class="sep">Aᵢ</td></tr>
+    <tr><td style="text-align:left">Addend</td><td>0</td><td>0</td><td>1</td><td>1</td><td class="sep">Bᵢ</td></tr>
+    <tr><td style="text-align:left">Sum</td><td>1</td><td>1</td><td>1</td><td>0</td><td class="sep">Sᵢ</td></tr>
+    <tr><td style="text-align:left">Output carry</td><td>0</td><td>0</td><td>1</td><td>1</td><td class="sep">Cᵢ₊₁</td></tr>
+  </table></div>
+  <div class="bench wid" data-w="rca" data-mode="add"></div>
+  <div class="note"><b>Why not use the six steps here?</b> A 4-bit adder has 9 inputs (A₄–A₁, B₄–B₁, C₁), so its truth table would have 2⁹ = 512 rows. Cascading a known circuit (the full adder) gives a simple, regular design instead. This is typical of MSI design.</div>
+
+  <h3>Carry propagation</h3>
+  <div class="prose">
+  <p>The outputs of a parallel adder are only correct after the carry has rippled through every stage. S₄ cannot settle until C₄ settles, which waits for C₃, and so on back to C₁. In the full adder of Unit 4 the carry passes through an AND gate and an OR gate, i.e. <b>2 gate levels per stage</b>, so an n-bit adder needs <b>2n gate levels</b> for the carry. This carry propagation delay limits the speed of addition. It can be reduced with faster gates or with the <b>look-ahead carry</b> method (optional section below).</p>
+  </div>
+
+  <div class="opt" id="addsub">
+    <div class="optbadge">Optional · beyond syllabus</div>
+    <h3>Binary adder-subtractor</h3>
+    <div class="prose">
+    <p>A − B = A + (2's complement of B) = A + B′ + 1. One circuit can do both jobs: put an XOR gate on each B input and connect a mode input <b>M</b> to every XOR and to C₁.</p>
+    <ul>
+      <li><b>M = 0</b>: B ⊕ 0 = B and C₁ = 0, so the circuit adds A + B.</li>
+      <li><b>M = 1</b>: B ⊕ 1 = B′ and C₁ = 1, so it computes A + B′ + 1 = A − B.</li>
+    </ul>
+    <p>For unsigned numbers, C₅ = 1 means A ≥ B and the result is A − B. C₅ = 0 means A &lt; B and the result is the 2's complement of B − A.</p>
+    </div>
+    <div class="bench wid" data-w="rca" data-mode="sub"></div>
+  </div>
+
+  <div class="opt" id="cla">
+    <div class="optbadge">Optional · beyond syllabus</div>
+    <h3>Look-ahead carry</h3>
+    <div class="prose"><p>Define for each stage the <b>carry propagate</b> Pᵢ and <b>carry generate</b> Gᵢ:</p></div>
+    <div class="eq">
+      <div>Pᵢ = Aᵢ ⊕ Bᵢ     Gᵢ = AᵢBᵢ</div>
+      <div>Sᵢ = Pᵢ ⊕ Cᵢ     Cᵢ₊₁ = Gᵢ + PᵢCᵢ</div>
+    </div>
+    <div class="prose"><p>Substituting each carry into the next gives every carry directly in terms of P, G and C₁, as a two-level sum of products:</p></div>
+    <div class="eq">
+      <div>C₂ = G₁ + P₁C₁</div>
+      <div>C₃ = G₂ + P₂G₁ + P₂P₁C₁</div>
+      <div>C₄ = G₃ + P₃G₂ + P₃P₂G₁ + P₃P₂P₁C₁</div>
+    </div>
+    <div class="prose"><p>All carries now appear after the same two gate levels once P and G are ready, so S₂ to S₄ have equal delay. The bench computes the carries both ways; they always match.</p></div>
+    <div class="bench wid" data-w="rca" data-mode="cla"></div>
+  </div>
+
+  <div class="practice">
+    <h3>Check your understanding · 5.1</h3>
+    <details class="q"><summary><span class="n">Q1</span><span>How many full adders, inputs and outputs does an 8-bit parallel adder have?</span><span class="r">Answer</span></summary><div class="ans"><p>8 full adders. Inputs: 8 + 8 + C₁ = 17. Outputs: S₈…S₁ and C₉ = 9.</p></div></details>
+    <details class="q"><summary><span class="n">Q2</span><span>Why must C₁ be 0 when the chain is used for plain addition?</span><span class="r">Answer</span></summary><div class="ans"><p>There is no lower stage, so no carry should come in. A 1 on C₁ would add an extra 1 to the result. (The adder-subtractor uses exactly this to add the +1 of the 2's complement.)</p></div></details>
+    <details class="q"><summary><span class="n">Q3</span><span>How many gate levels does the carry pass through in a 16-bit ripple-carry adder?</span><span class="r">Answer</span></summary><div class="ans"><p>2 levels per stage × 16 = 32 gate levels.</p></div></details>
+    <details class="q"><summary><span class="n">Q4</span><span>Construct a 16-bit adder from four 4-bit adder ICs.</span><span class="r">Mano 5-1</span></summary><div class="ans"><p>Each IC has 9 inputs (A₄–A₁, B₄–B₁, C_in) and 5 outputs (S₄–S₁, C_out). Connect bits 1–4 to IC1, 5–8 to IC2, 9–12 to IC3, 13–16 to IC4. C_in of IC1 = 0; C_out of IC1 → C_in of IC2; C_out of IC2 → C_in of IC3; C_out of IC3 → C_in of IC4. C_out of IC4 is C₁₇.</p></div></details>
+  </div>
+</section>
+
+<!-- ============ 5.2 ============ -->
+<section class="unit" id="u52">
+  <span class="sylref">Syllabus 5.2</span>
+  <h2>Decimal adder (BCD adder)</h2>
+  <div class="prose">
+  <p>Calculators and some computers do arithmetic directly in decimal, with each digit in binary-coded form. A <b>decimal adder</b> adds two coded decimal digits plus a carry and gives a coded digit plus a carry. It needs at least <b>9 inputs</b> (4 + 4 + carry-in) and <b>5 outputs</b> (4 + carry-out). The circuit depends on the code; here we use BCD.</p>
+  <p>The classical method would need a 512-row table. Instead, add the two BCD digits with a 4-bit binary adder, then correct the result. Since each digit is at most 9, the sum is at most 9 + 9 + 1 = 19.</p>
+  </div>
+
+  <h3>Design · BCD correction logic</h3>
+  <div class="design">
+    <div class="ds"><div class="dn">1</div><div class="db"><h5><small>Step 1</small>State the problem</h5>
+      <p>The 4-bit binary adder gives the sum as <b>5 bits</b>: its output carry K (weight 16) and four sum bits (weights 8, 4, 2, 1). Four bits alone only reach 15; with K the range is 0 to 31, of which only 0 to 19 can occur (e.g. 19 = K 1, sum bits 0011, i.e. 16 + 3). Design a circuit that detects when this binary sum is <b>not</b> a valid BCD result, so 0110 (6) can be added to correct it and an output carry produced.</p></div></div>
+    <div class="ds"><div class="dn">2</div><div class="db"><h5><small>Step 2</small>Determine the number of inputs and outputs</h5>
+      <p><b>5 inputs</b>: the binary adder's carry and its four sum bits. <b>1 output</b>: the correction signal, which is also the BCD output carry.</p></div></div>
+    <div class="ds"><div class="dn">3</div><div class="db"><h5><small>Step 3</small>Assign letter symbols</h5>
+      <div class="tw"><table class="io"><tr><th>Inputs</th><th class="sep">Outputs</th></tr><tr><td>K = binary carry; Z₈ Z₄ Z₂ Z₁ = binary sum bits (weights 8 4 2 1)</td><td class="sep">C = correction / output carry</td></tr></table></div></div></div>
+    <div class="ds"><div class="dn">4</div><div class="db"><h5><small>Step 4</small>Derive the truth table</h5>
+      <p>Mano Table 5-1. Only sums 0 to 19 can occur; other input combinations are don't-cares. Up to 1001 the binary and BCD sums are identical. From 1010 upward the BCD sum = binary sum + 0110, with C = 1.</p>
+      <div class="tw" data-tt="bcd"></div></div></div>
+    <div class="ds"><div class="dn">5</div><div class="db"><h5><small>Step 5</small>Obtain the simplified Boolean function</h5>
+      <p>C = 1 when K = 1 (sums 16–19), or when Z₈ = 1 together with Z₄ or Z₂ (sums 10–15, which separates them from 1000 and 1001). Z₁ does not matter. Map of K, Z₈, Z₄, Z₂ with the impossible combinations as X:</p>
+      <div class="kmaps"><div class="km" data-km="bcdc"></div></div>
+      <div class="eq"><div>C = K + Z₈Z₄ + Z₈Z₂</div></div></div></div>
+    <div class="ds"><div class="dn">6</div><div class="db"><h5><small>Step 6</small>Draw the logic diagram</h5>
+      <p>Two AND gates and one OR gate.</p>
+      <div class="bench" data-sim="bcdc"></div></div></div>
+  </div>
+
+  <h3>The complete BCD adder</h3>
+  <div class="prose">
+  <p>Mano Fig. 5-6. The two digits and the input carry go into the top 4-bit adder, which gives K Z₈Z₄Z₂Z₁. The correction logic computes C. C is the output carry and also drives the second adder's inputs: when C = 1 it adds 0110, when C = 0 it adds 0000. The second adder's own carry-out is ignored. Pick two digits to see each stage:</p>
+  </div>
+  <div class="bench wid" data-w="bcd"></div>
+  <div class="note">A decimal parallel adder for n digits uses n BCD adder stages, with each stage's output carry connected to the next stage's input carry. A BCD adder can be built from 3 ICs (two 4-bit adders and one SSI package for the correction gates), or bought as a single MSI chip.</div>
+
+  <div class="practice">
+    <h3>Check your understanding · 5.2</h3>
+    <details class="q"><summary><span class="n">Q1</span><span>Add 8 + 7 in BCD and show the correction.</span><span class="r">Answer</span></summary><div class="ans"><p>1000 + 0111 = 1111 (binary 15), K = 0. Z₈Z₄ = 1, so C = 1. Add 0110: 1111 + 0110 = 1 0101; ignore the carry. Result: C = 1, sum 0101, i.e. BCD 1 0101 = 15 ✓.</p></div></details>
+    <details class="q"><summary><span class="n">Q2</span><span>Add 9 + 9 + 1 (carry-in) in BCD.</span><span class="r">Answer</span></summary><div class="ans"><p>1001 + 1001 + 1 = 1 0011 (19): K = 1, so C = 1. 0011 + 0110 = 1001. Result C = 1, sum 1001 = 19 ✓.</p></div></details>
+    <details class="q"><summary><span class="n">Q3</span><span>Why is 0110 the correction value?</span><span class="r">Answer</span></summary><div class="ans"><p>A 4-bit binary adder carries at 16, but a decimal digit should carry at 10. The difference is 16 − 10 = 6, so adding 6 skips the six unused codes 1010–1111 and produces the correct carry.</p></div></details>
+    <details class="q"><summary><span class="n">Q4</span><span>How many unused input combinations does a BCD adder have?</span><span class="r">Mano 5-9</span></summary><div class="ans"><p>9 inputs give 2⁹ = 512 combinations. Valid ones: 10 × 10 digit pairs × 2 carry values = 200. Unused: 512 − 200 = 312.</p></div></details>
+  </div>
+</section>
+
+<!-- ============ 5.3 ============ -->
+<section class="unit" id="u53">
+  <span class="sylref">Syllabus 5.3</span>
+  <h2>Magnitude comparator</h2>
+  <div class="prose">
+  <p>A <b>magnitude comparator</b> compares two numbers A and B and shows the result on three outputs: (A &gt; B), (A = B) and (A &lt; B). For two n-bit numbers the truth table has 2²ⁿ rows, which is already 256 rows for n = 4. So we design a small 2-bit comparator with the six steps, spot the pattern, and extend it to 4 bits with an <b>algorithm</b>.</p>
+  </div>
+
+  <h3>Design · 2-bit magnitude comparator</h3>
+  <div class="design">
+    <div class="ds"><div class="dn">1</div><div class="db"><h5><small>Step 1</small>State the problem</h5>
+      <p>Compare two 2-bit unsigned numbers and indicate whether the first is greater than, equal to, or less than the second.</p></div></div>
+    <div class="ds"><div class="dn">2</div><div class="db"><h5><small>Step 2</small>Determine the number of inputs and outputs</h5>
+      <p><b>4 inputs</b> (2 bits of each number), <b>3 outputs</b> (one per relation; exactly one is 1).</p></div></div>
+    <div class="ds"><div class="dn">3</div><div class="db"><h5><small>Step 3</small>Assign letter symbols</h5>
+      <div class="tw"><table class="io"><tr><th>Inputs</th><th class="sep">Outputs</th></tr><tr><td>A = A₁A₀, B = B₁B₀</td><td class="sep">G = (A &gt; B), E = (A = B), L = (A &lt; B)</td></tr></table></div></div></div>
+    <div class="ds"><div class="dn">4</div><div class="db"><h5><small>Step 4</small>Derive the truth table</h5>
+      <div class="tw" data-tt="cmp2"></div></div></div>
+    <div class="ds"><div class="dn">5</div><div class="db"><h5><small>Step 5</small>Obtain the simplified Boolean functions</h5>
+      <div class="kmaps"><div class="km" data-km="cmpG"></div><div class="km" data-km="cmpE"></div><div class="km" data-km="cmpL"></div></div>
+      <p>The 1s of E are isolated (00=00, 01=01, 10=10, 11=11), so the K-map cannot simplify E. Instead, give each bit position an <b>equal-bit signal</b>, the XNOR of its two bits:</p>
+      <div class="eq"><div>xᵢ = AᵢBᵢ + Aᵢ′Bᵢ′   → xᵢ = 1 when Aᵢ and Bᵢ are the same (both 0 or both 1), xᵢ = 0 when they differ</div></div>
+      <p>With these signals the three functions take a regular form. <b>E</b> needs every position to match, so it ANDs all the xᵢ. <b>G</b> and <b>L</b> compare the left bits first, and look at the right bits only when the left bits are equal (x₁ = 1):</p>
+      <div class="eq">
+        <div>E = x₁x₀ <span style="color:var(--muted)">(AND of the XNOR results of each bit position: 1 only when every bit of A equals the bit of B in the same position)</span></div>
+        <div>G = A₁B₁′ + x₁A₀B₀′    (= A₁B₁′ + A₀B₁′B₀′ + A₁A₀B₀′)</div>
+        <div>L = A₁′B₁ + x₁A₀′B₀    (= A₁′B₁ + A₁′A₀′B₀ + A₀′B₁B₀)</div>
+      </div>
+      <p><b>Where the bracketed forms come from.</b> Since x₁ = A₁B₁ + A₁′B₁′ (XNOR of the MSBs), substitute it into the second term and simplify. The result is exactly the K-map answer above:</p>
+      <div class="eq">
+        <div>x₁A₀B₀′ = (A₁B₁ + A₁′B₁′)A₀B₀′ = A₁A₀B₁B₀′ + A₁′A₀B₁′B₀′   <span style="color:var(--muted)">(substitute x₁)</span></div>
+        <div>G = A₁B₁′ + A₁A₀B₁B₀′ + A₁′A₀B₁′B₀′</div>
+        <div>  = A₁(B₁′ + B₁A₀B₀′) + B₁′(A₁ + A₁′A₀B₀′)   <span style="color:var(--muted)">(use A₁B₁′ twice, since x + x = x, and pair it with each term)</span></div>
+        <div>  = A₁(B₁′ + A₀B₀′) + B₁′(A₁ + A₀B₀′)   <span style="color:var(--muted)">(x′ + xy = x′ + y, and x + x′y = x + y)</span></div>
+        <div>  = A₁B₁′ + A₁A₀B₀′ + A₀B₁′B₀′ ✓</div>
+        <div style="margin-top:8px">x₁A₀′B₀ = (A₁B₁ + A₁′B₁′)A₀′B₀ = A₁A₀′B₁B₀ + A₁′A₀′B₁′B₀   <span style="color:var(--muted)">(substitute x₁)</span></div>
+        <div>L = A₁′B₁ + A₁A₀′B₁B₀ + A₁′A₀′B₁′B₀</div>
+        <div>  = B₁(A₁′ + A₁A₀′B₀) + A₁′(B₁ + B₁′A₀′B₀)   <span style="color:var(--muted)">(same steps, A and B swapped)</span></div>
+        <div>  = A₁′B₁ + A₀′B₁B₀ + A₁′A₀′B₀ ✓</div>
+      </div>
+      <p>Both forms are correct. The x₁ form is preferred in circuits because the XNOR outputs x₁, x₀ are already needed for E, so G and L reuse them.</p>
+      <p><b>How to read G.</b> For two 2-bit numbers A = A₁A₀ and B = B₁B₀, A is greater than B when:</p>
+      <ol class="steps">
+        <li>the MSB of A is 1 and the MSB of B is 0, giving the term <span class="ex">A₁B₁′</span>, OR</li>
+        <li>the MSBs are equal (<span class="ex">x₁ = 1</span>), so we check the LSBs, and the LSB of A is 1 while the LSB of B is 0, giving the term <span class="ex">x₁A₀B₀′</span>.</li>
+      </ol>
+      <p>Therefore <span class="ex">G = A₁B₁′ + x₁A₀B₀′</span>. By the same logic with A and B swapped, <span class="ex">L = A₁′B₁ + x₁A₀′B₀</span>.</p></div></div>
+    <div class="ds"><div class="dn">6</div><div class="db"><h5><small>Step 6</small>Draw the logic diagram</h5>
+      <p>Two XNOR gates produce x₁ and x₀; they are shared by all three outputs.</p>
+      <div class="bench" data-sim="cmp2"></div></div></div>
+  </div>
+
+  <h3>Extending to 4 bits: the algorithm</h3>
+  <div class="prose">
+  <p>Compare the bits the way a person compares numbers: start at the most significant position, and move right only while the bits are equal. The first unequal pair decides. With <span class="ex">xᵢ = AᵢBᵢ + Aᵢ′Bᵢ′</span> for i = 0 to 3:</p>
+  </div>
+  <div class="eq">
+    <div>(A = B) = x₃x₂x₁x₀ <span style="color:var(--muted)">(AND of the XNOR results of each bit position: 1 only when every bit of A equals the bit of B in the same position)</span></div>
+    <div>(A &gt; B) = A₃B₃′ + x₃A₂B₂′ + x₃x₂A₁B₁′ + x₃x₂x₁A₀B₀′</div>
+    <div>(A &lt; B) = A₃′B₃ + x₃A₂′B₂ + x₃x₂A₁′B₁ + x₃x₂x₁A₀′B₀</div>
+  </div>
+  <div class="prose"><p>The four x signals are shared by all three outputs, which keeps the circuit (Mano Fig. 5-7) regular. The same circuit also compares two BCD digits.</p></div>
+  <div class="bench wid" data-w="cmp4"></div>
+
+  <div class="practice">
+    <h3>Check your understanding · 5.3</h3>
+    <details class="q"><summary><span class="n">Q1</span><span>Compare A = 1011 and B = 1001 using the equations.</span><span class="r">Answer</span></summary><div class="ans"><p>x₃ = 1 (1,1), x₂ = 1 (0,0), A₁B₁′ = 1·1 = 1. So the term x₃x₂A₁B₁′ = 1 and (A &gt; B) = 1. (A = B) = 0 because x₁ = 0.</p></div></details>
+    <details class="q"><summary><span class="n">Q2</span><span>Design a circuit with one output that is 1 only when two 4-bit numbers are equal.</span><span class="r">Mano 5-13</span></summary><div class="ans"><ol class="mini"><li><b>Problem.</b> Output 1 when A = B, 0 otherwise.</li><li><b>Inputs and outputs.</b> 8 inputs, 1 output.</li><li><b>Symbols.</b> A₃A₂A₁A₀, B₃B₂B₁B₀; output x.</li><li><b>Truth table.</b> 256 rows; x = 1 only on the 16 rows where every bit pair matches.</li><li><b>Simplified function.</b> <span class="ex">x = x₃x₂x₁x₀</span> with <span class="ex">xᵢ = (Aᵢ ⊕ Bᵢ)′</span>.</li><li><b>Logic diagram.</b> Four XNOR gates into one 4-input AND gate.</li></ol></div></details>
+    <details class="q"><summary><span class="n">Q3</span><span>Why is the comparator designed by an algorithm rather than a truth table?</span><span class="r">Answer</span></summary><div class="ans"><p>The truth table grows as 2²ⁿ (256 rows for 4 bits, 65 536 for 8 bits), but the comparison follows a regular rule that repeats for every bit position. Writing that rule as Boolean equations gives the circuit directly.</p></div></details>
+  </div>
+</section>
+
+<!-- ============ 5.4 ============ -->
+<section class="unit" id="u54">
+  <span class="sylref">Syllabus 5.4 · encoder added to the course</span>
+  <h2>Decoders and encoders</h2>
+  <div class="prose">
+  <p>An n-bit binary code can represent up to 2ⁿ distinct elements. A <b>decoder</b> converts binary information from <b>n input lines to at most 2ⁿ unique output lines</b>. If some input combinations are unused, it has fewer outputs: an n-to-m-line decoder has m ≤ 2ⁿ. Each output generates one <b>minterm</b> of the inputs. An <b>encoder</b> does the reverse.</p>
+  </div>
+
+  <h3 id="dec38">Design · 3-to-8-line decoder</h3>
+  <div class="design">
+    <div class="ds"><div class="dn">1</div><div class="db"><h5><small>Step 1</small>State the problem</h5>
+      <p>Design a circuit that takes a 3-bit binary number and activates exactly one of eight output lines, the one whose number equals the input (binary-to-octal conversion).</p></div></div>
+    <div class="ds"><div class="dn">2</div><div class="db"><h5><small>Step 2</small>Determine the number of inputs and outputs</h5>
+      <p><b>3 inputs</b>, <b>8 outputs</b> (2³ = 8).</p></div></div>
+    <div class="ds"><div class="dn">3</div><div class="db"><h5><small>Step 3</small>Assign letter symbols</h5>
+      <div class="tw"><table class="io"><tr><th>Inputs</th><th class="sep">Outputs</th></tr><tr><td>x (MSB), y, z</td><td class="sep">D₀ to D₇</td></tr></table></div></div></div>
+    <div class="ds"><div class="dn">4</div><div class="db"><h5><small>Step 4</small>Derive the truth table</h5>
+      <p>Mano Table 5-2. The outputs are <b>mutually exclusive</b>: only one is 1 at a time.</p>
+      <div class="tw" data-tt="dec38"></div></div></div>
+    <div class="ds"><div class="dn">5</div><div class="db"><h5><small>Step 5</small>Obtain the simplified Boolean functions</h5>
+      <p>Each output column has a single 1, so each output is one minterm and cannot be simplified further:</p>
+      <div class="eq"><div>D₀ = x′y′z′   D₁ = x′y′z   D₂ = x′yz′   D₃ = x′yz</div><div>D₄ = xy′z′   D₅ = xy′z   D₆ = xyz′   D₇ = xyz</div></div></div></div>
+    <div class="ds"><div class="dn">6</div><div class="db"><h5><small>Step 6</small>Draw the logic diagram</h5>
+      <p>Three inverters (for x′, y′, z′) and eight 3-input AND gates. Literals are drawn by name to keep the diagram readable.</p>
+      <div class="bench" data-sim="dec38"></div></div></div>
+  </div>
+
+  <h3 id="decimpl">Combinational circuits from a decoder</h3>
+  <div class="prose">
+  <p>A decoder produces all 2ⁿ minterms, and any Boolean function is a sum of minterms. So <b>any combinational circuit with n inputs and m outputs can be built from an n-to-2ⁿ-line decoder and m OR gates</b>.</p>
+  <ol class="steps">
+    <li>Express each output function as a sum of minterms (from the truth table).</li>
+    <li>Choose a decoder with n inputs that generates all 2ⁿ minterms.</li>
+    <li>For each output, connect the decoder outputs of its minterms to one OR gate.</li>
+  </ol>
+  <p><b>Example (Mano 5-1): full adder with a decoder.</b> From the full-adder truth table, <span class="ex">S = Σ(1, 2, 4, 7)</span> and <span class="ex">C = Σ(3, 5, 6, 7)</span>. Use a 3-to-8 decoder and two 4-input OR gates.</p>
+  </div>
+  <div class="bench" data-sim="decfa"></div>
+  <div class="note">If a function has more than 2ⁿ/2 minterms, its complement F′ has fewer. Then a NOR gate over the minterms of F′ gives F with fewer gate inputs. The decoder method suits circuits with many outputs, each having few minterms.</div>
+
+  <h3 id="decen">Decoder with an enable input</h3>
+  <div class="prose">
+  <p>Most IC decoders have an <b>enable</b> input E. Mano Fig. 5-10 is a 2-to-4 decoder built from NAND gates, so its outputs are <b>active-low</b> (the selected output is 0) and it is enabled when <b>E = 0</b>. When E = 1 all outputs are 1, whatever A and B are.</p>
+  </div>
+  <div class="bench" data-sim="dec24"></div>
+  <div class="note">The same circuit is also a <b>demultiplexer</b>: treat E as the data input and A, B as select lines. The value on E then appears on the output selected by AB, while the other outputs stay at 1. That is why it is called a decoder/demultiplexer (see <a href="#demux">5.5 Demultiplexer</a>).</div>
+
+  <div class="opt" id="decexp">
+    <div class="optbadge">Optional · beyond syllabus</div>
+    <h3>Building a bigger decoder</h3>
+    <div class="prose"><p>Enable inputs let decoders be combined. Mano Fig. 5-12 builds a <b>4 × 16 decoder from two 3 × 8 decoders</b>: x, y, z go to both decoders. The fourth input w enables the top decoder through an inverter and the bottom decoder directly (enable active-high in this figure).</p>
+    <ul><li>w = 0: top decoder enabled, gives D₀–D₇ (minterms 0000–0111); bottom outputs all 0.</li><li>w = 1: bottom decoder enabled, gives D₈–D₁₅ (minterms 1000–1111); top outputs all 0.</li></ul></div>
+    <div class="diag" style="max-width:560px"><svg viewBox="0 0 520 220" role="img" aria-label="Two 3 by 8 decoders: x, y, z go to both; w enables the bottom one and, through an inverter, the top one">
+      <rect class="blk" x="220" y="20" width="120" height="70" rx="4"/><text x="280" y="50" text-anchor="middle" font-size="13">3 × 8</text><text x="280" y="68" text-anchor="middle" font-size="13">decoder</text><text x="280" y="86" text-anchor="middle" class="sm">E</text>
+      <rect class="blk" x="220" y="130" width="120" height="70" rx="4"/><text x="280" y="160" text-anchor="middle" font-size="13">3 × 8</text><text x="280" y="178" text-anchor="middle" font-size="13">decoder</text><text x="280" y="196" text-anchor="middle" class="sm">E</text>
+      <g class="arrow"><path d="M40 35H220M40 55H220M40 75H220M150 35V145H220M170 55V165H220M190 75V185H220M340 55H420M340 165H420M40 205H120M120 205L120 205"/></g>
+      <text x="20" y="39" font-size="13">x</text><text x="20" y="59" font-size="13">y</text><text x="20" y="79" font-size="13">z</text><text x="20" y="209" font-size="13">w</text>
+      <path class="arrow" d="M60 205H280V200M80 205V110H120"/><path class="gate" d="M120,100 L140,110 L120,120 Z"/><circle class="bub" cx="144" cy="110" r="4"/><path class="arrow" d="M148 110H280V90"/>
+      <text x="428" y="59" font-size="13">D₀–D₇</text><text x="428" y="169" font-size="13">D₈–D₁₅</text>
+    </svg></div>
+  </div>
+
+  <h3 id="enc">Design · Octal-to-binary encoder <span class="added">added to course</span></h3>
+  <div class="prose"><p>An <b>encoder</b> performs the inverse of a decoder. It has 2ⁿ (or fewer) input lines and n output lines; the outputs give the binary code of the active input.</p></div>
+  <div class="design">
+    <div class="ds"><div class="dn">1</div><div class="db"><h5><small>Step 1</small>State the problem</h5>
+      <p>Design a circuit with one input line per octal digit that outputs the 3-bit binary code of whichever input is 1. Assume only one input is 1 at a time.</p></div></div>
+    <div class="ds"><div class="dn">2</div><div class="db"><h5><small>Step 2</small>Determine the number of inputs and outputs</h5>
+      <p><b>8 inputs</b>, <b>3 outputs</b>.</p></div></div>
+    <div class="ds"><div class="dn">3</div><div class="db"><h5><small>Step 3</small>Assign letter symbols</h5>
+      <div class="tw"><table class="io"><tr><th>Inputs</th><th class="sep">Outputs</th></tr><tr><td>D₀ to D₇</td><td class="sep">x (MSB), y, z</td></tr></table></div></div></div>
+    <div class="ds"><div class="dn">4</div><div class="db"><h5><small>Step 4</small>Derive the truth table</h5>
+      <p>Mano Table 5-3. Only these 8 of the 256 input combinations are allowed; all others are don't-cares.</p>
+      <div class="tw" data-tt="enc"></div></div></div>
+    <div class="ds"><div class="dn">5</div><div class="db"><h5><small>Step 5</small>Obtain the simplified Boolean functions</h5>
+      <p>With all other combinations as don't-cares, each output is simply the OR of the inputs whose code has a 1 in that position. z = 1 for digits 1, 3, 5, 7; y for 2, 3, 6, 7; x for 4, 5, 6, 7:</p>
+      <div class="eq"><div>x = D₄ + D₅ + D₆ + D₇</div><div>y = D₂ + D₃ + D₆ + D₇</div><div>z = D₁ + D₃ + D₅ + D₇</div></div></div></div>
+    <div class="ds"><div class="dn">6</div><div class="db"><h5><small>Step 6</small>Draw the logic diagram</h5>
+      <p>Three 4-input OR gates (Mano Fig. 5-13). D₀ is not connected at all. "Next input" steps through the eight valid inputs; try turning on two inputs at once.</p>
+      <div class="bench" data-sim="enc"></div></div></div>
+  </div>
+  <div class="prose">
+  <p><b>Limitations of this encoder.</b></p>
+  <ul>
+    <li>If two inputs are 1 together the output is meaningless. D₃ and D₆ together give 111, which is neither 3 nor 6. A <b>priority</b> rule fixes this.</li>
+    <li>The output 000 appears both when D₀ = 1 and when no input is active. An extra "valid" output fixes this.</li>
+  </ul>
+  </div>
+
+  <div class="opt" id="prio">
+    <div class="optbadge">Optional · beyond syllabus</div>
+    <h3>Design · 4-input priority encoder</h3>
+    <div class="design">
+      <div class="ds"><div class="dn">1</div><div class="db"><h5><small>Step 1</small>State the problem</h5>
+        <p>Encode four inputs into a 2-bit code. If several inputs are 1, encode the one with the highest priority (highest subscript). Add an output that shows whether any input is active.</p></div></div>
+      <div class="ds"><div class="dn">2</div><div class="db"><h5><small>Step 2</small>Determine the number of inputs and outputs</h5>
+        <p><b>4 inputs</b>, <b>3 outputs</b> (2-bit code + valid bit).</p></div></div>
+      <div class="ds"><div class="dn">3</div><div class="db"><h5><small>Step 3</small>Assign letter symbols</h5>
+        <div class="tw"><table class="io"><tr><th>Inputs</th><th class="sep">Outputs</th></tr><tr><td>D₀ (lowest) to D₃ (highest priority)</td><td class="sep">x y = code, V = valid</td></tr></table></div></div></div>
+      <div class="ds"><div class="dn">4</div><div class="db"><h5><small>Step 4</small>Derive the truth table</h5>
+        <p>Mano Table 5-4. X marks a don't-care: an input below the active highest one does not matter.</p>
+        <div class="tw"><table>
+          <tr><th>D₀</th><th>D₁</th><th>D₂</th><th>D₃</th><th class="sep">x</th><th>y</th><th>V</th></tr>
+          <tr><td>0</td><td>0</td><td>0</td><td>0</td><td class="sep">X</td><td>X</td><td>0</td></tr>
+          <tr><td>1</td><td>0</td><td>0</td><td>0</td><td class="sep">0</td><td>0</td><td>1</td></tr>
+          <tr><td>X</td><td>1</td><td>0</td><td>0</td><td class="sep">0</td><td>1</td><td>1</td></tr>
+          <tr><td>X</td><td>X</td><td>1</td><td>0</td><td class="sep">1</td><td>0</td><td>1</td></tr>
+          <tr><td>X</td><td>X</td><td>X</td><td>1</td><td class="sep">1</td><td>1</td><td>1</td></tr>
+        </table></div></div></div>
+      <div class="ds"><div class="dn">5</div><div class="db"><h5><small>Step 5</small>Obtain the simplified Boolean functions</h5>
+        <p>Expanding each X to 0 and 1 gives all 16 rows; the all-zero row is a don't-care for x and y.</p>
+        <div class="kmaps"><div class="km" data-km="pex"></div><div class="km" data-km="pey"></div></div>
+        <div class="eq"><div>x = D₂ + D₃</div><div>y = D₃ + D₁D₂′</div><div>V = D₀ + D₁ + D₂ + D₃</div></div></div></div>
+      <div class="ds"><div class="dn">6</div><div class="db"><h5><small>Step 6</small>Draw the logic diagram</h5>
+        <div class="bench" data-sim="prio"></div></div></div>
+    </div>
+  </div>
+
+  <div class="practice">
+    <h3>Check your understanding · 5.4</h3>
+    <details class="q"><summary><span class="n">Q1</span><span>Implement F₁ = x′y′z′ + xz, F₂ = xy′z′ + x′y, F₃ = x′y′z + xy with a decoder and OR gates.</span><span class="r">Mano 5-15</span></summary><div class="ans"><p>Expand to minterms: F₁ = Σ(0, 5, 7), F₂ = Σ(2, 3, 4), F₃ = Σ(1, 6, 7). Use a 3-to-8 decoder; OR gate 1 takes D₀, D₅, D₇; OR gate 2 takes D₂, D₃, D₄; OR gate 3 takes D₁, D₆, D₇.</p></div></details>
+    <details class="q"><summary><span class="n">Q2</span><span>Design a BCD-to-decimal decoder, using the six unused codes as don't-cares.</span><span class="r">Mano 5-14</span></summary><div class="ans"><ol class="mini">
+      <li><b>Problem.</b> Activate one of ten outputs for the BCD digit at the input.</li>
+      <li><b>Inputs and outputs.</b> 4 inputs, 10 outputs; inputs 1010–1111 never occur.</li>
+      <li><b>Symbols.</b> Inputs A B C D; outputs D₀–D₉.</li>
+      <li><b>Truth table.</b> One 1 per row: digit N makes D_N = 1; rows 10–15 are X.</li>
+      <li><b>Simplified functions.</b> D₀ = A′B′C′D′, D₁ = A′B′C′D, D₂ = B′CD′, D₃ = B′CD, D₄ = BC′D′, D₅ = BC′D, D₆ = BCD′, D₇ = BCD, D₈ = AD′, D₉ = AD.</li>
+      <li><b>Logic diagram.</b> Ten AND gates (two 4-input, six 3-input, two 2-input) fed by A, B, C, D and their complements.</li></ol></div></details>
+    <details class="q"><summary><span class="n">Q3</span><span>An 8-input encoder has D₃ = 1 and D₆ = 1 at the same time. What is the output, and how does a priority encoder fix it?</span><span class="r">Answer</span></summary><div class="ans"><p>x = 1 (D₆), y = 1 (D₃, D₆), z = 1 (D₃), so the output 111 is wrong. A priority encoder gives the higher subscript priority, so the output is 110 (D₆).</p></div></details>
+    <details class="q"><summary><span class="n">Q4</span><span>What is the difference between a decoder and an encoder?</span><span class="r">Answer</span></summary><div class="ans"><p>A decoder takes an n-bit code and activates one of up to 2ⁿ outputs (one minterm per output). An encoder takes one active line out of up to 2ⁿ inputs and outputs its n-bit code.</p></div></details>
+  </div>
+</section>
+
+<!-- ============ 5.5 ============ -->
+<section class="unit" id="u55">
+  <span class="sylref">Syllabus 5.5 · demultiplexer added to the course</span>
+  <h2>Multiplexers and demultiplexers</h2>
+  <div class="prose">
+  <p>A <b>multiplexer</b> (MUX, or <i>data selector</i>) selects binary information from one of many input lines and sends it to a single output. Which input is selected depends on the <b>selection lines</b>: normally 2ⁿ inputs and n selection lines. A <b>demultiplexer</b> does the opposite: one input, routed to one of 2ⁿ outputs.</p>
+  </div>
+
+  <h3 id="mux41">Design · 4-to-1-line multiplexer</h3>
+  <div class="design">
+    <div class="ds"><div class="dn">1</div><div class="db"><h5><small>Step 1</small>State the problem</h5>
+      <p>Design a circuit that connects one of four data inputs to a single output, chosen by a 2-bit select code.</p></div></div>
+    <div class="ds"><div class="dn">2</div><div class="db"><h5><small>Step 2</small>Determine the number of inputs and outputs</h5>
+      <p><b>6 inputs</b> (4 data + 2 select), <b>1 output</b>.</p></div></div>
+    <div class="ds"><div class="dn">3</div><div class="db"><h5><small>Step 3</small>Assign letter symbols</h5>
+      <div class="tw"><table class="io"><tr><th>Inputs</th><th class="sep">Outputs</th></tr><tr><td>I₀ I₁ I₂ I₃ = data, s₁ s₀ = select</td><td class="sep">Y</td></tr></table></div></div></div>
+    <div class="ds"><div class="dn">4</div><div class="db"><h5><small>Step 4</small>Derive the truth table</h5>
+      <p>The full table has 2⁶ = 64 rows, so it is written as a compact <b>function table</b> (Mano Fig. 5-16b): for each select code, Y equals one data input.</p>
+      <div class="tw"><table><tr><th>s₁</th><th>s₀</th><th class="sep">Y</th></tr><tr><td>0</td><td>0</td><td class="sep">I₀</td></tr><tr><td>0</td><td>1</td><td class="sep">I₁</td></tr><tr><td>1</td><td>0</td><td class="sep">I₂</td></tr><tr><td>1</td><td>1</td><td class="sep">I₃</td></tr></table></div></div></div>
+    <div class="ds"><div class="dn">5</div><div class="db"><h5><small>Step 5</small>Obtain the simplified Boolean function</h5>
+      <p>Each row of the function table becomes one product term: the select minterm ANDed with its data input.</p>
+      <div class="eq"><div>Y = s₁′s₀′I₀ + s₁′s₀I₁ + s₁s₀′I₂ + s₁s₀I₃</div></div></div></div>
+    <div class="ds"><div class="dn">6</div><div class="db"><h5><small>Step 6</small>Draw the logic diagram</h5>
+      <p>Four 3-input AND gates and one 4-input OR gate. With s₁s₀ = 10, only the AND gate of I₂ has both select inputs at 1, so Y follows I₂.</p>
+      <div class="bench" data-sim="mux41"></div></div></div>
+  </div>
+  <div class="prose"><p>The AND gates and inverters <b>decode</b> the select lines: a 2ⁿ-to-1 MUX is an n-to-2ⁿ decoder with one data input added to each AND gate, followed by a single OR gate. Like decoders, MUX ICs may have an <b>enable</b> (strobe) input, used to combine two or more MUX ICs into a larger one.</p></div>
+
+  <h3 id="muximpl">Boolean function implementation with a multiplexer</h3>
+  <div class="prose">
+  <p>A MUX is a decoder with the OR gate already built in. A 2ⁿ-to-1 MUX can implement any function of <b>n + 1 variables</b>:</p>
+  <ol class="steps">
+    <li>Write the function as a sum of minterms. Connect the last n variables to the selection lines (the second variable to the highest select line, and so on).</li>
+    <li>The first variable, say A, is applied to the data inputs as A, A′, 1 or 0.</li>
+    <li>Draw the <b>implementation table</b>: one column per data input. Top row: minterms with A′ (0 to 2ⁿ − 1). Bottom row: minterms with A (2ⁿ to 2ⁿ⁺¹ − 1). Circle the function's minterms.</li>
+    <li>For each column: neither circled → 0; both circled → 1; bottom only → A; top only → A′.</li>
+  </ol>
+  <p><b>Example (Mano Fig. 5-18):</b> <span class="ex">F(A, B, C) = Σ(1, 3, 5, 6)</span> with a 4-to-1 MUX, B → s₁, C → s₀. The implementation table gives I₀ = 0, I₁ = 1, I₂ = A, I₃ = A′.</p>
+  </div>
+  <div class="bench" data-sim="muxf"></div>
+  <div class="prose"><p>Use the tool below to build the implementation table for any 3- or 4-variable function. The presets include Mano Example 5-2, <span class="ex">F(A,B,C,D) = Σ(0, 1, 3, 4, 8, 9, 15)</span> with an 8-to-1 MUX.</p></div>
+  <div class="bench wid" data-w="mtool"></div>
+  <div class="note"><b>Decoder method vs MUX method.</b> The decoder method needs one decoder and one OR gate per output. The MUX method needs one MUX per output. So circuits with few outputs suit multiplexers; circuits with many outputs suit decoders. In practice decoders are mostly used to decode binary information and multiplexers to select a path from many sources to one destination.</div>
+
+  <div class="opt" id="quadmux">
+    <div class="optbadge">Optional · beyond syllabus</div>
+    <h3>Quadruple 2-to-1-line multiplexer</h3>
+    <div class="prose"><p>Several MUXes can share one IC with common select and enable inputs (Mano Fig. 5-17). Four 2-to-1 MUXes share one select line S and one enable E (active-low). Output Yᵢ is either Aᵢ or Bᵢ, so the unit chooses one of two 4-bit words.</p></div>
+    <div class="tw"><table><tr><th>E</th><th>S</th><th class="sep">Output Y</th></tr><tr><td>1</td><td>X</td><td class="sep">all 0s</td></tr><tr><td>0</td><td>0</td><td class="sep">select A</td></tr><tr><td>0</td><td>1</td><td class="sep">select B</td></tr></table></div>
+  </div>
+
+  <h3 id="demux">Design · 1-to-4-line demultiplexer <span class="added">added to course</span></h3>
+  <div class="prose"><p>A <b>demultiplexer</b> receives information on a single line and transmits it on one of 2ⁿ output lines, selected by n selection lines.</p></div>
+  <div class="design">
+    <div class="ds"><div class="dn">1</div><div class="db"><h5><small>Step 1</small>State the problem</h5>
+      <p>Design a circuit that routes one data input to one of four output lines, chosen by a 2-bit select code. Unselected outputs stay at 0.</p></div></div>
+    <div class="ds"><div class="dn">2</div><div class="db"><h5><small>Step 2</small>Determine the number of inputs and outputs</h5>
+      <p><b>3 inputs</b> (1 data + 2 select), <b>4 outputs</b>.</p></div></div>
+    <div class="ds"><div class="dn">3</div><div class="db"><h5><small>Step 3</small>Assign letter symbols</h5>
+      <div class="tw"><table class="io"><tr><th>Inputs</th><th class="sep">Outputs</th></tr><tr><td>D = data, s₁ s₀ = select</td><td class="sep">Y₀ Y₁ Y₂ Y₃</td></tr></table></div></div></div>
+    <div class="ds"><div class="dn">4</div><div class="db"><h5><small>Step 4</small>Derive the truth table</h5>
+      <div class="tw" data-tt="dmx"></div></div></div>
+    <div class="ds"><div class="dn">5</div><div class="db"><h5><small>Step 5</small>Obtain the simplified Boolean functions</h5>
+      <p>Each output has a single 1, at the row where its select code matches and D = 1:</p>
+      <div class="eq"><div>Y₀ = Ds₁′s₀′   Y₁ = Ds₁′s₀   Y₂ = Ds₁s₀′   Y₃ = Ds₁s₀</div></div></div></div>
+    <div class="ds"><div class="dn">6</div><div class="db"><h5><small>Step 6</small>Draw the logic diagram</h5>
+      <p>Four 3-input AND gates. Compare with the 2-to-4 decoder: it is the same circuit with D added to every AND gate.</p>
+      <div class="bench" data-sim="dmx"></div></div></div>
+  </div>
+  <div class="prose">
+  <p><b>Decoder with enable = demultiplexer.</b> A decoder with an enable input works as a demultiplexer when the enable line is used as the data input and the decoder inputs as the select lines. In Mano's NAND decoder (<a href="#decen">5.4</a>), with AB = 10 the output D₂ equals E while all other outputs are 1. Because one circuit does both jobs, such ICs are sold as <b>decoder/demultiplexers</b>.</p>
+  </div>
+
+  <div class="practice">
+    <h3>Check your understanding · 5.5</h3>
+    <details class="q"><summary><span class="n">Q1</span><span>Implement F(A,B,C,D) = Σ(0, 3, 5, 6, 8, 9, 14, 15) with an 8 × 1 MUX.</span><span class="r">Mano 5-24</span></summary><div class="ans"><p>B, C, D → s₂, s₁, s₀; A on the data inputs. Top row 0–7, bottom row 8–15. Circled: 0, 3, 5, 6 (top) and 8, 9, 14, 15 (bottom).</p><p>I₀ = 1, I₁ = A, I₂ = 0, I₃ = A′, I₄ = 0, I₅ = A′, I₆ = 1, I₇ = A. (Check it with the tool above.)</p></div></details>
+    <details class="q"><summary><span class="n">Q2</span><span>Implement a full adder with two 4 × 1 multiplexers.</span><span class="r">Mano 5-25</span></summary><div class="ans"><p>Connect x → s₁ and y → s₀ on both MUXes and put z on the data inputs.</p><p>S MUX: I₀ = z, I₁ = z′, I₂ = z′, I₃ = z. C MUX: I₀ = 0, I₁ = z, I₂ = z, I₃ = 1.</p></div></details>
+    <details class="q"><summary><span class="n">Q3</span><span>An 8 × 1 MUX has A, B, C on s₂ s₁ s₀ and inputs I₁ = I₂ = I₇ = 0, I₃ = I₅ = 1, I₀ = I₄ = D, I₆ = D′. Find F.</span><span class="r">Mano 5-27</span></summary><div class="ans"><p>ABC = 000 with D = 1 → m1; 011 → m6, m7; 100 with D = 1 → m9; 101 → m10, m11; 110 with D = 0 → m12. <span class="ex">F(A,B,C,D) = Σ(1, 6, 7, 9, 10, 11, 12)</span>.</p></div></details>
+    <details class="q"><summary><span class="n">Q4</span><span>Rearrange the truth table of the 2-to-4 NAND decoder (Fig. 5-10) to show it works as a demultiplexer.</span><span class="r">Mano 5-19</span></summary><div class="ans"><p>Group the rows by the select inputs A B and treat E as data. For AB = 00: D₀ = E, D₁ = D₂ = D₃ = 1. For AB = 01: D₁ = E, others 1. For AB = 10: D₂ = E. For AB = 11: D₃ = E. So E is routed to the selected output.</p></div></details>
+    <details class="q"><summary><span class="n">Q5</span><span>How many select lines does a 16-to-1 MUX need, and how many variables can it implement?</span><span class="r">Answer</span></summary><div class="ans"><p>4 select lines (2⁴ = 16). Using the implementation-table method it can implement any function of 4 + 1 = 5 variables.</p></div></details>
+  </div>
+</section>
+
+<!-- ============ 5.6 ============ -->
+<section class="unit" id="u56">
+  <span class="sylref">Syllabus 5.6</span>
+  <h2>Read-only memory (ROM) and programmable logic array (PLA)</h2>
+  <div class="prose">
+  <p>A <b>programmable logic device (PLD)</b> is an IC whose internal AND and OR gates are connected through electronic fuses. "Programming" means blowing the fuses on paths that must be broken, a hardware procedure. PLDs differ in where the fuses are:</p>
+  </div>
+  <div class="tw"><table class="cmp">
+    <tr><th>Device</th><th>AND array</th><th>OR array</th></tr>
+    <tr><td>PROM</td><td>Fixed (a full decoder)</td><td>Programmable</td></tr>
+    <tr><td>PLA</td><td>Programmable</td><td>Programmable</td></tr>
+    <tr class="opt-row"><td>PAL <span class="src">(optional)</span></td><td>Programmable</td><td>Fixed</td></tr>
+  </table></div>
+
+  <h3 id="rom">Read-only memory</h3>
+  <div class="prose">
+  <p>A ROM contains a decoder and OR gates in one IC, with programmable connections between them. It is used to implement complex combinational circuits or as permanent storage; the stored pattern stays when power is switched off.</p>
+  <p>A ROM has <b>n input lines</b> and <b>m output lines</b>. Each input combination is an <b>address</b>; each output bit pattern is a <b>word</b> of m bits. There are 2ⁿ addresses, so the ROM stores 2ⁿ words and is described as a <b>2ⁿ × m ROM</b>.</p>
+  <p><b>Example:</b> a 32 × 4 ROM has 5 inputs (2⁵ = 32). Inside, a 5 × 32 decoder (32 AND gates, 5 inverters) produces the 32 minterms. Each minterm connects through a fuse to each of the 4 OR gates, so there are 32 × 4 = 128 fuses. Blowing a fuse removes that minterm from that output.</p>
+  </div>
+  <div class="diag" style="max-width:520px"><svg viewBox="0 0 480 170" role="img" aria-label="ROM structure: n address inputs go into an n by 2 to the n decoder whose minterm outputs connect through fuses to m OR gates">
+    <g class="arrow"><path d="M20 85H80M200 50H260M200 85H260M200 120H260M380 85H450"/></g>
+    <rect class="blk" x="80" y="30" width="120" height="110" rx="4"/><text x="140" y="80" text-anchor="middle" font-size="13">n × 2ⁿ</text><text x="140" y="98" text-anchor="middle" font-size="13">decoder</text>
+    <rect class="blk" x="260" y="30" width="120" height="110" rx="4"/><text x="320" y="72" text-anchor="middle" font-size="13">2ⁿ × m</text><text x="320" y="90" text-anchor="middle" font-size="13">fuses</text><text x="320" y="108" text-anchor="middle" font-size="13">+ m OR gates</text>
+    <text x="20" y="75" font-size="12">n inputs</text><text x="408" y="75" font-size="12">m outputs</text><text x="230" y="160" text-anchor="middle" class="sm">2ⁿ minterms</text>
+  </svg></div>
+
+  <h3>Combinational logic implementation with a ROM</h3>
+  <div class="prose">
+  <ol class="steps">
+    <li>From the number of inputs n and outputs m, choose a <b>2ⁿ × m ROM</b>.</li>
+    <li>Write the ROM <b>truth table</b> (program table). No simplification is needed.</li>
+    <li>For each output, blow the fuses of the minterms where that output is 0; keep the fuses where it is 1.</li>
+  </ol>
+  <p><b>Example (Mano Fig. 5-23):</b> two inputs, two outputs, <span class="ex">F₁ = Σ(1, 2, 3)</span>, <span class="ex">F₂ = Σ(0, 2)</span>, so a 4 × 2 ROM with 8 fuses. The truth table has three 0s, so three fuses are blown. Click any fuse to blow or restore it and watch the stored words change.</p>
+  </div>
+  <div class="bench wid" data-w="rom"></div>
+  <div class="note">Some ROMs have an inverter after each OR gate and start with all 0 outputs. For those, keep the fuses of the minterms where the output is <b>1</b> in the complemented sense: the OR gate forms F′ and the inverter restores F (Mano Fig. 5-23c).</div>
+
+
+  <h3 id="romex">Example · A 64 × 4 ROM as a lookup table</h3>
+  <div class="prose">
+  <p><b>Scenario.</b> A controller keeps a small table of 4-bit codes in a ROM. The table has room for 64 entries, but only 12 are used: Word 1 to Word 12, each stored at a chosen address. When the controller puts an address on the 6 address lines, the ROM must put the 4-bit word stored there on its outputs. Any address that holds no word must read 0000.</p>
+  <p>This is the <b>memory view</b> of a ROM: address in, stored word out. Below we program it step by step, then read it back.</p>
+  </div>
+
+  <h4 class="exh">Memory map (truth table)</h4>
+  <div class="prose"><p>Inputs: address lines A₅ A₄ A₃ A₂ A₁ A₀ (n = 6). Outputs: data bits F₃ F₂ F₁ F₀ (m = 4). Rows are listed in address order.</p></div>
+  <div class="tw" data-romex="map"></div>
+
+  <h4 class="exh">Programming the ROM</h4>
+  <ol class="steps prose">
+    <li><b>Choose the size.</b> 6 inputs and 4 outputs give a 2⁶ × 4 = <b>64 × 4 ROM</b> (64 words of 4 bits). Inside it there are two parts:
+      <ul>
+        <li><b>A 6 × 64 decoder.</b> It turns the 6-bit address into 64 lines, m₀ to m₆₃. For any address, exactly one line is 1.</li>
+        <li><b>4 OR gates, one per output bit</b> (F₃, F₂, F₁, F₀). Each OR gate is wired to <b>all 64</b> decoder lines, and every wire passes through its own fuse.</li>
+      </ul>
+      So the fuses form a grid of 64 lines × 4 OR gates = <b>256 fuses</b>. An intact fuse lets a line's 1 reach that output; a blown fuse blocks it.</li>
+    <li><b>Write the program table.</b> The 12 rows above; every other address stores 0000. No simplification is needed.</li>
+    <li><b>Blow the fuses.</b> On each minterm line, keep the fuse (●) to every output whose bit is 1 and blow it (✕) where the bit is 0. On the 52 unused lines, blow all 4 fuses.</li>
+  </ol>
+  <div class="tw" data-romex="fuse"></div>
+  <div class="prose"><p>Reading the matrix down each column gives every output as a sum of minterms, exactly as in the circuit view of a ROM:</p></div>
+  <div class="eq" data-romex="sop"></div>
+
+  <div class="bench wid" data-w="romex"></div>
+
+  <h4 class="exh">Looking ahead: the same data in a PLA</h4>
+  <div class="prose">
+  <p>52 of the 64 words in this ROM hold nothing, yet the decoder still builds all 64 minterm lines. A PLA builds only the product terms it needs: here one AND gate per stored word, P₀ to P₁₁, each matching all six address bits. In the program table, 1 = variable used true, 0 = complemented, and – = no connection.</p>
+  </div>
+  <div class="tw" data-romex="pla"></div>
+  <div class="prose">
+  <p><b>Fuse count</b> (Mano's formulas): ROM 2ⁿ × m = 64 × 4 = <b>256</b>. PLA 2n × k + k × m + m = 2·6·12 + 12·4 + 4 = <b>196</b>, with only 12 AND gates instead of 64 decoder lines. Simplifying the functions could reduce the product terms further; this is why a PLA is preferred when most addresses are don't-cares.</p>
+  </div>
+
+  <h3>Example · Squaring a 3-bit number with a ROM</h3>
+  <div class="prose"><p>Mano Example 5-3: inputs A₂A₁A₀, output = square of the input (0 to 49), so 6 output bits B₅…B₀.</p></div>
+  <div class="tw" data-tt="sq"></div>
+  <div class="prose"><p>B₀ always equals A₀, and B₁ is always 0, so they need no ROM outputs. Only B₅–B₂ are stored: the ROM needs 3 inputs and 4 outputs, an <b>8 × 4 ROM</b>.</p></div>
+  <div class="tw" data-tt="rom84"></div>
+
+  <h3>Types of ROM</h3>
+  <div class="tw"><table class="cmp">
+    <tr><th>Type</th><th>How it is programmed</th><th>Can it be changed?</th></tr>
+    <tr><td><b>ROM</b> (mask-programmed)</td><td>By the manufacturer during fabrication, from the customer's truth table. Economical only in large quantities.</td><td>No</td></tr>
+    <tr><td><b>PROM</b></td><td>By the user, in the lab, by blowing fuses with current pulses using a PROM programmer.</td><td>No (irreversible)</td></tr>
+    <tr><td><b>EPROM</b></td><td>Like a PROM, but erased by ultraviolet light back to all 0s (or all 1s).</td><td>Yes, after UV erasure</td></tr>
+    <tr><td><b>EEPROM</b></td><td>Erased with electrical signals instead of UV light.</td><td>Yes, electrically</td></tr>
+  </table></div>
+  <div class="prose"><p><b>Two ways to view a ROM.</b> (1) As a circuit: each output is a Boolean function in sum of minterms. (2) As memory: the inputs give an address and the outputs read out the stored word, hence "read-only memory". ROMs are used for code converters, arithmetic functions such as multipliers, character displays, and microprogrammed control units.</p></div>
+
+  <h3 id="pla">Programmable logic array (PLA)</h3>
+  <div class="prose">
+  <p>When a circuit has many don't-care conditions, a ROM wastes space: its words at unused addresses are never used. Mano's example: a 12-bit card code to 6-bit internal code would need a 4096 × 6 ROM, yet only 47 words are used. A <b>PLA</b> is an LSI device that avoids this waste. It does <b>not</b> fully decode the inputs: the decoder is replaced by a group of programmable AND gates, each producing one product term, so functions are implemented in <b>simplified sum-of-products</b> form.</p>
+  <p>A PLA has <b>n inputs, k product terms (AND gates), m outputs (OR gates)</b>. Fuses connect every input and its complement to every AND gate, every AND gate to every OR gate, and each output to an inverter that can be bypassed (output true, T) or kept (output complemented, C).</p>
+  </div>
+  <div class="diag" style="max-width:600px"><svg viewBox="0 0 600 150" role="img" aria-label="PLA block diagram: n inputs and their complements through n by k fuses into k AND gates, then k by m fuses into m OR gates, then m output fuses and inverters">
+    <g class="arrow"><path d="M20 75H90M210 75H300M420 75H500M560 75H590"/></g>
+    <rect class="blk" x="90" y="30" width="120" height="90" rx="4"/><text x="150" y="70" text-anchor="middle" font-size="13">k AND gates</text><text x="150" y="88" text-anchor="middle" class="sm">product terms</text>
+    <rect class="blk" x="300" y="30" width="120" height="90" rx="4"/><text x="360" y="70" text-anchor="middle" font-size="13">m OR gates</text><text x="360" y="88" text-anchor="middle" class="sm">sum terms</text>
+    <rect class="blk" x="500" y="50" width="60" height="50" rx="4"/><text x="530" y="80" text-anchor="middle" font-size="12">T / C</text>
+    <text x="20" y="64" font-size="12">n inputs</text><text x="255" y="64" text-anchor="middle" class="sm">k × m fuses</text><text x="50" y="100" class="sm">2n × k fuses</text><text x="460" y="64" text-anchor="middle" class="sm">m fuses</text>
+  </svg></div>
+  <div class="tw"><table class="cmp">
+    <tr><th></th><th>ROM</th><th>PLA</th></tr>
+    <tr><td>AND part</td><td>Full decoder: generates all 2ⁿ minterms</td><td>Programmable AND gates: only the product terms needed</td></tr>
+    <tr><td>Function form</td><td>Sum of minterms (canonical, no simplification)</td><td>Simplified sum of products</td></tr>
+    <tr><td>Size given by</td><td>n inputs, m outputs (2ⁿ × m)</td><td>n inputs, k product terms, m outputs</td></tr>
+    <tr><td>Programmed fuses</td><td>2ⁿ × m</td><td>2n × k + k × m + m</td></tr>
+    <tr><td>Best for</td><td>Few don't-cares, any function from its truth table</td><td>Many inputs/outputs with many don't-cares</td></tr>
+  </table></div>
+
+  <h3>PLA program table</h3>
+  <div class="prose">
+  <p>Programming a PLA means specifying its AND-OR-NOT paths. The <b>program table</b> has three parts:</p>
+  <ul>
+    <li><b>Product term</b>: numbered list of the AND gates.</li>
+    <li><b>Inputs</b>: for each product term, 1 if the variable appears uncomplemented, 0 if complemented, – if absent (no connection).</li>
+    <li><b>Outputs</b>: 1 if the product term is part of that output, – if not. Under each output, T (true) keeps the inverter bypassed; C (complement) uses it.</li>
+  </ul>
+  <p><b>Example (Mano Fig. 5-27):</b> three inputs, two outputs. From the truth table, <span class="ex">F₁ = Σ(4, 5, 7)</span> and <span class="ex">F₂ = Σ(3, 5, 7)</span>. Simplify each output to as few product terms as possible:</p>
+  </div>
+  <div class="kmaps"><div class="km" data-km="plaf1"></div><div class="km" data-km="plaf2"></div></div>
+  <div class="eq"><div>F₁ = AB′ + AC     F₂ = AC + BC</div></div>
+  <div class="prose"><p>Only three distinct product terms are needed (AC is shared by both outputs), so a PLA with 3 inputs, 3 product terms and 2 outputs is enough.</p></div>
+  <div class="tw"><table class="prog">
+    <tr><th rowspan="2" style="text-align:left"></th><th rowspan="2">Product term</th><th colspan="3" class="sep">Inputs</th><th colspan="2" class="sep">Outputs</th></tr>
+    <tr><th class="sep">A</th><th>B</th><th>C</th><th class="sep">F₁</th><th>F₂</th></tr>
+    <tr><td style="text-align:left">AB′</td><td>1</td><td class="sep">1</td><td>0</td><td>–</td><td class="sep">1</td><td>–</td></tr>
+    <tr><td style="text-align:left">AC</td><td>2</td><td class="sep">1</td><td>–</td><td>1</td><td class="sep">1</td><td>1</td></tr>
+    <tr><td style="text-align:left">BC</td><td>3</td><td class="sep">–</td><td>1</td><td>1</td><td class="sep">–</td><td>1</td></tr>
+    <tr class="brk"><td></td><td></td><td class="sep"></td><td></td><td></td><td class="sep">T</td><td>T</td></tr>
+  </table></div>
+  <div class="bench" data-sim="pla"></div>
+
+  <h3>Example · using the complement (Mano Example 5-4)</h3>
+  <div class="prose"><p><span class="ex">F₁(A,B,C) = Σ(3, 5, 6, 7)</span>, <span class="ex">F₂(A,B,C) = Σ(0, 2, 4, 7)</span>, on a PLA with 3 inputs, 4 product terms, 2 outputs. Simplify both the true and the complemented form of each function and pick the combination with the fewest distinct terms:</p></div>
+  <div class="kmaps"><div class="km" data-km="e54f1"></div><div class="km" data-km="e54f1c"></div><div class="km" data-km="e54f2"></div></div>
+  <div class="prose"><p>F₁ = AB + AC + BC shares no terms with F₂ = B′C′ + A′C′ + ABC. But <span class="ex">F₁′ = B′C′ + A′C′ + A′B′</span> shares two. So program F₁′ and mark F₁'s output <b>C</b>: the output inverter turns F₁′ back into F₁. Only four distinct terms are needed.</p></div>
+  <div class="tw"><table class="prog">
+    <tr><th rowspan="2"></th><th rowspan="2">Product term</th><th colspan="3" class="sep">Inputs</th><th colspan="2" class="sep">Outputs</th></tr>
+    <tr><th class="sep">A</th><th>B</th><th>C</th><th class="sep">F₁</th><th>F₂</th></tr>
+    <tr><td style="text-align:left">B′C′</td><td>1</td><td class="sep">–</td><td>0</td><td>0</td><td class="sep">1</td><td>1</td></tr>
+    <tr><td style="text-align:left">A′C′</td><td>2</td><td class="sep">0</td><td>–</td><td>0</td><td class="sep">1</td><td>1</td></tr>
+    <tr><td style="text-align:left">A′B′</td><td>3</td><td class="sep">0</td><td>0</td><td>–</td><td class="sep">1</td><td>–</td></tr>
+    <tr><td style="text-align:left">ABC</td><td>4</td><td class="sep">1</td><td>1</td><td>1</td><td class="sep">–</td><td>1</td></tr>
+    <tr class="brk"><td></td><td></td><td class="sep"></td><td></td><td></td><td class="sep">C</td><td>T</td></tr>
+  </table></div>
+
+  <div class="opt" id="pal">
+    <div class="optbadge">Optional · beyond syllabus</div>
+    <h3>Programmable array logic (PAL)</h3>
+    <div class="prose">
+    <p>A PAL has a <b>programmable AND array and a fixed OR array</b>. It is easier to program than a PLA but less flexible: each OR gate has its own fixed set of AND gates, so product terms <b>cannot be shared</b> between outputs. Each function must be simplified on its own and must fit the number of terms per section. Mano's PAL (Fig. 5-30) has 4 inputs, 4 outputs and sections with 3 AND gates each.</p>
+    <p>Example: w = Σ(2, 12, 13), x = Σ(7–15), y = Σ(0, 2, 3, 4, 5, 6, 7, 8, 10, 11, 15), z = Σ(1, 2, 8, 12, 13). Simplified: w = ABC′ + A′B′CD′, x = A + BCD, y = A′B + CD + B′D′, z = ABC′ + A′B′CD′ + AC′D′ + A′B′C′D. z has four terms, too many for one section, so it reuses w: <span class="ex">z = w + AC′D′ + A′B′C′D</span>.</p>
+    </div>
+    <div class="tw"><table class="prog">
+      <tr><th>Term</th><th class="sep">A</th><th>B</th><th>C</th><th>D</th><th>w</th><th class="sep" style="text-align:left">Output</th></tr>
+      <tr><td>1</td><td class="sep">1</td><td>1</td><td>0</td><td>–</td><td>–</td><td class="sep" style="text-align:left">w = ABC′</td></tr>
+      <tr><td>2</td><td class="sep">0</td><td>0</td><td>1</td><td>0</td><td>–</td><td class="sep" style="text-align:left">  + A′B′CD′</td></tr>
+      <tr><td>3</td><td class="sep">–</td><td>–</td><td>–</td><td>–</td><td>–</td><td class="sep" style="text-align:left">  (unused)</td></tr>
+      <tr class="brk"><td>4</td><td class="sep">1</td><td>–</td><td>–</td><td>–</td><td>–</td><td class="sep" style="text-align:left">x = A</td></tr>
+      <tr><td>5</td><td class="sep">–</td><td>1</td><td>1</td><td>1</td><td>–</td><td class="sep" style="text-align:left">  + BCD</td></tr>
+      <tr><td>6</td><td class="sep">–</td><td>–</td><td>–</td><td>–</td><td>–</td><td class="sep" style="text-align:left">  (unused)</td></tr>
+      <tr class="brk"><td>7</td><td class="sep">0</td><td>1</td><td>–</td><td>–</td><td>–</td><td class="sep" style="text-align:left">y = A′B</td></tr>
+      <tr><td>8</td><td class="sep">–</td><td>–</td><td>1</td><td>1</td><td>–</td><td class="sep" style="text-align:left">  + CD</td></tr>
+      <tr><td>9</td><td class="sep">–</td><td>0</td><td>–</td><td>0</td><td>–</td><td class="sep" style="text-align:left">  + B′D′</td></tr>
+      <tr class="brk"><td>10</td><td class="sep">–</td><td>–</td><td>–</td><td>–</td><td>1</td><td class="sep" style="text-align:left">z = w</td></tr>
+      <tr><td>11</td><td class="sep">1</td><td>–</td><td>0</td><td>0</td><td>–</td><td class="sep" style="text-align:left">  + AC′D′</td></tr>
+      <tr><td>12</td><td class="sep">0</td><td>0</td><td>0</td><td>1</td><td>–</td><td class="sep" style="text-align:left">  + A′B′C′D</td></tr>
+    </table></div>
+    <div class="prose"><p>Mano Table 5-6. Only the AND inputs are programmed. An unused AND gate keeps all its fuses intact, so it receives both A and A′ and its output is always 0.</p></div>
+  </div>
+
+  <div class="practice">
+    <h3>Check your understanding · 5.6</h3>
+    <details class="q"><summary><span class="n">Q1</span><span>What ROM size is needed for (a) a multiplier of two 4-bit numbers, (b) a BCD-to-seven-segment decoder with enable?</span><span class="r">Mano 5-31</span></summary><div class="ans"><p>(a) 8 inputs, 8 outputs → 2⁸ × 8 = <b>256 × 8</b>. (b) 4 + 1 = 5 inputs, 7 outputs → <b>32 × 7</b>.</p></div></details>
+    <details class="q"><summary><span class="n">Q2</span><span>Tabulate the 8 × 4 ROM truth table for A = Σ(1,2,4,6), B = Σ(0,1,6,7), C = Σ(2,6), D = Σ(1,2,3,5,7).</span><span class="r">Mano 5-32</span></summary><div class="ans"><div class="tw" data-tt="p532"></div></div></details>
+    <details class="q"><summary><span class="n">Q3</span><span>How many fuses must be programmed in a PLA with 16 inputs, 48 product terms and 8 outputs? Compare with a ROM.</span><span class="r">Answer</span></summary><div class="ans"><p>PLA: 2n × k + k × m + m = 2·16·48 + 48·8 + 8 = 1536 + 384 + 8 = <b>1928</b>. A ROM with 16 inputs and 8 outputs needs 2¹⁶ × 8 = <b>524 288</b>.</p></div></details>
+    <details class="q"><summary><span class="n">Q4</span><span>Why is a PLA preferred over a ROM when there are many don't-care conditions?</span><span class="r">Answer</span></summary><div class="ans"><p>A ROM always decodes every address, so words for the don't-care addresses are wasted. A PLA only builds the product terms the simplified functions need, and don't-cares help simplify those terms further.</p></div></details>
+    <details class="q"><summary><span class="n">Q5</span><span>In a PLA program table, what do 1, 0 and – mean in the inputs columns?</span><span class="r">Answer</span></summary><div class="ans"><p>1: the uncomplemented variable is connected to that AND gate. 0: the complemented variable is connected. –: no connection (both fuses blown); an open AND input behaves like 1.</p></div></details>
+  </div>
+</section>
+
+<!-- ============ BANK ============ -->
+<section class="unit" id="bank">
+  <span class="sylref">Exam practice</span>
+  <h2>Problem bank</h2>
+  <div class="prose"><p>Longer problems from the end of Mano Chapter 5. Design answers use the same six steps as the lessons.</p></div>
+  <details class="q"><summary><span class="n">5-2</span><span>Build a BCD-to-Excess-3 converter with a 4-bit adder. How do you change it into an Excess-3-to-BCD converter?</span><span class="r">Answer</span></summary><div class="ans"><p>Apply the BCD digit to the A inputs, 0011 to the B inputs and C₁ = 0; the sum outputs give Excess-3. For the reverse, subtract 3: apply the Excess-3 digit to A and add 1101 (2's complement of 0011), ignoring the output carry.</p></div></details>
+  <details class="q optq"><summary><span class="n">5-3</span><span>The adder-subtractor computes 0110 − 1001 (6 − 9). Give the nine inputs and five outputs.</span><span class="r">Optional</span></summary><div class="ans"><p>Inputs: M = 1, A = 0110, B = 1001. The XOR gates give B′ = 0110 and C₁ = 1. Sum: 0110 + 0110 + 1 = 1101, C₅ = 0. Outputs: S = 1101, C₅ = 0. C₅ = 0 means A &lt; B; 1101 is the 2's complement of 0011, i.e. −3.</p></div></details>
+  <details class="q optq"><summary><span class="n">5-4</span><span>Adder-subtractor outputs for (a) M=0, 0111, 0110 (b) M=0, 1000, 1001 (c) M=1, 1100, 1000 (d) M=1, 0101, 1010 (e) M=1, 0000, 0001.</span><span class="r">Optional</span></summary><div class="ans"><p>(a) 0111 + 0110 = 1101, C₅ = 0. (b) 1000 + 1001 = 1 0001: S = 0001, C₅ = 1. (c) 1100 + 0111 + 1 = 1 0100: S = 0100, C₅ = 1. (d) 0101 + 0101 + 1 = 1011, C₅ = 0. (e) 0000 + 1110 + 1 = 1111, C₅ = 0.</p></div></details>
+  <details class="q optq"><summary><span class="n">5-7</span><span>XOR delay 20 ns, AND/OR delay 10 ns. Total delay of the 4-bit look-ahead adder of Fig. 5-5?</span><span class="r">Optional</span></summary><div class="ans"><p>Pᵢ from the first XOR: 20 ns. Look-ahead carries (AND then OR): 20 ns more = 40 ns. Final XOR for Sᵢ: 20 ns more = <b>60 ns</b>.</p></div></details>
+  <details class="q"><summary><span class="n">5-10</span><span>Design a circuit that generates the 9's complement of a BCD digit.</span><span class="r">Answer</span></summary><div class="ans"><ol class="mini">
+    <li><b>Problem.</b> Output 9 − N for the BCD digit N.</li>
+    <li><b>Inputs and outputs.</b> 4 inputs, 4 outputs; inputs 1010–1111 are don't-cares.</li>
+    <li><b>Symbols.</b> Inputs A B C D; outputs w x y z.</li>
+    <li><b>Truth table.</b> 0→1001, 1→1000, 2→0111, 3→0110, 4→0101, 5→0100, 6→0011, 7→0010, 8→0001, 9→0000.</li>
+    <li><b>Simplified functions.</b> w = A′B′C′, x = B ⊕ C, y = C, z = D′.</li>
+    <li><b>Logic diagram.</b> One 3-input AND (A′, B′, C′), one XOR (B, C), a wire from C, an inverter on D.</li></ol></div></details>
+  <details class="q"><summary><span class="n">5-16</span><span>Implement F₁ = Σ(2,4,7), F₂ = Σ(0,3), F₃ = Σ(0,2,3,4,7) with a 3 × 8 NAND decoder (active-low outputs) and external NAND or AND gates.</span><span class="r">Answer</span></summary><div class="ans"><p>The decoder outputs are minterms complemented (mᵢ′). A NAND of mᵢ′ terms gives their OR: F₁ = NAND(D₂, D₄, D₇), F₂ = NAND(D₀, D₃). F₃ has 5 minterms, so use its complement F₃′ = Σ(1, 5, 6): an AND of D₁, D₅, D₆ gives (m₁ + m₅ + m₆)′ = F₃. Gate inputs: 3 + 2 + 3.</p></div></details>
+  <details class="q"><summary><span class="n">5-18</span><span>Construct a 5 × 32 decoder with four 3 × 8 decoders (with enable) and one 2 × 4 decoder.</span><span class="r">Answer</span></summary><div class="ans"><p>Connect the three low inputs (A₂A₁A₀) to all four 3 × 8 decoders. Feed the two high inputs (A₄A₃) to the 2 × 4 decoder; its four outputs drive the enables of the four 3 × 8 decoders. A₄A₃ = 00 enables the decoder for D₀–D₇, 01 for D₈–D₁₅, 10 for D₁₆–D₂₃, 11 for D₂₄–D₃₁.</p></div></details>
+  <details class="q optq"><summary><span class="n">5-20</span><span>Design a 4-input priority encoder with D₀ having the highest priority.</span><span class="r">Optional</span></summary><div class="ans"><ol class="mini">
+    <li><b>Problem.</b> Encode the active input with the highest priority, now D₀ highest, D₃ lowest.</li>
+    <li><b>Inputs and outputs.</b> 4 inputs, 3 outputs.</li>
+    <li><b>Symbols.</b> D₀–D₃; outputs x y and V.</li>
+    <li><b>Truth table.</b> 0000 → XX, V=0; 1XXX → 00; 01XX → 01; 001X → 10; 0001 → 11 (inputs listed D₀D₁D₂D₃).</li>
+    <li><b>Simplified functions.</b> <span class="ex">x = D₀′D₁′</span>, <span class="ex">y = D₀′D₁ + D₀′D₂′</span>, <span class="ex">V = D₀ + D₁ + D₂ + D₃</span> (the all-zero row is a don't-care for x, y).</li>
+    <li><b>Logic diagram.</b> x: one AND of D₀′, D₁′. y: D₀′ AND (D₁ + D₂′). V: a 4-input OR.</li></ol></div></details>
+  <details class="q"><summary><span class="n">5-28</span><span>Implement F(A,B,C,D) = Σ(1,3,4,11,12,13,14,15) with a 4 × 1 MUX (A, B on the select lines) and external gates.</span><span class="r">Answer</span></summary><div class="ans"><p>Split by AB. AB = 00: minterms 1, 3 → CD = 01, 11 → I₀ = D. AB = 01: minterm 4 → CD = 00 → I₁ = C′D′. AB = 10: minterm 11 → CD = 11 → I₂ = CD. AB = 11: all four → I₃ = 1. External gates: one NOR (C, D) for I₁ and one AND (C, D) for I₂.</p></div></details>
+  <details class="q"><summary><span class="n">5-29</span><span>Make a 128 × 8 ROM from four 32 × 8 ROM chips (each with enable) and a decoder.</span><span class="r">Answer</span></summary><div class="ans"><p>128 words need 7 address lines. The 5 low lines (A₄–A₀) go to all four chips. The 2 high lines (A₆A₅) go to a 2 × 4 decoder whose outputs drive the four chip enables, so only one chip is active. The 8 data outputs of the chips are connected together (common output lines).</p></div></details>
+  <details class="q"><summary><span class="n">5-33</span><span>PLA program table for the four functions of Problem 5-32, with the fewest product terms.</span><span class="r">Answer</span></summary><div class="ans"><p>Simplify each function on a 3-variable map: <span class="ex">A = xz′ + yz′ + x′y′z</span>, <span class="ex">B = x′y′ + xy</span>, <span class="ex">C = yz′</span>, <span class="ex">D = z + x′y</span>. The term yz′ is shared by A and C, giving 7 distinct product terms.</p>
+    <div class="tw"><table class="prog">
+      <tr><th rowspan="2"></th><th rowspan="2">Term</th><th colspan="3" class="sep">Inputs</th><th colspan="4" class="sep">Outputs</th></tr>
+      <tr><th class="sep">x</th><th>y</th><th>z</th><th class="sep">A</th><th>B</th><th>C</th><th>D</th></tr>
+      <tr><td style="text-align:left">xz′</td><td>1</td><td class="sep">1</td><td>–</td><td>0</td><td class="sep">1</td><td>–</td><td>–</td><td>–</td></tr>
+      <tr><td style="text-align:left">yz′</td><td>2</td><td class="sep">–</td><td>1</td><td>0</td><td class="sep">1</td><td>–</td><td>1</td><td>–</td></tr>
+      <tr><td style="text-align:left">x′y′z</td><td>3</td><td class="sep">0</td><td>0</td><td>1</td><td class="sep">1</td><td>–</td><td>–</td><td>–</td></tr>
+      <tr><td style="text-align:left">x′y′</td><td>4</td><td class="sep">0</td><td>0</td><td>–</td><td class="sep">–</td><td>1</td><td>–</td><td>–</td></tr>
+      <tr><td style="text-align:left">xy</td><td>5</td><td class="sep">1</td><td>1</td><td>–</td><td class="sep">–</td><td>1</td><td>–</td><td>–</td></tr>
+      <tr><td style="text-align:left">z</td><td>6</td><td class="sep">–</td><td>–</td><td>1</td><td class="sep">–</td><td>–</td><td>–</td><td>1</td></tr>
+      <tr><td style="text-align:left">x′y</td><td>7</td><td class="sep">0</td><td>1</td><td>–</td><td class="sep">–</td><td>–</td><td>–</td><td>1</td></tr>
+      <tr class="brk"><td></td><td></td><td class="sep"></td><td></td><td></td><td class="sep">T</td><td>T</td><td>T</td><td>T</td></tr>
+    </table></div></div></details>
+</section>
+
+<!-- ============ SUMMARY ============ -->
+<section class="unit" id="summary">
+  <span class="sylref">Revision</span>
+  <h2>Key results</h2>
+  <div class="tw"><table class="cmp">
+    <tr><th>Block</th><th>Key equations / facts</th><th>Size</th></tr>
+    <tr><td>Parallel adder</td><td>n full adders, carry chained; 2n gate levels for the carry</td><td>2n + 1 inputs, n + 1 outputs</td></tr>
+    <tr><td>BCD adder</td><td class="ex">C = K + Z₈Z₄ + Z₈Z₂; add 0110 when C = 1</td><td>9 inputs, 5 outputs</td></tr>
+    <tr><td>Magnitude comparator</td><td class="ex">xᵢ = AᵢBᵢ + Aᵢ′Bᵢ′; (A=B) = x₃x₂x₁x₀</td><td>2n inputs, 3 outputs</td></tr>
+    <tr><td>Decoder</td><td>Each output is one minterm; with OR gates builds any circuit</td><td>n → 2ⁿ</td></tr>
+    <tr><td>Encoder</td><td>Each output = OR of inputs with a 1 in that bit</td><td>2ⁿ → n</td></tr>
+    <tr><td>Multiplexer</td><td class="ex">Y = Σ (select minterm)·Iᵢ; implements n + 1 variables</td><td>2ⁿ data + n select → 1</td></tr>
+    <tr><td>Demultiplexer</td><td class="ex">Yᵢ = D·(select minterm i); = decoder with enable</td><td>1 data + n select → 2ⁿ</td></tr>
+    <tr><td>ROM</td><td>Fixed decoder + programmable OR; sum of minterms</td><td>2ⁿ × m, 2ⁿ·m fuses</td></tr>
+    <tr><td>PLA</td><td>Programmable AND + OR; simplified SOP; T/C outputs</td><td>n, k, m; 2nk + km + m fuses</td></tr>
+  </table></div>
+  <footer>Content follows the BT102CO syllabus (Unit 5) and M. Morris Mano, <i>Digital Design</i>, Chapter 5, with the supplementary class note. Circuit benches are live: click an input or a truth-table row.</footer>
+</section>
+</main>
+</div>
+
+<script>
+(function(){
+const sub=k=>String(k).replace(/^([A-Za-z]+)(\d+)$/,'$1<sub>$2</sub>');
+/* ---------- gate geometry ---------- */
+const HH=n=>n<=2?15:n===3?20:25;
+const SP=n=>n<=2?14:12;
+const OUTBUB=new Set(['NAND','NOR','XNOR']);
+const INBUB=new Set(['IOR','IAND']);
+const ANDISH=new Set(['AND','NAND','IAND']);
+const ORISH=new Set(['OR','NOR','XOR','XNOR','IOR']);
+const HIDDEN=new Set(['PIN','SINK']);
+function gW(g){
+  if(HIDDEN.has(g.t))return 0;
+  if(g.t==='NOT')return 32;
+  let w=ANDISH.has(g.t)?20+HH(g.in.length):40;
+  if(OUTBUB.has(g.t))w+=8;
+  return w;
+}
+function inPin(g,i){
+  if(g.t==='SINK')return {x:g.x,y:g.y};
+  const n=g.in.length;
+  const y=g.y+(i-(n-1)/2)*SP(n);
+  let x=g.x;
+  if(g.t==='IOR')x=g.x-5;else if(g.t==='IAND')x=g.x-8;else if(ORISH.has(g.t))x=g.x+2;
+  return {x,y};
+}
+function outPin(g){return {x:g.x+gW(g),y:g.y}}
+function shape(g){
+  if(HIDDEN.has(g.t))return '';
+  const x=g.x,y=g.y,n=g.t==='NOT'?1:g.in.length,h=HH(n);let s='';
+  if(g.t==='NOT')return `<path class="gate" d="M${x},${y-12} L${x+24},${y} L${x},${y+12} Z"/><circle class="bub" cx="${x+28}" cy="${y}" r="4"/>`;
+  if(ANDISH.has(g.t))s+=`<path class="gate" d="M${x},${y-h} H${x+20} A${h},${h} 0 0 1 ${x+20},${y+h} H${x} Z"/>`;
+  else{
+    s+=`<path class="gate" d="M${x},${y-h} Q${x+10},${y} ${x},${y+h} Q${x+26},${y+h} ${x+40},${y} Q${x+26},${y-h} ${x},${y-h} Z"/>`;
+    if(g.t==='XOR'||g.t==='XNOR')s+=`<path class="gate" style="fill:none" d="M${x-6},${y-h} Q${x+4},${y} ${x-6},${y+h}"/>`;
+  }
+  const bw=ANDISH.has(g.t)?20+h:40;
+  if(OUTBUB.has(g.t))s+=`<circle class="bub" cx="${x+bw+4}" cy="${y}" r="4"/>`;
+  if(INBUB.has(g.t))for(let i=0;i<g.in.length;i++){const p=inPin(g,i);s+=`<circle class="bub" cx="${g.t==='IOR'?x+1:x-4}" cy="${p.y}" r="4"/>`;}
+  return s;
+}
+function op(t,a){
+  const all=a.every(v=>v),any=a.some(v=>v),par=a.reduce((p,v)=>p^v,0);
+  switch(t){case'AND':return +all;case'OR':return +any;case'XOR':return par;case'NOT':return 1-a[0];
+  case'NAND':case'IOR':return all?0:1;case'NOR':case'IAND':return any?0:1;case'XNOR':return 1-par;case'SINK':return a[0];}
+}
+const pretty=s=>s.split('#')[0].replace(/'/g,'′');
+function litVal(key,st){const nm=key.split('#')[0];if(nm==='0')return 0;if(nm==='1')return 1;const neg=nm.endsWith("'");const b=nm.replace("'","");return st[b]^(neg?1:0)}
+function evalDiag(d,st){
+  const v={};
+  for(const k in d.lits)v[k]=litVal(k,st);
+  for(const g of d.gates)v[g.id]=g.t==='PIN'?g.f(st,v):op(g.t,g.in.map(i=>v[i]));
+  return v;
+}
+function renderDiag(d,v){
+  const byId={};d.gates.forEach(g=>byId[g.id]=g);
+  const ow=d.ow||24,ledX=d.w-ow-12;
+  const srcPt=k=>byId[k]?outPin(byId[k]):{x:34,y:d.lits[k]};
+  let boxes='',wires='',dots='',gates='',texts='';
+  (d.boxes||[]).forEach(b=>{boxes+=`<rect class="blk" x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" rx="4"/>`;(b.t||[]).forEach((t,i)=>{texts+=`<text x="${b.x+b.w/2}" y="${b.ty+i*16}" text-anchor="middle" font-size="13">${t}</text>`});});
+  for(const k in d.lits)texts+=`<text x="28" y="${d.lits[k]+4}" text-anchor="end" font-size="13">${pretty(k)}</text>`;
+  const fan={};
+  d.gates.forEach(g=>{if(g.t==='PIN')return;g.in.forEach((s,i)=>{
+    const a=srcPt(s),b=inPin(g,i);
+    const mx=(g.mx&&g.mx[i]!=null)?g.mx[i]:b.x-12;
+    (fan[s]=fan[s]||[]).push({a,b,mx});
+  });});
+  for(const s in fan){
+    const list=fan[s],cls=v[s]?'w1':'w0';
+    const isOut=byId[s]&&byId[s].out;
+    const maxMx=Math.max(...list.map(w=>w.mx)),cntMax=list.filter(w=>w.mx===maxMx).length;
+    list.forEach(w=>{
+      const p=w.a.y===w.b.y?`M${w.a.x},${w.a.y} H${w.b.x}`:`M${w.a.x},${w.a.y} H${w.mx} V${w.b.y} H${w.b.x}`;
+      wires+=`<path class="${cls}" d="${p}"/>`;
+      if((list.length>1||isOut)&&(w.mx<maxMx||cntMax>1||isOut)&&w.a.y!==w.b.y)dots+=`<circle class="dot${v[s]}" cx="${w.mx}" cy="${w.a.y}" r="3"/>`;
+    });
+  }
+  d.gates.forEach(g=>{
+    gates+=shape(g);
+    const o=outPin(g);
+    if(g.t==='SINK'&&g.slab)texts+=`<text x="${g.x+6}" y="${g.y+4}" class="sm">${g.slab}</text>`;
+    if(g.t==='PIN'&&g.plab!=null)texts+=`<text x="${g.x-6}" y="${g.y+4}" text-anchor="end" class="sm">${g.plab}</text>`;
+    if(g.t==='PIN'&&g.dotv)texts+=`<circle class="led${v[g.id]}" cx="${g.x+8}" cy="${g.y}" r="4"/>`;
+    if(g.lab)texts+=`<text class="lab" x="${o.x+3}" y="${o.y-6}">${g.lab}</text>`;
+    if(g.out){
+      wires+=`<path class="${v[g.id]?'w1':'w0'}" d="M${o.x},${o.y} H${ledX-7}"/>`;
+      texts+=`<circle class="led${v[g.id]}" cx="${ledX}" cy="${o.y}" r="7"/><text x="${ledX+12}" y="${o.y+4}" font-size="13" font-weight="600">${g.out}</text>`;
+    }
+  });
+  return `<svg viewBox="0 0 ${d.w} ${d.h}" role="img" aria-label="${d.title||'logic diagram'}">${boxes}${wires}${dots}${gates}${texts}</svg>`;
+}
+
+/* ---------- simulator bench ---------- */
+function mount(el,cfg){
+  const st={};cfg.inputs.forEach(k=>st[k]=0);
+  if(cfg.init)Object.assign(st,cfg.init);
+  const n=cfg.inputs.length;
+  el.innerHTML=`<header><h4>${cfg.title}</h4><span class="tag">Live circuit</span></header>
+  <div class="ctrl"></div><div class="readout" aria-live="polite"></div><div class="diags"></div>${cfg.table?'<div class="simtable"></div>':''}`;
+  const ctrl=el.querySelector('.ctrl'),ro=el.querySelector('.readout'),dg=el.querySelector('.diags'),tb=el.querySelector('.simtable');
+  ctrl.innerHTML=cfg.inputs.map(k=>`<button class="bit" data-k="${k}" aria-pressed="false">${sub(k)}<b>0</b></button>`).join('')+
+    `<span class="spacer"></span><button class="btn" data-a="next">Next input ▸</button><button class="btn" data-a="reset">Reset</button>`;
+  const idx=()=>cfg.inputs.reduce((a,k)=>a*2+st[k],0);
+  const setIdx=i=>{cfg.inputs.forEach((k,j)=>st[k]=(i>>(n-1-j))&1)};
+  ctrl.addEventListener('click',e=>{
+    const b=e.target.closest('button');if(!b)return;
+    if(b.dataset.k)st[b.dataset.k]^=1;
+    else if(b.dataset.a==='next'){
+      if(cfg.seq){const p=cfg.seq.indexOf(idx());setIdx(cfg.seq[(p+1)%cfg.seq.length]);}
+      else setIdx((idx()+1)%(1<<n));
+    }else{if(cfg.seq)setIdx(cfg.seq[0]);else setIdx(0);}
+    draw();
+  });
+  if(tb){
+    const cols=cfg.table.cols;
+    const rows=cfg.table.rows||[...Array(1<<n).keys()];
+    let h='<table><thead><tr>'+cfg.inputs.map(k=>`<th>${sub(k)}</th>`).join('')+cols.map((c,i)=>`<th${i===0?' class="sep"':''}>${c[2]}</th>`).join('')+'</tr></thead><tbody>';
+    rows.forEach(i=>{
+      const s={};cfg.inputs.forEach((k,j)=>s[k]=(i>>(n-1-j))&1);
+      const vals=cfg.diagrams.map(d=>evalDiag(d,s));
+      const dc=cfg.table.dc&&cfg.table.dc(s);
+      h+=`<tr class="row${dc?' dc':''}" data-i="${i}" tabindex="0">`+cfg.inputs.map(k=>`<td>${s[k]}</td>`).join('')+cols.map((c,ci)=>`<td${ci===0?' class="sep"':''}>${vals[c[0]][c[1]]}</td>`).join('')+'</tr>';
+    });
+    tb.innerHTML=h+'</tbody></table>'+(cfg.table.note?`<div class="src" style="margin-top:6px">${cfg.table.note}</div>`:'');
+    tb.addEventListener('click',e=>{const r=e.target.closest('tr.row');if(r){setIdx(+r.dataset.i);draw();}});
+    tb.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){const r=e.target.closest('tr.row');if(r){e.preventDefault();setIdx(+r.dataset.i);draw();}}});
+  }
+  function draw(){
+    ctrl.querySelectorAll('.bit').forEach(b=>{const v=st[b.dataset.k];b.setAttribute('aria-pressed',v?'true':'false');b.querySelector('b').textContent=v;});
+    const vals=cfg.diagrams.map(d=>evalDiag(d,st));
+    dg.innerHTML=cfg.diagrams.map((d,i)=>`<div class="diag">${d.title&&cfg.diagrams.length>1?`<div class="dt">${d.title}</div>`:''}${renderDiag(d,vals[i])}</div>`).join('');
+    ro.innerHTML=cfg.readout?cfg.readout(st,vals):'';
+    if(tb){const c=idx();tb.querySelectorAll('tr.row').forEach(r=>r.classList.toggle('cur',+r.dataset.i===c));}
+  }
+  if(cfg.seq&&!cfg.init)setIdx(cfg.seq[0]);
+  draw();
+}
+
+/* ---------- circuits ---------- */
+const S={};
+const MT=['x′y′z′','x′y′z','x′yz′','x′yz','xy′z′','xy′z','xyz′','xyz'];
+
+// BCD correction logic
+S.bcdc={title:'BCD correction logic',inputs:['K','Z8','Z4','Z2'],
+  diagrams:[{w:430,h:140,lits:{K:20,'Z8#1':43,'Z4#1':57,'Z8#2':103,'Z2#2':117},gates:[
+    {id:'a1',t:'AND',x:130,y:50,in:['Z8#1','Z4#1'],lab:'Z8Z4'},
+    {id:'a2',t:'AND',x:130,y:110,in:['Z8#2','Z2#2'],lab:'Z8Z2'},
+    {id:'c',t:'OR',x:280,y:80,in:['K','a1','a2'],mx:[240,250,230],out:'C'}]}],
+  table:{cols:[[0,'a1','Z₈Z₄'],[0,'a2','Z₈Z₂'],[0,'c','C']],dc:s=>s.K&&(s.Z8||s.Z4),note:'Italic rows cannot occur (binary sum above 19): don\'t-cares. Z₁ does not affect C, so it is left out.'},
+  readout:(s,v)=>{const lo=s.Z8*8+s.Z4*4+s.Z2*2;return s.K&&(s.Z8||s.Z4)?'This combination cannot occur (sum would exceed 19).':`Binary sum = ${s.K*16+lo} or ${s.K*16+lo+1} (Z₁ = 0 or 1) → C = ${v[0].c} ${v[0].c?'→ add 0110, output carry 1':'→ no correction'}`}};
+
+// 2-bit comparator
+S.cmp2={title:'2-bit magnitude comparator',inputs:['A1','A0','B1','B0'],
+  diagrams:[{w:500,h:385,ow:44,lits:{A1:33,B1:47,'A0#x':93,'B0#x':107,'A1#g':153,"B1'#g":167,'A0#g':220,"B0'#g":232,"A1'#l":283,'B1#l':297,"A0'#l":350,'B0#l':362},gates:[
+    {id:'x1',t:'XNOR',x:110,y:40,in:['A1','B1'],lab:'x1'},
+    {id:'x0',t:'XNOR',x:110,y:100,in:['A0#x','B0#x'],lab:'x0'},
+    {id:'g1',t:'AND',x:200,y:160,in:['A1#g',"B1'#g"],lab:'A1B1′'},
+    {id:'g2',t:'AND',x:200,y:220,in:['x1','A0#g',"B0'#g"],mx:[180,null,null],lab:'x1A0B0′'},
+    {id:'l1',t:'AND',x:200,y:290,in:["A1'#l",'B1#l'],lab:'A1′B1'},
+    {id:'l2',t:'AND',x:200,y:350,in:['x1',"A0'#l",'B0#l'],mx:[170,null,null],lab:'x1A0′B0'},
+    {id:'eq',t:'AND',x:340,y:70,in:['x1','x0'],mx:[300,312],out:'A=B'},
+    {id:'gt',t:'OR',x:340,y:190,in:['g1','g2'],mx:[300,312],out:'A&gt;B'},
+    {id:'lt',t:'OR',x:340,y:320,in:['l1','l2'],mx:[300,312],out:'A&lt;B'}]}],
+  table:{cols:[[0,'x1','x₁'],[0,'x0','x₀'],[0,'gt','A&gt;B'],[0,'eq','A=B'],[0,'lt','A&lt;B']]},
+  readout:(s,v)=>{const a=s.A1*2+s.A0,b=s.B1*2+s.B0;return `A = ${s.A1}${s.A0} (${a}), B = ${s.B1}${s.B0} (${b}) → ${a>b?'A &gt; B':a<b?'A &lt; B':'A = B'}`}};
+
+// 3-to-8 decoder
+(function(){const lits={},gates=[];for(let i=0;i<8;i++){const y=34+i*50,b=[(i>>2)&1,(i>>1)&1,i&1];
+  const k=['x','y','z'].map((c,j)=>`${c}${b[j]?'':"'"}#${i}`);lits[k[0]]=y-12;lits[k[1]]=y;lits[k[2]]=y+12;
+  gates.push({id:'d'+i,t:'AND',x:150,y,in:k,lab:MT[i],out:'D'+i});}
+  S.dec38={title:'3-to-8-line decoder',inputs:['x','y','z'],diagrams:[{w:420,h:415,ow:30,lits,gates}],
+    table:{cols:[...Array(8).keys()].map(i=>[0,'d'+i,'D'+i])},
+    readout:(s)=>{const m=s.x*4+s.y*2+s.z;return `xyz = ${s.x}${s.y}${s.z} → minterm m${m} = ${MT[m]} → only D${m} = 1`}};})();
+
+// full adder with decoder (block)
+(function(){const g=[{id:'sx',t:'SINK',x:120,y:70,in:['x'],slab:'2²'},{id:'sy',t:'SINK',x:120,y:110,in:['y'],slab:'2¹'},{id:'sz',t:'SINK',x:120,y:150,in:['z'],slab:'2⁰'}];
+  for(let i=0;i<8;i++)g.push({id:'m'+i,t:'PIN',x:220,y:35+i*35,in:[],plab:String(i),f:(s)=>+((s.x*4+s.y*2+s.z)===i),dotv:i===0});
+  g.push({id:'s',t:'OR',x:340,y:110,in:['m1','m2','m4','m7'],mx:[262,272,282,292],out:'S'});
+  g.push({id:'c',t:'OR',x:340,y:230,in:['m3','m5','m6','m7'],mx:[302,310,318,326],out:'C'});
+  S.decfa={title:'Full adder from a 3×8 decoder and two OR gates (Mano Fig. 5-9)',inputs:['x','y','z'],
+    diagrams:[{w:500,h:320,lits:{x:70,y:110,z:150},boxes:[{x:120,y:15,w:100,h:290,t:['3 × 8','decoder'],ty:210}],gates:g}],
+    table:{cols:[[0,'c','C'],[0,'s','S']]},
+    readout:(s,v)=>{const m=s.x*4+s.y*2+s.z;return `xyz = ${s.x}${s.y}${s.z} → decoder output ${m} is 1 → S = ${v[0].s} (Σ1,2,4,7), C = ${v[0].c} (Σ3,5,6,7)`}};})();
+
+// 2-to-4 decoder with enable (NAND, active-low)
+(function(){const lits={},gates=[];for(let i=0;i<4;i++){const y=40+i*60,a=(i>>1)&1,b=i&1;
+  const k=[`E'#${i}`,`A${a?'':"'"}#${i}`,`B${b?'':"'"}#${i}`];lits[k[0]]=y-12;lits[k[1]]=y;lits[k[2]]=y+12;
+  gates.push({id:'d'+i,t:'NAND',x:150,y,in:k,out:'D'+i});}
+  S.dec24={title:'2-to-4-line decoder with enable, NAND gates (Mano Fig. 5-10)',inputs:['E','A','B'],diagrams:[{w:420,h:265,ow:30,lits,gates}],
+    table:{cols:[...Array(4).keys()].map(i=>[0,'d'+i,'D'+i]),note:'Outputs are active-low: the selected output is 0.'},
+    readout:(s)=>{const m=s.A*2+s.B;return s.E?'E = 1: decoder disabled, all outputs are 1.':`E = 0: enabled. AB = ${s.A}${s.B} → D${m} = 0 (selected), others 1. As a demultiplexer: data E = 0 appears on D${m}.`}};})();
+
+// octal-to-binary encoder
+(function(){const lits={},gates=[],sets={x:[4,5,6,7],y:[2,3,6,7],z:[1,3,5,7]};
+  ['x','y','z'].forEach((o,j)=>{const y=60+j*100;const k=sets[o].map(d=>`D${d}#${o}`);k.forEach((kk,i)=>lits[kk]=y-18+i*12);
+    gates.push({id:o,t:'OR',x:160,y,in:k,out:o});});
+  const ins=['D0','D1','D2','D3','D4','D5','D6','D7'],seq=ins.map((_,i)=>1<<(7-i));
+  S.enc={title:'Octal-to-binary encoder (Mano Fig. 5-13)',inputs:ins,seq,diagrams:[{w:400,h:300,lits,gates}],
+    table:{rows:seq,cols:[[0,'x','x'],[0,'y','y'],[0,'z','z']],note:'Only the eight allowed inputs are listed. D₀ is not connected: its code is 000.'},
+    readout:(s,v)=>{const on=ins.filter(k=>s[k]);const code=`${v[0].x}${v[0].y}${v[0].z}`;
+      if(on.length===0)return `No input active → xyz = 000, the same as D₀ = 1. This ambiguity needs a "valid" output.`;
+      if(on.length>1)return `${on.join(' and ')} active together → xyz = ${code}, which is not a valid code for either. A priority encoder is needed.`;
+      return `${on[0]} active → xyz = ${code} (${parseInt(code,2)})`}};})();
+
+// priority encoder (optional)
+S.prio={title:'4-input priority encoder (Mano Fig. 5-15)',inputs:['D0','D1','D2','D3'],
+  diagrams:[{w:450,h:235,lits:{'D2#1':33,'D3#1':47,'D2#2':105,'D1#2':103-0,'D3#3':88,'D0#4':172,'D1#4':184,'D2#5':196,'D3#5':208},gates:[]}],
+  table:{cols:[[0,'x','x'],[0,'y','y'],[0,'v','V']],dc:s=>!(s.D0||s.D1||s.D2||s.D3),note:'All-zero row: V = 0, so x and y are don\'t-cares.'},
+  readout:(s,v)=>{const hi=['D3','D2','D1','D0'].find(k=>s[k]);return hi?`Highest active input: ${hi} → xy = ${v[0].x}${v[0].y}, V = 1`:'No input active → V = 0 (x, y not used)'}};
+// define priority gates with clean literal layout
+S.prio.diagrams[0].lits={'D2#1':33,'D3#1':47,'D1#2':98,'D2#2':125,'D3#3':81,'D0#4':172,'D1#4':184,'D2#4':196,'D3#4':208};
+S.prio.diagrams[0].gates=[
+  {id:'x',t:'OR',x:170,y:40,in:['D2#1','D3#1'],out:'x'},
+  {id:'n2',t:'NOT',x:100,y:125,in:['D2#2'],lab:'D2′'},
+  {id:'a',t:'AND',x:180,y:105,in:['D1#2','n2'],mx:[null,150],lab:'D1D2′'},
+  {id:'y',t:'OR',x:290,y:88,in:['D3#3','a'],mx:[null,260],out:'y'},
+  {id:'v',t:'OR',x:170,y:190,in:['D0#4','D1#4','D2#4','D3#4'],out:'V'}];
+
+// 4-to-1 MUX
+(function(){const lits={},gates=[];for(let i=0;i<4;i++){const y=40+i*65,a=(i>>1)&1,b=i&1;
+  const k=[`s1${a?'':"'"}#${i}`,`s0${b?'':"'"}#${i}`,`I${i}`];lits[k[0]]=y-12;lits[k[1]]=y;lits[k[2]]=y+12;
+  gates.push({id:'g'+i,t:'AND',x:170,y,in:k});}
+  gates.push({id:'y',t:'OR',x:320,y:137,in:['g0','g1','g2','g3'],mx:[280,290,290,280],out:'Y'});
+  S.mux41={title:'4-to-1-line multiplexer (Mano Fig. 5-16)',inputs:['s1','s0','I0','I1','I2','I3'],init:{s1:1,s0:0,I2:1},diagrams:[{w:450,h:275,lits,gates}],
+    readout:(s,v)=>{const m=s.s1*2+s.s0;return `s₁s₀ = ${s.s1}${s.s0} → input I${m} selected → Y = I${m} = ${v[0].y}`}};})();
+
+// MUX implementing F = Σ(1,3,5,6)
+S.muxf={title:'F(A,B,C) = Σ(1, 3, 5, 6) with a 4×1 MUX (Mano Fig. 5-18)',inputs:['A','B','C'],
+  diagrams:[{w:460,h:250,lits:{'0':45,'1':80,'A#d':115,"A'":150,'B':195,'C':225},
+    boxes:[{x:150,y:20,w:110,h:220,t:['4 × 1','MUX'],ty:120}],
+    gates:[{id:'i0',t:'SINK',x:150,y:45,in:['0'],slab:'I0'},{id:'i1',t:'SINK',x:150,y:80,in:['1'],slab:'I1'},
+      {id:'i2',t:'SINK',x:150,y:115,in:['A#d'],slab:'I2'},{id:'i3',t:'SINK',x:150,y:150,in:["A'"],slab:'I3'},
+      {id:'s1',t:'SINK',x:150,y:195,in:['B'],slab:'s1'},{id:'s0',t:'SINK',x:150,y:225,in:['C'],slab:'s0'},
+      {id:'f',t:'PIN',x:260,y:130,in:[],plab:'Y',f:(s,v)=>[v.i0,v.i1,v.i2,v.i3][s.B*2+s.C],out:'F'}]}],
+  table:{cols:[[0,'f','F']],note:'F = 1 on rows 1, 3, 5, 6 ✓'},
+  readout:(s,v)=>{const m=s.B*2+s.C,src=['0','1','A','A′'][m];return `BC = ${s.B}${s.C} → I${m} selected, which is connected to ${src} → F = ${v[0].f}`}};
+
+// 1-to-4 DEMUX
+(function(){const lits={},gates=[];for(let i=0;i<4;i++){const y=40+i*60,a=(i>>1)&1,b=i&1;
+  const k=[`s1${a?'':"'"}#${i}`,`s0${b?'':"'"}#${i}`,`D#${i}`];lits[k[0]]=y-12;lits[k[1]]=y;lits[k[2]]=y+12;
+  gates.push({id:'y'+i,t:'AND',x:150,y,in:k,out:'Y'+i});}
+  S.dmx={title:'1-to-4-line demultiplexer',inputs:['s1','s0','D'],diagrams:[{w:400,h:265,ow:30,lits,gates}],
+    table:{cols:[...Array(4).keys()].map(i=>[0,'y'+i,'Y'+i])},
+    readout:(s)=>{const m=s.s1*2+s.s0;return `s₁s₀ = ${s.s1}${s.s0} → data D = ${s.D} is routed to Y${m}; other outputs are 0`}};})();
+
+// PLA example
+S.pla={title:'PLA for F₁ = AB′ + AC, F₂ = AC + BC (Mano Fig. 5-26)',inputs:['A','B','C'],
+  diagrams:[{w:440,h:190,lits:{A:33,"B'":47,'A#2':93,'C#2':107,'B#3':153,'C#3':167},gates:[
+    {id:'p1',t:'AND',x:140,y:40,in:['A',"B'"],lab:'1: AB′'},
+    {id:'p2',t:'AND',x:140,y:100,in:['A#2','C#2'],lab:'2: AC'},
+    {id:'p3',t:'AND',x:140,y:160,in:['B#3','C#3'],lab:'3: BC'},
+    {id:'f1',t:'OR',x:300,y:70,in:['p1','p2'],mx:[262,276],out:'F1'},
+    {id:'f2',t:'OR',x:300,y:140,in:['p2','p3'],mx:[288,270],out:'F2'}]}],
+  table:{cols:[[0,'p1','AB′'],[0,'p2','AC'],[0,'p3','BC'],[0,'f1','F₁'],[0,'f2','F₂']]}};
+
+document.querySelectorAll('[data-sim]').forEach(el=>{const c=S[el.dataset.sim];if(c)mount(el,c);});
+
+/* ---------- static truth tables ---------- */
+const bits=(n,w)=>n.toString(2).padStart(w,'0').split('').map(Number);
+const TT={
+  dec38:{h:['x','y','z','D0','D1','D2','D3','D4','D5','D6','D7'],sep:3,rows:[...Array(8).keys()].map(i=>[...bits(i,3),...[...Array(8).keys()].map(j=>+(i===j))])},
+  enc:{h:['D0','D1','D2','D3','D4','D5','D6','D7','x','y','z'],sep:8,rows:[...Array(8).keys()].map(i=>[...[...Array(8).keys()].map(j=>+(i===j)),...bits(i,3)])},
+  dmx:{h:['s1','s0','D','Y0','Y1','Y2','Y3'],sep:3,rows:[...Array(8).keys()].map(i=>{const s=i>>1,d=i&1;return [...bits(s,2),d,...[0,1,2,3].map(k=>k===s?d:0)]})},
+  cmp2:{h:['A1','A0','B1','B0','G','E','L'],sep:4,rows:[...Array(16).keys()].map(i=>{const a=i>>2,b=i&3;return [...bits(i,4),+(a>b),+(a===b),+(a<b)]})},
+  bcd:{h:['K','Z8','Z4','Z2','Z1','C','S8','S4','S2','S1','Decimal'],sep:5,brk:10,rows:[...Array(20).keys()].map(n=>[...bits(n,5),...(n<10?[0,...bits(n,4)]:[1,...bits(n-10,4)]),n])},
+  sq:{h:['A2','A1','A0','B5','B4','B3','B2','B1','B0','Decimal'],sep:3,rows:[...Array(8).keys()].map(n=>[...bits(n,3),...bits(n*n,6),n*n])},
+  rom84:{h:['A2','A1','A0','F1','F2','F3','F4'],sep:3,rows:[...Array(8).keys()].map(n=>[...bits(n,3),...bits(n*n,6).slice(0,4)])},
+  p532:{h:['x','y','z','A','B','C','D'],sep:3,rows:[...Array(8).keys()].map(n=>[...bits(n,3),+[1,2,4,6].includes(n),+[0,1,6,7].includes(n),+[2,6].includes(n),+[1,2,3,5,7].includes(n)])}
+};
+document.querySelectorAll('[data-tt]').forEach(el=>{const t=TT[el.dataset.tt];if(!t)return;
+  let h='<table><tr>'+t.h.map((x,i)=>`<th${i===t.sep?' class="sep"':''}>${sub(x)}</th>`).join('')+'</tr>';
+  t.rows.forEach((r,ri)=>{h+=`<tr data-n="${ri}"${t.brk===ri?' class="brk"':''}>`+r.map((c,i)=>`<td${i===t.sep?' class="sep"':''}>${c}</td>`).join('')+'</tr>';});
+  el.innerHTML=h+'</table>';});
+
+/* ---------- custom widgets ---------- */
+function bitBtn(key,val,label){return `<button class="bit" data-k="${key}" aria-pressed="${val?'true':'false'}">${label}<b>${val}</b></button>`}
+const W={};
+
+// ripple-carry adder / adder-subtractor / look-ahead
+W.rca=function(el){
+  const mode=el.dataset.mode;const st={A:{4:1,3:0,2:1,1:1},B:{4:0,3:0,2:1,1:1},C1:0,M:mode==='sub'?1:0};
+  if(mode==='sub'){st.A={4:0,3:1,2:1,1:0};st.B={4:1,3:0,2:0,1:1};}
+  const title=mode==='sub'?'4-bit adder-subtractor (Mano Fig. 5-2b)':mode==='cla'?'Ripple carry vs look-ahead carry':'4-bit binary parallel adder (Mano Fig. 5-2a)';
+  el.innerHTML=`<header><h4>${title}</h4><span class="tag">Live circuit</span></header><div class="ctrl"></div><div class="readout" aria-live="polite"></div><div class="diag"></div><div class="body pg"></div>`;
+  const ctrl=el.querySelector('.ctrl'),ro=el.querySelector('.readout'),dg=el.querySelector('.diag'),pg=el.querySelector('.pg');
+  if(mode!=='cla')pg.remove();
+  ctrl.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const k=b.dataset.k;
+    if(k.startsWith('A')||k.startsWith('B'))st[k[0]][k.slice(1)]^=1;else st[k]^=1;draw();});
+  function draw(){
+    const grp=(L)=>`<span class="grp"><span class="gl">${L}</span>${[4,3,2,1].map(i=>bitBtn(L+i,st[L][i],`${L}<sub>${i}</sub>`)).join('')}</span>`;
+    ctrl.innerHTML=grp('A')+grp('B')+(mode==='sub'?bitBtn('M',st.M,'M'):bitBtn('C1',st.C1,'C<sub>1</sub>'));
+    const C={1:mode==='sub'?st.M:st.C1},Sx={},Bx={},P={},G={};
+    for(let i=1;i<=4;i++){Bx[i]=st.B[i]^(mode==='sub'?st.M:0);const a=st.A[i],b=Bx[i],c=C[i];P[i]=a^b;G[i]=a&b;Sx[i]=a^b^c;C[i+1]=(a&b)|(c&(a^b));}
+    const val=o=>o[4]*8+o[3]*4+o[2]*2+o[1],str=o=>`${o[4]}${o[3]}${o[2]}${o[1]}`;
+    // svg
+    let s='<svg viewBox="0 0 690 230" role="img" aria-label="Four full adders in a chain with carries passing from right to left">';
+    const cls=v=>v?'w1':'w0',tc=v=>v?'v1':'v0';
+    for(let i=4;i>=1;i--){const x=60+(4-i)*140;
+      s+=`<path class="${cls(st.A[i])}" d="M${x+55},34 V90"/><path class="${cls(Bx[i])}" d="M${x+25},34 V90"/>`;
+      s+=`<text x="${x+25}" y="28" text-anchor="middle" font-size="12">${mode==='sub'?'B'+i+'⊕M':'B'+i}=<tspan class="${tc(Bx[i])}">${Bx[i]}</tspan></text><text x="${x+55}" y="12" text-anchor="middle" font-size="12">A${i}=<tspan class="${tc(st.A[i])}">${st.A[i]}</tspan></text>`;
+      s+=`<rect class="fa" x="${x}" y="90" width="80" height="60" rx="4"/><text x="${x+40}" y="125" text-anchor="middle" font-size="14" font-weight="600">FA</text>`;
+      s+=`<path class="${cls(Sx[i])}" d="M${x+40},150 V195"/><text x="${x+40}" y="214" text-anchor="middle" font-size="13">S${i}=<tspan class="${tc(Sx[i])}" font-weight="700">${Sx[i]}</tspan></text>`;
+      // carry in from right
+      const xr=x+80,xl=x;
+      if(i===1){s+=`<path class="${cls(C[1])}" d="M${xr+50},120 H${xr}"/><text x="${xr+6}" y="110" font-size="12">C1=<tspan class="${tc(C[1])}">${C[1]}</tspan>${mode==='sub'?' (=M)':''}</text>`;}
+      // carry out to left
+      if(i===4){s+=`<path class="${cls(C[5])}" d="M${xl},120 H${xl-30} V195"/><text x="${xl-30}" y="214" text-anchor="middle" font-size="13">C5=<tspan class="${tc(C[5])}" font-weight="700">${C[5]}</tspan></text>`;}
+      else{s+=`<path class="${cls(C[i+1])}" d="M${xl},120 H${xl-60}"/><text x="${xl-30}" y="112" text-anchor="middle" font-size="12">C${i+1}=<tspan class="${tc(C[i+1])}">${C[i+1]}</tspan></text>`;}
+    }
+    dg.innerHTML=s+'</svg>';
+    if(mode==='sub'){
+      ro.innerHTML=st.M?`M = 1, subtract: A − B = ${str(st.A)} + ${str(Bx)} + 1 = ${C[5]} ${str(Sx)}. ${C[5]?`C₅ = 1 → A ≥ B, result = ${val(Sx)} (${val(st.A)} − ${val(st.B)})`:`C₅ = 0 → A &lt; B, result is the 2's complement of ${val(st.B)-val(st.A)}, i.e. −${val(st.B)-val(st.A)}`}`
+        :`M = 0, add: ${str(st.A)} (${val(st.A)}) + ${str(st.B)} (${val(st.B)}) = ${C[5]} ${str(Sx)} (${C[5]*16+val(Sx)})`;
+    }else ro.innerHTML=`${str(st.A)} (${val(st.A)}) + ${str(st.B)} (${val(st.B)}) + C₁ ${st.C1} = C₅ S = ${C[5]} ${str(Sx)} (${C[5]*16+val(Sx)})`;
+    if(mode==='cla'){
+      const la={2:G[1]|(P[1]&C[1]),3:G[2]|(P[2]&G[1])|(P[2]&P[1]&C[1]),4:G[3]|(P[3]&G[2])|(P[3]&P[2]&G[1])|(P[3]&P[2]&P[1]&C[1])};
+      pg.innerHTML=`<div class="tw" style="margin:0"><table><tr><th>i</th><th>Pᵢ = Aᵢ⊕Bᵢ</th><th>Gᵢ = AᵢBᵢ</th><th class="sep">Cᵢ₊₁ ripple</th><th>Cᵢ₊₁ look-ahead</th></tr>`+
+        [1,2,3].map(i=>`<tr><td>${i}</td><td>${P[i]}</td><td>${G[i]}</td><td class="sep">C${i+1} = ${C[i+1]}</td><td>C${i+1} = ${la[i+1]} ${la[i+1]===C[i+1]?'<span class="ok">✓</span>':''}</td></tr>`).join('')+'</table></div>';
+    }
+  }
+  draw();
+};
+
+// BCD adder
+W.bcd=function(el){
+  const st={a:8,b:7,cin:0};
+  el.innerHTML=`<header><h4>BCD adder, step by step (Mano Fig. 5-6)</h4><span class="tag">Live circuit</span></header>
+  <div class="row2"><label for="bcd-a">Augend digit</label><select id="bcd-a">${[...Array(10).keys()].map(i=>`<option${i===8?' selected':''}>${i}</option>`).join('')}</select>
+  <label for="bcd-b">Addend digit</label><select id="bcd-b">${[...Array(10).keys()].map(i=>`<option${i===7?' selected':''}>${i}</option>`).join('')}</select>
+  <span class="grp" id="bcd-cin"></span></div><div class="body"></div>`;
+  const body=el.querySelector('.body');const cinEl=el.querySelector('#bcd-cin');
+  el.querySelector('#bcd-a').addEventListener('change',e=>{st.a=+e.target.value;draw()});
+  el.querySelector('#bcd-b').addEventListener('change',e=>{st.b=+e.target.value;draw()});
+  cinEl.addEventListener('click',e=>{if(e.target.closest('button')){st.cin^=1;draw()}});
+  function draw(){
+    cinEl.innerHTML=bitBtn('cin',st.cin,'Carry in');
+    const n=st.a+st.b+st.cin,bz=bits(n,5),K=bz[0],Z8=bz[1],Z4=bz[2],Z2=bz[3];
+    const C=K|(Z8&Z4)|(Z8&Z2),add=C?6:0,low=n&15,s2=(low+add)&15;
+    const why=K?'K = 1':(Z8&Z4)?'Z₈Z₄ = 1':(Z8&Z2)?'Z₈Z₂ = 1':'none of K, Z₈Z₄, Z₈Z₂ is 1';
+    body.innerHTML=`<div class="stage">
+      <div><div class="k">Inputs (BCD)</div><div class="v">${bits(st.a,4).join('')} + ${bits(st.b,4).join('')} + ${st.cin}</div><div class="s">${st.a} + ${st.b} + ${st.cin}</div></div>
+      <div><div class="k">Top 4-bit adder: K Z₈Z₄Z₂Z₁</div><div class="v">${K} ${bz.slice(1).join('')}</div><div class="s">binary ${n}</div></div>
+      <div class="${C?'hot':''}"><div class="k">Correction C = K + Z₈Z₄ + Z₈Z₂</div><div class="v">C = ${C}</div><div class="s">${C?why+' → add 0110':why+' → add 0000'}</div></div>
+      <div><div class="k">Bottom adder adds</div><div class="v">${bits(add,4).join('')}</div><div class="s">${bz.slice(1).join('')} + ${bits(add,4).join('')} = ${bits(s2,4).join('')} (carry ignored)</div></div>
+      <div class="hot"><div class="k">Output: carry · S₈S₄S₂S₁</div><div class="v">${C} · ${bits(s2,4).join('')}</div><div class="s">decimal ${C?1:0}${s2} = ${n}</div></div></div>`;
+    document.querySelectorAll('[data-tt="bcd"] tr[data-n]').forEach(r=>r.classList.toggle('hl',+r.dataset.n===n));
+  }
+  draw();
+};
+
+// 4-bit comparator
+W.cmp4=function(el){
+  const st={A:{3:1,2:0,1:1,0:1},B:{3:1,2:0,1:0,0:1}};
+  el.innerHTML=`<header><h4>4-bit magnitude comparator (Mano Fig. 5-7)</h4><span class="tag">Live circuit</span></header><div class="ctrl"></div><div class="readout" aria-live="polite"></div><div class="body"></div>`;
+  const ctrl=el.querySelector('.ctrl'),ro=el.querySelector('.readout'),body=el.querySelector('.body');
+  ctrl.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const k=b.dataset.k;st[k[0]][k.slice(1)]^=1;draw();});
+  function draw(){
+    const grp=(L)=>`<span class="grp"><span class="gl">${L}</span>${[3,2,1,0].map(i=>bitBtn(L+i,st[L][i],`${L}<sub>${i}</sub>`)).join('')}</span>`;
+    ctrl.innerHTML=grp('A')+grp('B');
+    const x={};[3,2,1,0].forEach(i=>x[i]=+(st.A[i]===st.B[i]));
+    const first=[3,2,1,0].find(i=>!x[i]);
+    const gTerms=[3,2,1,0].map(i=>{let pre=1;for(let j=3;j>i;j--)pre&=x[j];return pre&st.A[i]&(1-st.B[i]);});
+    const lTerms=[3,2,1,0].map(i=>{let pre=1;for(let j=3;j>i;j--)pre&=x[j];return pre&(1-st.A[i])&st.B[i];});
+    const G=+gTerms.some(Boolean),L=+lTerms.some(Boolean),E=x[3]&x[2]&x[1]&x[0];
+    const va=st.A[3]*8+st.A[2]*4+st.A[1]*2+st.A[0],vb=st.B[3]*8+st.B[2]*4+st.B[1]*2+st.B[0];
+    ro.innerHTML=`A = ${va}, B = ${vb} → (A &gt; B) = ${G}, (A = B) = ${E}, (A &lt; B) = ${L}`;
+    const tn=['A₃B₃′','x₃A₂B₂′','x₃x₂A₁B₁′','x₃x₂x₁A₀B₀′'],ln=['A₃′B₃','x₃A₂′B₂','x₃x₂A₁′B₁','x₃x₂x₁A₀′B₀'];
+    body.innerHTML=`<div class="tw" style="margin:0"><table><tr><th>Position i</th><th>3</th><th>2</th><th>1</th><th>0</th></tr>
+      <tr><td>Aᵢ</td>${[3,2,1,0].map(i=>`<td>${st.A[i]}</td>`).join('')}</tr>
+      <tr><td>Bᵢ</td>${[3,2,1,0].map(i=>`<td>${st.B[i]}</td>`).join('')}</tr>
+      <tr><td>xᵢ (equal?)</td>${[3,2,1,0].map(i=>`<td>${i===first?`<span class="circ">${x[i]}</span>`:x[i]}</td>`).join('')}</tr>
+      <tr><td>(A&gt;B) term</td>${gTerms.map((t,k)=>`<td title="${tn[k]}">${t}</td>`).join('')}</tr>
+      <tr><td>(A&lt;B) term</td>${lTerms.map((t,k)=>`<td title="${ln[k]}">${t}</td>`).join('')}</tr></table></div>
+      <p class="src" style="margin-top:8px">${first===undefined?'All bit pairs are equal, so (A = B) = x₃x₂x₁x₀ = 1.':`The first unequal pair from the left is position ${first}; the term ${G?tn[3-first]:ln[3-first]} = 1 decides the result.`}</p>`;
+  }
+  draw();
+};
+
+// ROM 4x2 with fuses
+W.rom=function(el){
+  const preset=[[0,1],[1,0],[1,1],[1,0]];
+  const st={a1:0,a0:1,f:preset.map(r=>r.slice())};
+  el.innerHTML=`<header><h4>4 × 2 ROM, programmable fuses (Mano Fig. 5-23)</h4><span class="tag">Live circuit</span></header><div class="ctrl"></div><div class="readout" aria-live="polite"></div><div class="body"></div>`;
+  const ctrl=el.querySelector('.ctrl'),ro=el.querySelector('.readout'),body=el.querySelector('.body');
+  el.addEventListener('click',e=>{const b=e.target.closest('button');if(!b||!el.contains(b))return;
+    if(b.dataset.k==='a1'||b.dataset.k==='a0')st[b.dataset.k]^=1;
+    else if(b.dataset.fuse){const [r,c]=b.dataset.fuse.split(',').map(Number);st.f[r][c]^=1;}
+    else if(b.dataset.a==='preset')st.f=preset.map(r=>r.slice());
+    else if(b.dataset.a==='intact')st.f=st.f.map(r=>r.map(()=>1));
+    else return;draw();});
+  function draw(){
+    const addr=st.a1*2+st.a0;
+    ctrl.innerHTML=bitBtn('a1',st.a1,'A<sub>1</sub>')+bitBtn('a0',st.a0,'A<sub>0</sub>')+`<span class="spacer"></span><button class="btn" data-a="preset">Load Mano example</button><button class="btn" data-a="intact">All fuses intact</button>`;
+    const F=[0,1].map(c=>st.f[addr][c]);
+    ro.innerHTML=`Address A₁A₀ = ${st.a1}${st.a0} → decoder output ${addr} → stored word F₁F₂ = ${F[0]}${F[1]}`;
+    const blown=st.f.flat().filter(v=>!v).length;
+    body.innerHTML=`<div class="tw" style="margin:0"><table><tr><th>Decoder output (address)</th><th class="sep">Fuse to F₁ OR gate</th><th>Fuse to F₂ OR gate</th></tr>`+
+      st.f.map((r,i)=>`<tr class="${i===addr?'sel':''}"><td>${i} (${bits(i,2).join('')})</td>`+r.map((v,c)=>`<td${c===0?' class="sep"':''}><button class="fuse" data-fuse="${i},${c}" aria-pressed="${v?'true':'false'}" aria-label="Fuse from minterm ${i} to F${c+1}: ${v?'intact':'blown'}">${v?'●':'✕'}</button></td>`).join('')+'</tr>').join('')+
+      `</table></div><p class="src" style="margin-top:8px">● intact (minterm included) · ✕ blown. ${blown} of 8 fuses blown. Programmed functions: F₁ = Σ(${st.f.map((r,i)=>r[0]?i:null).filter(x=>x!==null).join(', ')||'–'}), F₂ = Σ(${st.f.map((r,i)=>r[1]?i:null).filter(x=>x!==null).join(', ')||'–'}).</p>`;
+  }
+  draw();
+};
+
+// MUX implementation-table tool
+W.mtool=function(el){
+  el.innerHTML=`<header><h4>Implementation-table builder</h4><span class="tag">Tool</span></header>
+  <div class="row2"><label for="mt-n">Variables</label><select id="mt-n"><option value="3">3 (A, B, C) · 4×1 MUX</option><option value="4">4 (A, B, C, D) · 8×1 MUX</option></select>
+  <label for="mt-m">Minterms</label><input type="text" id="mt-m" value="0, 1, 3, 4, 8, 9, 15" inputmode="numeric"></div>
+  <div class="row2"><span class="src">Presets:</span><button class="btn" data-p="3|1,3,5,6">Fig. 5-18 · Σ(1,3,5,6)</button><button class="btn" data-p="4|0,1,3,4,8,9,15">Example 5-2</button><button class="btn" data-p="4|0,3,5,6,8,9,14,15">Problem 5-24</button></div>
+  <div class="body" aria-live="polite"></div>`;
+  const nEl=el.querySelector('#mt-n'),mEl=el.querySelector('#mt-m'),body=el.querySelector('.body');
+  nEl.value='4';
+  el.addEventListener('click',e=>{const b=e.target.closest('button[data-p]');if(!b)return;const [n,m]=b.dataset.p.split('|');nEl.value=n;mEl.value=m.split(',').join(', ');draw();});
+  nEl.addEventListener('change',draw);mEl.addEventListener('input',draw);
+  function draw(){
+    const n=+nEl.value,N=1<<(n-1),max=(1<<n)-1;
+    const parts=mEl.value.split(/[\s,;]+/).filter(Boolean);
+    const ms=[...new Set(parts.map(Number))];
+    if(parts.some(p=>!/^\d+$/.test(p))||ms.some(m=>m>max)){body.innerHTML=`<div class="err">Enter minterm numbers from 0 to ${max}, separated by commas.</div>`;return;}
+    const set=new Set(ms),vars=n===3?['A','B','C']:['A','B','C','D'];
+    const inp=[...Array(N).keys()].map(j=>{const t=set.has(j),b=set.has(j+N);return t&&b?'1':!t&&!b?'0':b?'A':'A′';});
+    let ok=true;for(let m=0;m<=max;m++){const j=m%N,a=m>=N?1:0,v=inp[j]==='1'?1:inp[j]==='0'?0:inp[j]==='A'?a:1-a;if(v!==+set.has(m))ok=false;}
+    const sel=vars.slice(1).map((v,i)=>`${v} → s<sub>${n-2-i}</sub>`).join(', ');
+    const cell=m=>set.has(m)?`<span class="circ">${m}</span>`:m;
+    body.innerHTML=`<p class="src" style="margin:0 0 8px">F(${vars.join(',')}) = Σ(${[...set].sort((a,b)=>a-b).join(', ')}) · ${N}-to-1 MUX · ${sel} · A on the data inputs</p>
+    <div class="tw" style="margin:0"><table class="impl"><tr><th></th>${[...Array(N).keys()].map(j=>`<th>I<sub>${j}</sub></th>`).join('')}</tr>
+    <tr><th>A′</th>${[...Array(N).keys()].map(j=>`<td>${cell(j)}</td>`).join('')}</tr>
+    <tr><th>A</th>${[...Array(N).keys()].map(j=>`<td>${cell(j+N)}</td>`).join('')}</tr>
+    <tr class="inp"><td></td>${inp.map(v=>`<td>${v}</td>`).join('')}</tr></table></div>
+    <p style="margin:10px 0 0">${inp.map((v,j)=>`I<sub>${j}</sub> = ${v}`).join(', ')}. ${ok?`<span class="ok">✓ The MUX output equals F on all ${max+1} rows.</span>`:''}</p>`;
+  }
+  draw();
+};
+document.querySelectorAll('[data-w]').forEach(el=>{const f=W[el.dataset.w];if(f)f(el);});
+
+/* ---------- K-maps ---------- */
+const K={
+  bcdc:{v:['K','Z8','Z4','Z2'],ones:[5,6,7,8,9],dc:[10,11,12,13,14,15],g:[[8,9,10,11,12,13,14,15],[6,7,14,15],[5,7,13,15]],t:'Correction C',e:'C = K + Z₈Z₄ + Z₈Z₂'},
+  cmpG:{v:['A1','A0','B1','B0'],ones:[4,8,9,12,13,14],g:[[8,9,12,13],[4,12],[12,14]],t:'G = (A > B)',e:'G = A₁B₁′ + A₀B₁′B₀′ + A₁A₀B₀′'},
+  cmpE:{v:['A1','A0','B1','B0'],ones:[0,5,10,15],g:[],t:'E = (A = B)',e:'E = x₁x₀ (the 1s cannot be grouped)'},
+  cmpL:{v:['A1','A0','B1','B0'],ones:[1,2,3,6,7,11],g:[[2,3,6,7],[1,3],[3,11]],t:'L = (A < B)',e:'L = A₁′B₁ + A₁′A₀′B₀ + A₀′B₁B₀'},
+  pex:{v:['D0','D1','D2','D3'],ones:[1,2,3,5,6,7,9,10,11,13,14,15],dc:[0],g:[[2,3,6,7,10,11,14,15],[1,3,5,7,9,11,13,15]],t:'Output x',e:'x = D₂ + D₃'},
+  pey:{v:['D0','D1','D2','D3'],ones:[1,3,4,5,7,9,11,12,13,15],dc:[0],g:[[1,3,5,7,9,11,13,15],[4,5,12,13]],t:'Output y',e:'y = D₃ + D₁D₂′'},
+  plaf1:{v:['A','B','C'],ones:[4,5,7],g:[[4,5],[5,7]],t:'F₁ = Σ(4,5,7)',e:'F₁ = AB′ + AC'},
+  plaf2:{v:['A','B','C'],ones:[3,5,7],g:[[5,7],[3,7]],t:'F₂ = Σ(3,5,7)',e:'F₂ = AC + BC'},
+  e54f1:{v:['A','B','C'],ones:[3,5,6,7],g:[[5,7],[6,7],[3,7]],t:'F₁ = Σ(3,5,6,7)',e:'F₁ = AC + AB + BC'},
+  e54f1c:{v:['A','B','C'],ones:[0,1,2,4],g:[[0,4],[0,2],[0,1]],t:'F₁′ (the 0s of F₁)',e:'F₁′ = B′C′ + A′C′ + A′B′'},
+  e54f2:{v:['A','B','C'],ones:[0,2,4,7],g:[[0,4],[0,2],[7]],t:'F₂ = Σ(0,2,4,7)',e:'F₂ = B′C′ + A′C′ + ABC'}
+};
+const GC=['var(--g1)','var(--g2)','var(--g3)','var(--g4)'];
+const gray=[0,1,3,2],b2=n=>n.toString(2).padStart(2,'0');
+document.querySelectorAll('[data-km]').forEach(el=>{
+  const k=K[el.dataset.km];if(!k)return;
+  const nv=k.v.length,four=nv===4,rows=four?gray:[0,1],cols=nv===2?[0,1]:gray,rw=nv===2?2:4;
+  const vs=k.v.map(sub);
+  const rl=four?vs[0]+vs[1]:vs[0],cl=four?vs[2]+vs[3]:nv===3?vs[1]+vs[2]:vs[1];
+  let h=`<div class="t">${k.t}</div><div class="tw" style="margin:0"><table><tr><th>${rl}\\${cl}</th>${cols.map(c=>`<th>${nv===2?c:b2(c)}</th>`).join('')}</tr>`;
+  rows.forEach(r=>{
+    h+=`<tr><th>${four?b2(r):r}</th>`;
+    cols.forEach(c=>{
+      const m=r*rw+c,one=k.ones.includes(m),dc=(k.dc||[]).includes(m);
+      const sh=[];k.g.forEach((g,gi)=>{if(g.includes(m))sh.push(`inset 0 0 0 ${2+gi*2.5}px ${GC[gi%4]}`)});
+      h+=`<td class="${dc?'x':''}" title="m${m}" style="${sh.length?'box-shadow:'+sh.join(','):''}">${one?1:dc?'X':''}</td>`;
+    });
+    h+='</tr>';
+  });
+  h+=`</table></div><div class="cap">${k.e}</div>`;
+  el.innerHTML=h;
+});
+
+/* ---------- optional-topic toggle ---------- */
+const box=document.getElementById('hideopt');
+try{if(localStorage.getItem('u5-hideopt')==='1'){box.checked=true;document.body.classList.add('hideopt');}}catch(e){}
+box.addEventListener('change',()=>{document.body.classList.toggle('hideopt',box.checked);try{localStorage.setItem('u5-hideopt',box.checked?'1':'0')}catch(e){}});
+})();
+
+/* ---------- ROM lookup-table example ---------- */
+(function(){
+const DATA=[[1,5,'1011'],[2,10,'1001'],[3,0,'0110'],[4,1,'1100'],[5,18,'0011'],[6,25,'1110'],[7,32,'0101'],[8,41,'1010'],[9,47,'0111'],[10,50,'1101'],[11,55,'0001'],[12,63,'1111']];
+const byAddr=[...DATA].sort((a,b)=>a[1]-b[1]);
+const b6=n=>n.toString(2).padStart(6,'0');
+const sb=s=>s.split('').join(' ');
+const R={};
+R.map=()=>'<table><tr><th>Address (dec)</th><th>A₅ A₄ A₃ A₂ A₁ A₀</th><th class="sep">F₃ F₂ F₁ F₀</th><th>Word</th></tr>'+
+  byAddr.map(([w,a,d])=>`<tr><td>${a}</td><td>${sb(b6(a))}</td><td class="sep">${sb(d)}</td><td>Word ${w}</td></tr>`).join('')+
+  '<tr class="dc"><td>all other 52</td><td>–</td><td class="sep">0 0 0 0</td><td>empty</td></tr></table>';
+R.fuse=()=>'<table><tr><th>Minterm line</th><th class="sep">F₃</th><th>F₂</th><th>F₁</th><th>F₀</th><th class="sep">Stored word</th></tr>'+
+  byAddr.map(([w,a,d])=>`<tr><td>m<sub>${a}</sub></td>${d.split('').map((c,i)=>`<td${i===0?' class="sep"':''}>${c==='1'?'●':'<span style="color:var(--muted)">✕</span>'}</td>`).join('')}<td class="sep">${d} · Word ${w}</td></tr>`).join('')+
+  '<tr class="dc"><td>52 others</td><td class="sep">✕</td><td>✕</td><td>✕</td><td>✕</td><td class="sep">0000</td></tr></table>'+
+  `<p class="src" style="margin-top:6px">● intact: ${DATA.reduce((s,r)=>s+[...r[2]].filter(c=>c==='1').length,0)} fuses · ✕ blown: ${256-DATA.reduce((s,r)=>s+[...r[2]].filter(c=>c==='1').length,0)} fuses · total 256</p>`;
+R.sop=()=>[0,1,2,3].map(i=>`<div>F<sub>${3-i}</sub> = Σ(${byAddr.filter(r=>r[2][i]==='1').map(r=>r[1]).join(', ')})</div>`).join('');
+R.pla=()=>'<table class="prog"><tr><th rowspan="2">Product term</th><th rowspan="2">Word</th><th colspan="6" class="sep">Inputs (address)</th><th colspan="4" class="sep">Outputs</th></tr><tr><th class="sep">A₅</th><th>A₄</th><th>A₃</th><th>A₂</th><th>A₁</th><th>A₀</th><th class="sep">F₃</th><th>F₂</th><th>F₁</th><th>F₀</th></tr>'+
+  DATA.map(([w,a,d],k)=>`<tr><td>P<sub>${k}</sub> (loc ${a})</td><td>${w}</td>${b6(a).split('').map((c,i)=>`<td${i===0?' class="sep"':''}>${c}</td>`).join('')}${d.split('').map((c,i)=>`<td${i===0?' class="sep"':''}>${c==='1'?'1':'–'}</td>`).join('')}</tr>`).join('')+
+  '<tr class="brk"><td></td><td></td><td class="sep"></td><td></td><td></td><td></td><td></td><td></td><td class="sep">T</td><td>T</td><td>T</td><td>T</td></tr></table>';
+document.querySelectorAll('[data-romex]').forEach(el=>{const f=R[el.dataset.romex];if(f)el.innerHTML=f();});
+
+const el=document.querySelector('[data-w="romex"]');if(!el)return;
+const st={a:5};
+const used=byAddr.map(r=>r[1]);
+el.innerHTML=`<header><h4>Read the 64 × 4 ROM</h4><span class="tag">Live circuit</span></header><div class="ctrl"></div><div class="readout" aria-live="polite"></div><div class="body"></div>`;
+const ctrl=el.querySelector('.ctrl'),ro=el.querySelector('.readout'),body=el.querySelector('.body');
+el.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.k){const i=+b.dataset.k;st.a^=(1<<i);}
+  else if(b.dataset.a==='next'){const n=used.find(x=>x>st.a);st.a=n===undefined?used[0]:n;}
+  else if(b.dataset.a==='empty'){let x=(st.a+1)%64;while(used.includes(x))x=(x+1)%64;st.a=x;}
+  else return;draw();});
+function draw(){
+  const bits=b6(st.a);
+  ctrl.innerHTML=[5,4,3,2,1,0].map(i=>{const v=+bits[5-i];return `<button class="bit" data-k="${i}" aria-pressed="${v?'true':'false'}">A<sub>${i}</sub><b>${v}</b></button>`}).join('')+
+    `<span class="spacer"></span><button class="btn" data-a="next">Next stored word ▸</button><button class="btn" data-a="empty">An empty address</button>`;
+  const row=byAddr.find(r=>r[1]===st.a);
+  const word=row?row[2]:'0000';
+  ro.innerHTML=`Address ${bits} = ${st.a} → decoder raises minterm line m<sub>${st.a}</sub> → output F₃F₂F₁F₀ = ${word} ${row?`(Word ${row[0]})`:'(empty: all 4 fuses blown)'}`;
+  body.innerHTML=`<div class="stage">${[3,2,1,0].map((o,i)=>`<div class="${word[i]==='1'?'hot':''}"><div class="k">OR gate F${['₃','₂','₁','₀'][i]}</div><div class="v">${word[i]}</div><div class="s">fuse from m<sub>${st.a}</sub>: ${word[i]==='1'?'intact ●':'blown ✕'}</div></div>`).join('')}</div>
+  <p class="src" style="margin:4px 0 0">Only line m<sub>${st.a}</sub> is 1, so each OR gate outputs 1 only if its fuse on that line is intact.</p>`;
+}
+draw();
+})();
+
+</script>
+
+</body></html>

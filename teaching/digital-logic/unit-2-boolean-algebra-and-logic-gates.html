@@ -1,0 +1,1126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unit 2 · Boolean Algebra & Logic Gates</title>
+<style>
+:root{
+  --bg:#f7f6f2; --surface:#ffffff; --surface-2:#f0eee8; --ink:#1d1d1f; --ink-2:#55545a; --line:#dcd9d0;
+  --accent:#3b4bb8; --accent-soft:#e7e9fa; --opt:#a35c00; --opt-soft:#fbefdc; --good:#1f7a45; --good-soft:#e1f3e8;
+  --bad:#b3261e; --bad-soft:#fbe4e2; --gate-fill:#ffffff; --hi:#fff3b0;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --math:"Cambria Math","STIX Two Math","Latin Modern Math",Cambria,Georgia,serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#16171b; --surface:#1f2026; --surface-2:#272830; --ink:#ececf1; --ink-2:#a6a6b2; --line:#373842;
+    --accent:#9aa6ff; --accent-soft:#272c4f; --opt:#f0b260; --opt-soft:#3a2c17; --good:#6fd39a; --good-soft:#18352a;
+    --bad:#ff8a80; --bad-soft:#3d1f1d; --gate-fill:#2a2b33; --hi:#4a4220;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#16171b; --surface:#1f2026; --surface-2:#272830; --ink:#ececf1; --ink-2:#a6a6b2; --line:#373842;
+  --accent:#9aa6ff; --accent-soft:#272c4f; --opt:#f0b260; --opt-soft:#3a2c17; --good:#6fd39a; --good-soft:#18352a;
+  --bad:#ff8a80; --bad-soft:#3d1f1d; --gate-fill:#2a2b33; --hi:#4a4220;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--accent)}
+.wrap{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1240px;margin:0 auto}
+nav.side{position:sticky;top:0;height:100vh;overflow:auto;padding:24px 16px;border-right:1px solid var(--line);font-size:14px}
+nav.side h2{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin:18px 0 6px}
+nav.side a{display:block;padding:4px 8px;border-radius:6px;text-decoration:none;color:var(--ink)}
+nav.side a:hover,nav.side a.on{background:var(--accent-soft);color:var(--accent)}
+nav.side a.o{color:var(--opt)}
+.ctrl{display:flex;flex-direction:column;gap:8px;margin-top:18px}
+.ctrl label{display:flex;gap:8px;align-items:center;cursor:pointer}
+button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:6px 12px}
+button:hover{border-color:var(--accent)}
+main{padding:32px 40px 80px;min-width:0}
+header.hero{border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:8px}
+.kicker{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+h1{font-size:34px;line-height:1.2;margin:6px 0 10px}
+h2.sec{font-size:26px;margin:56px 0 4px;padding-top:12px;scroll-margin-top:12px}
+h3{font-size:19px;margin:30px 0 8px}
+h4{font-size:16px;margin:20px 0 6px}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chip{display:inline-block;font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line)}
+.chip.core{background:var(--accent-soft);color:var(--accent);border-color:transparent}
+.chip.opt{background:var(--opt-soft);color:var(--opt);border-color:transparent}
+.lead{color:var(--ink-2);margin:0 0 14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:16px 0}
+.note,.tip,.warn,.def{border-radius:10px;padding:12px 16px;margin:14px 0;border-left:4px solid}
+.def{background:var(--accent-soft);border-color:var(--accent)}
+.tip{background:var(--good-soft);border-color:var(--good)}
+.warn{background:var(--bad-soft);border-color:var(--bad)}
+.note{background:var(--surface-2);border-color:var(--ink-2)}
+.note b:first-child,.tip b:first-child,.warn b:first-child,.def b:first-child{display:block;font-size:12px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:2px}
+section.optional{border:1px dashed var(--opt);border-radius:14px;padding:4px 22px 18px;margin-top:48px;background:linear-gradient(var(--opt-soft),transparent 160px)}
+section.optional h2.sec{margin-top:16px}
+body.hide-opt .optional, body.hide-opt nav.side a.o{display:none}
+.ex{font-family:var(--math);font-size:1.08em;white-space:nowrap}
+.eqblock{font-family:var(--math);font-size:1.08em;background:var(--surface-2);border-radius:8px;padding:10px 14px;margin:10px 0;overflow-x:auto}
+.proof{display:grid;grid-template-columns:auto 1fr auto;gap:2px 14px;font-family:var(--math);background:var(--surface-2);border-radius:8px;padding:10px 14px;margin:10px 0;overflow-x:auto;align-items:baseline}
+.proof .why{font-family:system-ui,sans-serif;font-size:13px;color:var(--ink-2)}
+.tblwrap{overflow-x:auto;margin:10px 0}
+table{border-collapse:collapse;font-size:14.5px}
+th,td{border:1px solid var(--line);padding:5px 10px;text-align:center}
+th{background:var(--surface-2);font-weight:600}
+table.left td,table.left th{text-align:left}
+table.tt td{font-family:var(--mono);min-width:30px}
+table.tt th{font-family:var(--math);font-weight:normal;font-style:italic}
+td.one{background:var(--accent-soft);color:var(--accent);font-weight:700}
+tr.hi td{background:var(--hi)!important}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.gates{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.gate{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}
+.gate h4{margin:0 0 4px}
+.gate .ex{display:block;margin:2px 0 6px}
+.gate table{margin:0 auto}
+svg.circ{color:var(--ink);max-width:100%;height:auto;display:block;margin:8px auto}
+svg.circ text{font-family:var(--math);font-style:italic;font-size:14px;fill:var(--ink)}
+svg.circ .w{stroke:var(--ink);stroke-width:1.6;fill:none}
+svg.circ .dot{fill:var(--ink)}
+figure{margin:12px 0;text-align:center}
+figcaption{font-size:13px;color:var(--ink-2)}
+details{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:10px 0}
+details summary{cursor:pointer;font-weight:600}
+details[open] summary{margin-bottom:8px}
+.sol summary{color:var(--good);font-weight:600;font-size:14px}
+.sol{background:var(--good-soft);border-color:transparent}
+ol.probs>li{margin:14px 0}
+.sim{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:center}
+.sim .ins{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
+.tog{min-width:84px;font-family:var(--mono);font-size:15px}
+.tog.on{background:var(--accent);color:var(--surface);border-color:var(--accent)}
+.lamp{display:inline-flex;align-items:center;gap:10px;font-weight:600}
+.lamp i{width:26px;height:26px;border-radius:50%;background:var(--surface-2);border:2px solid var(--line);display:inline-block}
+.lamp.on i{background:#ffcf33;border-color:#e0a800;box-shadow:0 0 14px #ffcf33}
+select,input[type=text]{font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);width:100%}
+input[type=text]{font-family:var(--math)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.row>*{flex:1 1 220px}
+.msg{font-size:14px;margin:8px 0}
+.msg.ok{color:var(--good)} .msg.err{color:var(--bad)}
+.quiz .q{margin:14px 0;padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.quiz .opts{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.quiz .opts button{font-family:var(--math)}
+.quiz .opts button.right{background:var(--good-soft);border-color:var(--good);color:var(--good)}
+.quiz .opts button.wrong{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.quiz .exp{font-size:14px;color:var(--ink-2);margin-top:6px;display:none}
+.quiz .q.done .exp{display:block}
+.score{font-weight:600}
+.cheat{columns:2 300px;column-gap:28px}
+.cheat div{break-inside:avoid;margin-bottom:10px}
+.mobnav{display:none}
+@media (max-width:900px){
+  .wrap{grid-template-columns:1fr}
+  nav.side{display:none}
+  .mobnav{display:block;margin:0 0 16px}
+  main{padding:20px 16px 60px}
+  h1{font-size:27px}
+  .sim{grid-template-columns:1fr}
+  section.optional{padding:4px 12px 14px}
+}
+@media print{
+  nav.side,.mobnav,.noprint{display:none!important}
+  .wrap{display:block} main{padding:0}
+  body{background:#fff;color:#000}
+  details{border:none;padding:0}
+  section.optional{break-before:page}
+  h2.sec{break-before:page}
+}
+</style>
+</head>
+<body><div style="font:14px/1.4 Inter,-apple-system,Segoe UI,sans-serif;background:#0b1d3a;padding:10px 16px;"><a href="/teaching/digital-logic.html" style="color:#fbf9f3;text-decoration:none;">&larr; Digital Logic &middot; all units</a></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs id="gdefs"></defs></svg>
+<div class="wrap">
+<nav class="side" id="nav">
+  <div class="kicker">BT102CO · Digital Logic</div>
+  <strong>Unit 2 teaching material</strong>
+  
+  
+  <h2>Syllabus (6 hrs)</h2>
+  <a href="#s21">2.1 Introduction to Boolean algebra</a>
+  <a href="#s22">2.2 Basic theory & properties</a>
+  <a href="#s23">2.3 Boolean functions</a>
+  <a href="#s24">2.4 Logic gates & operations</a>
+  <h2 class="o-h">Optional (beyond syllabus)</h2>
+  <a class="o" href="#o1">O1 Canonical forms (Unit 3 preview)</a>
+  <a class="o" href="#o2">O2 Integrated circuits & logic families</a>
+  <a class="o" href="#o3">O3 Logic-family parameters</a>
+  <a class="o" href="#o4">O4 Positive & negative logic</a>
+  <h2>Practice</h2>
+  <a href="#lab">Lab link (Labs 1–2)</a>
+  <a href="#tut">Tutorial sheet + solutions</a>
+  <a href="#quiz">Quick quiz</a>
+  <a href="#sheet">One-page summary</a>
+  <div class="ctrl noprint">
+    <label><input type="checkbox" id="optToggle" checked> Show optional topics</label>
+    <button id="expandAll">Expand all solutions</button>
+    
+    <button id="themeBtn">Toggle dark mode</button>
+  </div>
+</nav>
+
+<main>
+<!-- FIXED: #mobnavBody was missing, which crashed the mobile menu + sidebar section highlighting - verify on a narrow window -->
+<details class="mobnav noprint"><summary>Contents</summary><div id="mobnavBody"></div></details>
+<header class="hero">
+  <div class="kicker">Digital Logic · BT102CO · Year I, Semester I</div>
+  <h1>Unit 2: Boolean Algebra and Logic Gates</h1>
+  <p class="lead">Teaching material for the 6-hour unit: lecture content, worked examples, interactive tools, lab connection, a tutorial sheet with solutions and a quiz. Content follows Mano's <i>Digital Design</i> Ch. 2 and the supplementary unit notes.</p>
+  </header>
+
+
+
+<!-- ============ 2.1 ============ -->
+<h2 class="sec" id="s21">2.1 Introduction to Boolean algebra <span class="chip core">Core</span></h2>
+<!-- ============ analogy of electrical circuit to switching circuit ============ -->
+<h3>Switching circuits</h3>
+<p>Let switch closed = 1, open = 0; lamp on = 1, off = 0.</p>
+<div class="grid2">
+  <figure><!-- FIXED: this figure was blank (JS crashed before drawing it) - verify it renders --><svg class="circ" id="sw-series" viewBox="0 0 300 110" width="300"></svg><figcaption>Switches in series: L = A · B (AND)</figcaption></figure>
+  <figure><!-- FIXED: this figure was blank (JS crashed before drawing it) - verify it renders --><svg class="circ" id="sw-par" viewBox="0 0 300 130" width="300"></svg><figcaption>Switches in parallel: L = A + B (OR)</figcaption></figure>
+</div>
+<p>Electronic digital circuits are called <b>switching circuits</b> because a transistor behaves like a switch: conducting (closed) or not conducting (open), controlled by binary signals (two voltage ranges standing for 0 and 1). The hardware blocks that perform AND, OR, NOT are called <b>logic gates</b>.</p>
+
+<p class="lead">Start from what students already know (switches, true/false) and build towards a formal algebra.</p>
+
+
+
+
+
+<h3>Binary logic</h3>
+<p>Binary logic deals with <b>binary variables</b> (letters such as <span class="ex">A, B, x, y</span>) that take only two values, 0 and 1, and with <b>logical operations</b>. There are three basic operations:</p>
+<div class="grid2">
+  <div class="card"><b>AND</b> (· or no symbol)<br><span class="ex">x · y = z</span> or <span class="ex">xy = z</span><br>z = 1 only if x = 1 <i>and</i> y = 1.</div>
+  <div class="card"><b>OR</b> (+)<br><span class="ex">x + y = z</span><br>z = 1 if x = 1 <i>or</i> y = 1 (or both).</div>
+  <div class="card"><b>NOT</b> (prime ' or overbar)<br><span class="ex">x' = z</span><br>z is the opposite of x.</div>
+</div>
+<div class="grid2">
+  <figure><!-- FIXED: was empty (same JS crash) - verify it renders --><div class="tblwrap" id="tt-and"></div><figcaption>AND</figcaption></figure>
+  <figure><!-- FIXED: was empty (same JS crash) - verify it renders --><div class="tblwrap" id="tt-or"></div><figcaption>OR</figcaption></figure>
+  <figure><!-- FIXED: was empty (same JS crash) - verify it renders --><div class="tblwrap" id="tt-not"></div><figcaption>NOT</figcaption></figure>
+</div>
+<div class="def"><b>Definition</b>A <b>truth table</b> lists every possible combination of the input variables (2<sup>n</sup> rows for n variables) and the resulting output.</div>
+<div class="warn"><b>Common confusion</b>Binary logic is not binary arithmetic. In arithmetic, 1 + 1 = 10 ("one plus one is two"); in logic, 1 + 1 = 1 ("one OR one is one").</div>
+
+
+<h3>From logic to an algebra</h3>
+<ul>
+  <li><b>1854</b>: George Boole introduced a systematic algebra of logic, now called <b>Boolean algebra</b>.</li>
+  <li><b>1938</b>: Claude Shannon introduced two-valued <b>switching algebra</b> and showed it describes bistable switching circuits.</li>
+  <li><b>1904</b>: E. V. Huntington gave the postulates we use as the formal definition.</li>
+</ul>
+<p>Designers use Boolean algebra to turn circuit diagrams into expressions and back, and to simplify circuits before building them.</p>
+
+<h4>Background: what an algebraic structure needs</h4>
+<p>Any deductive system starts from a <b>set</b> of elements, <b>operators</b> and <b>postulates</b> (unproved axioms). A <b>binary operator</b> <code>*</code> (here <code>*</code> is just a representational symbol, could be anything like <code>+</code> or <code>&middot;</code>) on <b>set S</b> assigns to each pair <b>(a, b)</b> a unique element <b>c = a * b</b>. Common postulates:</p>
+
+<div class="tblwrap">
+  <table class="left">
+    <thead>
+      <tr>
+        <th>Postulate</th>
+        <th>Meaning</th>
+        <th>Example in ordinary arithmetic (+ and &middot;)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Closure</td>
+        <td>a, b &isin; S &rArr; a * b &isin; S</td>
+        <td>
+          &bull; <b>For + :</b> Naturals are closed under addition (2 + 3 = 5)<br>
+          &bull; <b>For &middot; :</b> Naturals are closed under multiplication (2 &middot; 3 = 6)
+        </td>
+      </tr>
+      <tr>
+        <td>Associative</td>
+        <td>(x * y) * z = x * (y * z)</td>
+        <td>
+          &bull; <b>For + :</b> (2 + 3) + 4 = 2 + (3 + 4) = 9<br>
+          &bull; <b>For &middot; :</b> (2 &middot; 3) &middot; 4 = 2 &middot; (3 &middot; 4) = 24
+        </td>
+      </tr>
+      <tr>
+        <td>Commutative</td>
+        <td>x * y = y * x</td>
+        <td>
+          &bull; <b>For + :</b> 2 + 3 = 3 + 2 = 5<br>
+          &bull; <b>For &middot; :</b> 2 &middot; 3 = 3 &middot; 2 = 6
+        </td>
+      </tr>
+      <tr>
+        <td>Identity</td>
+        <td>e * x = x * e = x</td>
+        <td>
+          An identity element <b>e</b> leaves the operand unchanged:<br>
+          &bull; e = 0 for + (OR operator) &rarr; x + 0 = x<br>
+          &bull; e = 1 for &middot; (AND operator) &rarr; x &middot; 1 = x
+        </td>
+      </tr>
+      <tr>
+        <td>Inverse</td>
+        <td>x * y = e</td>
+        <td>
+          An inverse element yields the operator's identity element <b>e</b>:<br>
+          &bull; <b>For + :</b> x + (&minus;x) = 0<br>
+          &bull; <b>For &middot; :</b> x &middot; (1/x) = 1<br>
+          <i>(Boolean Logic: X + X&#772; = 1, X &middot; X&#772; = 0)</i>
+        </td>
+      </tr>
+      <tr>
+        <td>Distributive</td>
+        <td>x * (y &middot; z) = (x * y) &middot; (x * z)</td>
+        <td>
+          &bull; <b>Arithmetic:</b> a &middot; (b + c) = a &middot; b + a &middot; c<br>
+          &bull; <b>Boolean Logic (Dual):</b> X + (Y &middot; Z) = (X + Y) &middot; (X + Z)
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ============ 2.2 ============ -->
+<h2 class="sec" id="s22">2.2 Basic theory and properties of Boolean algebra <span class="chip core">Core</span></h2>
+
+<h3>Huntington postulates</h3>
+<p>Boolean algebra is an algebraic structure on a set B with two binary operators + and · such that:</p>
+<div class="tblwrap"><table class="left">
+<tr><th>#</th><th>Postulate</th><th>(a) for +</th><th>(b) for ·</th></tr>
+<tr><td>P1</td><td>Closure</td><td colspan="2">B is closed under + and ·</td></tr>
+<tr><td>P2</td><td>Identity</td><td class="ex">x + 0 = x</td><td class="ex">x · 1 = x</td></tr>
+<tr><td>P3</td><td>Commutative</td><td class="ex">x + y = y + x</td><td class="ex">x · y = y · x</td></tr>
+<tr><td>P4</td><td>Distributive</td><td class="ex"><b>Product-to-Sum</b><br>x(y + z) = xy + xz</td><td class="ex"><b>Sum-to-Product</b><br>x + yz = (x + y)(x + z)</td></tr>
+<tr><td>P5</td><td>Complement</td><td class="ex">x + x' = 1</td><td class="ex">x · x' = 0</td></tr>
+<tr><td>P6</td><td colspan="3">At least two elements x, y ∈ B with x ≠ y</td></tr>
+</table></div>
+<p style="font-size:14px;color:var(--ink-2)">Numbering follows Mano. The supplementary notes number them differently (e.g. Distribution = P3, Identity = P4); tell students which scheme the exam uses.</p>
+
+<h4>How Boolean algebra differs from ordinary algebra</h4>
+<ol>
+  <li>The associative law is not a postulate, but it can be derived (Theorem 4).</li>
+  <li><span class="ex">x + yz = (x + y)(x + z)</span> holds in Boolean algebra, not in ordinary algebra.</li>
+  <li>No additive or multiplicative inverses, so no subtraction or division.</li>
+  <li>The complement operator has no counterpart in ordinary algebra.</li>
+  <li>The two-valued Boolean algebra has only two elements: B = {0, 1}.</li>
+</ol>
+<div class="warn"><b>Common mistake</b>Students "cancel" terms as in ordinary algebra. From x + y = x + z you <b>cannot</b> conclude y = z (try x = 1).</div>
+
+<h3>Two-valued Boolean algebra</h3>
+<p>B = {0, 1} with + as OR, · as AND and ' as NOT satisfies all six postulates. Closure, identity, commutativity and complement can be read directly from the operator tables. The distributive law is checked over all 8 combinations:</p>
+<!-- FIXED: was empty (same JS crash) - verify it renders --><div class="tblwrap" id="tt-dist"></div>
+<p>Columns <span class="ex">x(y + z)</span> and <span class="ex">xy + xz</span> agree in every row, so the law holds. Engineers call this algebra <b>switching algebra</b>, and from here on "Boolean algebra" means the two-valued one.</p>
+
+<h3>Duality Principle</h3>
+<div class="def">
+  <b>Duality:</b> The principle states that any valid Boolean algebraic identity remains true if you interchange its operators and identity elements while keeping all variables and their complements completely unchanged.<br><br>
+  <b>To find the dual of any expression, follow these exact rules:</b>
+  <ul>
+    <li><b>Swap the operators:</b> Replace every AND (<code>&middot;</code>) with an OR (<code>+</code>), and every OR (<code>+</code>) with an AND (<code>&middot;</code>).</li>
+    <li><b>Leave variables alone:</b> Keep all variables and their complements (<code>x, x', y, z'</code>, etc.) in their exact original form.</li>
+    <li><b>Swap constants (if present):</b> Replace any <code>0</code> with <code>1</code>, and any <code>1</code> with <code>0</code>.</li>
+  </ul>
+  <b>Example:</b><br>
+  &bull; <b>Original:</b> <code>xx'yz' + x'y'z</code><br>
+  &bull; <b>Dual:</b> <code>(x' + y + z') &middot; (x' + y' + z)</code>
+</div>
+
+<div class="def">
+  <b>Why Duality is Necessary & Its Implications:</b>
+  <ul>
+    <li><b>Built-In Symmetry:</b> Unlike arithmetic, Boolean algebra treats its primary operations (<code>+</code> and <code>&middot;</code>) with equal structural weight.</li>
+    <li><b>The "Two-for-One" Rule:</b> Every mathematical law or theorem comes in a mirrored pair; proving one automatically proves its dual, cutting axiom work in half.</li>
+    <li><b>Circuit Flexibility & Optimization:</b> Enables engineers to seamlessly switch between <b>Sum-of-Products (SOP)</b> and <b>Product-of-Sums (POS)</b> hardware implementations depending on gate constraints.</li>
+    <li><b>Simplification Efficiency:</b> Provides an alternative path to simplify an expression if its native form is too complex to reduce directly.</li>
+  </ul>
+</div>
+
+<div class="tblwrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Expression</th>
+        <th>Dual</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="ex">x + 0 = x</td>
+        <td class="ex">x &middot; 1 = x</td>
+      </tr>
+      <tr>
+        <td class="ex">x + x' = 1</td>
+        <td class="ex">x &middot; x' = 0</td>
+      </tr>
+      <tr>
+        <td class="ex">x + xy = x</td>
+        <td class="ex">x(x + y) = x</td>
+      </tr>
+      <tr>
+        <td class="ex">x'yz' + x'y'z</td>
+        <td class="ex">(x' + y + z')(x' + y' + z)</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<div class="warn"><b>Watch out</b>The dual does not complement the variables. Only operators and constants change.</div>
+
+<h3>Basic theorems</h3>
+<div class="tblwrap"><table class="left">
+<tr><th>Name</th><th>(a)</th><th>(b) dual</th></tr>
+<tr><td>Theorem 1 · Idempotence</td><td class="ex">x + x = x</td><td class="ex">x · x = x</td></tr>
+<tr><td>Theorem 2 · Null element</td><td class="ex">x + 1 = 1</td><td class="ex">x · 0 = 0</td></tr>
+<tr><td>Theorem 3 · Involution</td><td class="ex" colspan="2">(x')' = x</td></tr>
+<tr><td>Theorem 4 · Associative</td><td class="ex">x + (y + z) = (x + y) + z</td><td class="ex">x(yz) = (xy)z</td></tr>
+<tr><td>Theorem 5 · DeMorgan</td><td class="ex">(x + y)' = x'y'</td><td class="ex">(xy)' = x' + y'</td></tr>
+<tr><td>Theorem 6 · Absorption</td><td class="ex">x + xy = x</td><td class="ex">x(x + y) = x</td></tr>
+<tr><td>Useful extra · Simplification</td><td class="ex">x + x'y = x + y</td><td class="ex">x(x' + y) = xy</td></tr>
+<tr><td>Useful extra · Consensus</td><td class="ex">xy + x'z + yz = xy + x'z</td><td class="ex">(x+y)(x'+z)(y+z) = (x+y)(x'+z)</td></tr>
+</table></div>
+
+<h4>Proofs from the postulates</h4>
+<p><b>Theorem 1(a):</b> <span class="ex">x + x = x</span></p>
+<div class="proof">
+<span>x + x</span><span>= (x + x) · 1</span><span class="why">P2(b)</span>
+<span></span><span>= (x + x)(x + x')</span><span class="why">P5(a)</span>
+<span></span><span>= x + xx'</span><span class="why">P4(b)</span>
+<span></span><span>= x + 0</span><span class="why">P5(b)</span>
+<span></span><span>= x</span><span class="why">P2(a)</span>
+</div>
+<p><b>Theorem 1(b):</b> <span class="ex">x · x = x</span>: each step is the dual of the step above.</p>
+<div class="proof">
+<span>x · x</span><span>= xx + 0</span><span class="why">P2(a)</span>
+<span></span><span>= xx + xx'</span><span class="why">P5(b)</span>
+<span></span><span>= x(x + x')</span><span class="why">P4(a)</span>
+<span></span><span>= x · 1</span><span class="why">P5(a)</span>
+<span></span><span>= x</span><span class="why">P2(b)</span>
+</div>
+<p><b>Theorem 2(a):</b> <span class="ex">x + 1 = 1</span></p>
+<div class="proof">
+<span>x + 1</span><span>= 1 · (x + 1)</span><span class="why">P2(b)</span>
+<span></span><span>= (x + x')(x + 1)</span><span class="why">P5(a)</span>
+<span></span><span>= x + x' · 1</span><span class="why">P4(b)</span>
+<span></span><span>= x + x'</span><span class="why">P2(b)</span>
+<span></span><span>= 1</span><span class="why">P5(a)</span>
+</div>
+<p><b>Theorem 2(b):</b> <span class="ex">x · 0 = 0</span> by duality.</p>
+<p><b>Theorem 3:</b> <span class="ex">(x')' = x</span>. P5 gives x + x' = 1 and xx' = 0, so x is a complement of x'. The complement is unique, so (x')' = x.</p>
+<p><b>Theorem 6(a):</b> <span class="ex">x + xy = x</span></p>
+<div class="proof">
+<span>x + xy</span><span>= x · 1 + xy</span><span class="why">P2(b)</span>
+<span></span><span>= x(1 + y)</span><span class="why">P4(a)</span>
+<span></span><span>= x(y + 1)</span><span class="why">P3(a)</span>
+<span></span><span>= x · 1</span><span class="why">Theorem 2(a)</span>
+<span></span><span>= x</span><span class="why">P2(b)</span>
+</div>
+<details>
+  <summary><b>Algebraic Proof of De Morgan's Law: (x + y)' = x'y'</b> (For advanced study)</summary>
+  
+  <p><b>The Big Picture: The "Uniqueness of the Complement" Trick</b><br>
+  Normally, proving a De Morgan's law requires complex truth tables or long multi-step reductions. But in advanced Boolean algebra, there is a powerful shortcut rule: 
+  If you want to prove that expression <code>B</code> is the exact complement of expression <code>A</code> (meaning <code>B = A'</code>), you only need to prove two things:</p>
+  <ul>
+    <li><code>A + B = 1</code> (When you OR them together, you get 1)</li>
+    <li><code>A &middot; B = 0</code> (When you AND them together, you get 0)</li>
+  </ul>
+  <p>For this proof, let <code>A = (x + y)</code> and <code>B = x'y'</code>. By showing that <code>(x + y) + x'y' = 1</code> and <code>(x + y) &middot; x'y' = 0</code>, we mathematically prove that <code>x'y'</code> must be the complement of <code>(x + y)</code>, which means <code>(x + y)' = x'y'</code>.</p>
+
+  <hr style="border: 0; border-top: 1px solid #ccc; margin: 15px 0;">
+
+  <div class="proof">
+    <!-- Part 1 -->
+    <span style="grid-column: 1 / -1; font-weight: bold; padding-top: 5px;">Part 1: Proving the OR condition equals 1</span>
+    <span>(x + y) + x'y'</span><span>= (x + y + x')(x + y + y')</span><span class="why">P4(b) (Distributive Law)</span>
+    <span></span><span>= (y + 1)(x + 1)</span><span class="why">P3, P5(a) (Commutative &amp; Complement)</span>
+    <span></span><span>= 1 &middot; 1 = 1</span><span class="why">Theorem 2(a)</span>
+    
+    <!-- Part 2 -->
+    <span style="grid-column: 1 / -1; font-weight: bold; padding-top: 10px;">Part 2: Proving the AND condition equals 0</span>
+    <span>(x + y) &middot; x'y'</span><span>= xx'y' + yx'y'</span><span class="why">P4(a), P3 (Distributive Law)</span>
+    <span></span><span>= 0 &middot; y' + x' &middot; 0</span><span class="why">P5(b) (Complement Law)</span>
+    <span></span><span>= 0 + 0 = 0</span><span class="why">Theorem 2(b)</span>
+  </div>
+
+  <p style="margin-top: 15px;"><b>Conclusion:</b> Because <code>(x + y)</code> and <code>x'y'</code> satisfy both rules (their sum is <code>1</code> and their product is <code>0</code>), they form a strictly complementary pair. Therefore, <b>(x + y)' = x'y'</b> is proven true!</p>
+</details>
+
+<h4>Proof by truth table</h4>
+<p>Any theorem can also be checked by listing all input combinations. DeMorgan's first theorem:</p>
+<!-- FIXED: was empty (same JS crash) - verify it renders --><div class="tblwrap" id="tt-dm"></div>
+<p>And absorption <span class="ex">x + xy = x</span>:</p>
+<!-- FIXED: was empty (same JS crash) - verify it renders --><div class="tblwrap" id="tt-abs"></div>
+
+<h3>Operator precedence</h3>
+<div class="eqblock">( ) parentheses → NOT ( ' ) → AND ( · ) → OR ( + )</div>
+<p>Example: in <span class="ex">(x + y)'</span> evaluate x + y first, then complement. In <span class="ex">x'y'</span> complement each variable first, then AND. In <span class="ex">(a + bc)d'</span>: bc, then a + bc, then d', then AND.</p>
+
+<h3>Venn diagrams</h3>
+<p>Each variable is a circle; inside the circle the variable is 1. Regions of two circles: <span class="ex">x'y', x'y, xy', xy</span>.</p>
+<div class="grid2">
+  <figure><!-- FIXED: this figure was blank (JS crashed before drawing it) - verify it renders --><svg class="circ" id="venn2" viewBox="0 0 260 150" width="260"></svg><figcaption>Four regions of a two-variable Venn diagram</figcaption></figure>
+  <figure><!-- FIXED: this figure was blank (JS crashed before drawing it) - verify it renders --><svg class="circ" id="vennAbs" viewBox="0 0 260 150" width="260"></svg><figcaption>x + xy = x: the region xy already lies inside x</figcaption></figure>
+</div>
+<div class="tip"><b></b>Draw the three-circle diagram for <span class="ex">x(y + z)</span> and <span class="ex">xy + xz</span> side by side. We see that the shaded regions are identical, which makes the distributive law concrete.</div>
+
+<!-- ============ 2.3 ============ -->
+<h2 class="sec" id="s23">2.3 Boolean functions <span class="chip core">Core</span></h2>
+<div class="def"><b>Definition</b>A <b>Boolean function</b> is an expression made of binary variables, the operators AND, OR, NOT, parentheses and an equals sign. For each input combination its value is 0 or 1.</div>
+
+<h3>Three ways to represent a function</h3>
+<div class="grid2">
+  <div class="card"><b>1. Algebraic expression</b><br><span class="ex">F₁ = xyz'</span> is 1 only when x = 1, y = 1, z = 0.</div>
+  <div class="card"><b>2. Truth table</b><br>2<sup>n</sup> rows, inputs counted 0 to 2<sup>n</sup>−1 in binary. Unique for each function.</div>
+  <div class="card"><b>3. Logic diagram</b><br>One gate per term, one input per literal, inverters for complemented variables.</div>
+</div>
+<!-- FIXED: was empty (same JS crash) - verify it renders --><div class="tblwrap" id="tt-f1234"></div>
+<p style="font-size:14px;color:var(--ink-2)">F₁ = xyz', F₂ = x + y'z, F₃ = x'y'z + x'yz + xy', F₄ = xy' + x'z</p>
+<div class="note"><b>Key question</b>F₃ and F₄ have identical columns, so they are the <b>same function</b>. A truth table is unique; an expression is not. Boolean algebra is mostly used to find the simplest expression for a given function.</div>
+<div class="grid2">
+  <figure><!-- FIXED: this figure was blank (JS crashed before drawing it) - verify it renders --><svg class="circ" id="c-f2" viewBox="0 0 260 110" width="260"></svg><figcaption>F₂ = x + y'z</figcaption></figure>
+  <figure><!-- FIXED: this figure was blank (JS crashed before drawing it) - verify it renders --><svg class="circ" id="c-f4" viewBox="0 0 330 160" width="330"></svg><figcaption>F₄ = xy' + x'z: 2 AND, 1 OR, 2 NOT (F₃ needs 3 three-input ANDs)</figcaption></figure>
+</div>
+
+<h3>Algebraic manipulation (literal minimisation)</h3>
+<div class="def"><b>Literal</b>A variable in primed or unprimed form. Each literal is a gate input and each term is a gate, so fewer literals and terms means less hardware.</div>
+<p>There is no fixed algorithm; we try postulates and theorems ("cut and try"). Systematic methods (K-maps) come in Unit 3.</p>
+<h4>Worked examples: simplify to a minimum number of literals</h4>
+<div class="proof">
+<span>1.</span><span>x + x'y = (x + x')(x + y) = 1 · (x + y) = x + y</span><span class="why">P4(b), P5</span>
+<span>2.</span><span>x(x' + y) = xx' + xy = 0 + xy = xy</span><span class="why">dual of 1</span>
+<span>3.</span><span>x'y'z + x'yz + xy' = x'z(y' + y) + xy' = x'z + xy'</span><span class="why">shows F₃ = F₄</span>
+<span>4.</span><span>xy + x'z + yz = xy + x'z + yz(x + x')</span><span class="why">P5</span>
+<span></span><span>= xy + x'z + xyz + x'yz = xy(1 + z) + x'z(1 + y)</span><span class="why">P4</span>
+<span></span><span>= xy + x'z</span><span class="why">consensus</span>
+<span>5.</span><span>(x + y)(x' + z)(y + z) = (x + y)(x' + z)</span><span class="why">dual of 4</span>
+</div>
+
+<h3>Complement of a function</h3>
+<p>F' swaps the 0s and 1s of F. Generalised DeMorgan:</p>
+<div class="eqblock">(A + B + C + … + F)' = A'B'C'…F'&nbsp;&nbsp;&nbsp;&nbsp;(ABC…F)' = A' + B' + C' + … + F'</div>
+<details><summary>Derivation of the three-variable form</summary>
+<div class="proof">
+<span>(A + B + C)'</span><span>= (A + X)'</span><span class="why">let X = B + C</span>
+<span></span><span>= A'X'</span><span class="why">DeMorgan</span>
+<span></span><span>= A'(B + C)'</span><span class="why">substitute</span>
+<span></span><span>= A'B'C'</span><span class="why">DeMorgan, associative</span>
+</div></details>
+<h4>Method 1: apply DeMorgan repeatedly</h4>
+<div class="proof">
+<span>F₁ = x'yz' + x'y'z</span><span>F₁' = (x'yz')'(x'y'z)' = (x + y' + z)(x + y + z')</span><span></span>
+<span>F₂ = x(y'z' + yz)</span><span>F₂' = x' + (y'z' + yz)' = x' + (y'z')'(yz)' = x' + (y + z)(y' + z')</span><span></span>
+</div>
+<h4>Method 2: take the dual, then complement each literal</h4>
+<div class="proof">
+<span>F₁ = x'yz' + x'y'z</span><span>dual: (x' + y + z')(x' + y' + z) → F₁' = (x + y' + z)(x + y + z')</span><span></span>
+<span>F₂ = x(y'z' + yz)</span><span>dual: x + (y' + z')(y + z) → F₂' = x' + (y + z)(y' + z')</span><span></span>
+</div>
+
+<h3>Interactive: truth-table and equivalence checker</h3>
+<div class="card noprint" id="ttool">
+  <p style="margin-top:0;font-size:14px">Type expressions with letters as variables. Use <code>'</code> for NOT, <code>+</code> for OR, juxtaposition or <code>.</code> for AND, <code>^</code> for XOR, and parentheses. Students can check their simplifications here.</p>
+  <div class="row">
+    <label>F = <input type="text" id="exF" value="x'y'z + x'yz + xy'"></label>
+    <label>G (optional) = <input type="text" id="exG" value="xy' + x'z"></label>
+  </div>
+  <div class="msg" id="exMsg"></div>
+  <!-- FIXED: was empty (same JS crash) - verify it renders --><div class="tblwrap" id="exTable"></div>
+</div>
+
+<!-- ============ 2.4 ============ -->
+<h2 class="sec" id="s24">2.4 Logic gates and operations <span class="chip core">Core</span></h2>
+
+<h3>The 16 functions of two variables</h3>
+<p>With n variables there are 2<sup>2ⁿ</sup> possible functions. For n = 2 that is 16; AND and OR are only two of them.</p>
+<!-- FIXED: was empty (same JS crash) - verify it renders --><div class="tblwrap" id="t16"></div>
+<div class="tblwrap"><table class="left">
+<tr><th>Function</th><th>Symbol</th><th>Name</th><th>Comment</th></tr>
+<tr><td class="ex">F₀ = 0</td><td></td><td>Null</td><td>Constant 0</td></tr>
+<tr><td class="ex">F₁ = xy</td><td class="ex">x · y</td><td>AND</td><td>x and y</td></tr>
+<tr><td class="ex">F₂ = xy'</td><td class="ex">x / y</td><td>Inhibition</td><td>x but not y</td></tr>
+<tr><td class="ex">F₃ = x</td><td></td><td>Transfer</td><td>x</td></tr>
+<tr><td class="ex">F₄ = x'y</td><td class="ex">y / x</td><td>Inhibition</td><td>y but not x</td></tr>
+<tr><td class="ex">F₅ = y</td><td></td><td>Transfer</td><td>y</td></tr>
+<tr><td class="ex">F₆ = xy' + x'y</td><td class="ex">x ⊕ y</td><td>Exclusive-OR</td><td>x or y but not both</td></tr>
+<tr><td class="ex">F₇ = x + y</td><td class="ex">x + y</td><td>OR</td><td>x or y</td></tr>
+<tr><td class="ex">F₈ = (x + y)'</td><td class="ex">x ↓ y</td><td>NOR</td><td>Not-OR</td></tr>
+<tr><td class="ex">F₉ = xy + x'y'</td><td class="ex">x ⊙ y</td><td>Equivalence</td><td>x equals y</td></tr>
+<tr><td class="ex">F₁₀ = y'</td><td class="ex">y'</td><td>Complement</td><td>Not y</td></tr>
+<tr><td class="ex">F₁₁ = x + y'</td><td class="ex">x ⊂ y</td><td>Implication</td><td>If y then x</td></tr>
+<tr><td class="ex">F₁₂ = x'</td><td class="ex">x'</td><td>Complement</td><td>Not x</td></tr>
+<tr><td class="ex">F₁₃ = x' + y</td><td class="ex">x ⊃ y</td><td>Implication</td><td>If x then y</td></tr>
+<tr><td class="ex">F₁₄ = (xy)'</td><td class="ex">x ↑ y</td><td>NAND</td><td>Not-AND</td></tr>
+<tr><td class="ex">F₁₅ = 1</td><td></td><td>Identity</td><td>Constant 1</td></tr>
+</table></div>
+<p>Three groups: <b>2</b> constants (F₀, F₁₅), <b>4</b> unary functions (transfer and complement of x or y), and <b>10</b> binary functions giving 8 operations: AND, OR, NAND, NOR, XOR, equivalence, inhibition, implication.</p>
+
+<h3>Why only eight standard gates?</h3>
+<p>A gate is worth building if it is cheap to make, extends to more than two inputs, has useful properties (commutative, associative) and can build other functions. Two constants and four duplicates leave ten candidates. Inhibition and implication are neither commutative nor associative, so they are dropped. That leaves the <b>eight standard gates</b>:</p>
+<!-- FIXED: was empty (same JS crash) - verify it renders --><div class="gates" id="gallery"></div>
+<div class="note"><b>Remember</b>The small bubble means complement. A triangle alone is a <b>buffer</b>: it doesn't change the logic value but amplifies the signal (like two inverters in cascade). XOR and XNOR are complements: <span class="ex">(x ⊕ y)' = x ⊙ y</span>.</div>
+
+<h3>Interactive gate simulator</h3>
+<div class="card noprint">
+  <div class="sim">
+    <div>
+      <label>Gate <select id="simGate"></select></label>
+      <div class="ins"><button class="tog" id="inA">x = 0</button><button class="tog" id="inB">y = 0</button></div>
+      <div class="lamp" id="lamp"><i></i><span>F = 0</span></div>
+      <!-- FIXED: this figure was blank (JS crashed before drawing it) - verify it renders --><svg class="circ" id="simSvg" viewBox="0 0 160 60" width="220"></svg>
+    </div>
+    <!-- FIXED: was empty (same JS crash) - verify it renders --><div class="tblwrap" id="simTT"></div>
+  </div>
+</div>
+
+<!-- ===== Universal gates: all 8 gates from NAND only and from NOR only ===== -->
+<h3>Universal gates: NAND and NOR</h3>
+<div class="def"><b>Universal gate</b>A gate that can implement every Boolean function on its own. Any function can be written with AND, OR and NOT, so building those three from one gate type proves universality. Below, all eight standard gates are built from NAND only and from NOR only.</div>
+<p>NAND and NOR are cheaper and easier to fabricate than AND/OR, which is why they are the basic gates in IC logic families such as TTL and CMOS.</p>
+
+<h4>NAND-only implementations</h4>
+<div class="grid2">
+  <figure>
+    <svg class="circ" viewBox="0 0 150 60" width="150"><path class="w" d="M15,30 L28,30"/><g transform="translate(40,10)"><path d="M5,2 H30 A18,18 0 0 1 30,38 H5 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="5.0" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="5.0" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><path class="w" d="M28,20 L28,40"/><path class="w" d="M28,20 L40,20"/><path class="w" d="M28,40 L40,40"/><circle class="dot" cx="28" cy="30" r="3"/><path class="w" d="M100,30 L115,30"/><text x="11" y="30" text-anchor="end" dominant-baseline="middle">A</text><text x="119" y="30" text-anchor="start" dominant-baseline="middle">A'</text></svg>
+    <figcaption><b>NOT</b> · 1 gate<br>(A·A)' = A'</figcaption>
+  </figure>
+  <figure>
+    <svg class="circ" viewBox="0 0 225 60" width="225"><path class="w" d="M15,30 L28,30"/><g transform="translate(40,10)"><path d="M5,2 H30 A18,18 0 0 1 30,38 H5 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="5.0" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="5.0" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><path class="w" d="M28,20 L28,40"/><path class="w" d="M28,20 L40,20"/><path class="w" d="M28,40 L40,40"/><circle class="dot" cx="28" cy="30" r="3"/><path class="w" d="M100,30 L113,30"/><text x="102" y="18" text-anchor="start" dominant-baseline="middle">A'</text><g transform="translate(125,10)"><path d="M5,2 H30 A18,18 0 0 1 30,38 H5 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="5.0" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="5.0" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><path class="w" d="M113,20 L113,40"/><path class="w" d="M113,20 L125,20"/><path class="w" d="M113,40 L125,40"/><circle class="dot" cx="113" cy="30" r="3"/><path class="w" d="M185,30 L198,30"/><text x="11" y="30" text-anchor="end" dominant-baseline="middle">A</text><text x="202" y="30" text-anchor="start" dominant-baseline="middle">A</text></svg>
+    <figcaption><b>Buffer</b> · 2 gates<br>((A·A)')' = A</figcaption>
+  </figure>
+  <figure>
+    <svg class="circ" viewBox="0 0 275 60" width="275"><path class="w" d="M15,20 L30,20"/><path class="w" d="M15,40 L30,40"/><g transform="translate(30,10)"><path d="M5,2 H30 A18,18 0 0 1 30,38 H5 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="5.0" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="5.0" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><path class="w" d="M90,30 L138,30"/><text x="94" y="18" text-anchor="start" dominant-baseline="middle">(AB)'</text><g transform="translate(150,10)"><path d="M5,2 H30 A18,18 0 0 1 30,38 H5 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="5.0" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="5.0" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><path class="w" d="M138,20 L138,40"/><path class="w" d="M138,20 L150,20"/><path class="w" d="M138,40 L150,40"/><circle class="dot" cx="138" cy="30" r="3"/><path class="w" d="M210,30 L223,30"/><text x="11" y="20" text-anchor="end" dominant-baseline="middle">A</text><text x="11" y="40" text-anchor="end" dominant-baseline="middle">B</text><text x="227" y="30" text-anchor="start" dominant-baseline="middle">AB</text></svg>
+    <figcaption><b>AND</b> · 2 gates<br>((AB)')' = AB</figcaption>
+  </figure>
+  <figure>
+    <svg class="circ" viewBox="0 0 275 115" width="275"><path class="w" d="M14,20 L28,20"/><g transform="translate(40,0)"><path d="M5,2 H30 A18,18 0 0 1 30,38 H5 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="5.0" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="5.0" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><path class="w" d="M28,10 L28,30"/><path class="w" d="M28,10 L40,10"/><path class="w" d="M28,30 L40,30"/><circle class="dot" cx="28" cy="20" r="3"/><path class="w" d="M14,90 L28,90"/><g transform="translate(40,70)"><path d="M5,2 H30 A18,18 0 0 1 30,38 H5 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="5.0" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="5.0" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><path class="w" d="M28,80 L28,100"/><path class="w" d="M28,80 L40,80"/><path class="w" d="M28,100 L40,100"/><circle class="dot" cx="28" cy="90" r="3"/><path class="w" d="M100,20 L125,20 L125,45 L150,45"/><path class="w" d="M100,90 L125,90 L125,65 L150,65"/><g transform="translate(150,35)"><path d="M5,2 H30 A18,18 0 0 1 30,38 H5 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="5.0" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="5.0" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><text x="10" y="20" text-anchor="end" dominant-baseline="middle">A</text><text x="10" y="90" text-anchor="end" dominant-baseline="middle">B</text><text x="104" y="12" text-anchor="start" dominant-baseline="middle">A'</text><text x="104" y="100" text-anchor="start" dominant-baseline="middle">B'</text><path class="w" d="M210,55 L225,55"/><text x="229" y="55" text-anchor="start" dominant-baseline="middle">A+B</text></svg>
+    <figcaption><b>OR</b> · 3 gates<br>(A'·B')' = A + B (DeMorgan)</figcaption>
+  </figure>
+  <figure>
+    <svg class="circ" viewBox="0 0 165 60" width="165"><path class="w" d="M15,20 L30,20"/><path class="w" d="M15,40 L30,40"/><g transform="translate(30,10)"><path d="M5,2 H30 A18,18 0 0 1 30,38 H5 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="5.0" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="5.0" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><path class="w" d="M90,30 L105,30"/><text x="11" y="20" text-anchor="end" dominant-baseline="middle">A</text><text x="11" y="40" text-anchor="end" dominant-baseline="middle">B</text><text x="109" y="30" text-anchor="start" dominant-baseline="middle">(AB)'</text></svg>
+    <figcaption><b>NAND</b> · 1 gate<br>native gate: (AB)'</figcaption>
+  </figure>
+  <figure>
+    <svg class="circ" viewBox="0 0 385 115" width="385"><path class="w" d="M14,20 L28,20"/><g transform="translate(40,0)"><path d="M5,2 H30 A18,18 0 0 1 30,38 H5 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="5.0" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="5.0" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><path class="w" d="M28,10 L28,30"/><path class="w" d="M28,10 L40,10"/><path class="w" d="M28,30 L40,30"/><circle class="dot" cx="28" cy="20" r="3"/><path class="w" d="M14,90 L28,90"/><g transform="translate(40,70)"><path d="M5,2 H30 A18,18 0 0 1 30,38 H5 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="5.0" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="5.0" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><path class="w" d="M28,80 L28,100"/><path class="w" d="M28,80 L40,80"/><path class="w" d="M28,100 L40,100"/><circle class="dot" cx="28" cy="90" r="3"/><path class="w" d="M100,20 L125,20 L125,45 L150,45"/><path class="w" d="M100,90 L125,90 L125,65 L150,65"/><g transform="translate(150,35)"><path d="M5,2 H30 A18,18 0 0 1 30,38 H5 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="5.0" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="5.0" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><text x="10" y="20" text-anchor="end" dominant-baseline="middle">A</text><text x="10" y="90" text-anchor="end" dominant-baseline="middle">B</text><text x="104" y="12" text-anchor="start" dominant-baseline="middle">A'</text><text x="104" y="100" text-anchor="start" dominant-baseline="middle">B'</text><path class="w" d="M210,55 L243,55"/><text x="213" y="43" text-anchor="start" dominant-baseline="middle">A+B</text><g transform="translate(255,35)"><path d="M5,2 H30 A18,18 0 0 1 30,38 H5 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="5.0" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="5.0" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><path class="w" d="M243,45 L243,65"/><path class="w" d="M243,45 L255,45"/><path class="w" d="M243,65 L255,65"/><circle class="dot" cx="243" cy="55" r="3"/><path class="w" d="M315,55 L328,55"/><text x="332" y="55" text-anchor="start" dominant-baseline="middle">(A+B)'</text></svg>
+    <figcaption><b>NOR</b> · 4 gates<br>OR circuit + inverter: ((A'B')')' = (A + B)'</figcaption>
+  </figure>
+  <figure>
+    <svg class="circ" viewBox="0 0 385 125" width="385"><path class="w" d="M15,10 L160,10"/><circle class="dot" cx="40" cy="10" r="3"/><path class="w" d="M40,10 L40,50 L70,50"/><path class="w" d="M15,110 L160,110"/><circle class="dot" cx="50" cy="110" r="3"/><path class="w" d="M50,110 L50,70 L70,70"/><g transform="translate(70,40)"><path d="M5,2 H30 A18,18 0 0 1 30,38 H5 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="5.0" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="5.0" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><path class="w" d="M130,60 L145,60"/><circle class="dot" cx="145" cy="60" r="3"/><path class="w" d="M145,60 L145,30 L160,30"/><path class="w" d="M145,60 L145,90 L160,90"/><g transform="translate(160,0)"><path d="M5,2 H30 A18,18 0 0 1 30,38 H5 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="5.0" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="5.0" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><g transform="translate(160,80)"><path d="M5,2 H30 A18,18 0 0 1 30,38 H5 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="5.0" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="5.0" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><path class="w" d="M220,20 L235,20 L235,50 L250,50"/><path class="w" d="M220,100 L235,100 L235,70 L250,70"/><g transform="translate(250,40)"><path d="M5,2 H30 A18,18 0 0 1 30,38 H5 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="5.0" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="5.0" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><text x="11" y="10" text-anchor="end" dominant-baseline="middle">A</text><text x="11" y="110" text-anchor="end" dominant-baseline="middle">B</text><text x="132" y="48" text-anchor="start" dominant-baseline="middle">G1</text><text x="222" y="8" text-anchor="start" dominant-baseline="middle">G2</text><text x="222" y="112" text-anchor="start" dominant-baseline="middle">G3</text><path class="w" d="M310,60 L325,60"/><text x="329" y="60" text-anchor="start" dominant-baseline="middle">A⊕B</text></svg>
+    <figcaption><b>XOR</b> · 4 gates<br>hint:use distributive law, sum-to-product rule for . operation <br><b>x + yz = (x + y)(x + z)</b><br> ,G1 = (AB)', G2 = (A·G1)' = A' + B, G3 = (B·G1)' = A + B', G4 = (G2·G3)' = AB' + A'B</figcaption>
+  </figure>
+  <figure>
+    <svg class="circ" viewBox="0 0 490 125" width="490"><path class="w" d="M15,10 L160,10"/><circle class="dot" cx="40" cy="10" r="3"/><path class="w" d="M40,10 L40,50 L70,50"/><path class="w" d="M15,110 L160,110"/><circle class="dot" cx="50" cy="110" r="3"/><path class="w" d="M50,110 L50,70 L70,70"/><g transform="translate(70,40)"><path d="M5,2 H30 A18,18 0 0 1 30,38 H5 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="5.0" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="5.0" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><path class="w" d="M130,60 L145,60"/><circle class="dot" cx="145" cy="60" r="3"/><path class="w" d="M145,60 L145,30 L160,30"/><path class="w" d="M145,60 L145,90 L160,90"/><g transform="translate(160,0)"><path d="M5,2 H30 A18,18 0 0 1 30,38 H5 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="5.0" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="5.0" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><g transform="translate(160,80)"><path d="M5,2 H30 A18,18 0 0 1 30,38 H5 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="5.0" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="5.0" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><path class="w" d="M220,20 L235,20 L235,50 L250,50"/><path class="w" d="M220,100 L235,100 L235,70 L250,70"/><g transform="translate(250,40)"><path d="M5,2 H30 A18,18 0 0 1 30,38 H5 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="5.0" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="5.0" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><text x="11" y="10" text-anchor="end" dominant-baseline="middle">A</text><text x="11" y="110" text-anchor="end" dominant-baseline="middle">B</text><text x="132" y="48" text-anchor="start" dominant-baseline="middle">G1</text><text x="222" y="8" text-anchor="start" dominant-baseline="middle">G2</text><text x="222" y="112" text-anchor="start" dominant-baseline="middle">G3</text><path class="w" d="M310,60 L348,60"/><text x="313" y="48" text-anchor="start" dominant-baseline="middle">A⊕B</text><g transform="translate(360,40)"><path d="M5,2 H30 A18,18 0 0 1 30,38 H5 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="5.0" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="5.0" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><path class="w" d="M348,50 L348,70"/><path class="w" d="M348,50 L360,50"/><path class="w" d="M348,70 L360,70"/><circle class="dot" cx="348" cy="60" r="3"/><path class="w" d="M420,60 L433,60"/><text x="437" y="60" text-anchor="start" dominant-baseline="middle">(A⊕B)'</text></svg>
+    <figcaption><b>XNOR</b> · 5 gates<br>XOR circuit + inverter: (A ⊕ B)' = AB + A'B'</figcaption>
+  </figure>
+</div>
+
+<h4>NOR-only implementations</h4>
+<div class="grid2">
+  <figure>
+    <svg class="circ" viewBox="0 0 150 60" width="150"><path class="w" d="M15,30 L28,30"/><g transform="translate(40,10)"><path d="M3,2 Q16,20 3,38 Q30,38 48,20 Q30,2 3,2 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="7.5" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="7.5" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><path class="w" d="M28,20 L28,40"/><path class="w" d="M28,20 L40,20"/><path class="w" d="M28,40 L40,40"/><circle class="dot" cx="28" cy="30" r="3"/><path class="w" d="M100,30 L115,30"/><text x="11" y="30" text-anchor="end" dominant-baseline="middle">A</text><text x="119" y="30" text-anchor="start" dominant-baseline="middle">A'</text></svg>
+    <figcaption><b>NOT</b> · 1 gate<br>(A + A)' = A'</figcaption>
+  </figure>
+  <figure>
+    <svg class="circ" viewBox="0 0 225 60" width="225"><path class="w" d="M15,30 L28,30"/><g transform="translate(40,10)"><path d="M3,2 Q16,20 3,38 Q30,38 48,20 Q30,2 3,2 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="7.5" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="7.5" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><path class="w" d="M28,20 L28,40"/><path class="w" d="M28,20 L40,20"/><path class="w" d="M28,40 L40,40"/><circle class="dot" cx="28" cy="30" r="3"/><path class="w" d="M100,30 L113,30"/><text x="102" y="18" text-anchor="start" dominant-baseline="middle">A'</text><g transform="translate(125,10)"><path d="M3,2 Q16,20 3,38 Q30,38 48,20 Q30,2 3,2 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="7.5" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="7.5" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><path class="w" d="M113,20 L113,40"/><path class="w" d="M113,20 L125,20"/><path class="w" d="M113,40 L125,40"/><circle class="dot" cx="113" cy="30" r="3"/><path class="w" d="M185,30 L198,30"/><text x="11" y="30" text-anchor="end" dominant-baseline="middle">A</text><text x="202" y="30" text-anchor="start" dominant-baseline="middle">A</text></svg>
+    <figcaption><b>Buffer</b> · 2 gates<br>((A + A)')' = A</figcaption>
+  </figure>
+  <figure>
+    <svg class="circ" viewBox="0 0 275 60" width="275"><path class="w" d="M15,20 L30,20"/><path class="w" d="M15,40 L30,40"/><g transform="translate(30,10)"><path d="M3,2 Q16,20 3,38 Q30,38 48,20 Q30,2 3,2 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="7.5" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="7.5" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><path class="w" d="M90,30 L138,30"/><text x="94" y="18" text-anchor="start" dominant-baseline="middle">(A+B)'</text><g transform="translate(150,10)"><path d="M3,2 Q16,20 3,38 Q30,38 48,20 Q30,2 3,2 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="7.5" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="7.5" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><path class="w" d="M138,20 L138,40"/><path class="w" d="M138,20 L150,20"/><path class="w" d="M138,40 L150,40"/><circle class="dot" cx="138" cy="30" r="3"/><path class="w" d="M210,30 L223,30"/><text x="11" y="20" text-anchor="end" dominant-baseline="middle">A</text><text x="11" y="40" text-anchor="end" dominant-baseline="middle">B</text><text x="227" y="30" text-anchor="start" dominant-baseline="middle">A+B</text></svg>
+    <figcaption><b>OR</b> · 2 gates<br>((A + B)')' = A + B</figcaption>
+  </figure>
+  <figure>
+    <svg class="circ" viewBox="0 0 275 115" width="275"><path class="w" d="M14,20 L28,20"/><g transform="translate(40,0)"><path d="M3,2 Q16,20 3,38 Q30,38 48,20 Q30,2 3,2 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="7.5" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="7.5" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><path class="w" d="M28,10 L28,30"/><path class="w" d="M28,10 L40,10"/><path class="w" d="M28,30 L40,30"/><circle class="dot" cx="28" cy="20" r="3"/><path class="w" d="M14,90 L28,90"/><g transform="translate(40,70)"><path d="M3,2 Q16,20 3,38 Q30,38 48,20 Q30,2 3,2 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="7.5" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="7.5" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><path class="w" d="M28,80 L28,100"/><path class="w" d="M28,80 L40,80"/><path class="w" d="M28,100 L40,100"/><circle class="dot" cx="28" cy="90" r="3"/><path class="w" d="M100,20 L125,20 L125,45 L150,45"/><path class="w" d="M100,90 L125,90 L125,65 L150,65"/><g transform="translate(150,35)"><path d="M3,2 Q16,20 3,38 Q30,38 48,20 Q30,2 3,2 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="7.5" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="7.5" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><text x="10" y="20" text-anchor="end" dominant-baseline="middle">A</text><text x="10" y="90" text-anchor="end" dominant-baseline="middle">B</text><text x="104" y="12" text-anchor="start" dominant-baseline="middle">A'</text><text x="104" y="100" text-anchor="start" dominant-baseline="middle">B'</text><path class="w" d="M210,55 L225,55"/><text x="229" y="55" text-anchor="start" dominant-baseline="middle">AB</text></svg>
+    <figcaption><b>AND</b> · 3 gates<br>(A' + B')' = AB (DeMorgan)</figcaption>
+  </figure>
+  <figure>
+    <svg class="circ" viewBox="0 0 165 60" width="165"><path class="w" d="M15,20 L30,20"/><path class="w" d="M15,40 L30,40"/><g transform="translate(30,10)"><path d="M3,2 Q16,20 3,38 Q30,38 48,20 Q30,2 3,2 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="7.5" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="7.5" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><path class="w" d="M90,30 L105,30"/><text x="11" y="20" text-anchor="end" dominant-baseline="middle">A</text><text x="11" y="40" text-anchor="end" dominant-baseline="middle">B</text><text x="109" y="30" text-anchor="start" dominant-baseline="middle">(A+B)'</text></svg>
+    <figcaption><b>NOR</b> · 1 gate<br>native gate: (A + B)'</figcaption>
+  </figure>
+  <figure>
+    <svg class="circ" viewBox="0 0 385 115" width="385"><path class="w" d="M14,20 L28,20"/><g transform="translate(40,0)"><path d="M3,2 Q16,20 3,38 Q30,38 48,20 Q30,2 3,2 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="7.5" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="7.5" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><path class="w" d="M28,10 L28,30"/><path class="w" d="M28,10 L40,10"/><path class="w" d="M28,30 L40,30"/><circle class="dot" cx="28" cy="20" r="3"/><path class="w" d="M14,90 L28,90"/><g transform="translate(40,70)"><path d="M3,2 Q16,20 3,38 Q30,38 48,20 Q30,2 3,2 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="7.5" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="7.5" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><path class="w" d="M28,80 L28,100"/><path class="w" d="M28,80 L40,80"/><path class="w" d="M28,100 L40,100"/><circle class="dot" cx="28" cy="90" r="3"/><path class="w" d="M100,20 L125,20 L125,45 L150,45"/><path class="w" d="M100,90 L125,90 L125,65 L150,65"/><g transform="translate(150,35)"><path d="M3,2 Q16,20 3,38 Q30,38 48,20 Q30,2 3,2 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="7.5" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="7.5" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><text x="10" y="20" text-anchor="end" dominant-baseline="middle">A</text><text x="10" y="90" text-anchor="end" dominant-baseline="middle">B</text><text x="104" y="12" text-anchor="start" dominant-baseline="middle">A'</text><text x="104" y="100" text-anchor="start" dominant-baseline="middle">B'</text><path class="w" d="M210,55 L243,55"/><text x="213" y="43" text-anchor="start" dominant-baseline="middle">AB</text><g transform="translate(255,35)"><path d="M3,2 Q16,20 3,38 Q30,38 48,20 Q30,2 3,2 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="7.5" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="7.5" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><path class="w" d="M243,45 L243,65"/><path class="w" d="M243,45 L255,45"/><path class="w" d="M243,65 L255,65"/><circle class="dot" cx="243" cy="55" r="3"/><path class="w" d="M315,55 L328,55"/><text x="332" y="55" text-anchor="start" dominant-baseline="middle">(AB)'</text></svg>
+    <figcaption><b>NAND</b> · 4 gates<br>AND circuit + inverter: ((A' + B')')' = (AB)'</figcaption>
+  </figure>
+  <figure>
+    <svg class="circ" viewBox="0 0 385 125" width="385"><path class="w" d="M15,10 L160,10"/><circle class="dot" cx="40" cy="10" r="3"/><path class="w" d="M40,10 L40,50 L70,50"/><path class="w" d="M15,110 L160,110"/><circle class="dot" cx="50" cy="110" r="3"/><path class="w" d="M50,110 L50,70 L70,70"/><g transform="translate(70,40)"><path d="M3,2 Q16,20 3,38 Q30,38 48,20 Q30,2 3,2 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="7.5" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="7.5" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><path class="w" d="M130,60 L145,60"/><circle class="dot" cx="145" cy="60" r="3"/><path class="w" d="M145,60 L145,30 L160,30"/><path class="w" d="M145,60 L145,90 L160,90"/><g transform="translate(160,0)"><path d="M3,2 Q16,20 3,38 Q30,38 48,20 Q30,2 3,2 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="7.5" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="7.5" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><g transform="translate(160,80)"><path d="M3,2 Q16,20 3,38 Q30,38 48,20 Q30,2 3,2 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="7.5" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="7.5" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><path class="w" d="M220,20 L235,20 L235,50 L250,50"/><path class="w" d="M220,100 L235,100 L235,70 L250,70"/><g transform="translate(250,40)"><path d="M3,2 Q16,20 3,38 Q30,38 48,20 Q30,2 3,2 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="7.5" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="7.5" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><text x="11" y="10" text-anchor="end" dominant-baseline="middle">A</text><text x="11" y="110" text-anchor="end" dominant-baseline="middle">B</text><text x="132" y="48" text-anchor="start" dominant-baseline="middle">G1</text><text x="222" y="8" text-anchor="start" dominant-baseline="middle">G2</text><text x="222" y="112" text-anchor="start" dominant-baseline="middle">G3</text><path class="w" d="M310,60 L325,60"/><text x="329" y="60" text-anchor="start" dominant-baseline="middle">A⊙B</text></svg>
+    <figcaption><b>XNOR</b> · 4 gates<br>G1 = (A + B)', G2 = (A + G1)' = A'B, G3 = (B + G1)' = AB', G4 = (G2 + G3)' = AB + A'B'</figcaption>
+  </figure>
+  <figure>
+    <svg class="circ" viewBox="0 0 490 125" width="490"><path class="w" d="M15,10 L160,10"/><circle class="dot" cx="40" cy="10" r="3"/><path class="w" d="M40,10 L40,50 L70,50"/><path class="w" d="M15,110 L160,110"/><circle class="dot" cx="50" cy="110" r="3"/><path class="w" d="M50,110 L50,70 L70,70"/><g transform="translate(70,40)"><path d="M3,2 Q16,20 3,38 Q30,38 48,20 Q30,2 3,2 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="7.5" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="7.5" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><path class="w" d="M130,60 L145,60"/><circle class="dot" cx="145" cy="60" r="3"/><path class="w" d="M145,60 L145,30 L160,30"/><path class="w" d="M145,60 L145,90 L160,90"/><g transform="translate(160,0)"><path d="M3,2 Q16,20 3,38 Q30,38 48,20 Q30,2 3,2 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="7.5" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="7.5" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><g transform="translate(160,80)"><path d="M3,2 Q16,20 3,38 Q30,38 48,20 Q30,2 3,2 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="7.5" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="7.5" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><path class="w" d="M220,20 L235,20 L235,50 L250,50"/><path class="w" d="M220,100 L235,100 L235,70 L250,70"/><g transform="translate(250,40)"><path d="M3,2 Q16,20 3,38 Q30,38 48,20 Q30,2 3,2 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="7.5" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="7.5" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><text x="11" y="10" text-anchor="end" dominant-baseline="middle">A</text><text x="11" y="110" text-anchor="end" dominant-baseline="middle">B</text><text x="132" y="48" text-anchor="start" dominant-baseline="middle">G1</text><text x="222" y="8" text-anchor="start" dominant-baseline="middle">G2</text><text x="222" y="112" text-anchor="start" dominant-baseline="middle">G3</text><path class="w" d="M310,60 L348,60"/><text x="313" y="48" text-anchor="start" dominant-baseline="middle">A⊙B</text><g transform="translate(360,40)"><path d="M3,2 Q16,20 3,38 Q30,38 48,20 Q30,2 3,2 Z" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><circle cx="51" cy="20" r="3" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"/><line x1="54" y1="20" x2="60" y2="20" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="10" x2="7.5" y2="10" style="stroke:currentColor;stroke-width:1.6;fill:none"/><line x1="0" y1="30" x2="7.5" y2="30" style="stroke:currentColor;stroke-width:1.6;fill:none"/></g><path class="w" d="M348,50 L348,70"/><path class="w" d="M348,50 L360,50"/><path class="w" d="M348,70 L360,70"/><circle class="dot" cx="348" cy="60" r="3"/><path class="w" d="M420,60 L433,60"/><text x="437" y="60" text-anchor="start" dominant-baseline="middle">A⊕B</text></svg>
+    <figcaption><b>XOR</b> · 5 gates<br>XNOR circuit + inverter: (A ⊙ B)' = AB' + A'B</figcaption>
+  </figure>
+</div>
+
+<div class="tblwrap"><table>
+<tr><th>Gate</th><th>NAND gates needed</th><th>NOR gates needed</th></tr>
+<tr><td>NOT</td><td>1</td><td>1</td></tr>
+<tr><td>Buffer</td><td>2</td><td>2</td></tr>
+<tr><td>AND</td><td>2</td><td>3</td></tr>
+<tr><td>OR</td><td>3</td><td>2</td></tr>
+<tr><td>NAND</td><td>1</td><td>4</td></tr>
+<tr><td>NOR</td><td>4</td><td>1</td></tr>
+<tr><td>XOR</td><td>4</td><td>5</td></tr>
+<tr><td>XNOR</td><td>5</td><td>4</td></tr>
+</table></div>
+
+<!-- ===== end universal gates ===== -->
+
+
+<div class="tip"><b>Tip</b>Ask: "Which theorem makes the OR-from-NAND circuit work?" (DeMorgan: (A'B')' = A + B.) Then ask students to build the AND-from-NOR circuit themselves before showing it.</div>
+
+<h3>Extending gates to multiple inputs</h3>
+<p>A gate extends to more inputs if its operation is <b>commutative</b> and <b>associative</b>. AND and OR have both: <span class="ex">(x + y) + z = x + (y + z) = x + y + z</span>.</p>
+<div class="content-section">
+  <h3>Why Does This Let Us "Extend" Gates?</h3>
+  <p>
+    Because AND and OR are both associative and commutative, we can drop the parentheses entirely and write a multi-input expression simply as: 
+    <br><code>x + y + z</code> or <code>x.y.z</code>
+  </p>
+  <p>In hardware design, this means:</p>
+  <ul>
+    <li>we can physically build a 3-input OR gate or an 8-input AND gate.</li>
+    <li>we don't need to worry about chaining multiple 2-input gates in a <b>specific sequence or hierarchy </b>just to<b> combine several signals</b>. Any combination or wiring order will yield the correct logical result.</li>
+  </ul>
+</div>
+<p><b>Different Case:  NAND and NOR are commutative but not associative:</b></p>
+<div class="eqblock"><p>hint: F₈ = (x + y)' &emsp; x &darr; y &emsp; NOR i.e. Not-OR</p><br>(x ↓ y) ↓ z = [(x + y)' + z]' = (x + y)z' = xz' + yz'<br>x ↓ (y ↓ z) = [x + (y + z)']' = x'(y + z) = x'y + x'z</div>
+<p>With x = 1, y = 0, z = 0 the first gives 1 and the second gives 0. So multi-input NAND/NOR are <b>defined</b> as complemented AND/OR:</p>
+<div class="eqblock">x ↓ y ↓ z = (x + y + z)'&nbsp;&nbsp;&nbsp;&nbsp;x ↑ y ↑ z = (xyz)'</div>
+<div class="grid2">
+  <figure><!-- FIXED: this figure was blank (JS crashed before drawing it) - verify it renders --><svg class="circ" id="c-nor3" viewBox="0 0 160 50" width="160"></svg><figcaption>Three-input NOR: (x + y + z)'</figcaption></figure>
+  <figure><!-- FIXED: this figure was blank (JS crashed before drawing it) - verify it renders --><svg class="circ" id="c-nand3" viewBox="0 0 160 50" width="160"></svg><figcaption>Three-input NAND: (xyz)'</figcaption></figure>
+</div>
+<p><b>Cascaded NAND gates</b> need careful parentheses:</p>
+<figure><!-- FIXED: this figure was blank (JS crashed before drawing it) - verify it renders --><svg class="circ" id="c-casc" viewBox="0 0 280 110" width="280"></svg><figcaption>F = [(ABC)' · (DE)']' = ABC + DE (by DeMorgan): a sum of products built only with NANDs</figcaption></figure>
+<p><b>XOR and XNOR</b> are commutative and associative, so they extend too. A multi-input XOR is an <b>odd function</b>: output is 1 when an odd number of inputs are 1. In practice it is built by cascading 2-input gates.</p>
+<div class="grid2">
+  <figure><!-- FIXED: this figure was blank (JS crashed before drawing it) - verify it renders --><svg class="circ" id="c-xor3" viewBox="0 0 230 80" width="230"></svg><figcaption>x ⊕ y ⊕ z from two 2-input XORs</figcaption></figure>
+  <!-- FIXED: was empty (same JS crash) - verify it renders --><div class="tblwrap" id="tt-xor3"></div>
+</div>
+
+<!-- ============ OPTIONAL ============ -->
+<section class="optional" id="o1">
+  <h2 class="sec">O1 · Canonical forms: minterms and maxterms <span class="chip opt">Optional · Unit 3 preview</span></h2>
+  <p class="lead">SOP/POS is formally in Unit 3 (3.2). Use this as a bridge so Unit 3 starts smoothly.</p>
+
+  <h3>1. The Core Concept: What Makes a Form "Canonical"?</h3>
+  <p>In digital logic, expressions can be written in many ways, but canonical forms provide a strict, standardized blueprint:</p>
+  <ul>
+    <li><b>Canonical Form:</b> Every single variable (<var>n</var> variables) must appear in every term—either in its normal or complemented form.</li>
+    <li><b>Standard Form:</b> Terms can be shortened and contain fewer literals (e.g., <span class="ex">xy + x'z</span>), which is what we ultimately simplify.</li>
+  </ul>
+
+  <h3>2. Minterms vs. Maxterms</h3>
+  <p>For <var>n</var> variables, there are <span class="ex">2<sup>n</sup></span> possible input combinations. Each combination maps to a unique minterm and maxterm.</p>
+  <ul>
+    <li><b>Minterm (Standard Product - <span class="ex">Σ</span>):</b> An AND product of all <var>n</var> variables. A variable is primed (<span class="ex">'</span>) if its bit is 0, and unprimed if 1. Evaluates to 1 for only one specific row (e.g., <span class="ex">m<sub>3</sub> = A'BC</span> for <var>A=0, B=1, C=1</var>).</li>
+    <li><b>Maxterm (Standard Sum - <span class="ex">Π</span>):</b> An OR sum of all <var>n</var> variables. A variable is primed (<span class="ex">'</span>) if its bit is 1, and unprimed if 0. Evaluates to 0 for only one specific row (e.g., <span class="ex">M<sub>3</sub> = A + B' + C'</span>).</li>
+  </ul>
+  <p><b>Key Identity:</b> A minterm and its corresponding maxterm are exact complements of each other: <span class="ex">m<sub>j</sub>' = M<sub>j</sub></span>.</p>
+
+  <h3>3. Where Do the Index Numbers Come From? (<span class="ex">Σ</span> and <span class="ex">Π</span>)</h3>
+  <p>The numbers inside the shorthand notation (such as <span class="ex">1, 3, 6, 7</span>) are the <b>decimal equivalents of the truth table's binary row indices</b>. Each input combination maps to a specific row number:</p>
+
+  <div class="tblwrap" id="t-mm">
+    <table>
+      <thead>
+        <tr><th>Index (<var>j</var>)</th><th>Binary (<var>ABC</var>)</th><th>Minterm (<var>m<sub>j</sub></var>)</th><th>Maxterm (<var>M<sub>j</sub></var>)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>0</td><td>0 0 0</td><td><span class="ex">A'B'C'</span></td><td><span class="ex">A + B + C</span></td></tr>
+        <tr><td>1</td><td>0 0 1</td><td><span class="ex">A'B'C</span></td><td><span class="ex">A + B + C'</span></td></tr>
+        <tr><td><i>...</i></td><td><i>...</i></td><td><i>...</i></td><td><i>...</i></td></tr>
+        <tr><td>7</td><td>1 1 1</td><td><span class="ex">ABC</span></td><td><span class="ex">A' + B' + C'</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <ul>
+    <li><b>Sum of Minterms (<span class="ex">Σ</span>):</b> OR the minterms where <span class="ex">F = 1</span>. Compact notation: <span class="ex">F = Σ(1, 3, 6, 7)</span> means <span class="ex">m<sub>1</sub> + m<sub>3</sub> + m<sub>6</sub> + m<sub>7</sub></span>.</li>
+    <li><b>Product of Maxterms (<span class="ex">Π</span>):</b> AND the maxterms where <span class="ex">F = 0</span>. Compact notation: <span class="ex">F = Π(0, 2, 4, 5)</span> means <span class="ex">M<sub>0</sub> · M<sub>2</sub> · M<sub>4</sub> · M<sub>5</sub></span>.</li>
+  </ul>
+
+  <h3>4. Step-by-Step Example: Expanding to Sum of Minterms</h3>
+  <p>Expanding <span class="ex">F = A + B'C</span> for 3 variables (<var>A, B, C</var>):</p>
+  <div class="proof">
+    <span>A</span><span>= A(B + B')(C + C') = ABC + ABC' + AB'C + AB'C'</span><span></span>
+    <span>B'C</span><span>= B'C(A + A') = AB'C + A'B'C</span><span></span>
+    <span>F</span><span>= A'B'C + AB'C' + AB'C + ABC' + ABC = Σ(1, 4, 5, 6, 7)</span><span class="why">x + x = x removes the duplicate</span>
+  </div>
+
+  <h3>5. Quick Conversion Trick</h3>
+  <p>If you have the minterm list, finding the maxterm list is instant: just list the missing index numbers from <span class="ex">0</span> to <span class="ex">2<sup>n</sup> − 1</span>.</p>
+  <p><i>Example:</i> If 3 variables and <span class="ex">F = Σ(1, 4, 5, 6, 7)</span>, the missing indices are <span class="ex">0, 2, 3</span>. Therefore, the Product of Maxterms is <span class="ex">F = Π(0, 2, 3)</span>.</p>
+
+  <p>The two canonical forms usually have many literals. <b>Standard forms</b> (sum of products such as <span class="ex">y' + xy + x'yz'</span>, product of sums such as <span class="ex">x(y' + z)(x' + y + z' + w)</span>) allow terms with fewer literals. Simplifying them is the subject of Unit 3.</p>
+</section>
+<section class="optional" id="o2">
+<h2 class="sec">O2 · Integrated circuits and digital logic families <span class="chip opt">Optional</span></h2>
+<p>An <b>integrated circuit (IC)</b> is a silicon chip containing the gates, packaged in plastic or ceramic with 14 to 64+ pins.</p>
+<h4>Levels of integration</h4>
+<div class="tblwrap"><table class="left">
+<tr><th>Level</th><th>Gates per package</th><th>Examples</th></tr>
+<tr><td>SSI (small-scale)</td><td>fewer than 10</td><td>7400 quad NAND, 7404 hex inverter</td></tr>
+<tr><td>MSI (medium-scale)</td><td>about 10–100</td><td>Decoders, adders, multiplexers (Unit 5)</td></tr>
+<tr><td>LSI (large-scale)</td><td>100 to a few thousand</td><td>Processors, memory chips, programmable logic</td></tr>
+<tr><td>VLSI (very large-scale)</td><td>thousands and more</td><td>Large memories, microcomputer chips</td></tr>
+</table></div>
+<h4>Logic families</h4>
+<div class="tblwrap"><table class="left">
+<tr><th>Family</th><th>Key feature</th></tr>
+<tr><td>TTL (transistor-transistor logic)</td><td>Long-standing standard; evolved from DTL; basic gate is NAND; 5 V supply; 74xx series</td></tr>
+<tr><td>ECL (emitter-coupled logic)</td><td>Fastest (transistors not saturated, 1–2 ns delay); used in supercomputers, signal processors; 10000 series</td></tr>
+<tr><td>MOS (metal-oxide semiconductor)</td><td>Unipolar (one carrier type: NMOS or PMOS); very high packing density</td></tr>
+<tr><td>CMOS (complementary MOS)</td><td>PMOS + NMOS pairs; very low power; dominates modern ICs; 4000 and 74HC/74HCT series</td></tr>
+</table></div>
+<div class="tblwrap"><table class="left">
+<tr><th>TTL series</th><th>Prefix</th><th>Example</th></tr>
+<tr><td>Standard</td><td>74</td><td>7486</td></tr>
+<tr><td>High-speed</td><td>74H</td><td>74H86</td></tr>
+<tr><td>Low-power</td><td>74L</td><td>74L86</td></tr>
+<tr><td>Schottky</td><td>74S</td><td>74S86</td></tr>
+<tr><td>Low-power Schottky</td><td>74LS</td><td>74LS86</td></tr>
+<tr><td>Advanced Schottky / Advanced low-power Schottky</td><td>74AS / 74ALS</td><td>74AS86 / 74ALS86</td></tr>
+</table></div>
+<p style="font-size:14px;color:var(--ink-2)">Same number = same logic and pinout (all "86" parts are quad 2-input XOR); the prefix changes only electrical characteristics. 74HCT CMOS parts are pin- and electrically compatible with TTL.</p>
+</section>
+
+<section class="optional" id="o3">
+<h2 class="sec">O3 · Characteristics of logic families <span class="chip opt">Optional</span></h2>
+<div class="grid2">
+  <div class="card"><b>Fan-in</b><br>Number of inputs to a gate. Often limited to 4–5 in fast technologies; larger gates are built from smaller ones (e.g. 7-input NAND from two 4-input NANDs and an inverter).</div>
+  <div class="card"><b>Fan-out</b><br>Number of standard loads a gate output can drive without degrading. A gate driving six inverters of 1.0 load each has fan-out 6.</div>
+  <div class="card"><b>Propagation delay</b><br>Time for a change at the input to reach the output, in ns. t<sub>PHL</sub> and t<sub>PLH</sub> are measured at the 50% point of the output. Often quoted as the average (t<sub>PHL</sub> + t<sub>PLH</sub>)/2; some texts use max(t<sub>PHL</sub>, t<sub>PLH</sub>).</div>
+  <div class="card"><b>Power dissipation</b><br>P<sub>D</sub> = V<sub>CC</sub> × I<sub>CC</sub>(avg), with I<sub>CC</sub>(avg) = (I<sub>CCH</sub> + I<sub>CCL</sub>)/2.</div>
+  <div class="card"><b>Noise margin</b><br>Largest noise voltage that does not change the output. NM<sub>H</sub> = V<sub>OH</sub> − V<sub>IH</sub>, NM<sub>L</sub> = V<sub>IL</sub> − V<sub>OL</sub>.</div>
+</div>
+<h4>Worked examples</h4>
+<div class="proof">
+<span>Power</span><span>TTL NAND: V<sub>CC</sub> = 5 V, I<sub>CCH</sub> = 1 mA, I<sub>CCL</sub> = 3 mA → I<sub>CC</sub>(avg) = 2 mA → P<sub>D</sub> = 10 mW per gate; a 4-gate IC dissipates 40 mW</span><span></span>
+<span>Noise</span><span>Standard TTL: V<sub>OH</sub> = 2.4, V<sub>OL</sub> = 0.4, V<sub>IH</sub> = 2.0, V<sub>IL</sub> = 0.8 V → NM<sub>H</sub> = 0.4 V, NM<sub>L</sub> = 0.4 V</span><span></span>
+<span>Fan-out</span><span>NAND fan-out 5, buffer fan-out 10: the NAND drives 5 buffers, each buffer drives 10 inputs → 50 NAND inputs served</span><span></span>
+</div>
+</section>
+
+<section class="optional" id="o4">
+<h2 class="sec">O4 · Positive and negative logic <span class="chip opt">Optional</span></h2>
+<p>A signal has a high level H and a low level L. <b>Positive logic:</b> H = 1, L = 0. <b>Negative logic:</b> L = 1, H = 0. The names refer to the assignment, not to the sign of the voltages.</p>
+<div class="grid2">
+  <div class="tblwrap"><table class="tt"><tr><th>x</th><th>y</th><th>z</th></tr><tr><td>L</td><td>L</td><td>L</td></tr><tr><td>L</td><td>H</td><td>L</td></tr><tr><td>H</td><td>L</td><td>L</td></tr><tr><td>H</td><td>H</td><td>H</td></tr></table><p style="font-size:13px;color:var(--ink-2)">Physical behaviour from the data sheet</p></div>
+  <div class="card"><b>Positive logic</b> reading (H = 1): output is 1 only when both inputs are 1 → <b>AND</b> gate.<br><br><b>Negative logic</b> reading (L = 1): output is 1 when either input is 1 → <b>OR</b> gate.</div>
+</div>
+<p>Changing polarity swaps all 0s and 1s at inputs and output, which gives the <b>dual</b> function: AND ↔ OR, NAND ↔ NOR. Negative-logic inputs/outputs are marked with a small triangle (polarity indicator). We assume positive logic throughout the course.</p>
+</section>
+
+<!-- ============ LAB ============ -->
+<h2 class="sec" id="lab">Lab connection: Lab 1 (logic gates) & Lab 2 (DeMorgan)</h2>
+<div class="tblwrap"><table class="left">
+<tr><th>IC</th><th>Function</th><th>Notes</th></tr>
+<tr><td>7408</td><td>Quad 2-input AND</td><td rowspan="6">14-pin DIP, V<sub>CC</sub> = pin 14 (+5 V), GND = pin 7. Pin 1 is left of the notch, numbered anticlockwise when viewed from the top. The 7402 has a different pin layout (outputs on pins 1, 4, 10, 13): check its data sheet.</td></tr>
+<tr><td>7432</td><td>Quad 2-input OR</td></tr>
+<tr><td>7404</td><td>Hex inverter</td></tr>
+<tr><td>7400</td><td>Quad 2-input NAND</td></tr>
+<tr><td>7402</td><td>Quad 2-input NOR</td></tr>
+<tr><td>7486</td><td>Quad 2-input XOR</td></tr>
+</table></div>
+<div class="card">
+<b>Lab 2 procedure (DeMorgan):</b>
+<ol>
+  <li>Build <span class="ex">(A + B)'</span> with a 7402 NOR, and <span class="ex">A'B'</span> with two 7404 inverters into a 7408 AND.</li>
+  <li>Apply all four input combinations using switches; record both outputs with LEDs.</li>
+  <li>Repeat for <span class="ex">(AB)'</span> (7400) vs <span class="ex">A' + B'</span> (7404 + 7432).</li>
+  <li>Conclude: outputs match in every row, which verifies both DeMorgan theorems.</li>
+</ol>
+</div>
+
+<!-- ============ TUTORIAL ============ -->
+<h2 class="sec" id="tut">Tutorial sheet</h2>
+<p class="lead">Problems 1–9 for Tutorial 1, 10–17 for Tutorial 2. Solutions are collapsed so the sheet can be used in class.</p>
+<ol class="probs">
+<li>Prove with a truth table: <span class="ex">(xyz)' = x' + y' + z'</span>.
+<details class="sol"><summary>Solution</summary>Both columns are 0 only in row xyz = 111 and 1 in the other seven rows, so the two sides are equal. (Use the checker above to display the table.)</details></li>
+<li>Simplify <span class="ex">x'y' + xy + x'y</span>.
+<details class="sol"><summary>Solution</summary><span class="ex">x'y' + x'y = x'(y' + y) = x'</span>; then <span class="ex">x' + xy = (x' + x)(x' + y) = x' + y</span>.</details></li>
+<li>Simplify <span class="ex">(x + y)(x + y')</span>.
+<details class="sol"><summary>Solution</summary><span class="ex">= x + yy' = x + 0 = x</span> (P4(b), P5(b)).</details></li>
+<li>Simplify <span class="ex">ABC + A'B + ABC'</span>.
+<details class="sol"><summary>Solution</summary><span class="ex">ABC + ABC' = AB(C + C') = AB</span>; <span class="ex">AB + A'B = B(A + A') = B</span>.</details></li>
+<li>Simplify <span class="ex">x'yz + xz</span>.
+<details class="sol"><summary>Solution</summary><span class="ex">= z(x'y + x) = z(x + y) = xz + yz</span> (using x + x'y = x + y).</details></li>
+<li>Simplify <span class="ex">xy + x(wz + wz')</span>.
+<details class="sol"><summary>Solution</summary><span class="ex">= xy + xw(z + z') = xy + xw = x(y + w)</span>.</details></li>
+<li>Reduce <span class="ex">A'C' + ABC + AC'</span> to three literals.
+<details class="sol"><summary>Solution</summary><span class="ex">A'C' + AC' = C'</span>; <span class="ex">C' + ABC = (C' + C)(C' + AB) = C' + AB</span>.</details></li>
+<li>Reduce <span class="ex">(x'y' + z)' + z + xy + wz</span> to three literals.
+<details class="sol"><summary>Solution</summary><span class="ex">(x'y' + z)' = (x + y)z' = xz' + yz'</span>. Then <span class="ex">xz' + z = x + z</span> and <span class="ex">yz' + z = y + z</span>, so F = x + y + z + xy + wz = <span class="ex">x + y + z</span> (absorption).</details></li>
+<li>Prove the consensus theorem <span class="ex">xy + x'z + yz = xy + x'z</span> algebraically.
+<details class="sol"><summary>Solution</summary><span class="ex">yz = yz(x + x') = xyz + x'yz</span>; <span class="ex">xy + xyz = xy</span> and <span class="ex">x'z + x'yz = x'z</span> by absorption.</details></li>
+<li>Find the complement of <span class="ex">F = x + yz</span>; then show <span class="ex">F·F' = 0</span> and <span class="ex">F + F' = 1</span>.
+<details class="sol"><summary>Solution</summary><span class="ex">F' = x'(yz)' = x'(y' + z')</span>.<br><span class="ex">F·F' = (x + yz)x'(y' + z') = x'yz(y' + z') = x'yy'z + x'yzz' = 0</span>.<br><span class="ex">F + F' = x + yz + x'(y' + z') = x + yz + y' + z' = x + yz + (yz)' = 1</span> (using x + x'a = x + a).</details></li>
+<li>Find the complement of <span class="ex">xy' + x'y</span>.
+<details class="sol"><summary>Solution</summary><span class="ex">(xy')'(x'y)' = (x' + y)(x + y') = x'y' + xy</span>: the complement of XOR is XNOR.</details></li>
+<li>Find the complement of <span class="ex">(AB' + C)D' + E</span>.
+<details class="sol"><summary>Solution</summary><span class="ex">F' = [(AB' + C)D']'E' = [(AB' + C)' + D]E' = [(A' + B)C' + D]E'</span>.</details></li>
+<li>Find the complement of <span class="ex">F₁ = x'yz' + x'y'z</span> by the dual method.
+<details class="sol"><summary>Solution</summary>Dual: <span class="ex">(x' + y + z')(x' + y' + z)</span>; complement each literal: <span class="ex">F₁' = (x + y' + z)(x + y + z')</span>.</details></li>
+<li>Using DeMorgan, rewrite <span class="ex">F = x'y' + x'z + y'z</span> with only OR and NOT operations.
+<details class="sol"><summary>Solution</summary><span class="ex">x'y' = (x + y)'</span>, <span class="ex">x'z = (x + z')'</span>, <span class="ex">y'z = (y + z')'</span>, so <span class="ex">F = (x + y)' + (x + z')' + (y + z')'</span>: only OR gates and inverters needed.</details></li>
+<li>Show that <span class="ex">F = AB + CD</span> can be implemented with NAND gates only.
+<details class="sol"><summary>Solution</summary><span class="ex">F = ((AB + CD)')' = ((AB)'(CD)')'</span>: two 2-input NANDs produce (AB)' and (CD)', and a third NAND combines them.</details></li>
+<li>Show that NOR is not associative.
+<details class="sol"><summary>Solution</summary><span class="ex">(x ↓ y) ↓ z = xz' + yz'</span>, <span class="ex">x ↓ (y ↓ z) = x'y + x'z</span>. At x = 1, y = z = 0: the first is 1, the second is 0.</details></li>
+<li>Write the truth table of <span class="ex">x ⊕ y ⊕ z</span> and state when it is 1.
+<details class="sol"><summary>Solution</summary>F = 1 for rows 001, 010, 100, 111 (minterms 1, 2, 4, 7): an odd number of 1s. See the table in 2.4.</details></li>
+</ol>
+<div class="optional" style="border:1px dashed var(--opt);border-radius:12px;padding:6px 16px;margin-top:20px">
+<h4 style="color:var(--opt)">Optional problems (O1–O4)</h4>
+<ol class="probs">
+<li>Express <span class="ex">F(A,B,C) = A + B'C</span> as a sum of minterms and a product of maxterms.
+<details class="sol"><summary>Solution</summary><span class="ex">Σ(1, 4, 5, 6, 7) = Π(0, 2, 3)</span>.</details></li>
+<li>Convert <span class="ex">F(x,y,z) = Σ(1, 3, 7)</span> to the other canonical form.
+<details class="sol"><summary>Solution</summary><span class="ex">Π(0, 2, 4, 5, 6)</span>.</details></li>
+<li>A 14-pin TTL package has 12 pins for inputs and outputs. How many of each gate fit: (a) 2-input XOR (b) 3-input AND (c) 4-input NAND (d) 5-input NOR (e) 8-input NAND?
+<details class="sol"><summary>Solution</summary>Pins per gate = inputs + 1. (a) 12/3 = 4 (b) 12/4 = 3 (c) 12/5 → 2 (d) 12/6 = 2 (e) 12/9 → 1.</details></li>
+<li>A gate has V<sub>OH</sub> = 4.4 V, V<sub>IH</sub> = 3.5 V, V<sub>IL</sub> = 1.5 V, V<sub>OL</sub> = 0.1 V. Find the noise margins.
+<details class="sol"><summary>Solution</summary>NM<sub>H</sub> = 4.4 − 3.5 = 0.9 V; NM<sub>L</sub> = 1.5 − 0.1 = 1.4 V.</details></li>
+<li>Show that a positive-logic NAND gate is a negative-logic NOR gate.
+<details class="sol"><summary>Solution</summary>Swapping polarity complements every input and output, which gives the dual function. The dual of NAND, (xy)', is (x + y)' = NOR.</details></li>
+</ol>
+</div>
+
+<!-- ============ QUIZ ============ -->
+<h2 class="sec" id="quiz">Quick quiz <span class="score noprint" id="score"></span></h2>
+<p class="lead noprint">Click an answer. Use it as a 10-minute recap at the end of Lecture 6.</p>
+<!-- FIXED: was empty (same JS crash) - verify it renders --><div class="quiz" id="quizBox"></div>
+
+<!-- ============ SUMMARY ============ -->
+<h2 class="sec" id="sheet">One-page summary</h2>
+<div class="card cheat">
+  <div><b>Postulates</b><br><span class="ex">x + 0 = x, x·1 = x</span><br><span class="ex">x + x' = 1, x·x' = 0</span><br><span class="ex">x(y + z) = xy + xz</span><br><span class="ex">x + yz = (x + y)(x + z)</span></div>
+  <div><b>Theorems</b><br><span class="ex">x + x = x, x·x = x</span><br><span class="ex">x + 1 = 1, x·0 = 0</span><br><span class="ex">(x')' = x</span><br><span class="ex">x + xy = x, x(x + y) = x</span><br><span class="ex">x + x'y = x + y</span></div>
+  <div><b>DeMorgan</b><br><span class="ex">(x + y)' = x'y'</span><br><span class="ex">(xy)' = x' + y'</span><br>Complement: swap +/·, complement every literal</div>
+  <div><b>Duality</b><br>Swap + ↔ · and 0 ↔ 1, keep literals unchanged</div>
+  <div><b>Precedence</b><br>( ) → NOT → AND → OR</div>
+  <div><b>Counts</b><br>n variables: 2<sup>n</sup> truth-table rows, 2<sup>2ⁿ</sup> functions (16 for n = 2)</div>
+  <div><b>Gates</b><br>AND, OR, NOT, buffer, NAND, NOR, XOR, XNOR<br>Universal: NAND, NOR<br>Not associative: NAND, NOR<br>Multi-input XOR = odd function</div>
+  <div><b>XOR</b><br><span class="ex">x ⊕ y = xy' + x'y</span><br><span class="ex">x ⊙ y = xy + x'y' = (x ⊕ y)'</span><br><span class="ex">x ⊕ 0 = x, x ⊕ 1 = x'</span></div>
+</div>
+<p style="font-size:13px;color:var(--ink-2);margin-top:30px">References: M. Morris Mano, <i>Digital Design</i>, Ch. 2; Floyd, <i>Digital Fundamentals</i></p>
+</main>
+</div>
+
+<script>
+(function(){
+const $=s=>document.querySelector(s);
+const NS="http://www.w3.org/2000/svg";
+
+/* ---------- gate symbol defs ---------- */
+const ST='style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.8"';
+const LN='style="stroke:currentColor;stroke-width:1.6;fill:none"';
+function orX(y){const t=(y-2)/36;return 3+26*t*(1-t);}
+function inYs(n){return n===1?[20]:n===2?[10,30]:[8,20,32];}
+function body(base){
+  if(base==='and')return `<path d="M5,2 H30 A18,18 0 0 1 30,38 H5 Z" ${ST}/>`;
+  if(base==='or')return `<path d="M3,2 Q16,20 3,38 Q30,38 48,20 Q30,2 3,2 Z" ${ST}/>`;
+  if(base==='xor')return `<path d="M9,2 Q22,20 9,38 Q34,38 50,20 Q34,2 9,2 Z" ${ST}/><path d="M3,2 Q16,20 3,38" ${LN}/>`;
+  if(base==='not')return `<path d="M8,6 L40,20 L8,34 Z" ${ST}/>`;
+  if(base==='buf')return `<path d="M8,6 L46,20 L8,34 Z" ${ST}/>`;
+}
+const BASE={and:'and',nand:'and',or:'or',nor:'or',xor:'xor',xnor:'xor',not:'not',buf:'buf'};
+const BUB={nand:51,nor:51,xnor:53,not:44};
+const OUTX={and:48,or:48,xor:50,not:40,buf:46};
+function sym(t,n){
+  const b=BASE[t];let s=body(b);
+  let ox=OUTX[b];
+  if(BUB[t]){const r=t==='not'?4:3;s+=`<circle cx="${BUB[t]}" cy="20" r="${r}" ${ST}/>`;ox=BUB[t]+r;}
+  s+=`<line x1="${ox}" y1="20" x2="60" y2="20" ${LN}/>`;
+  inYs(n).forEach(y=>{const ex=(b==='and')?5:(b==='not'||b==='buf')?8:orX(y);s+=`<line x1="0" y1="${y}" x2="${ex}" y2="${y}" ${LN}/>`;});
+  return `<symbol id="g-${t}${n}" viewBox="0 0 60 40">${s}</symbol>`;
+}
+let defs='';
+['and','nand','or','nor','xor','xnor'].forEach(t=>{defs+=sym(t,2)+sym(t,3);});
+defs+=sym('not',1)+sym('buf',1);
+$('#gdefs').innerHTML=defs;
+
+/* ---------- circuit composer ---------- */
+function circuit(el,spec){
+  if(typeof el==='string')el=document.getElementById(el.replace('#',''));
+  if(!el){console.warn('circuit(): target not found, skipped');return;} /* FIX: guard so a missing id can't crash the whole script */
+  let s='';
+  (spec.wires||[]).forEach(w=>{let d='M'+w[0]+','+w[1];for(let i=2;i<w.length;i+=2)d+=' L'+w[i]+','+w[i+1];s+=`<path class="w" d="${d}"/>`;});
+  (spec.gates||[]).forEach(g=>{s+=`<use href="#g-${g[0]}" x="${g[1]}" y="${g[2]}" width="60" height="40"/>`;});
+  (spec.dots||[]).forEach(d=>{s+=`<circle class="dot" cx="${d[0]}" cy="${d[1]}" r="3"/>`;});
+  (spec.labels||[]).forEach(l=>{s+=`<text x="${l[0]}" y="${l[1]}" text-anchor="${l[3]||'start'}" dominant-baseline="middle">${l[2]}</text>`;});
+  el.innerHTML=s;
+}
+
+/* FIX (image-loading bug): the 6 calls below targeted ids u-nand-not, u-nand-and, u-nand-or,
+   u-nor-not, u-nor-or, u-nor-and which no longer exist in the page (those figures are now static SVGs
+   in the "Universal gates" section). circuit() threw "Cannot set properties of null", which stopped
+   the rest of this script, so every diagram/table drawn after this point never rendered.
+   Disabled here; kept for reference.
+/* universal gates * /
+circuit('u-nand-not',{gates:[['nand2',50,10]],wires:[[14,30,35,30],[35,20,50,20],[35,40,50,40],[35,20,35,40],[110,30,128,30]],dots:[[35,30]],labels:[[10,30,'A','end'],[132,30,"A'"]]});
+circuit('u-nand-and',{gates:[['nand2',30,10],['nand2',125,10]],wires:[[14,20,30,20],[14,40,30,40],[90,30,110,30],[110,20,125,20],[110,40,125,40],[110,20,110,40],[185,30,200,30]],dots:[[110,30]],labels:[[10,20,'A','end'],[10,40,'B','end'],[92,20,"(AB)'"],[204,30,'AB']]});
+const orFrom=(g)=>({gates:[[g,40,0],[g,40,70],[g,150,35]],wires:[[14,20,28,20],[28,10,40,10],[28,30,40,30],[28,10,28,30],[14,90,28,90],[28,80,40,80],[28,100,40,100],[28,80,28,100],[100,20,125,20,125,45,150,45],[100,90,125,90,125,65,150,65],[210,55,225,55]],dots:[[28,20],[28,90]]});
+let s1=orFrom('nand2');s1.labels=[[10,20,'A','end'],[10,90,'B','end'],[104,12,"A'"],[104,100,"B'"],[228,55,'A+B']];circuit('u-nand-or',s1);
+circuit('u-nor-not',{gates:[['nor2',50,10]],wires:[[14,30,35,30],[35,20,50,20],[35,40,50,40],[35,20,35,40],[110,30,128,30]],dots:[[35,30]],labels:[[10,30,'A','end'],[132,30,"A'"]]});
+circuit('u-nor-or',{gates:[['nor2',30,10],['nor2',125,10]],wires:[[14,20,30,20],[14,40,30,40],[90,30,110,30],[110,20,125,20],[110,40,125,40],[110,20,110,40],[185,30,200,30]],dots:[[110,30]],labels:[[10,20,'A','end'],[10,40,'B','end'],[88,18,"(A+B)'"],[204,30,'A+B']]});
+let s2=orFrom('nor2');s2.labels=[[10,20,'A','end'],[10,90,'B','end'],[104,12,"A'"],[104,100,"B'"],[228,55,'AB']];circuit('u-nor-and',s2);
+
+*/
+/* 3-input */
+circuit('c-nor3',{gates:[['nor3',20,5]],wires:[[8,13,20,13],[8,25,20,25],[8,37,20,37],[80,25,90,25]],labels:[[5,13,'x','end'],[5,25,'y','end'],[5,37,'z','end'],[93,25,"(x+y+z)'"]]});
+circuit('c-nand3',{gates:[['nand3',20,5]],wires:[[8,13,20,13],[8,25,20,25],[8,37,20,37],[80,25,90,25]],labels:[[5,13,'x','end'],[5,25,'y','end'],[5,37,'z','end'],[93,25,"(xyz)'"]]});
+circuit('c-casc',{gates:[['nand3',30,5],['nand2',30,65],['nand2',140,35]],wires:[[16,13,30,13],[16,25,30,25],[16,37,30,37],[16,75,30,75],[16,95,30,95],[90,25,115,25,115,45,140,45],[90,85,115,85,115,65,140,65],[200,55,212,55]],labels:[[12,13,'A','end'],[12,25,'B','end'],[12,37,'C','end'],[12,75,'D','end'],[12,95,'E','end'],[92,16,"(ABC)'"],[92,96,"(DE)'"],[215,55,'F']]});
+circuit('c-xor3',{gates:[['xor2',30,0],['xor2',130,15]],wires:[[16,10,30,10],[16,30,30,30],[90,20,110,20,110,25,130,25],[16,65,110,65,110,45,130,45],[190,35,200,35]],labels:[[12,10,'x','end'],[12,30,'y','end'],[12,65,'z','end'],[203,35,'F']]});
+/* F2, F4 */
+circuit('c-f2',{gates:[['not1',20,40],['and2',100,45],['or2',180,25]],wires:[[8,60,20,60],[80,60,90,60,90,55,100,55],[8,95,90,95,90,75,100,75],[160,65,170,65,170,55,180,55],[8,15,170,15,170,35,180,35],[240,45,250,45]],labels:[[5,15,'x','end'],[5,60,'y','end'],[5,95,'z','end'],[252,45,'F₂']]});
+circuit('c-f4',{gates:[['not1',40,40],['and2',130,10],['not1',40,80],['and2',130,90],['or2',220,50]],wires:[[12,20,130,20],[12,60,40,60],[100,60,115,60,115,40,130,40],[25,20,25,100,40,100],[100,100,130,100],[12,140,115,140,115,120,130,120],[190,30,205,30,205,60,220,60],[190,110,205,110,205,80,220,80],[280,70,295,70]],dots:[[25,20]],labels:[[8,20,'x','end'],[8,60,'y','end'],[8,140,'z','end'],[192,22,"xy'"],[192,120,"x'z"],[298,70,'F₄']]});
+
+/* switches */
+function sw(x,y,closed){return `<circle class="dot" cx="${x}" cy="${y}" r="2.5"/><circle class="dot" cx="${x+30}" cy="${y}" r="2.5"/><path class="w" d="M${x},${y} L${x+28},${y-(closed?0:14)}"/>`;}
+$('#sw-series').innerHTML=`<path class="w" d="M30,30 H70 M100,30 H150 M180,30 H230 M230,30 V45 M230,75 V90 H30 V30"/>`+sw(70,30)+sw(150,30)+`<circle cx="230" cy="60" r="15" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.6"/><text x="230" y="61" text-anchor="middle" dominant-baseline="middle">L</text><text x="85" y="50" text-anchor="middle">A</text><text x="165" y="50" text-anchor="middle">B</text><circle cx="30" cy="60" r="12" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.6"/><text x="30" y="61" text-anchor="middle" dominant-baseline="middle">~</text>`;
+$('#sw-par').innerHTML=`<path class="w" d="M30,30 H90 M90,30 H110 M140,30 H160 M90,30 V75 H110 M140,75 H160 V30 M160,30 H230 V50 M230,80 V110 H30 V30"/>`+sw(110,30)+sw(110,75)+`<circle cx="230" cy="65" r="15" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.6"/><text x="230" y="66" text-anchor="middle" dominant-baseline="middle">L</text><text x="125" y="48" text-anchor="middle">A</text><text x="125" y="95" text-anchor="middle">B</text><circle cx="30" cy="70" r="12" style="fill:var(--gate-fill);stroke:currentColor;stroke-width:1.6"/><text x="30" y="71" text-anchor="middle" dominant-baseline="middle">~</text>`;
+
+/* venn */
+const vbase=(shade)=>`<rect x="5" y="5" width="250" height="140" rx="6" style="fill:none;stroke:currentColor;stroke-width:1.4"/>${shade||''}<circle cx="100" cy="75" r="52" style="fill:none;stroke:currentColor;stroke-width:1.6"/><circle cx="160" cy="75" r="52" style="fill:none;stroke:currentColor;stroke-width:1.6"/><text x="60" y="22">x</text><text x="200" y="22">y</text>`;
+$('#venn2').innerHTML=vbase()+`<text x="72" y="77" text-anchor="middle">xy'</text><text x="130" y="77" text-anchor="middle">xy</text><text x="188" y="77" text-anchor="middle">x'y</text><text x="228" y="135" text-anchor="middle">x'y'</text>`;
+$('#vennAbs').innerHTML=vbase(`<circle cx="100" cy="75" r="52" style="fill:var(--accent-soft);stroke:none"/><clipPath id="cx"><circle cx="100" cy="75" r="52"/></clipPath><circle cx="160" cy="75" r="52" clip-path="url(#cx)" style="fill:var(--accent);opacity:.35"/>`)+`<text x="130" y="77" text-anchor="middle">xy</text><text x="72" y="77" text-anchor="middle">x</text>`;
+
+/* ---------- truth tables ---------- */
+const NOT=a=>1-a;
+function tt(el,vars,cols,opts){
+  opts=opts||{};const n=vars.length;
+  let h='<table class="tt"><tr>'+vars.map(v=>`<th>${v}</th>`).join('')+cols.map(c=>`<th style="border-left:${c.sep?'3px double var(--line)':''}">${c.l}</th>`).join('')+'</tr>';
+  for(let r=0;r<(1<<n);r++){
+    const v=vars.map((_,i)=>(r>>(n-1-i))&1);
+    h+=`<tr data-r="${r}">`+v.map(b=>`<td>${b}</td>`).join('')+cols.map(c=>{const o=c.f(...v)?1:0;return `<td class="${c.hl&&o?'one':''}">${o}</td>`;}).join('')+'</tr>';
+  }
+  h+='</table>';
+  if(typeof el==='string')el=document.getElementById(el);
+  if(!el)return; /* FIX: guard */
+  el.innerHTML=h;
+}
+tt('tt-and',['x','y'],[{l:'x·y',f:(x,y)=>x&y,hl:1}]);
+tt('tt-or',['x','y'],[{l:'x+y',f:(x,y)=>x|y,hl:1}]);
+tt('tt-not',['x'],[{l:"x'",f:x=>NOT(x),hl:1}]);
+tt('tt-dist',['x','y','z'],[{l:'y+z',f:(x,y,z)=>y|z},{l:'x(y+z)',f:(x,y,z)=>x&(y|z),hl:1},{l:'xy',f:(x,y)=>x&y,sep:1},{l:'xz',f:(x,y,z)=>x&z},{l:'xy+xz',f:(x,y,z)=>(x&y)|(x&z),hl:1}]);
+tt('tt-dm',['x','y'],[{l:'x+y',f:(x,y)=>x|y},{l:"(x+y)'",f:(x,y)=>NOT(x|y),hl:1},{l:"x'",f:x=>NOT(x),sep:1},{l:"y'",f:(x,y)=>NOT(y)},{l:"x'y'",f:(x,y)=>NOT(x)&NOT(y),hl:1}]);
+tt('tt-abs',['x','y'],[{l:'xy',f:(x,y)=>x&y},{l:'x+xy',f:(x,y)=>x|(x&y),hl:1}]);
+tt('tt-f1234',['x','y','z'],[{l:'F₁',f:(x,y,z)=>x&y&NOT(z),hl:1,sep:1},{l:'F₂',f:(x,y,z)=>x|(NOT(y)&z),hl:1},{l:'F₃',f:(x,y,z)=>(NOT(x)&NOT(y)&z)|(NOT(x)&y&z)|(x&NOT(y)),hl:1},{l:'F₄',f:(x,y,z)=>(x&NOT(y))|(NOT(x)&z),hl:1}]);
+tt('tt-xor3',['x','y','z'],[{l:'x⊕y',f:(x,y)=>x^y},{l:'F = x⊕y⊕z',f:(x,y,z)=>x^y^z,hl:1}]);
+
+/* 16 functions */
+(function(){let h='<table class="tt"><tr><th>x</th><th>y</th>';for(let i=0;i<16;i++)h+=`<th>F<sub>${i}</sub></th>`;h+='</tr>';
+const rows=[[0,0],[0,1],[1,0],[1,1]];rows.forEach((r,ri)=>{h+=`<tr><td>${r[0]}</td><td>${r[1]}</td>`;for(let i=0;i<16;i++){const b=(i>>(3-ri))&1;h+=`<td class="${b?'one':''}">${b}</td>`;}h+='</tr>';});
+const sy=['','·','/','','/','','⊕','+','↓','⊙',"'",'⊂',"'",'⊃','↑',''];h+='<tr><th colspan="2" style="font-style:normal;font-family:system-ui">symbol</th>'+sy.map(s=>`<td style="font-family:var(--math)">${s}</td>`).join('')+'</tr></table>';$('#t16').innerHTML=h;})();
+
+/* minterm/maxterm table */
+(function(){const v=['x','y','z'];let h='<table class="tt"><tr><th>x</th><th>y</th><th>z</th><th>Minterm</th><th>m</th><th>Maxterm</th><th>M</th></tr>';
+for(let r=0;r<8;r++){const b=v.map((_,i)=>(r>>(2-i))&1);const mt=v.map((n,i)=>n+(b[i]?'':"'")).join('');const Mt=v.map((n,i)=>n+(b[i]?"'":'')).join(' + ');
+h+=`<tr>${b.map(x=>`<td>${x}</td>`).join('')}<td style="font-family:var(--math)">${mt}</td><td style="font-family:var(--math)">m<sub>${r}</sub></td><td style="font-family:var(--math)">${Mt}</td><td style="font-family:var(--math)">M<sub>${r}</sub></td></tr>`;}
+$('#t-mm').innerHTML=h+'</table>';})();
+
+/* ---------- gate gallery & simulator ---------- */
+const G=[
+ {k:'and',n:'AND',e:'F = xy',f:(x,y)=>x&y,s:'and2'},
+ {k:'or',n:'OR',e:'F = x + y',f:(x,y)=>x|y,s:'or2'},
+ {k:'not',n:'Inverter (NOT)',e:"F = x'",f:x=>NOT(x),s:'not1',one:1},
+ {k:'buf',n:'Buffer',e:'F = x',f:x=>x,s:'buf1',one:1},
+ {k:'nand',n:'NAND',e:"F = (xy)'",f:(x,y)=>NOT(x&y),s:'nand2'},
+ {k:'nor',n:'NOR',e:"F = (x + y)'",f:(x,y)=>NOT(x|y),s:'nor2'},
+ {k:'xor',n:'XOR',e:"F = xy' + x'y = x ⊕ y",f:(x,y)=>x^y,s:'xor2'},
+ {k:'xnor',n:'XNOR (equivalence)',e:"F = xy + x'y' = x ⊙ y",f:(x,y)=>NOT(x^y),s:'xnor2'}];
+function gateSvg(g){return g.one?`<svg class="circ" viewBox="0 0 120 40" width="150"><use href="#g-${g.s}" x="30" y="0" width="60" height="40"/><path class="w" d="M15,20 H30 M90,20 H102"/><text x="11" y="20" text-anchor="end" dominant-baseline="middle">x</text><text x="106" y="20" dominant-baseline="middle">F</text></svg>`
+ :`<svg class="circ" viewBox="0 0 120 40" width="150"><use href="#g-${g.s}" x="30" y="0" width="60" height="40"/><path class="w" d="M15,10 H30 M15,30 H30 M90,20 H102"/><text x="11" y="10" text-anchor="end" dominant-baseline="middle">x</text><text x="11" y="30" text-anchor="end" dominant-baseline="middle">y</text><text x="106" y="20" dominant-baseline="middle">F</text></svg>`;}
+const gal=$('#gallery');
+G.forEach((g,i)=>{const d=document.createElement('div');d.className='gate';d.innerHTML=`<h4>${g.n}</h4>${gateSvg(g)}<span class="ex">${g.e}</span><div id="gt${i}"></div>`;gal.appendChild(d);
+ tt('gt'+i,g.one?['x']:['x','y'],[{l:'F',f:g.f,hl:1}]);});
+const sel=$('#simGate');G.forEach((g,i)=>{const o=document.createElement('option');o.value=i;o.textContent=g.n;sel.appendChild(o);});
+let A=0,B=0;
+function sim(){const g=G[sel.value];$('#inB').style.display=g.one?'none':'';
+ $('#inA').textContent='x = '+A;$('#inA').classList.toggle('on',!!A);$('#inB').textContent='y = '+B;$('#inB').classList.toggle('on',!!B);
+ const out=g.one?g.f(A):g.f(A,B);$('#lamp').classList.toggle('on',!!out);$('#lamp span').textContent='F = '+out+'   ('+g.e+')';
+ $('#simSvg').innerHTML=gateSvg(g).replace(/^<svg[^>]*>|<\/svg>$/g,'');
+ tt('simTT',g.one?['x']:['x','y'],[{l:'F',f:g.f,hl:1}]);
+ const r=g.one?A:(A*2+B);const tr=document.querySelector('#simTT tr[data-r="'+r+'"]');if(tr)tr.classList.add('hi');}
+sel.onchange=sim;$('#inA').onclick=()=>{A^=1;sim();};$('#inB').onclick=()=>{B^=1;sim();};sim();
+
+/* ---------- expression parser ---------- */
+function parse(src){
+  const s=src.replace(/[·•*&∧]/g,'.').replace(/[⊕]/g,'^').replace(/[∨|]/g,'+').replace(/[’`′]/g,"'").replace(/\s+/g,'');
+  let i=0;const vars=new Set();
+  function peek(){return s[i];}
+  function orE(){let n=xorE();while(peek()==='+'){i++;const a=n,b=xorE();n=e=>a(e)|b(e);}return n;}
+  function xorE(){let n=andE();while(peek()==='^'){i++;const a=n,b=andE();n=e=>a(e)^b(e);}return n;}
+  function startsUnary(c){return c&&(/[A-Za-z01(~!]/.test(c));}
+  function andE(){let n=un();while(true){if(peek()==='.'){i++;}else if(!startsUnary(peek()))break;const a=n,b=un();n=e=>a(e)&b(e);}return n;}
+  function un(){let neg=0;while(peek()==='~'||peek()==='!'){neg^=1;i++;}let n=prim();while(peek()==="'"){i++;const a=n;n=e=>1-a(e);}if(neg){const a=n;n=e=>1-a(e);}return n;}
+  function prim(){const c=peek();
+    if(c==='('){i++;const n=orE();if(peek()!==')')throw Error('Missing ")"');i++;return n;}
+    if(c==='0'||c==='1'){i++;const v=+c;return()=>v;}
+    if(c&&/[A-Za-z]/.test(c)){i++;vars.add(c);return e=>e[c];}
+    throw Error(c?'Unexpected "'+c+'" at position '+(i+1):'Expression ended too early');}
+  if(!s)throw Error('empty');
+  const f=orE();if(i<s.length)throw Error('Unexpected "'+s[i]+'" at position '+(i+1));
+  return {f,vars};
+}
+function runTool(){
+  const fs=$('#exF').value.trim(),gs=$('#exG').value.trim();const msg=$('#exMsg');
+  try{
+    const F=parse(fs);let Gp=null;if(gs)Gp=parse(gs);
+    const vars=[...new Set([...F.vars,...(Gp?Gp.vars:[])])].sort();
+    if(vars.length>6)throw Error('Use at most 6 variables');
+    const cols=[{l:'F',f:(...v)=>F.f(env(v)),hl:1,sep:1}];
+    if(Gp)cols.push({l:'G',f:(...v)=>Gp.f(env(v)),hl:1});
+    function env(v){const e={};vars.forEach((n,k)=>e[n]=v[k]);return e;}
+    tt($('#exTable'),vars.length?vars:['–'],vars.length?cols:[{l:'F',f:()=>F.f({}),hl:1}]);
+    const n=vars.length,mins=[],maxs=[];let same=true;
+    for(let r=0;r<(1<<n);r++){const v=vars.map((_,k)=>(r>>(n-1-k))&1);const a=F.f(env(v));(a?mins:maxs).push(r);if(Gp&&a!==Gp.f(env(v)))same=false;}
+    let t=`F(${vars.join(',')}) = Σm(${mins.join(', ')||'–'}) = ΠM(${maxs.join(', ')||'–'})`;
+    if(Gp)t+= same?'  ·  ✔ F and G are equal':'  ·  ✘ F and G differ (see rows)';
+    msg.textContent=t;msg.className='msg '+(Gp?(same?'ok':'err'):'');
+  }catch(e){msg.textContent=e.message==='empty'?'Type an expression for F.':'Could not read expression: '+e.message;msg.className='msg err';$('#exTable').innerHTML='';}
+}
+$('#exF').oninput=runTool;$('#exG').oninput=runTool;runTool();
+
+/* ---------- quiz ---------- */
+const Q=[
+ ['The dual of x + 0 = x is',["x · 1 = x","x' + 1 = x'","x · 0 = 0","x + 1 = 1"],0,'Swap + with · and 0 with 1; literals stay the same.'],
+ ["x + x'y simplifies to",["x + y","xy","x'","y"],0,"x + x'y = (x + x')(x + y) = x + y."],
+ ["(x + y)' equals",["x'y'","x' + y'","xy","x + y"],0,'DeMorgan: complement and swap OR for AND.'],
+ ['Which gates are universal?',['AND and OR','NAND and NOR','XOR and XNOR','NOT and buffer'],1,'NAND alone or NOR alone can build NOT, AND and OR.'],
+ ['How many Boolean functions of two variables exist?',['4','8','16','32'],2,'2^(2^n) = 2^4 = 16.'],
+ ['A 3-input XOR gives 1 when',['all inputs are 1','an odd number of inputs are 1','an even number of inputs are 1','exactly two inputs are 1'],1,'Multi-input XOR is an odd function.'],
+ ['Correct operator precedence (highest first):',['AND, OR, NOT','NOT, OR, AND','( ), NOT, AND, OR','( ), AND, NOT, OR'],2,'Parentheses, then complement, then AND, then OR.'],
+ ['Which law holds in Boolean but not ordinary algebra?',['x(y + z) = xy + xz','x + yz = (x + y)(x + z)','x + y = y + x','x · 1 = x'],1,'Distribution of + over · has no counterpart in real arithmetic.'],
+ ['x(x + y) equals',['x','y','xy','x + y'],0,'Absorption theorem 6(b).'],
+ ['Which operator is NOT associative?',['AND','OR','XOR','NAND'],3,'(x↑y)↑z ≠ x↑(y↑z); so is NOR.'],
+ ['A truth table for 4 variables has how many rows?',['4','8','16','32'],2,'2^4 = 16.'],
+ ['x ⊕ 1 equals',["x","x'","0","1"],1,'XOR with 1 inverts the other input.']];
+let score=0,answered=0;
+const qb=$('#quizBox');
+Q.forEach((q,qi)=>{const d=document.createElement('div');d.className='q';d.innerHTML=`<b>${qi+1}.</b> ${q[0]}<div class="opts"></div><div class="exp">${q[3]}</div>`;
+ const o=d.querySelector('.opts');q[1].forEach((t,ti)=>{const b=document.createElement('button');b.textContent=t;b.onclick=()=>{if(d.classList.contains('done'))return;d.classList.add('done');answered++;
+  if(ti===q[2]){b.classList.add('right');score++;}else{b.classList.add('wrong');o.children[q[2]].classList.add('right');}
+  $('#score').textContent=`· ${score}/${answered}`;};o.appendChild(b);});qb.appendChild(d);});
+
+/* ---------- controls ---------- */
+const ot=$('#optToggle');ot.onchange=()=>document.body.classList.toggle('hide-opt',!ot.checked);
+let exp=false;$('#expandAll').onclick=()=>{exp=!exp;document.querySelectorAll('details.sol').forEach(d=>d.open=exp);$('#expandAll').textContent=exp?'Collapse all solutions':'Expand all solutions';};
+$('#themeBtn').onclick=()=>{const r=document.documentElement;const dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;r.dataset.theme=dark?'light':'dark';};
+window.addEventListener('beforeprint',()=>document.querySelectorAll('details').forEach(d=>d.open=true));
+/* mobile nav */
+const mb=$('#mobnavBody');mb.innerHTML=[...document.querySelectorAll('#nav a')].map(a=>a.outerHTML).join('')+'<div class="ctrl"><button onclick="window.print()">Print / save PDF</button></div>';
+mb.querySelectorAll('a').forEach(a=>{a.style.display='block';a.style.padding='3px 0';});
+/* active link */
+const links=[...document.querySelectorAll('#nav a')];
+const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){links.forEach(l=>l.classList.toggle('on',l.getAttribute('href')==='#'+e.target.id));}});},{rootMargin:'-10% 0px -80% 0px'});
+document.querySelectorAll('h2.sec[id],section[id]').forEach(h=>io.observe(h));
+})();
+</script>
+</body>
+</html>

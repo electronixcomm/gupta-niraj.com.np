@@ -1,0 +1,1454 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body><div style="font:14px/1.4 Inter,-apple-system,Segoe UI,sans-serif;background:#0b1d3a;padding:10px 16px;"><a href="/teaching/digital-logic.html" style="color:#fbf9f3;text-decoration:none;">&larr; Digital Logic &middot; all units</a></div>
+<title>Boolean Simplification Ladder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a sticky "ladder" rail on the left (one rung per level, bottom = foundations, top = critical problems), reading column on the right; the Lab breaks out wider. */
+:root{
+  --paper:#F2F5F6; --surface:#FFFFFF; --ink:#13212A; --muted:#566773; --line:#D3DDE2;
+  --wire:#0E6B66; --wire-soft:#DDEFEC; --led:#E39B12; --led-soft:#FCEFD3;
+  --ok:#1D7A3E; --ok-soft:#E1F2E7; --bad:#B4372B; --bad-soft:#F8E3E0;
+  --g1:#0E8A82; --g2:#C2397A; --g3:#2F62C9; --g4:#D9781A; --g5:#6B49B8; --g6:#4E8A1E;
+  --f-display:"Archivo","Arial Narrow",system-ui,sans-serif;
+  --f-body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;
+  --step--1:.86rem; --step-0:1.03rem; --step-1:1.22rem; --step-2:1.55rem; --step-3:2.1rem; --step-4:clamp(2.2rem,5vw,3.4rem);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0E1418; --surface:#162026; --ink:#E3EAEE; --muted:#93A4AF; --line:#2A3841;
+  --wire:#4FC2B8; --wire-soft:#16302F; --led:#F3B63E; --led-soft:#3A2E14;
+  --ok:#5BC27F; --ok-soft:#173022; --bad:#F07F72; --bad-soft:#3A1E1B;
+  --g1:#3FC1B6; --g2:#EC6FA9; --g3:#7AA2F5; --g4:#F2A04D; --g5:#A88BF0; --g6:#8FCB55; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0E1418; --surface:#162026; --ink:#E3EAEE; --muted:#93A4AF; --line:#2A3841;
+  --wire:#4FC2B8; --wire-soft:#16302F; --led:#F3B63E; --led-soft:#3A2E14;
+  --ok:#5BC27F; --ok-soft:#173022; --bad:#F07F72; --bad-soft:#3A1E1B;
+  --g1:#3FC1B6; --g2:#EC6FA9; --g3:#7AA2F5; --g4:#F2A04D; --g5:#A88BF0; --g6:#8FCB55; color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:var(--step-0);line-height:1.6;margin:0}
+a{color:var(--wire)}
+:focus-visible{outline:2px solid var(--wire);outline-offset:2px;border-radius:3px}
+h1,h2,h3,h4{font-family:var(--f-display);line-height:1.12;text-wrap:balance;margin:0}
+h2{font-size:var(--step-3);font-weight:750;font-stretch:88%;letter-spacing:-.01em}
+h3{font-size:var(--step-1);font-weight:700;font-stretch:95%;margin-top:.4rem}
+p{margin:0}
+code,.t{font-family:var(--f-mono);font-size:.92em;white-space:nowrap}
+.t{color:var(--wire);font-weight:600}
+.eyebrow{font-family:var(--f-mono);font-size:var(--step--1);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.muted{color:var(--muted)}
+
+.shell{display:grid;grid-template-columns:230px minmax(0,1fr);gap:40px;max-width:1180px;margin:0 auto;padding-inline:24px;padding-block:28px 80px}
+@media (max-width:900px){.shell{grid-template-columns:minmax(0,1fr);gap:20px;padding-inline:16px}}
+
+/* ladder rail */
+.rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 20px);align-self:start;max-height:calc(100vh - 40px);overflow:auto}
+.rail h4{font-size:var(--step--1);font-family:var(--f-mono);font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.ladder{list-style:none;margin:0;padding:0 0 0 14px;border-left:3px solid var(--line);border-right:3px solid var(--line);display:flex;flex-direction:column-reverse;gap:2px}
+.ladder li a{display:grid;grid-template-columns:26px 1fr;align-items:center;gap:6px;padding:6px 8px;text-decoration:none;color:var(--ink);font-size:.9rem;line-height:1.25;border-top:1px dashed var(--line);border-radius:4px}
+.ladder li a:hover{background:var(--wire-soft)}
+.ladder li a .n{font-family:var(--f-mono);font-size:.78rem;color:var(--muted)}
+.ladder li a.done .n{color:var(--ok)}
+.ladder li a.done .n::after{content:"✓"}
+.ladder li a.here{background:var(--wire-soft);font-weight:700}
+.rail .prog{margin-top:12px;font-size:var(--step--1);color:var(--muted)}
+.bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-top:4px}
+.bar i{display:block;height:100%;background:var(--ok);width:0;transition:width .3s}
+@media (max-width:900px){
+  .rail{position:static;max-height:none;overflow:visible}
+  .ladder{flex-direction:row;flex-wrap:nowrap;overflow-x:auto;border:0;padding:0 0 6px;gap:6px}
+  .ladder li a{grid-template-columns:auto auto;white-space:nowrap;border:1px solid var(--line);background:var(--surface)}
+  .rail h4{display:none}
+}
+
+/* header */
+header.top{display:grid;gap:14px;padding-bottom:28px;border-bottom:1px solid var(--line);margin-bottom:8px}
+header.top h1{font-size:var(--step-4);font-weight:800;font-stretch:78%;letter-spacing:-.015em;max-width:16ch}
+header.top .lede{max-width:62ch;font-size:var(--step-1);color:var(--muted);line-height:1.5}
+.meta{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-family:var(--f-mono);font-size:.78rem;padding:3px 9px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--muted)}
+.chip.syl{border-color:var(--wire);color:var(--wire)}
+.chip.enr{border-color:var(--g5);color:var(--g5)}
+.path{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:6px}
+.path div{padding:10px 12px;border-top:3px solid var(--wire);background:var(--surface);font-size:.92rem;line-height:1.35}
+.path div b{display:block;font-family:var(--f-display);font-stretch:90%;font-size:1rem}
+.path div:nth-child(2){border-color:var(--g3)} .path div:nth-child(3){border-color:var(--g4)} .path div:nth-child(4){border-color:var(--g2)} .path div:nth-child(5){border-color:var(--g6)}
+@media (max-width:640px){.path{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* level sections */
+main{min-width:0}
+section.level{padding-block:44px 8px;display:grid;gap:18px;max-width:780px;scroll-margin-top:12px}
+section.level > p, section.level .prose{max-width:66ch}
+section.level .head{display:grid;gap:6px}
+.idea{border-left:4px solid var(--led);padding:10px 16px;background:var(--led-soft);border-radius:0 6px 6px 0;max-width:66ch}
+.idea b{font-family:var(--f-display);font-stretch:92%}
+.rules{margin:0;padding-left:1.3rem;display:grid;gap:4px;max-width:66ch}
+.figrow{display:flex;flex-wrap:wrap;gap:22px;align-items:flex-start}
+.figrow > *{min-width:0}
+figure{margin:0;display:grid;gap:6px}
+figcaption{font-size:var(--step--1);color:var(--muted);max-width:40ch}
+
+/* K-map */
+.kmap{display:inline-grid;gap:0;font-family:var(--f-mono);font-size:.9rem;user-select:none}
+.kmap .corner{position:relative;width:46px;height:34px}
+.kmap .corner span{position:absolute;font-size:.78rem;color:var(--muted)}
+.kmap .corner .r{left:4px;bottom:2px}.kmap .corner .c{right:4px;top:0}
+.kmap .corner::after{content:"";position:absolute;inset:0;background:linear-gradient(to top right,transparent calc(50% - .5px),var(--line) 50%,transparent calc(50% + .5px))}
+.kmap .lab{display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.8rem}
+.kmap .cell{width:50px;height:46px;border:1px solid var(--line);margin:-1px 0 0 -1px;background:var(--surface);position:relative;display:flex;align-items:center;justify-content:center;font-size:1.05rem;font-weight:600;transition:background .15s}
+.kmap .cell .idx{position:absolute;left:4px;top:2px;font-size:.62rem;color:var(--muted);font-weight:400}
+.kmap .cell.one{background:var(--led-soft);color:var(--ink)}
+.kmap .cell.one .v{color:var(--led)}
+.kmap .cell.zero .v{color:var(--muted);opacity:.7}
+.kmap .cell.dc .v{color:var(--g5)}
+.kmap.edit .cell{cursor:pointer}
+.kmap.edit .cell:hover{outline:2px solid var(--wire);outline-offset:-2px;z-index:2}
+.kmap .cell.dim{opacity:.35}
+.kmap .cell.hot{z-index:1}
+.kmap .cell .terms{position:absolute;inset:3px;pointer-events:none;border-radius:6px}
+.kmap5{display:flex;flex-wrap:wrap;gap:18px}
+.kmap5 .half{display:grid;gap:4px;justify-items:start}
+.kmap5 .half .eyebrow{padding-left:46px}
+.legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.legend button{font-family:var(--f-mono);font-size:.85rem;font-weight:600;background:var(--surface);border:2px solid currentColor;border-radius:6px;padding:2px 9px;cursor:pointer}
+.legend button:hover,.legend button.on{background:var(--paper)}
+
+/* steps */
+.worked{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px 20px;display:grid;gap:12px}
+.worked > .eyebrow{color:var(--wire)}
+.worked h3{margin:0}
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:12px;counter-reset:s}
+.steps > li{counter-increment:s;display:grid;grid-template-columns:30px minmax(0,1fr);gap:10px;align-items:start}
+.steps > li::before{content:counter(s);font-family:var(--f-mono);font-weight:600;font-size:.85rem;width:26px;height:26px;border-radius:50%;border:2px solid var(--wire);color:var(--wire);display:flex;align-items:center;justify-content:center}
+.steps > li > div{display:grid;gap:8px;min-width:0}
+.steps > li.final::before{background:var(--wire);color:var(--surface)}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{font-family:var(--f-body);font-size:.92rem;font-weight:700;padding:7px 14px;border-radius:6px;border:1.5px solid var(--wire);background:var(--wire);color:var(--surface);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--wire)}
+.btn:disabled{opacity:.45;cursor:default}
+.ans{font-family:var(--f-mono);font-weight:600;font-size:1.05rem;background:var(--wire-soft);padding:6px 10px;border-radius:6px;display:inline-block;max-width:100%;overflow-x:auto;white-space:nowrap}
+.eq{display:block;max-width:100%;font-family:var(--f-mono);font-size:.95rem;overflow-x:auto;white-space:nowrap;padding:2px 0}
+
+/* tables */
+.tbl{overflow-x:auto;max-width:100%}
+table{border-collapse:collapse;font-size:.92rem;font-variant-numeric:tabular-nums}
+th,td{padding:6px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-family:var(--f-mono);font-size:.76rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600}
+td.c,th.c{text-align:center}
+td code{white-space:nowrap}
+tr.ess td:first-child{color:var(--wire);font-weight:700}
+
+/* quiz */
+.quiz{border:1px dashed var(--wire);border-radius:10px;padding:14px 16px;display:grid;gap:10px;max-width:66ch}
+.quiz .q{font-weight:700}
+.quiz .opts{display:grid;gap:6px}
+.quiz .opts button{text-align:left;font:inherit;padding:7px 12px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.quiz .opts button:hover{border-color:var(--wire)}
+.quiz .opts button.right{background:var(--ok-soft);border-color:var(--ok)}
+.quiz .opts button.wrong{background:var(--bad-soft);border-color:var(--bad)}
+.quiz .fb{font-size:.95rem}
+.quiz .fb.ok{color:var(--ok)} .quiz .fb.no{color:var(--bad)}
+
+/* circuits */
+.circuit svg{display:block;max-width:100%;height:auto}
+.circuit{overflow-x:auto}
+.gate{fill:var(--surface);stroke:var(--ink);stroke-width:1.6}
+.wire{stroke:var(--ink);stroke-width:1.3;fill:none}
+.ctext{fill:var(--ink);font-family:var(--f-mono);font-size:12px}
+.ctext.o{fill:var(--wire);font-weight:600}
+
+/* lab */
+#lab{max-width:none}
+.labgrid{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:1000px){.labgrid{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;gap:12px;min-width:0}
+.field{display:grid;gap:4px}
+.field label{font-size:var(--step--1);color:var(--muted);font-family:var(--f-mono)}
+.field input,.field select{font:inherit;font-family:var(--f-mono);font-size:.95rem;padding:7px 9px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);width:100%}
+.seg{display:flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;width:max-content}
+.seg button{font:inherit;font-size:.9rem;padding:6px 12px;border:0;background:var(--surface);color:var(--ink);cursor:pointer;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--wire);color:var(--surface);font-weight:700}
+.err{color:var(--bad);font-size:.9rem}
+.out{display:grid;gap:16px;min-width:0}
+.result{display:grid;gap:6px}
+.kv{display:grid;grid-template-columns:110px minmax(0,1fr);gap:8px 12px;align-items:baseline}
+.kv dt{font-family:var(--f-mono);font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.kv dd{margin:0;min-width:0}
+@media (max-width:520px){.kv{grid-template-columns:minmax(0,1fr)}}
+details.expl{border-top:1px solid var(--line);padding-top:10px}
+details.expl summary{cursor:pointer;font-weight:700;color:var(--wire)}
+
+/* problems */
+.tier{display:grid;gap:12px}
+.tier > h3{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.prob{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px;display:grid;gap:10px}
+.prob .stmt{font-weight:700}
+.prob .src{font-family:var(--f-mono);font-size:.76rem;color:var(--muted)}
+.think{font-style:italic;color:var(--muted);max-width:66ch}
+footer{margin-top:60px;padding-top:20px;border-top:1px solid var(--line);font-size:var(--step--1);color:var(--muted);max-width:780px}
+.optlist{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.optlist a{display:grid;grid-template-columns:26px 1fr;gap:6px;padding:5px 8px;text-decoration:none;color:var(--muted);font-size:.86rem;border-radius:4px}
+.optlist a .n{font-family:var(--f-mono);font-size:.76rem;color:var(--g5)}
+.optlist a:hover,.optlist a.here{background:var(--wire-soft);color:var(--ink)}
+.optlist a.done .n::after{content:"✓";color:var(--ok)}
+.optpart{margin-top:64px;padding:22px 22px;border:1.5px dashed var(--g5);border-radius:12px;display:grid;gap:8px;max-width:780px}
+.optpart .eyebrow{color:var(--g5)}
+section.level.optional h2{color:var(--muted)}
+section.level.optional .head h2::after{content:"";}
+@media (max-width:900px){.optlist{display:flex;overflow-x:auto;gap:6px;padding-bottom:6px}.optlist a{white-space:nowrap;border:1px dashed var(--line);grid-template-columns:auto auto}}
+.part{margin-top:56px;padding-top:18px;border-top:3px solid var(--ink);display:grid;gap:6px;max-width:780px;scroll-margin-top:12px}
+.part h2{font-size:var(--step-3)}
+.part .eyebrow{color:var(--wire)}
+.optpart{border-top:1.5px dashed var(--g5)}
+.duo{flex:1 1 260px;min-width:0;display:grid;gap:6px;align-content:start;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.duo .ans{justify-self:start}
+.conv{display:flex;flex-wrap:wrap;gap:12px;align-items:end}
+.conv .field{min-width:0}
+.probs{display:grid;gap:16px}
+#toc{display:grid;gap:14px}
+#toc .grp{display:grid;gap:2px}
+#toc .gh{font-family:var(--f-mono);font-size:.74rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:0 8px 4px}
+#toc .gh.syl{color:var(--wire)}
+#toc a{display:grid;grid-template-columns:44px 1fr;gap:6px;align-items:baseline;padding:5px 8px;border-radius:5px;text-decoration:none;color:var(--ink);font-size:.88rem;line-height:1.3}
+#toc a .n{font-family:var(--f-mono);font-size:.74rem;color:var(--muted)}
+#toc a.opt{color:var(--muted)} #toc a.opt .n{color:var(--g5)}
+#toc a:hover{background:var(--wire-soft)}
+#toc a.here{background:var(--wire-soft);font-weight:700}
+#toc a.done .n::after{content:" ✓";color:var(--ok)}
+table.tt tr.xr td{background:var(--led-soft)}
+table.tt td,table.tt th{padding:4px 8px}
+@media (max-width:900px){#toc{display:flex;overflow-x:auto;gap:6px;padding-bottom:6px}#toc .grp{display:flex;gap:6px}#toc .gh{display:none}#toc a{white-space:nowrap;border:1px solid var(--line);background:var(--surface);grid-template-columns:auto auto}}
+</style>
+
+<div class="shell">
+<aside class="rail" aria-label="Contents">
+  <nav id="toc"></nav>
+  <div class="prog"><span id="progtext">0 syllabus subtopics checked</span><div class="bar"><i id="progbar"></i></div></div>
+</aside>
+
+<main>
+<header class="top">
+  <div class="meta">
+    <span class="chip syl">BT102CO · Digital Logic</span>
+    <span class="chip">Unit 3 · Simplification of Boolean functions · 6 hrs</span>
+    <span class="chip">Mano, Ch. 3</span>
+  </div>
+  <h1>Boolean Simplification Ladder</h1>
+  <p class="lede">Unit 3, subtopic by subtopic. Each subtopic adds one idea, works a textbook example one step at a time, checks understanding, and ends with practice problems.</p>
+  <div class="path">
+    <div><b>O1 · Bridge</b>Canonical forms: minterms and maxterms (optional preview)</div>
+    <div><b>3.1 K-Map</b>Two, three and four variable maps; prime implicants</div>
+    <div><b>3.2 SOP and POS</b>Sum of products, product of sums, two-level circuits</div>
+    <div><b>3.3 NAND and NOR</b>Simplification for NAND and NOR implementation</div>
+    <div><b>Exam and real life</b>Exam 2025 Q(b) model answer; attendance warning design</div>
+  </div>
+  <p class="muted" style="font-size:var(--step--1)">Sections marked <span class="chip syl">3.1</span> <span class="chip syl">3.2</span> <span class="chip syl">3.3</span> follow the syllabus. <span class="chip enr">Optional</span> sections are bridges or textbook extras; skip them without losing anything in the syllabus path.</p>
+</header>
+
+<!-- ===================== O1 ===================== -->
+<div class="part" id="part-o1"><span class="eyebrow">Before Unit 3</span><h2>Bridge: canonical forms</h2></div>
+
+<section class="level optional" data-optional="1" data-group="Bridge" id="o1" data-code="O1" data-short="Canonical forms">
+  <div class="head"><span class="eyebrow"><span class="chip enr">Optional</span> O1 · Unit 3 preview</span><h2>Canonical forms: minterms and maxterms</h2></div>
+  <p>SOP/POS is formally in Unit 3 (3.2). Use this as a bridge so Unit 3 starts smoothly.</p>
+
+  <h3>1. The core concept: what makes a form "canonical"?</h3>
+  <p>In digital logic, expressions can be written in many ways, but canonical forms provide a strict, standardized blueprint.</p>
+  <div class="tbl"><table><tbody>
+    <tr><th style="width:9rem">Canonical form</th><td>Every single variable (n variables) must appear in every term, either in its normal or complemented form.</td></tr>
+    <tr><th>Standard form</th><td>Terms can be shortened and contain fewer literals (e.g. <span class="t">xy + x'z</span>), which is what we ultimately simplify.</td></tr>
+  </tbody></table></div>
+
+  <h3>2. Minterms vs. maxterms</h3>
+  <p>For n variables there are 2ⁿ possible input combinations. Each combination maps to a unique minterm and maxterm.</p>
+  <div class="figrow">
+    <div class="duo">
+      <b>Minterm (standard product, Σ)</b>
+      <p>An AND product of all n variables. A variable is primed (') if its bit is 0, unprimed if 1. Evaluates to 1 for only one specific row.</p>
+      <span class="ans">m₃ = A'BC</span><span class="muted" style="font-size:.88rem">for A = 0, B = 1, C = 1</span>
+    </div>
+    <div class="duo">
+      <b>Maxterm (standard sum, Π)</b>
+      <p>An OR sum of all n variables. A variable is primed (') if its bit is 1, unprimed if 0. Evaluates to 0 for only one specific row.</p>
+      <span class="ans">M₃ = A + B' + C'</span><span class="muted" style="font-size:.88rem">0 only when A = 0, B = 1, C = 1</span>
+    </div>
+  </div>
+  <div class="idea"><b>Key identity:</b> a minterm and its corresponding maxterm are exact complements of each other: <span class="t">mⱼ' = Mⱼ</span>. Check with DeMorgan: (A'BC)' = A + B' + C' = M₃.</div>
+
+  <h3>3. Where do the index numbers come from? (Σ and Π)</h3>
+  <p>The numbers inside the shorthand notation (such as 1, 3, 6, 7) are the decimal equivalents of the truth table's binary row indices.</p>
+  <div class="tbl"><table><thead><tr><th class="c">x</th><th class="c">y</th><th class="c">z</th><th>Minterm</th><th>m</th><th>Maxterm</th><th>M</th></tr></thead><tbody>
+    <tr><td class="c">0</td><td class="c">0</td><td class="c">0</td><td><code>x'y'z'</code></td><td>m₀</td><td><code>x + y + z</code></td><td>M₀</td></tr>
+    <tr><td class="c">0</td><td class="c">0</td><td class="c">1</td><td><code>x'y'z</code></td><td>m₁</td><td><code>x + y + z'</code></td><td>M₁</td></tr>
+    <tr><td class="c">0</td><td class="c">1</td><td class="c">0</td><td><code>x'yz'</code></td><td>m₂</td><td><code>x + y' + z</code></td><td>M₂</td></tr>
+    <tr><td class="c">0</td><td class="c">1</td><td class="c">1</td><td><code>x'yz</code></td><td>m₃</td><td><code>x + y' + z'</code></td><td>M₃</td></tr>
+    <tr><td class="c">1</td><td class="c">0</td><td class="c">0</td><td><code>xy'z'</code></td><td>m₄</td><td><code>x' + y + z</code></td><td>M₄</td></tr>
+    <tr><td class="c">1</td><td class="c">0</td><td class="c">1</td><td><code>xy'z</code></td><td>m₅</td><td><code>x' + y + z'</code></td><td>M₅</td></tr>
+    <tr><td class="c">1</td><td class="c">1</td><td class="c">0</td><td><code>xyz'</code></td><td>m₆</td><td><code>x' + y' + z</code></td><td>M₆</td></tr>
+    <tr><td class="c">1</td><td class="c">1</td><td class="c">1</td><td><code>xyz</code></td><td>m₇</td><td><code>x' + y' + z'</code></td><td>M₇</td></tr>
+  </tbody></table></div>
+  <ul class="rules">
+    <li><b>Sum of minterms (Σ):</b> OR the minterms where F = 1. <span class="t">F = Σ(1, 3, 6, 7)</span> means m₁ + m₃ + m₆ + m₇.</li>
+    <li><b>Product of maxterms (Π):</b> AND the maxterms where F = 0. <span class="t">F = Π(0, 2, 4, 5)</span> means M₀ · M₂ · M₄ · M₅.</li>
+  </ul>
+
+  <div class="worked" data-stepper>
+    <span class="eyebrow">4. Step-by-step example</span>
+    <h3>Expand F = A + B'C to a sum of minterms (variables A, B, C)</h3>
+    <ol class="steps">
+      <li><div><p><b>Term A is missing B and C.</b> Multiply by (B + B') and (C + C'), which both equal 1:</p><div class="eq">A = A(B + B')(C + C') = ABC + ABC' + AB'C + AB'C'</div></div></li>
+      <li><div><p><b>Term B'C is missing A.</b> Multiply by (A + A'):</p><div class="eq">B'C = B'C(A + A') = AB'C + A'B'C</div></div></li>
+      <li><div><p><b>OR everything together.</b> AB'C appears twice; x + x = x removes the duplicate.</p><div class="eq">F = A'B'C + AB'C' + AB'C + ABC' + ABC</div></div></li>
+      <li class="final"><div><p><b>Write the index numbers</b>: 001, 100, 101, 110, 111.</p><span class="ans">F = Σ(1, 4, 5, 6, 7)</span></div></li>
+    </ol>
+  </div>
+
+  <h3>5. Quick conversion trick</h3>
+  <p>If you have the minterm list, the maxterm list is instant: list the missing index numbers from 0 to 2ⁿ − 1. With 3 variables and F = Σ(1, 4, 5, 6, 7), the missing indices are 0, 2, 3, so <span class="t">F = Π(0, 2, 3)</span>.</p>
+
+  <div class="worked">
+    <span class="eyebrow">Try it</span>
+    <h3>Σ ↔ Π converter</h3>
+    <div class="conv">
+      <div class="field"><label for="cvn">Variables</label><select id="cvn"><option value="2">2 (A, B)</option><option value="3" selected>3 (A, B, C)</option><option value="4">4 (A, B, C, D)</option></select></div>
+      <div class="field" style="flex:1"><label for="cvm">F = Σ( … )</label><input id="cvm" value="1, 4, 5, 6, 7" autocomplete="off"></div>
+    </div>
+    <p class="err" id="cverr" hidden></p>
+    <dl class="kv" id="cvout"></dl>
+  </div>
+
+  <div class="quiz" data-answer="2" data-explain="With 3 variables the indices run 0–7. Σ lists 0, 2, 5, 7, so the missing ones are 1, 3, 4, 6.">
+    <p class="q">F(x, y, z) = Σ(0, 2, 5, 7). What is F as a product of maxterms?</p>
+    <div class="opts"><button>Π(0, 2, 5, 7)</button><button>Π(1, 3, 4)</button><button>Π(1, 3, 4, 6)</button></div><p class="fb" aria-live="polite"></p>
+  </div>
+  <p class="muted">The two canonical forms usually have many literals. Standard forms (sum of products such as <span class="t">y' + xy + x'yz'</span>, product of sums such as <span class="t">x(y' + z)(x' + y + z' + w)</span>) allow terms with fewer literals. Simplifying them is the subject of Unit 3.</p>
+</section>
+
+<!-- ===================== 3.1 ===================== -->
+<div class="part" id="part-31"><span class="eyebrow">Syllabus 3.1</span><h2>K-Map: two, three and four variable maps</h2></div>
+
+<section class="level" data-group="3.1 K-Map" id="s311" data-code="3.1.1" data-short="Why the map method">
+  <div class="head"><span class="eyebrow"><span class="chip syl">3.1</span> 3.1.1 · Text §3-1</span><h2>Why the map method?</h2></div>
+  <p>Every literal in an expression becomes a gate input, and every product term becomes a gate. A truth table has exactly one form, but the algebra for the same function can be long or short. The shorter one is the cheaper, faster circuit.</p>
+  <div class="idea"><b>The goal of this unit:</b> find an expression in sum of products (SOP) or product of sums (POS) with the <b>fewest literals</b>. The answer is not always unique.</div>
+  <p>Algebraic simplification works, but it has no rule telling you what to do next. The <b>map method</b> (Veitch diagram, modified by Karnaugh, so "K-map") turns that guesswork into a visual procedure: each square is one minterm, and a function is the area covered by its 1-squares.</p>
+  <div class="quiz" data-answer="1" data-explain="6 = 110, so x = 1, y = 1, z = 0, giving xyz'. Each square of a K-map is one of these minterms.">
+    <p class="q">Each K-map square is one minterm. Which product term is the square for m₆ of F(x, y, z)?</p>
+    <div class="opts"><button>x'yz</button><button>xyz'</button><button>xy'z</button></div><p class="fb" aria-live="polite"></p>
+  </div>
+</section>
+
+<section class="level" data-group="3.1 K-Map" id="s312" data-code="3.1.2" data-short="Two-variable map">
+  <div class="head"><span class="eyebrow"><span class="chip syl">3.1</span> 3.1.2 · Text §3-2</span><h2>The two-variable map</h2></div>
+  <p>Two variables give four minterms, so the map has four squares. Rows carry <span class="t">x</span> (0 then 1), columns carry <span class="t">y</span>. Mark a 1 in every square whose minterm belongs to the function.</p>
+  <div class="figrow">
+    <figure><div class="kmap-mount" data-n="2" data-ones="" data-index="1"></div><figcaption>Squares m₀–m₃. x is primed in row 0, y is primed in column 0.</figcaption></figure>
+    <figure><div class="kmap-mount" data-n="2" data-ones="3" data-groups="xy:3"></div><figcaption>F = xy marks only m₃.</figcaption></figure>
+    <figure><div class="kmap-mount" data-n="2" data-ones="1,2,3" data-groups="x:2,3;y:1,3"></div><figcaption>F = x + y = m₁ + m₂ + m₃. Row x and column y overlap at m₃.</figcaption></figure>
+  </div>
+  <div class="idea"><b>First pattern to notice:</b> a whole row or column of 1s collapses to a single variable. Two 1s side by side differ in exactly one variable, and that variable drops out: <span class="t">x'y + xy = y(x' + x) = y</span>.</div>
+  <div class="quiz" data-answer="0" data-explain="m₀ and m₁ form row 0, where x = 0. So F = x'.">
+    <p class="q">A 2-variable map has 1s in m₀ and m₁ only. What is F?</p>
+    <div class="opts"><button>x'</button><button>y'</button><button>x'y'</button></div><p class="fb" aria-live="polite"></p>
+  </div>
+</section>
+
+<section class="level" data-group="3.1 K-Map" id="s313" data-code="3.1.3" data-short="Three-variable map">
+  <div class="head"><span class="eyebrow"><span class="chip syl">3.1</span> 3.1.3 · Text §3-2</span><h2>The three-variable map and adjacency</h2></div>
+  <p>Eight minterms, eight squares. The columns run <span class="t">00, 01, 11, 10</span> (Note: The pattern looks usual, <b>IS  NOT ???</b>.The main aim is while constructing columns/rows <b> ONLY ONE LITERAL IS ALLOWED TO CHANGE BETWEEN ADJACENT (SIDE-BY-SIDE) ROW AND COLUMN</b> , : <B>a Gray-code order:( REMEMBER FROM PREVIOUS CHAPTER GRAY CODES LOGIC)</B>, so only one bit changes between neighbours. That is the whole trick. Any two adjacent squares differ by <B>ONLY one variable . </B></p>
+  <div class="figrow">
+    <figure><div class="kmap-mount" data-n="3" data-ones="" data-index="1"></div><figcaption>Note the order m₀ m₁ m₃ m₂ along the top row.</figcaption></figure>
+    <figure><div class="kmap-mount" data-n="3" data-ones="5,7" data-groups="xz:5,7"></div><figcaption>m₅ + m₇ = xy'z + xyz = xz(y' + y) = xz</figcaption></figure>
+  </div>
+  <div class="idea"><b>Wrap-around:</b> the left and right edges touch, as if the map were drawn on a cylinder AND SO for top and bottom edge as well. So m₀ is adjacent to m₂,also m₀ is adjacent to m4.and m₄ to m₆ and so on for every edge opposite: <span class="t">x'y'z' + x'yz' = x'z'</span>.</div>
+  <ol class="rules">
+    <li>Groups must contain 1, 2, 4 or 8 squares (a power of two), arranged as a rectangle (wrap-around allowed).</li>
+    <li>1 square → 3 literals, 2 squares → 2 literals, 4 squares → 1 literal, 8 squares → F = 1.</li>
+    <li>Make each group <b>as large as possible</b>; a square may be used more than once.</li>
+	<li>Note: always start to look from block size of 2^(total number of variable). Like for 3 variable start looking from 2^3 : 8(All blocks) --->2^2 : 4 (4 Blocks) --->2^1 : 2 (2 blocks)--->2^0 : 1 (1 Blocks). Also, Try to group those first which has not been grouped yet. If cannot then can be grouped with already grouped square.</li>
+  </ol>
+  <div class="worked" data-stepper>
+    <span class="eyebrow">Worked example · Ex 3-1</span>
+    <h3>Simplify F(x, y, z) = Σ(2, 3, 4, 5)</h3>
+    <ol class="steps">
+      <li><div><p><b>Plot.</b> Put a 1 in squares 010, 011, 100 and 101.</p><div class="kmap-mount" data-n="3" data-ones="2,3,4,5"></div></div></li>
+      <li><div><p><b>Find adjacent pairs.</b> m₂ and m₃ sit side by side in row 0 (x'), under the y columns. m₄ and m₅ sit in row 1 (x), under the y' columns.</p><div class="kmap-mount" data-n="3" data-ones="2,3,4,5" data-groups="x'y:2,3;xy':4,5"></div></div></li>
+      <li class="final"><div><p><b>Read each group and OR them.</b></p><span class="ans"> <b>While reading the grouped value look for literals who remain <br> unchanged (row and column both) are only kept </b><br>example :---> x'y :( x:0,yz :11,10) in yz, z changed from 1 to 0 <br>so z collapsed leaving behind only y at value 1, <br>so y not y'.Now check for xy'<br>F = x'y + xy'</span></div></li>
+    </ol>
+  </div>
+  <div class="worked" data-stepper>
+    <span class="eyebrow">Worked example · Ex 3-2</span>
+    <h3>Simplify F(x, y, z) = Σ(3, 4, 6, 7)</h3>
+    <ol class="steps">
+      <li><div><p><b>Plot</b> the four 1s.</p><div class="kmap-mount" data-n="3" data-ones="3,4,6,7"></div></div></li>
+      <li><div><p><b>Column pair:</b> m₃ and m₇ share column 11, so they give <span class="t">yz</span>.</p></div></li>
+      <li><div><p><b>Wrap-around pair:</b> m₄ (col 00) and m₆ (col 10) are adjacent across the edge. Both have x = 1, z = 0, so they give <span class="t">xz'</span>.</p><div class="kmap-mount" data-n="3" data-ones="3,4,6,7" data-groups="yz:3,7;xz':4,6"></div></div></li>
+      <li class="final"><div><span class="ans">F = yz + xz'</span></div></li>
+    </ol>
+  </div>
+  <div class="worked" data-stepper>
+    <span class="eyebrow">Worked example · Ex 3-3</span>
+    <h3>Simplify F(x, y, z) = Σ(0, 2, 4, 5, 6)</h3>
+    <ol class="steps">
+      <li><div><p><b>Biggest group first.</b> The first and last columns (m₀ m₂ m₄ m₆) are four adjacent squares, all with z = 0: the single literal <span class="t">z'</span>.</p><div class="kmap-mount" data-n="3" data-ones="0,2,4,5,6" data-groups="z':0,2,4,6"></div></div></li>
+      <li><div><p><b>Leftover m₅.</b> Pair it with m₄, even though m₄ is already used. Reusing is allowed and better: <span class="t">xy'</span> (2 literals) beats <span class="t">xy'z</span> (3 literals).</p><div class="kmap-mount" data-n="3" data-ones="0,2,4,5,6" data-groups="z':0,2,4,6;xy':4,5"></div></div></li>
+      <li class="final"><div><span class="ans">F = z' + xy'</span></div></li>
+    </ol>
+  </div>
+  <div class="worked" data-stepper>
+    <span class="eyebrow">Worked example · Ex 3-4</span>
+    <h3>F = A'C + A'B + AB'C + BC: find the minterms, then simplify</h3>
+    <ol class="steps">
+      <li><div><p><b>Plot each term.</b> A'C → 001, 011. A'B → 010, 011 (011 already marked). AB'C → 101. BC → 011, 111.</p><div class="kmap-mount" data-n="3" data-names="ABC" data-ones="1,2,3,5,7"></div></div></li>
+      <li><div><p><b>Read the minterms:</b> <span class="t">F(A,B,C) = Σ(1, 2, 3, 5, 7)</span>.</p></div></li>
+      <li><div><p><b>Group:</b> the middle two columns (C = 1) give <span class="t">C</span>; m₂ pairs with m₃ to give <span class="t">A'B</span>.</p><div class="kmap-mount" data-n="3" data-names="ABC" data-ones="1,2,3,5,7" data-groups="C:1,3,5,7;A'B:2,3"></div></div></li>
+      <li class="final"><div><p>Four terms became two.</p><span class="ans">F = C + A'B</span></div></li>
+    </ol>
+  </div>
+  <div class="quiz" data-answer="2" data-explain="Groups must be 1, 2, 4 or 8 squares. Three squares do not cancel a whole variable, so cover them as two overlapping pairs.">
+    <p class="q">Three 1s sit in a row of a 3-variable map. How should you group them?</p>
+    <div class="opts"><button>One group of three</button><button>Three single squares</button><button>Two overlapping pairs</button></div><p class="fb" aria-live="polite"></p>
+  </div>
+</section>
+
+<section class="level" data-group="3.1 K-Map" id="s314" data-code="3.1.4" data-short="Four-variable map">
+  <div class="head"><span class="eyebrow"><span class="chip syl">3.1</span> 3.1.4 · Text §3-3</span><h2>The four-variable map</h2></div>
+  <p>Rows <span class="t">wx</span> and columns <span class="t">yz</span> both follow 00, 01, 11, 10. The minterm number is the row bits followed by the column bits: row 11, column 01 → 1101 → m₁₃. Now the top and bottom edges also touch, so the four corners are mutually adjacent.</p>
+  <div class="figrow">
+    <figure><div class="kmap-mount" data-n="4" data-ones="" data-index="1"></div><figcaption>Square numbering of the 4-variable map (Fig. 3-8).</figcaption></figure>
+    <div class="tbl"><table><thead><tr><th>Squares</th><th>Literals left</th></tr></thead><tbody>
+      <tr><td>1</td><td>4</td></tr><tr><td>2</td><td>3</td></tr><tr><td>4</td><td>2</td></tr><tr><td>8</td><td>1</td></tr><tr><td>16</td><td>F = 1</td></tr></tbody></table></div>
+  </div>
+  <div class="worked" data-stepper>
+    <span class="eyebrow">Worked example · Ex 3-5</span>
+    <h3>Simplify F(w, x, y, z) = Σ(0, 1, 2, 4, 5, 6, 8, 9, 12, 13, 14)</h3>
+    <ol class="steps">
+      <li><div><p><b>Plot</b> eleven 1s.</p><div class="kmap-mount" data-n="4" data-ones="0,1,2,4,5,6,8,9,12,13,14"></div></div></li>
+      <li><div><p><b>Largest group:</b> the two left columns (y = 0) hold eight 1s → <span class="t">y'</span>.</p><div class="kmap-mount" data-n="4" data-ones="0,1,2,4,5,6,8,9,12,13,14" data-groups="y':0,1,4,5,8,9,12,13"></div></div></li>
+      <li><div><p><b>Right column 1s (m₂, m₆, m₁₄)</b> can't stand alone. Wrap the top two rows to the left edge: m₀ m₂ m₄ m₆ → <span class="t">w'z'</span>. Then m₁₄ joins m₄ m₆ m₁₂ (middle rows, end columns) → <span class="t">xz'</span>.</p><div class="kmap-mount" data-n="4" data-ones="0,1,2,4,5,6,8,9,12,13,14" data-groups="y':0,1,4,5,8,9,12,13;w'z':0,2,4,6;xz':4,6,12,14"></div></div></li>
+      <li class="final"><div><span class="ans">F = y' + w'z' + xz'</span></div></li>
+    </ol>
+  </div>
+  <div class="worked" data-stepper>
+    <span class="eyebrow">Worked example · Ex 3-6</span>
+    <h3>Simplify F = A'B'C' + B'CD' + A'BCD' + AB'C'</h3>
+    <ol class="steps">
+      <li><div><p><b>Plot each term.</b> A'B'C' → 0000, 0001. B'CD' → 0010, 1010. A'BCD' → 0110. AB'C' → 1000, 1001.</p><div class="kmap-mount" data-n="4" data-names="ABCD" data-ones="0,1,2,6,8,9,10"></div></div></li>
+      <li><div><p><b>The four corners</b> (m₀, m₂, m₈, m₁₀) form one group because top/bottom and left/right edges both wrap: <span class="t">B'D'</span>.</p></div></li>
+      <li><div><p><b>m₀ m₁ m₈ m₉</b> (top and bottom rows, left two columns) give <span class="t">B'C'</span>. <b>m₆</b> pairs with m₂ to give <span class="t">A'CD'</span>.</p><div class="kmap-mount" data-n="4" data-names="ABCD" data-ones="0,1,2,6,8,9,10" data-groups="B'D':0,2,8,10;B'C':0,1,8,9;A'CD':2,6"></div></div></li>
+      <li class="final"><div><span class="ans">F = B'D' + B'C' + A'CD'</span></div></li>
+    </ol>
+  </div>
+  <div class="quiz" data-answer="0" data-explain="Corners are 0000, 0010, 1000, 1010. B = 0 and D = 0 in all four, so the term is B'D'.">
+    <p class="q">All four corners of an A B C D map are 1. Which term do they give?</p>
+    <div class="opts"><button>B'D'</button><button>A'C'</button><button>They are not adjacent</button></div><p class="fb" aria-live="polite"></p>
+  </div>
+</section>
+
+<section class="level" data-group="3.1 K-Map" id="s315" data-code="3.1.5" data-short="Prime implicants">
+  <div class="head"><span class="eyebrow"><span class="chip syl">3.1</span> 3.1.5 · Text §3-3</span><h2>Prime and essential prime implicants</h2></div>
+  
+  <p>When solving Karnaugh maps (K-maps), things can get messy if you just circle groups by guesswork. Using Prime Implicants (PIs) and Essential Prime Implicants (EPIs) turns the process into a systematic, foolproof puzzle.</p>
+  
+  <div class="idea">
+    <b>1. Prime Implicant (PI): The "As Big As Possible" Rule</b><br>
+    <b>What it is:</b> A group of 1s that cannot be made any larger by combining it with adjacent groups.<br>
+    <b>In plain language:</b> When you circle a group of 1s on a K-map, you always want it to be as big as the rules allow (1, 2, 4, 8, or 16 cells). If you've drawn a group of 2, but it could actually be expanded into a group of 4, that group of 2 is not a Prime Implicant.<br>
+    <b>The Goal:</b> Before doing anything else, you must identify all possible PIs on the map. These represent all the candidate building blocks for your simplest expression.<br><br>
+    
+    <b>2. Essential Prime Implicant (EPI): The "Mandatory Choice"</b><br>
+    <b>What it is:</b> A Prime Implicant that is the only group covering at least one specific 1 on the map.<br>
+    <b>In plain language:</b> Look closely at your 1s. Is there a 1 that is so isolated, or on an edge/corner, that only one single PI box covers it? That means that specific 1 has no other backup options.<br>
+    <b>The Rule:</b> Essentials must always appear in your final minimal answer. If you leave an EPI out, your final boolean expression will be wrong because at least one 1 will be left uncovered.
+  </div>
+
+  <p><b>Step-by-Step Strategy for Solving a K-Map:</b> When you look at a four-variable K-map, follow this exact workflow:</p>
+
+  <ol class="rules">
+    <li>
+      <b>Find All Prime Implicants:</b> Draw every single valid, maximum-size group of 1s (remembering that the map wraps around the edges like a globe). Don't worry about overlapping yet; just find all the biggest possible boxes.
+    </li>
+    <li>
+      <b>Spot the Essentials (EPIs):</b> Scan every 1 on the map. Find any 1 that belongs to only one box. Circle those boxes—they are your Essential Prime Implicants. Lock them into your final answer right away.
+    </li>
+    <li>
+      <b>Cover the Rest:</b> Look to see if all the 1s on the map are already covered by your EPIs.
+      <ul style="margin-top: 0.3rem; margin-bottom: 0; padding-left: 1.2rem; list-style-type: disc;">
+        <li><b>If yes:</b> You are done! Your final answer is just the sum of your EPIs.</li>
+        <li><b>If no:</b> (some 1s are left out), pick the cheapest, simplest remaining PIs to cover the leftover 1s.</li>
+      </ul>
+    </li>
+  </ol>
+</section>
+  <div class="worked" data-stepper>
+    <span class="eyebrow">Worked example · Fig. 3-11</span>
+    <h3>F(A, B, C, D) = Σ(0, 2, 3, 5, 7, 8, 9, 10, 11, 13, 15)</h3>
+    <ol class="steps">
+      <li><div><p><b>Plot</b> the eleven 1s.</p><div class="kmap-mount" data-n="4" data-names="ABCD" data-ones="0,2,3,5,7,8,9,10,11,13,15"></div></div></li>
+      <li><div><p><b>Essentials.</b> m₀ fits in only one group of four, the corners: <span class="t">B'D'</span>. m₅ fits only in the centre square m₅ m₇ m₁₃ m₁₅: <span class="t">BD</span>. Both are essential and cover eight 1s.</p><div class="kmap-mount" data-n="4" data-names="ABCD" data-ones="0,2,3,5,7,8,9,10,11,13,15" data-groups="B'D':0,2,8,10;BD:5,7,13,15"></div></div></li>
+      <li><div><p><b>Remaining: m₃, m₉, m₁₁.</b> m₃ is covered by <span class="t">CD</span> or <span class="t">B'C</span>; m₉ by <span class="t">AD</span> or <span class="t">AB'</span>; m₁₁ by any of the four.</p><div class="kmap-mount" data-n="4" data-names="ABCD" data-ones="0,2,3,5,7,8,9,10,11,13,15" data-groups="CD:3,7,11,15;B'C:2,3,10,11;AD:9,11,13,15;AB':8,9,10,11"></div></div></li>
+      <li class="final"><div><p>Pick one for m₃ and one for m₉. Four equally minimal answers, 8 literals each:</p>
+        <div class="eq">F = BD + B'D' + CD + AD</div><div class="eq">F = BD + B'D' + CD + AB'</div><div class="eq">F = BD + B'D' + B'C + AD</div><div class="eq">F = BD + B'D' + B'C + AB'</div></div></li>
+    </ol>
+  </div>
+  <div class="quiz" data-answer="1" data-explain="A PI is essential when some 1 is covered by that PI alone. Size does not matter; a single isolated 1 is an essential PI too.">
+    <p class="q">What makes a prime implicant essential?</p>
+    <div class="opts"><button>It is the largest group on the map</button><button>It is the only PI covering at least one minterm</button><button>It contains a corner square</button></div><p class="fb" aria-live="polite"></p>
+  </div>
+</section>
+
+<section class="level" data-group="3.1 K-Map" id="p31" data-code="3.1 ✎" data-short="Practice: K-maps">
+  <div class="head"><span class="eyebrow"><span class="chip syl">3.1</span> Practice · Text problems 3-1 to 3-7</span><h2>Practice: K-map simplification</h2></div>
+  <p>Each problem reveals its solution one step at a time. Try the next step yourself before you open it.</p>
+  <div class="probs" id="probs31"></div>
+</section>
+
+<!-- ===================== 3.2 ===================== -->
+<div class="part" id="part-32"><span class="eyebrow">Syllabus 3.2</span><h2>Product of sums, sum of products</h2></div>
+
+<section class="level" data-group="3.2 SOP and POS" id="s321" data-code="3.2.1" data-short="SOP from the map">
+  <div class="head"><span class="eyebrow"><span class="chip syl">3.2</span> 3.2.1 · Text §3-5</span><h2>Sum of products from the 1s</h2></div>
+  <p>Every simplification in 3.1 produced a <b>sum of products</b>: each group of 1s is an AND term, and the terms are ORed. In hardware that is a two-level <b>AND-OR</b> circuit: one AND gate per term, one OR gate to collect them (inputs are assumed available in true and complemented form, so no inverters).</p>
+  <div class="worked" data-stepper>
+    <span class="eyebrow">Worked example · Ex 3-8 (a)</span>
+    <h3>F(A, B, C, D) = Σ(0, 1, 2, 5, 8, 9, 10) in SOP</h3>
+    <ol class="steps">
+      <li><div><p><b>Group the 1s.</b> Corners → <span class="t">B'D'</span>; top and bottom rows, left columns → <span class="t">B'C'</span>; m₁ m₅ → <span class="t">A'C'D</span>.</p><div class="kmap-mount" data-n="4" data-names="ABCD" data-zeros="1" data-ones="0,1,2,5,8,9,10" data-groups="B'D':0,2,8,10;B'C':0,1,8,9;A'C'D:1,5"></div></div></li>
+      <li class="final"><div><span class="ans">F = B'D' + B'C' + A'C'D</span><div class="circuit" data-type="and-or" data-terms="B',D'|B',C'|A',C',D"></div><p class="muted" style="font-size:.9rem">AND-OR, two levels (Fig. 3-15a).</p></div></li>
+    </ol>
+  </div>
+  <div class="quiz" data-answer="1" data-explain="Each product term is one AND gate (3 here) and one OR gate collects them: 4 gates in two levels.">
+    <p class="q">F = AB + C'D + A'BC as an AND-OR circuit uses how many gates?</p>
+    <div class="opts"><button>3</button><button>4</button><button>7</button></div><p class="fb" aria-live="polite"></p>
+  </div>
+</section>
+
+<section class="level" data-group="3.2 SOP and POS" id="s322" data-code="3.2.2" data-short="POS from the 0s">
+  <div class="head"><span class="eyebrow"><span class="chip syl">3.2</span> 3.2.2 · Text §3-5</span><h2>Product of sums from the 0s</h2></div>
+  <p>The squares without 1s are the minterms of F'. Fill them with 0s and group the 0s exactly as you grouped 1s. That gives F' in SOP form. Complement it with DeMorgan's theorem (take the dual, complement each literal) and F appears in product-of-sums form.</p>
+  <div class="idea"><b>Recipe:</b> group 0s → write F' as SOP → complement → F as POS. The circuit is two-level <b>OR-AND</b>.</div>
+  <div class="worked" data-stepper>
+    <span class="eyebrow">Worked example · Ex 3-8 (b)</span>
+    <h3>Same F = Σ(0, 1, 2, 5, 8, 9, 10), now in POS</h3>
+    <ol class="steps">
+      <li><div><p><b>Group the 0s:</b> row 11 → <span class="t">AB</span>; column 11 → <span class="t">CD</span>; m₄ m₆ m₁₂ m₁₄ → <span class="t">BD'</span>.</p><div class="kmap-mount" data-n="4" data-names="ABCD" data-zeros="1" data-ones="0,1,2,5,8,9,10" data-zgroups="AB:12,13,14,15;CD:3,7,11,15;BD':4,6,12,14"></div><div class="eq">F' = AB + CD + BD'</div></div></li>
+      <li><div><p><b>Complement</b> with DeMorgan: each product term becomes a sum term with every literal complemented.</p><div class="eq">F = (AB + CD + BD')' = (A' + B')(C' + D')(B' + D)</div></div></li>
+      <li class="final"><div><span class="ans">F = (A' + B')(C' + D')(B' + D)</span><div class="circuit" data-type="or-and" data-terms="A',B'|C',D'|B',D"></div><p class="muted" style="font-size:.9rem">OR-AND, two levels (Fig. 3-15b).</p></div></li>
+    </ol>
+  </div>
+  <div class="worked" data-stepper>
+    <span class="eyebrow">Worked example · Table 3-2</span>
+    <h3>F(x, y, z) = Σ(1, 3, 4, 6) = Π(0, 2, 5, 7)</h3>
+    <ol class="steps">
+      <li><div><p><b>Fill 1s and 0s.</b> The 1s are the minterms, the 0s are the maxterms.</p><div class="kmap-mount" data-n="3" data-zeros="1" data-ones="1,3,4,6" data-groups="x'z:1,3;xz':4,6"></div><p>SOP from 1s: <span class="t">F = x'z + xz'</span></p></div></li>
+      <li><div><p>POS from 0s give : <span class="t">F' = xz + x'z'</span>, the equivalence function, confirming that XOR is its complement.</p></div></li>
+      <li class="final"><div><span class="ans">F = (x' + z')(x + z)</span></div></li>
+    </ol>
+  </div>
+  <div class="quiz" data-answer="2" data-explain="F' = A'B + CD'. Dual with complemented literals: F = (A + B')(C' + D).">
+    <p class="q">Grouping the 0s gave F' = A'B + CD'. What is F in POS form?</p>
+    <div class="opts"><button>(A' + B)(C + D')</button><button>(A + B)(C + D)</button><button>(A + B')(C' + D)</button></div><p class="fb" aria-live="polite"></p>
+  </div>
+</section>
+
+<section class="level" data-group="3.2 SOP and POS" id="s323" data-code="3.2.3" data-short="Entering a POS function">
+  <div class="head"><span class="eyebrow"><span class="chip syl">3.2</span> 3.2.3 · Text §3-5</span><h2>Putting a POS function on the map</h2></div>
+  <p>A function given as Π(maxterms) goes straight on the map: 0s in the listed squares, 1s everywhere else. A function given as a product of sums is entered through its complement: F' is a sum of products, and its terms mark the 0s.</p>
+  <div class="worked" data-stepper>
+    <span class="eyebrow">Worked example · Text p. 87</span>
+    <h3>Enter F = (A' + B' + C')(B + D), then simplify both ways</h3>
+    <ol class="steps">
+      <li><div><p><b>Complement:</b> <span class="t">F' = ABC + B'D'</span>.</p></div></li>
+      <li><div><p><b>Mark 0s</b> for F': ABC → m₁₄, m₁₅. B'D' → the corners m₀, m₂, m₈, m₁₀. Every other square is 1.</p><div class="kmap-mount" data-n="4" data-names="ABCD" data-zeros="1" data-ones="1,3,4,5,6,7,9,11,12,13"></div></div></li>
+      <li><div><p><b>SOP from the 1s:</b> rows 01 → <span class="t">A'B</span>; m₁ m₃ m₉ m₁₁ → <span class="t">B'D</span>; m₄ m₅ m₁₂ m₁₃ → <span class="t">BC'</span>.</p><div class="kmap-mount" data-n="4" data-names="ABCD" data-zeros="1" data-ones="1,3,4,5,6,7,9,11,12,13" data-groups="A'B:4,5,6,7;B'D:1,3,9,11;BC':4,5,12,13"></div></div></li>
+      <li class="final"><div><p>The POS was already minimal (the 0s group exactly as B'D' and ABC). The same function has two minimal forms of different cost: SOP uses 6 literals, POS uses 5.</p><span class="ans">F = A'B + B'D + BC' = (A' + B' + C')(B + D)</span></div></li>
+    </ol>
+  </div>
+  <div class="quiz" data-answer="0" data-explain="Π lists the 0s. Mark 0 in squares 0, 3, 5 and 6; every other square is 1.">
+    <p class="q">F(x, y, z) = Π(0, 3, 5, 6). Which squares get 0s on the map?</p>
+    <div class="opts"><button>0, 3, 5, 6</button><button>1, 2, 4, 7</button><button>None; Π cannot be mapped directly</button></div><p class="fb" aria-live="polite"></p>
+  </div>
+</section>
+
+<section class="level" data-group="3.2 SOP and POS" id="p32" data-code="3.2 ✎" data-short="Practice: SOP and POS">
+  <div class="head"><span class="eyebrow"><span class="chip syl">3.2</span> Practice · Text problems 3-9 to 3-11</span><h2>Practice: SOP and POS</h2></div>
+  <p>Read Π lists as 0s, group 0s for F', then complement.</p>
+  <div class="probs" id="probs32"></div>
+</section>
+
+<!-- ===================== 3.3 ===================== -->
+<div class="part" id="part-33"><span class="eyebrow">Syllabus 3.3</span><h2>Simplification for NAND and NOR implementation</h2></div>
+
+<section class="level" data-group="3.3 NAND and NOR" id="s331" data-code="3.3.1" data-short="NAND and NOR symbols">
+  <div class="head"><span class="eyebrow"><span class="chip syl">3.3</span> 3.3.1 · Text §3-6</span><h2>Why NAND and NOR, and their two symbols</h2></div>
+  <p>Real ICs are built mostly from NAND and NOR gates: they are easier to fabricate and are the basic gates of every IC logic family. So a simplified expression has to be converted. Two pictures make the conversion painless.</p>
+  <div class="tbl"><table><thead><tr><th>Gate</th><th>Usual symbol</th><th>Alternate symbol (DeMorgan)</th><th>Identity</th></tr></thead><tbody>
+    <tr><td>NAND</td><td>AND-invert</td><td>invert-OR (bubbles on inputs)</td><td><code>(xyz)' = x' + y' + z'</code></td></tr>
+    <tr><td>NOR</td><td>OR-invert</td><td>invert-AND (bubbles on inputs)</td><td><code>(x + y + z)' = x'y'z'</code></td></tr>
+    <tr><td>Inverter</td><td>buffer-invert</td><td>one-input NAND or one-input NOR</td><td><code>x'</code></td></tr>
+  </tbody></table></div>
+  <div class="idea"><b>Bubble rule:</b> a small circle means complement. Two bubbles on the same line cancel, so they can be removed without changing the logic.</div>
+  <div class="quiz" data-answer="1" data-explain="By DeMorgan, (AB)' = A' + B': a NAND behaves like an OR gate with inverted inputs.">
+    <p class="q">A NAND gate drawn as invert-OR computes which expression for inputs A, B?</p>
+    <div class="opts"><button>A' · B'</button><button>A' + B'</button><button>(A + B)'</button></div><p class="fb" aria-live="polite"></p>
+  </div>
+</section>
+
+<section class="level" data-group="3.3 NAND and NOR" id="s332" data-code="3.3.2" data-short="NAND implementation">
+  <div class="head"><span class="eyebrow"><span class="chip syl">3.3</span> 3.3.2 · Text §3-6</span><h2>NAND implementation (from SOP)</h2></div>
+  <p>Start from AND-OR. Replace every AND with a NAND and the OR with a NAND drawn as invert-OR. The bubbles at the AND outputs meet the bubbles at the OR inputs and cancel, so the circuit is unchanged.</p>
+  <div class="figrow">
+    <figure><div class="circuit" data-type="and-or" data-terms="A,B|C,D|E"></div><figcaption>(a) AND-OR for F = AB + CD + E</figcaption></figure>
+    <figure><div class="circuit" data-type="nand" data-terms="A,B|C,D|E"></div><figcaption>(c) NAND-NAND. Same function: F = [(AB)'·(CD)'·E']'</figcaption></figure>
+  </div>
+  <div class="idea"><b>NAND rule:</b> 1. simplify to SOP; 2. one NAND per product term (first level); 3. one NAND for the OR (second level); 4. a single-literal term needs an inverter, or feed its complement straight into the second level.</div>
+  <div class="worked" data-stepper>
+    <span class="eyebrow">Worked example · Ex 3-9</span>
+    <h3>Implement F(x, y, z) = Σ(0, 6) with NAND gates</h3>
+    <ol class="steps">
+      <li><div><p><b>Map it.</b> The two 1s are not adjacent, so SOP stays at two full minterms.</p><div class="kmap-mount" data-n="3" data-zeros="1" data-ones="0,6" data-groups="x'y'z':0;xyz':6"></div><div class="eq">F = x'y'z' + xyz'</div></div></li>
+      <li><div><p><b>NAND-NAND</b> straight from SOP (2 levels).</p><div class="circuit" data-type="nand" data-terms="x',y',z'|x,y,z'"></div></div></li>
+      <li class="final"><div><p><b>Second way:</b> combine the 0s for <span class="t">F' = x'y + xy' + z</span> and build F' in NAND-NAND. To get F, add a one-input NAND at the output: three levels. Useful when the complement is wanted.</p><div class="circuit" data-type="nand" data-terms="x',y|x,y'|z" data-out="F'"></div></div></li>
+    </ol>
+  </div>
+  <div class="quiz" data-answer="0" data-explain="NAND-NAND is a direct copy of AND-OR, which comes from sum of products.">
+    <p class="q">Before drawing a two-level NAND circuit for F, what form must F be in?</p>
+    <div class="opts"><button>Sum of products</button><button>Product of sums</button><button>Product of maxterms</button></div><p class="fb" aria-live="polite"></p>
+  </div>
+</section>
+
+<section class="level" data-group="3.3 NAND and NOR" id="s333" data-code="3.3.3" data-short="NOR implementation">
+  <div class="head"><span class="eyebrow"><span class="chip syl">3.3</span> 3.3.3 · Text §3-6</span><h2>NOR implementation (from POS)</h2></div>
+  <p>NOR is the dual of NAND, so every rule is the dual. Start from OR-AND: replace each OR with a NOR and the AND with a NOR drawn as invert-AND. The bubbles cancel again.</p>
+  <div class="figrow">
+    <figure><div class="circuit" data-type="or-and" data-terms="A,B|C,D|E"></div><figcaption>(a) OR-AND for F = (A + B)(C + D)E</figcaption></figure>
+    <figure><div class="circuit" data-type="nor" data-terms="A,B|C,D|E"></div><figcaption>(c) NOR-NOR, same function</figcaption></figure>
+  </div>
+  <div class="idea"><b>NOR rule:</b> simplify to POS (combine 0s, complement); one NOR per sum term; one NOR at the second level; a single literal needs an inverter or its complement fed directly.</div>
+  <div class="worked" data-stepper>
+    <span class="eyebrow">Worked example · Ex 3-10</span>
+    <h3>Implement F(x, y, z) = Σ(0, 6) with NOR gates</h3>
+    <ol class="steps">
+      <li><div><p><b>Group the 0s:</b> <span class="t">F' = x'y + xy' + z</span>.</p><div class="kmap-mount" data-n="3" data-zeros="1" data-ones="0,6" data-zgroups="x'y:2,3;xy':4,5;z:1,3,5,7"></div></div></li>
+      <li><div><p><b>Complement</b> for POS: <span class="t">F = (x + y')(x' + y)z'</span>.</p></div></li>
+      <li class="final"><div><p><b>NOR-NOR</b> (2 levels). The single literal z' gets a one-input NOR, or feed z directly into the output gate.</p><div class="circuit" data-type="nor" data-terms="x,y'|x',y|z'"></div></div></li>
+    </ol>
+  </div>
+</section>
+
+<section class="level" data-group="3.3 NAND and NOR" id="s334" data-code="3.3.4" data-short="Choosing the procedure">
+  <div class="head"><span class="eyebrow"><span class="chip syl">3.3</span> 3.3.4 · Table 3-3</span><h2>Choosing the right procedure</h2></div>
+  <p>Always simplify first; fewer literals means fewer gates. Then pick the row that matches the gate family and the output you need.</p>
+  <div class="tbl"><table><thead><tr><th>Case</th><th>Simplify</th><th>Standard form</th><th>How</th><th>Gates</th><th>Levels to F</th></tr></thead><tbody>
+    <tr><td>(a)</td><td>F</td><td>SOP</td><td>Combine 1s</td><td>NAND</td><td>2</td></tr>
+    <tr><td>(b)</td><td>F'</td><td>SOP</td><td>Combine 0s</td><td>NAND</td><td>3</td></tr>
+    <tr><td>(c)</td><td>F</td><td>POS</td><td>Complement F' from (b)</td><td>NOR</td><td>2</td></tr>
+    <tr><td>(d)</td><td>F'</td><td>POS</td><td>Complement F from (a)</td><td>NOR</td><td>3</td></tr>
+  </tbody></table></div>
+  <div class="quiz" data-answer="0" data-explain="NOR-NOR mirrors OR-AND, which needs product of sums. POS of F comes from combining the 0s and complementing.">
+    <p class="q">You want a two-level NOR-only circuit for F. Which map squares do you group?</p>
+    <div class="opts"><button>The 0s, then complement</button><button>The 1s, directly</button><button>Either; it makes no difference</button></div><p class="fb" aria-live="polite"></p>
+  </div>
+</section>
+
+<section class="level" data-group="3.3 NAND and NOR" id="p33" data-code="3.3 ✎" data-short="Practice: NAND and NOR">
+  <div class="head"><span class="eyebrow"><span class="chip syl">3.3</span> Practice · Text problems 3-12 to 3-17</span><h2>Practice: NAND and NOR</h2></div>
+  <p>Pick the right standard form for the gate type, then convert.</p>
+  <div class="probs" id="probs33"></div>
+</section>
+
+<!-- ===================== WRAP-UP ===================== -->
+<div class="part" id="part-wrap"><span class="eyebrow">Unit 3 wrap-up</span><h2>Critical thinking and the lab</h2></div>
+
+<section class="level" data-group="Unit wrap-up" id="crit" data-code="3 ★" data-short="Critical thinking">
+  <div class="head"><span class="eyebrow"><span class="chip syl">3.1–3.3</span> Mixed problems</span><h2>Critical thinking</h2></div>
+  <p>These problems mix all three subtopics, and each needs a decision the textbook procedure does not make for you.</p>
+  <div class="probs" id="probscrit"></div>
+</section>
+
+<section class="level" data-group="Unit wrap-up" id="lab" data-code="lab" data-short="K-map lab">
+  <div class="head"><span class="eyebrow">Practice bench</span><h2>K-map lab</h2></div>
+  <p style="max-width:66ch">Click squares to cycle 0 → 1 → X, or type the minterm lists. The lab finds every prime implicant, marks the essentials, picks a minimal cover, and draws the NAND and NOR circuits. Use it to check hand solutions, not to replace them.</p>
+  <div class="labgrid">
+    <div class="panel">
+      <div class="field"><label>Variables</label>
+        <div class="seg" id="nseg"><button data-n="2" aria-pressed="false">2</button><button data-n="3" aria-pressed="false">3</button><button data-n="4" aria-pressed="true">4</button></div></div>
+      <div class="field"><label for="names">Variable names</label>
+        <select id="names"><option value="xyz">w x y z (book default)</option><option value="ABC">A B C D</option></select></div>
+      <div class="field"><label for="mins">F = Σ m( … )</label><input id="mins" inputmode="numeric" autocomplete="off"></div>
+      <div class="field"><label for="dcs">d = Σ m( … ) don't-cares · optional topic O2</label><input id="dcs" inputmode="numeric" autocomplete="off"></div>
+      <p class="err" id="laberr" hidden></p>
+      <div class="field"><label for="preset">Load a textbook function</label>
+        <select id="preset"><option value="">Choose…</option></select></div>
+      <div class="ctrl"><button class="btn ghost" id="clear">Clear map</button></div>
+    </div>
+    <div class="out">
+      <div id="labmap"></div>
+      <dl class="kv" id="labres"></dl>
+      <div class="figrow" id="labcirc"></div>
+      <details class="expl" id="labexpl" open><summary>Step-by-step reasoning</summary><ol class="steps" id="labsteps" style="margin-top:12px"></ol></details>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== OPTIONAL ===================== -->
+<!-- ===================== EXAM + APPLICATION ===================== -->
+<div class="part" id="part-app"><span class="eyebrow">Exam and real life</span><h2>Solved exam question and an application</h2></div>
+
+<section class="level" data-group="Exam and application" id="exam25" data-code="E25" data-short="Exam 2025 Q(b)">
+  <div class="head"><span class="eyebrow"><span class="chip syl">3.1</span> <span class="chip enr">Uses O2</span> Board exam 2025 · Q(b)</span><h2>Exam 2025: simplify with don't-cares</h2></div>
+  <div class="idea"><b>Question.</b> Simplify the following using K-map:<br><span class="t">F(A, B, C, D) = Σ(0, 2, 4, 7, 10, 12)</span><br><span class="t">d(A, B, C, D) = Σ(1, 3, 5, 6, 8)</span></div>
+  <p>The printed question uses <b>ε</b>; read it as <b>Σ</b> (sum of minterms). <span class="t">F</span> lists the squares that must be 1, <span class="t">d</span> lists the don't-care squares (X). Everything else (m₉, m₁₁, m₁₃, m₁₄, m₁₅) is 0. Don't-cares are optional topic O2; read that section first if X squares are new.</p>
+  <div class="worked" data-stepper>
+    <span class="eyebrow">Model answer · step by step</span>
+    <h3>F = Σ(0, 2, 4, 7, 10, 12), d = Σ(1, 3, 5, 6, 8)</h3>
+    <ol class="steps">
+      <li><div><p><b>Draw the 4-variable map</b> with rows AB and columns CD in Gray order (00, 01, 11, 10). Put 1 in squares 0, 2, 4, 7, 10, 12; X in 1, 3, 5, 6, 8; 0 in the rest.</p><div class="kmap-mount" data-n="4" data-names="ABCD" data-zeros="1" data-ones="0,2,4,7,10,12" data-dcs="1,3,5,6,8"></div></div></li>
+      <li><div><p><b>Biggest group first.</b> The top two rows (A = 0) hold only 1s and Xs: m₀ m₂ m₄ m₇ plus X₁ X₃ X₅ X₆. Treat those four Xs as 1 and you get an <b>octet</b> → <span class="t">A'</span>. One literal covers four real 1s, including the awkward m₇.</p><div class="kmap-mount" data-n="4" data-names="ABCD" data-zeros="1" data-ones="0,2,4,7,10,12" data-dcs="1,3,5,6,8" data-groups="A':0,1,2,3,4,5,6,7"></div></div></li>
+      <li><div><p><b>m₁₂ is still uncovered.</b> Column CD = 00 is m₀ m₄ m₁₂ X₈, a quad → <span class="t">C'D'</span>.</p><p><b>m₁₀ is still uncovered.</b> The four corners are m₀ m₂ X₈ m₁₀, a quad because the edges wrap → <span class="t">B'D'</span>.</p><div class="kmap-mount" data-n="4" data-names="ABCD" data-zeros="1" data-ones="0,2,4,7,10,12" data-dcs="1,3,5,6,8" data-groups="A':0,1,2,3,4,5,6,7;C'D':0,4,8,12;B'D':0,2,8,10"></div></div></li>
+      <li><div><p><b>Check.</b> Every 1 is covered: m₀ m₂ m₄ m₇ (A'), m₁₂ (C'D'), m₁₀ (B'D'). No group contains a 0. All three groups are essential prime implicants, because each holds a 1 that no other group can reach.</p>
+        <div class="tbl"><table><thead><tr><th>Group</th><th>Squares</th><th>Xs used</th><th>Term</th></tr></thead><tbody>
+          <tr><td>Octet</td><td>0, 1, 2, 3, 4, 5, 6, 7</td><td>1, 3, 5, 6</td><td><code>A'</code></td></tr>
+          <tr><td>Quad (column)</td><td>0, 4, 8, 12</td><td>8</td><td><code>C'D'</code></td></tr>
+          <tr><td>Quad (corners)</td><td>0, 2, 8, 10</td><td>8</td><td><code>B'D'</code></td></tr>
+        </tbody></table></div></div></li>
+      <li class="final"><div><span class="ans">F = A' + B'D' + C'D'</span><div class="circuit" data-type="and-or" data-terms="A'|B',D'|C',D'"></div><p class="muted" style="font-size:.9rem">Two AND gates, one 3-input OR gate. A' goes straight to the OR gate. Factored form: F = A' + D'(B' + C').</p>
+        <p><b>Bonus (POS, from the 0s).</b> Group the 0s: m₉ m₁₁ m₁₃ m₁₅ → AD; m₁₄ m₁₅ → ABC. So F' = AD + ABC and <span class="t">F = (A' + D')(A' + B' + C')</span>. Same 5 literals.</p></div></li>
+    </ol>
+  </div>
+  <div class="worked">
+    <span class="eyebrow">How to write it in the exam</span>
+    <ol class="rules">
+      <li>Write F = Σm(0, 2, 4, 7, 10, 12) + d(1, 3, 5, 6, 8) and draw the map with labelled rows and columns.</li>
+      <li>Fill 1s, Xs and 0s, then loop the octet and the two quads, naming each loop beside the map.</li>
+      <li>State which Xs you took as 1 (1, 3, 5, 6, 8) and give F = A' + B'D' + C'D'.</li>
+      <li>If the question asks for a circuit, draw the AND-OR diagram above.</li>
+    </ol>
+  </div>
+  <div class="quiz" data-answer="2" data-explain="Without X₁, X₃, X₅ and X₆ the top two rows are not all 1s, so the octet A' could not be formed. Xs may be taken as 1 whenever that makes a group larger.">
+    <p class="q">Why are we allowed to loop the whole top half as A', even though m₁, m₃, m₅, m₆ are not in F?</p>
+    <div class="opts"><button>Because they are 0s and 0s can be ignored</button><button>Because every octet must start at m₀</button><button>Because they are don't-cares, so we may treat them as 1 to enlarge a group</button></div><p class="fb" aria-live="polite"></p>
+  </div>
+</section>
+
+<section class="level" data-group="Exam and application" id="attend" data-code="A1" data-short="Attendance warning">
+  <div class="head"><span class="eyebrow"><span class="chip syl">3.1–3.2</span> Real-life application</span><h2>Designing an attendance "Warning" flag</h2></div>
+  <p>A programmer is building an attendance system for an office. Every employee record carries four yes/no switches. The program must raise a <b>Warning (X = 1)</b> for anyone who needs HR's attention. Instead of writing a long chain of <code>if</code> statements, we design the logic as a circuit: truth table, then K-map, then the smallest gate network. The same expression goes straight into the code.</p>
+  <div class="figrow">
+    <div class="tbl"><table><thead><tr><th>Switch</th><th class="c">0</th><th class="c">1</th></tr></thead><tbody>
+      <tr><td><b>P</b> · Present status</td><td>Absent</td><td>Present</td></tr>
+      <tr><td><b>L</b> · Leave status</td><td>Leave not applied</td><td>Leave applied</td></tr>
+      <tr><td><b>M</b> · Many consecutive days missed</td><td>Fewer than 3</td><td>3 or more</td></tr>
+      <tr><td><b>T</b> · Total attendance</td><td>Below 50%</td><td>50% or above</td></tr>
+    </tbody></table></div>
+    <div class="tbl"><table><thead><tr><th class="c">P</th><th class="c">L</th><th>Daily state</th></tr></thead><tbody>
+      <tr><td class="c">1</td><td class="c">0</td><td>Present (expected, came)</td></tr>
+      <tr><td class="c">0</td><td class="c">0</td><td>Absent (expected, did not come)</td></tr>
+      <tr><td class="c">1</td><td class="c">1</td><td>Present but on leave (not expected, came)</td></tr>
+      <tr><td class="c">0</td><td class="c">1</td><td>Absent on approved leave</td></tr>
+    </tbody></table></div>
+  </div>
+  <div class="idea"><b>Raise a warning when:</b><br>1. the person is absent, has not applied for leave, and has missed 3 or more consecutive days;<br>2. the person is present but has leave applied for that day (the record contradicts itself);<br>3. the person's total attendance is below 50%.<br><b>Tasks:</b> (a) truth table, (b) K-map simplification, (c) logic circuit.</div>
+  <div class="worked" data-stepper>
+    <span class="eyebrow">Worked solution</span>
+    <h3>Design X(P, L, M, T) for the warning system</h3>
+    <ol class="steps">
+      <li><div><p><b>Translate each condition into a product term.</b> Read "absent" as P', "no leave" as L', and so on.</p>
+        <div class="tbl"><table><thead><tr><th>Condition</th><th>Switches</th><th>Term</th></tr></thead><tbody>
+          <tr><td>1. Absent, no leave, 3+ days missed</td><td>P = 0, L = 0, M = 1 (T any)</td><td><code>P'L'M</code></td></tr>
+          <tr><td>2. Present with leave applied</td><td>P = 1, L = 1 (M, T any)</td><td><code>PL</code></td></tr>
+          <tr><td>3. Attendance below 50%</td><td>T = 0 (P, L, M any)</td><td><code>T'</code></td></tr>
+        </tbody></table></div>
+        <p>Any one condition is enough, so the terms are ORed: X = P'L'M + PL + T'. The K-map will show whether this can be made smaller.</p>
+        <p class="muted" style="font-size:.9rem">Note: condition 1 says "more than 3 days", but switch M only knows "3 or more". The circuit can only use what M reports, so 3 days also triggers the warning.</p></div></li>
+      <li><div><p><b>(a) Truth table.</b> Take P as the most significant bit, so the row number is 8P + 4L + 2M + T. X is 1 when any condition column is 1.</p>
+        <div class="tbl"><table class="tt"><thead><tr><th class="c">m</th><th class="c">P</th><th class="c">L</th><th class="c">M</th><th class="c">T</th><th class="c">C1 P'L'M</th><th class="c">C2 PL</th><th class="c">C3 T'</th><th class="c">X</th></tr></thead><tbody>
+<tr class="xr"><td class="c">0</td><td class="c">0</td><td class="c">0</td><td class="c">0</td><td class="c">0</td><td class="c"><span class="muted">0</span></td><td class="c"><span class="muted">0</span></td><td class="c"><b>1</b></td><td class="c"><b class="t">1</b></td></tr>
+<tr><td class="c">1</td><td class="c">0</td><td class="c">0</td><td class="c">0</td><td class="c">1</td><td class="c"><span class="muted">0</span></td><td class="c"><span class="muted">0</span></td><td class="c"><span class="muted">0</span></td><td class="c">0</td></tr>
+<tr class="xr"><td class="c">2</td><td class="c">0</td><td class="c">0</td><td class="c">1</td><td class="c">0</td><td class="c"><b>1</b></td><td class="c"><span class="muted">0</span></td><td class="c"><b>1</b></td><td class="c"><b class="t">1</b></td></tr>
+<tr class="xr"><td class="c">3</td><td class="c">0</td><td class="c">0</td><td class="c">1</td><td class="c">1</td><td class="c"><b>1</b></td><td class="c"><span class="muted">0</span></td><td class="c"><span class="muted">0</span></td><td class="c"><b class="t">1</b></td></tr>
+<tr class="xr"><td class="c">4</td><td class="c">0</td><td class="c">1</td><td class="c">0</td><td class="c">0</td><td class="c"><span class="muted">0</span></td><td class="c"><span class="muted">0</span></td><td class="c"><b>1</b></td><td class="c"><b class="t">1</b></td></tr>
+<tr><td class="c">5</td><td class="c">0</td><td class="c">1</td><td class="c">0</td><td class="c">1</td><td class="c"><span class="muted">0</span></td><td class="c"><span class="muted">0</span></td><td class="c"><span class="muted">0</span></td><td class="c">0</td></tr>
+<tr class="xr"><td class="c">6</td><td class="c">0</td><td class="c">1</td><td class="c">1</td><td class="c">0</td><td class="c"><span class="muted">0</span></td><td class="c"><span class="muted">0</span></td><td class="c"><b>1</b></td><td class="c"><b class="t">1</b></td></tr>
+<tr><td class="c">7</td><td class="c">0</td><td class="c">1</td><td class="c">1</td><td class="c">1</td><td class="c"><span class="muted">0</span></td><td class="c"><span class="muted">0</span></td><td class="c"><span class="muted">0</span></td><td class="c">0</td></tr>
+<tr class="xr"><td class="c">8</td><td class="c">1</td><td class="c">0</td><td class="c">0</td><td class="c">0</td><td class="c"><span class="muted">0</span></td><td class="c"><span class="muted">0</span></td><td class="c"><b>1</b></td><td class="c"><b class="t">1</b></td></tr>
+<tr><td class="c">9</td><td class="c">1</td><td class="c">0</td><td class="c">0</td><td class="c">1</td><td class="c"><span class="muted">0</span></td><td class="c"><span class="muted">0</span></td><td class="c"><span class="muted">0</span></td><td class="c">0</td></tr>
+<tr class="xr"><td class="c">10</td><td class="c">1</td><td class="c">0</td><td class="c">1</td><td class="c">0</td><td class="c"><span class="muted">0</span></td><td class="c"><span class="muted">0</span></td><td class="c"><b>1</b></td><td class="c"><b class="t">1</b></td></tr>
+<tr><td class="c">11</td><td class="c">1</td><td class="c">0</td><td class="c">1</td><td class="c">1</td><td class="c"><span class="muted">0</span></td><td class="c"><span class="muted">0</span></td><td class="c"><span class="muted">0</span></td><td class="c">0</td></tr>
+<tr class="xr"><td class="c">12</td><td class="c">1</td><td class="c">1</td><td class="c">0</td><td class="c">0</td><td class="c"><span class="muted">0</span></td><td class="c"><b>1</b></td><td class="c"><b>1</b></td><td class="c"><b class="t">1</b></td></tr>
+<tr class="xr"><td class="c">13</td><td class="c">1</td><td class="c">1</td><td class="c">0</td><td class="c">1</td><td class="c"><span class="muted">0</span></td><td class="c"><b>1</b></td><td class="c"><span class="muted">0</span></td><td class="c"><b class="t">1</b></td></tr>
+<tr class="xr"><td class="c">14</td><td class="c">1</td><td class="c">1</td><td class="c">1</td><td class="c">0</td><td class="c"><span class="muted">0</span></td><td class="c"><b>1</b></td><td class="c"><b>1</b></td><td class="c"><b class="t">1</b></td></tr>
+<tr class="xr"><td class="c">15</td><td class="c">1</td><td class="c">1</td><td class="c">1</td><td class="c">1</td><td class="c"><span class="muted">0</span></td><td class="c"><b>1</b></td><td class="c"><span class="muted">0</span></td><td class="c"><b class="t">1</b></td></tr>
+
+        </tbody></table></div>
+        <span class="ans">X(P, L, M, T) = Σ(0, 2, 3, 4, 6, 8, 10, 12, 13, 14, 15)</span>
+        <p class="muted" style="font-size:.9rem">X = 0 only for m₁, m₅, m₇, m₉, m₁₁: people with at least 50% attendance and no other problem. All 16 combinations can occur, so there are no don't-cares.</p></div></li>
+      <li><div><p><b>(b) Plot the K-map.</b> Rows PL, columns MT, both in Gray order. Eleven 1s.</p><div class="kmap-mount" data-n="4" data-names="PLMT" data-zeros="1" data-ones="0,2,3,4,6,8,10,12,13,14,15"></div></div></li>
+      <li><div><p><b>Octet:</b> the two outer columns (MT = 00 and 10, joined by wrap-around) are all 1 → every square with T = 0 → <span class="t">T'</span>.</p><div class="kmap-mount" data-n="4" data-names="PLMT" data-zeros="1" data-ones="0,2,3,4,6,8,10,12,13,14,15" data-groups="T':0,2,4,6,8,10,12,14"></div></div></li>
+      <li><div><p><b>Quad:</b> row PL = 11 is all 1 → m₁₂ m₁₃ m₁₄ m₁₅ → <span class="t">PL</span>. It reuses m₁₂ and m₁₄, which is allowed.</p><p><b>Pair:</b> m₃ is left. Its neighbours are m₁ (0), m₇ (0), m₁₁ (0) and m₂ (1), so the only group is m₂ m₃ → <span class="t">P'L'M</span>.</p><div class="kmap-mount" data-n="4" data-names="PLMT" data-zeros="1" data-ones="0,2,3,4,6,8,10,12,13,14,15" data-groups="T':0,2,4,6,8,10,12,14;PL:12,13,14,15;P'L'M:2,3"></div></div></li>
+      <li><div><p><b>Read the result.</b> All three groups are essential prime implicants. The map shows the direct translation was already minimal: no smaller circuit exists. That proof is the point of the K-map step.</p><span class="ans">X = T' + PL + P'L'M</span></div></li>
+      <li><div><p><b>(c) Logic circuit</b> (AND-OR, two levels). If only P, L, M, T are wired in, add three NOT gates to make P', L' and T'.</p><div class="circuit" data-type="and-or" data-terms="T'|P,L|P',L',M" data-out="X"></div><p class="muted" style="font-size:.9rem">Gate count: 2 AND (2-input and 3-input) + 1 OR (3-input), plus NOT gates for complemented inputs.</p></div></li>
+      <li class="final"><div><p><b>Test with real records.</b></p>
+        <div class="tbl"><table><thead><tr><th>Employee</th><th>Situation</th><th class="c">P L M T</th><th class="c">X</th><th>Reason</th></tr></thead><tbody>
+          <tr><td>Ram</td><td>Absent, no leave, 4th day missing, 72% overall</td><td class="c"><code>0 0 1 1</code></td><td class="c"><b>1</b></td><td>P'L'M</td></tr>
+          <tr><td>Sita</td><td>Came in on a day she had leave approved, 85%</td><td class="c"><code>1 1 0 1</code></td><td class="c"><b>1</b></td><td>PL</td></tr>
+          <tr><td>Hari</td><td>Present today, no leave, 42% overall</td><td class="c"><code>1 0 0 0</code></td><td class="c"><b>1</b></td><td>T'</td></tr>
+          <tr><td>Gita</td><td>On approved leave, 5 days in a row, 68%</td><td class="c"><code>0 1 1 1</code></td><td class="c">0</td><td>Leave covers it</td></tr>
+          <tr><td>Bikash</td><td>Present, no leave, 91%</td><td class="c"><code>1 0 0 1</code></td><td class="c">0</td><td>No condition met</td></tr>
+        </tbody></table></div>
+        <p>The programmer can drop the expression straight into code:</p>
+        <span class="eq">warning = (!T) || (P &amp;&amp; L) || (!P &amp;&amp; !L &amp;&amp; M);</span></div></li>
+    </ol>
+  </div>
+  <div class="quiz" data-answer="1" data-explain="m₃ = 0011 touches m₁, m₇ and m₁₁, all 0, and m₂, which is 1. A pair is the largest group available, so P'L'M keeps three literals.">
+    <p class="q">Why can't m₃ (P = 0, L = 0, M = 1, T = 1) be part of a group of four?</p>
+    <div class="opts"><button>Because it is in the PL row</button><button>Because three of its four neighbours are 0, leaving only the pair with m₂</button><button>Because T = 1 squares can never be grouped</button></div><p class="fb" aria-live="polite"></p>
+  </div>
+</section>
+
+<div class="optpart part" id="optional">
+  <span class="eyebrow">Beyond the BT102CO syllabus</span>
+  <h2>Optional topics</h2>
+  <p>These sections are in Mano Chapter 3 but not in the Unit 3 syllabus. Nothing in 3.1–3.3 depends on them. Use them for enrichment, fast learners, or later units (don't-cares come back with BCD circuits in Units 4–5).</p>
+</div>
+<!-- LEVEL 9 -->
+<section class="level optional" data-optional="1" id="l9" data-group="Optional" data-code="O2" data-short="Don't-care conditions">
+  <div class="head"><span class="eyebrow"><span class="chip enr">Optional</span> O2 · Text §3-8</span><h2>Don't-care conditions</h2></div>
+  <p>Some input combinations never happen. A BCD digit uses only 10 of the 16 four-bit codes, so the other six are free. Mark those squares with <span class="t" style="color:var(--g5)">X</span>. While grouping, treat each X as a 1 if it makes a group bigger, and as a 0 otherwise. You never have to cover an X.</p>
+  <div class="worked" data-stepper>
+    <span class="eyebrow">Worked example · Ex 3-12</span>
+    <h3>F(w, x, y, z) = Σ(1, 3, 7, 11, 15), d = Σ(0, 2, 5)</h3>
+    <ol class="steps">
+      <li><div><p><b>Plot 1s and Xs.</b></p><div class="kmap-mount" data-n="4" data-zeros="1" data-ones="1,3,7,11,15" data-dcs="0,2,5"></div></div></li>
+      <li><div><p>Column 11 gives <span class="t">yz</span> (m₃ m₇ m₁₁ m₁₅). Only m₁ is left. On its own with m₃ it would be <span class="t">w'x'z</span> (3 literals). Use X's to make a group of four instead.</p></div></li>
+      <li><div><p><b>Option (a):</b> take X₀ and X₂ → top row → <span class="t">w'x'</span>.</p><div class="kmap-mount" data-n="4" data-zeros="1" data-ones="1,3,7,11,15" data-dcs="0,2,5" data-groups="yz:3,7,11,15;w'x':0,1,2,3"></div><p><b>Option (b):</b> take X₅ → m₁ m₃ m₅ m₇ → <span class="t">w'z</span>.</p><div class="kmap-mount" data-n="4" data-zeros="1" data-ones="1,3,7,11,15" data-dcs="0,2,5" data-groups="yz:3,7,11,15;w'z:1,3,5,7"></div></div></li>
+      <li class="final"><div><p>Both are correct; they differ only in the value given to don't-care squares. For POS, combine 0s with X₀ and X₂: <span class="t">F' = z' + wy'</span>.</p><span class="ans">F = yz + w'x'  or  F = yz + w'z  or  F = z(w' + y)</span></div></li>
+    </ol>
+  </div>
+  <div class="quiz" data-answer="1" data-explain="X squares are optional. Use them only when they enlarge a group of real 1s; never add a group just to cover an X.">
+    <p class="q">After grouping, one X square is not in any group. What should you do?</p>
+    <div class="opts"><button>Add a group for it</button><button>Nothing; it is treated as 0</button><button>Change it to 1</button></div><p class="fb" aria-live="polite"></p>
+  </div>
+</section>
+
+<!-- LEVEL 5 -->
+<section class="level optional" data-optional="1" id="l5" data-group="Optional" data-code="O3" data-short="5-variable map">
+  <div class="head"><span class="eyebrow"><span class="chip enr">Optional</span> O3 · Text §3-4</span><h2>The five-variable map</h2></div>
+  <p>Thirty-two squares, drawn as two 4-variable maps: A = 0 on the left (m₀–m₁₅), A = 1 on the right (m₁₆–m₃₁). Each half keeps its own adjacency, and a square is also adjacent to the square in the same position on the other half. Picture the two halves stacked on top of each other.</p>
+  <div class="tbl"><table><thead><tr><th>k</th><th>2ᵏ squares</th><th class="c">n=2</th><th class="c">n=3</th><th class="c">n=4</th><th class="c">n=5</th><th class="c">n=6</th></tr></thead><tbody>
+    <tr><td>0</td><td>1</td><td class="c">2</td><td class="c">3</td><td class="c">4</td><td class="c">5</td><td class="c">6</td></tr>
+    <tr><td>1</td><td>2</td><td class="c">1</td><td class="c">2</td><td class="c">3</td><td class="c">4</td><td class="c">5</td></tr>
+    <tr><td>2</td><td>4</td><td class="c">0</td><td class="c">1</td><td class="c">2</td><td class="c">3</td><td class="c">4</td></tr>
+    <tr><td>3</td><td>8</td><td class="c"></td><td class="c">0</td><td class="c">1</td><td class="c">2</td><td class="c">3</td></tr>
+    <tr><td>4</td><td>16</td><td class="c"></td><td class="c"></td><td class="c">0</td><td class="c">1</td><td class="c">2</td></tr>
+  </tbody></table></div>
+  <p class="muted" style="font-size:var(--step--1)">Table 3-1: literals left in a term = n − k.</p>
+  <div class="worked" data-stepper>
+    <span class="eyebrow">Worked example · Ex 3-7</span>
+    <h3>F(A, B, C, D, E) = Σ(0, 2, 4, 6, 9, 13, 21, 23, 25, 29, 31)</h3>
+    <ol class="steps">
+      <li><div><p><b>Plot.</b> Six 1s fall in the A = 0 half, five in the A = 1 half.</p><div class="kmap-mount" data-n="5" data-names="ABCDE" data-ones="0,2,4,6,9,13,21,23,25,29,31"></div></div></li>
+      <li><div><p><b>Inside A = 0:</b> m₀ m₂ m₄ m₆ form a block of four → <span class="t">A'B'E'</span> (A' is needed because the block lives only in the left half).</p></div></li>
+      <li><div><p><b>Across both halves:</b> column DE = 01, bottom two rows: m₉ m₁₃ (A = 0) sit over m₂₅ m₂₉ (A = 1). Four adjacent squares → <span class="t">BD'E</span>; A drops out.</p></div></li>
+      <li><div><p><b>Inside A = 1:</b> m₂₁ m₂₃ m₂₉ m₃₁ → <span class="t">ACE</span>.</p><div class="kmap-mount" data-n="5" data-names="ABCDE" data-ones="0,2,4,6,9,13,21,23,25,29,31" data-groups="A'B'E':0,2,4,6;BD'E:9,13,25,29;ACE:21,23,29,31"></div></div></li>
+      <li class="final"><div><span class="ans">F = A'B'E' + BD'E + ACE</span></div></li>
+    </ol>
+  </div>
+</section>
+
+<!-- LEVEL 8 -->
+<section class="level optional" data-optional="1" id="l8" data-group="Optional" data-code="O4" data-short="Other two-level forms">
+  <div class="head"><span class="eyebrow"><span class="chip enr">Optional</span> O4 · Text §3-7</span><h2>Other two-level implementations</h2></div>
+  <p>With four gate types (AND, OR, NAND, NOR) in two levels there are 16 combinations. Eight are <b>degenerate</b>: they collapse to one operation (AND feeding AND is just a bigger AND). The other eight are <b>nondegenerate</b> and can realise any function.</p>
+  <div class="tbl"><table><thead><tr><th>Form</th><th>Dual</th><th>Function performed</th></tr></thead><tbody>
+    <tr><td>AND-OR</td><td>OR-AND</td><td>SOP / POS</td></tr>
+    <tr><td>NAND-NAND</td><td>NOR-NOR</td><td>SOP / POS</td></tr>
+    <tr><td>NOR-OR</td><td>NAND-AND</td><td>OR-AND-INVERT / AND-OR-INVERT</td></tr>
+    <tr><td>OR-NAND</td><td>AND-NOR</td><td>OR-AND-INVERT / AND-OR-INVERT</td></tr>
+  </tbody></table></div>
+  <p><b>Wired logic:</b> tying open-collector TTL NAND outputs together forms a wired-AND: <span class="t">F = (AB)'·(CD)' = (AB + CD)'</span>, an AND-OR-INVERT. ECL NOR outputs tied together form a wired-OR: <span class="t">F = [(A + B)(C + D)]'</span>, an OR-AND-INVERT.</p>
+  <div class="tbl"><table><thead><tr><th>Forms</th><th>Implements</th><th>Simplify F' in</th><th>Output</th></tr></thead><tbody>
+    <tr><td>AND-NOR, NAND-AND</td><td>AND-OR-INVERT</td><td>SOP by combining 0s</td><td>F</td></tr>
+    <tr><td>OR-NAND, NOR-OR</td><td>OR-AND-INVERT</td><td>POS by combining 1s, then complementing</td><td>F</td></tr>
+  </tbody></table></div>
+  <div class="worked" data-stepper>
+    <span class="eyebrow">Worked example · Ex 3-11</span>
+    <h3>F(x, y, z) = Σ(0, 6) in all four AOI / OAI forms</h3>
+    <ol class="steps">
+      <li><div><p><b>Combine 0s:</b> <span class="t">F' = x'y + xy' + z</span>, so <span class="t">F = (x'y + xy' + z)'</span>. This is AND-OR-INVERT: build it as AND-NOR, or NAND-AND (z needs a one-input NAND there).</p></div></li>
+      <li><div><p><b>Combine 1s:</b> <span class="t">F = x'y'z' + xyz'</span>. Complement: <span class="t">F' = (x + y + z)(x' + y' + z)</span>.</p></div></li>
+      <li class="final"><div><p>So <span class="t">F = [(x + y + z)(x' + y' + z)]'</span>, an OR-AND-INVERT: build it as OR-NAND or NOR-OR.</p></div></li>
+    </ol>
+  </div>
+</section>
+
+<!-- LEVEL 10 -->
+<section class="level optional" data-optional="1" id="l10" data-group="Optional" data-code="O5" data-short="Tabulation method">
+  <div class="head"><span class="eyebrow"><span class="chip enr">Optional</span> O5 · Text §3-9 to 3-11</span><h2>The tabulation (Quine–McCluskey) method</h2></div>
+  <p>Maps rely on your eyes, and beyond five or six variables eyes fail. Tabulation is the same idea written as an algorithm a computer can run: combine minterms that differ in one bit, repeat until nothing combines, then pick a minimal set from what is left.</p>
+  <div class="worked" data-stepper>
+    <span class="eyebrow">Worked example · Ex 3-13</span>
+    <h3>F = Σ(0, 1, 2, 8, 10, 11, 14, 15)</h3>
+    <ol class="steps">
+      <li><div><p><b>Group by number of 1s.</b> Only neighbouring groups can differ by one bit, so you only compare a group with the one below it.</p>
+        <div class="tbl"><table><thead><tr><th>1s</th><th>Minterms (wxyz)</th></tr></thead><tbody>
+        <tr><td>0</td><td><code>0 = 0000</code></td></tr><tr><td>1</td><td><code>1 = 0001, 2 = 0010, 8 = 1000</code></td></tr><tr><td>2</td><td><code>10 = 1010</code></td></tr><tr><td>3</td><td><code>11 = 1011, 14 = 1110</code></td></tr><tr><td>4</td><td><code>15 = 1111</code></td></tr></tbody></table></div></div></li>
+      <li><div><p><b>Combine pairs</b> differing in one bit; write a dash for the eliminated variable and tick the parents. Example: 0 (0000) + 1 (0001) → <code>000-</code>. In decimal: two minterms combine when the lower group's number is larger by a power of 2.</p>
+        <div class="tbl"><table><thead><tr><th>Pair</th><th>wxyz</th><th>Pair</th><th>wxyz</th></tr></thead><tbody>
+        <tr><td>0,1</td><td><code>000-</code> ✗ no further match</td><td>10,11</td><td><code>101-</code> ✓</td></tr>
+        <tr><td>0,2</td><td><code>00-0</code> ✓</td><td>10,14</td><td><code>1-10</code> ✓</td></tr>
+        <tr><td>0,8</td><td><code>-000</code> ✓</td><td>11,15</td><td><code>1-11</code> ✓</td></tr>
+        <tr><td>2,10 / 8,10</td><td><code>-010</code> / <code>10-0</code> ✓</td><td>14,15</td><td><code>111-</code> ✓</td></tr></tbody></table></div></div></li>
+      <li><div><p><b>Combine again</b> (dashes must line up): 0,2,8,10 → <code>-0-0</code>; 10,11,14,15 → <code>1-1-</code>. No further merges.</p></div></li>
+      <li class="final"><div><p><b>Unticked terms are the prime implicants:</b> <code>000-</code> = w'x'y', <code>-0-0</code> = x'z', <code>1-1-</code> = wy.</p><span class="ans">F = w'x'y' + x'z' + wy</span></div></li>
+    </ol>
+  </div>
+  <div class="worked" data-stepper>
+    <span class="eyebrow">Worked example · Ex 3-14 and 3-15</span>
+    <h3>Selecting prime implicants for F = Σ(1, 4, 6, 7, 8, 9, 10, 11, 15)</h3>
+    <ol class="steps">
+      <li><div><p>Tabulation yields six PIs: <span class="t">x'y'z</span>, <span class="t">w'xz'</span>, <span class="t">w'xy</span>, <span class="t">xyz</span>, <span class="t">wyz</span>, <span class="t">wx'</span>. Their sum is valid, but not minimal.</p></div></li>
+      <li><div><p><b>Build the prime-implicant chart.</b> A column with a single X marks an essential PI.</p>
+        <div class="tbl"><table><thead><tr><th>PI</th><th>covers</th><th class="c">1</th><th class="c">4</th><th class="c">6</th><th class="c">7</th><th class="c">8</th><th class="c">9</th><th class="c">10</th><th class="c">11</th><th class="c">15</th></tr></thead><tbody>
+        <tr class="ess"><td>x'y'z ✓</td><td>1,9</td><td class="c">X</td><td></td><td></td><td></td><td></td><td class="c">X</td><td></td><td></td><td></td></tr>
+        <tr class="ess"><td>w'xz' ✓</td><td>4,6</td><td></td><td class="c">X</td><td class="c">X</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr><td>w'xy</td><td>6,7</td><td></td><td></td><td class="c">X</td><td class="c">X</td><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr><td>xyz</td><td>7,15</td><td></td><td></td><td></td><td class="c">X</td><td></td><td></td><td></td><td></td><td class="c">X</td></tr>
+        <tr><td>wyz</td><td>11,15</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="c">X</td><td class="c">X</td></tr>
+        <tr class="ess"><td>wx' ✓</td><td>8,9,10,11</td><td></td><td></td><td></td><td></td><td class="c">X</td><td class="c">X</td><td class="c">X</td><td class="c">X</td><td></td></tr>
+        </tbody></table></div>
+        <p>Columns 1, 4, 8 and 10 have a single X → essentials <span class="t">x'y'z</span>, <span class="t">w'xz'</span>, <span class="t">wx'</span>.</p></div></li>
+      <li><div><p><b>Uncovered:</b> 7 and 15. One PI, <span class="t">xyz</span>, covers both.</p></div></li>
+      <li class="final"><div><span class="ans">F = x'y'z + w'xz' + wx' + xyz</span></div></li>
+    </ol>
+  </div>
+</section>
+
+<!-- OPTIONAL PRACTICE -->
+<section class="level optional" data-optional="1" id="oprob" data-group="Optional" data-code="O6" data-short="Optional practice">
+  <div class="head"><span class="eyebrow"><span class="chip enr">Optional</span> O6 · Text problems</span><h2>Optional practice</h2></div>
+  <p>Problems that need the optional topics. Skip these if you are covering the syllabus only.</p>
+  <div class="probs" id="optproblems"></div>
+</section>
+<footer>Built on Mano, <i>Digital Logic and Computer Design</i>, Chapter 3, mapped to the BT102CO Unit 3 syllabus. Map notation follows the text: rows and columns in Gray-code order, primes for complements. Subtopic checkmarks are saved in this browser only.</footer>
+</main>
+</div>
+
+<script>
+// Quine-McCluskey + exact cover for n<=5
+function popcount(x){let c=0;while(x){c+=x&1;x>>=1;}return c;}
+function solve(n, ones, dcs){
+  ones=[...new Set(ones)].sort((a,b)=>a-b); dcs=[...new Set(dcs)].filter(d=>!ones.includes(d));
+  const full=(1<<n)-1;
+  if(ones.length===0) return {n,ones,dcs,pis:[],ess:[],solutions:[[]],const0:true};
+  // implicant = {val, mask(dash bits)}
+  let cur=[...ones,...dcs].map(m=>({val:m,mask:0,ms:[m]}));
+  const primes=[];
+  while(cur.length){
+    const used=new Set(), next=new Map();
+    for(let i=0;i<cur.length;i++)for(let j=i+1;j<cur.length;j++){
+      const a=cur[i],b=cur[j];
+      if(a.mask!==b.mask)continue;
+      const d=a.val^b.val; if(popcount(d)!==1)continue;
+      used.add(i);used.add(j);
+      const val=a.val&~d, mask=a.mask|d, key=val+'/'+mask;
+      if(!next.has(key)) next.set(key,{val,mask,ms:[...new Set([...a.ms,...b.ms])].sort((x,y)=>x-y)});
+    }
+    cur.forEach((c,i)=>{if(!used.has(i))primes.push(c);});
+    cur=[...next.values()];
+  }
+  // keep primes that cover at least one 1
+  const pis=primes.filter(p=>p.ms.some(m=>ones.includes(m)));
+  pis.forEach(p=>{p.lits=n-popcount(p.mask); p.covers=p.ms.filter(m=>ones.includes(m));});
+  pis.sort((a,b)=>a.lits-b.lits||a.ms[0]-b.ms[0]);
+  // essentials
+  const ess=[], essWhy={};
+  for(const m of ones){
+    const c=pis.filter(p=>p.covers.includes(m));
+    if(c.length===1){ if(!ess.includes(c[0])){ess.push(c[0]); essWhy[pis.indexOf(c[0])]=m;} }
+  }
+  const covered=new Set(ess.flatMap(p=>p.covers));
+  const rem=ones.filter(m=>!covered.has(m));
+  const cand=pis.filter(p=>!ess.includes(p)&&p.covers.some(m=>rem.includes(m)));
+  let best=null, sols=[];
+  if(rem.length===0){sols=[[]];}
+  else{
+    // iterate subsets by size
+    for(let k=1;k<=cand.length && !sols.length;k++){
+      const combos=[]; (function rec(s,arr){ if(arr.length===k){combos.push(arr.slice());return;} for(let i=s;i<cand.length;i++){arr.push(cand[i]);rec(i+1,arr);arr.pop();}})(0,[]);
+      let bestLit=Infinity;
+      for(const c of combos){
+        const cov=new Set(c.flatMap(p=>p.covers));
+        if(!rem.every(m=>cov.has(m)))continue;
+        const L=c.reduce((s,p)=>s+p.lits,0);
+        if(L<bestLit){bestLit=L;sols=[c];} else if(L===bestLit) sols.push(c);
+      }
+    }
+  }
+  const solutions=sols.map(s=>[...ess,...s]);
+  return {n,ones,dcs,pis,ess,essWhy,rem,solutions,const1:pis.length===1&&pis[0].mask===full};
+}
+function termStr(p,n,names){ // product term
+  if(p.mask===(1<<n)-1) return '1';
+  let s='';
+  for(let i=0;i<n;i++){const bit=1<<(n-1-i); if(p.mask&bit)continue; s+=names[i]+((p.val&bit)?'':"'");}
+  return s;
+}
+function sumStr(p,n,names){ // complemented product -> sum term
+  if(p.mask===(1<<n)-1) return '0';
+  const parts=[];
+  for(let i=0;i<n;i++){const bit=1<<(n-1-i); if(p.mask&bit)continue; parts.push(names[i]+((p.val&bit)?"'":''));}
+  return parts.length>1?'('+parts.join(' + ')+')':parts[0];
+}
+
+
+/* ---------- helpers ---------- */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const GRAY2=['00','01','11','10'];
+const GCOL=['--g1','--g2','--g3','--g4','--g5','--g6'];
+const SUB='₀₁₂₃₄₅₆₇₈₉';
+const sub=n=>String(n).split('').map(d=>SUB[d]).join('');
+const parseList=s=>(s||'').split(/[\s,;]+/).filter(Boolean).map(Number);
+function defaultNames(n){return ({2:'xy',3:'xyz',4:'wxyz',5:'ABCDE'})[n].split('');}
+function namesFrom(str,n){ if(!str) return defaultNames(n); if(str==='ABC') return 'ABCDE'.slice(0,n).split(''); if(str==='xyz') return defaultNames(n); return str.split('');}
+function termLits(p,n,names){const a=[];for(let i=0;i<n;i++){const b=1<<(n-1-i);if(p.mask&b)continue;a.push(names[i]+((p.val&b)?'':"'"));}return a;}
+function sumLits(p,n,names){const a=[];for(let i=0;i<n;i++){const b=1<<(n-1-i);if(p.mask&b)continue;a.push(names[i]+((p.val&b)?"'":''));}return a;}
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+
+/* ---------- K-map renderer ---------- */
+function layout(n){
+  if(n===2) return {rows:['0','1'],cols:['0','1'],rv:1};
+  if(n===3) return {rows:['0','1'],cols:GRAY2,rv:1};
+  return {rows:GRAY2,cols:GRAY2,rv:2};
+}
+function renderKmap(el,o){
+  el.innerHTML='';
+  const n=o.n;
+  if(n===5){
+    const wrap=document.createElement('div');wrap.className='kmap5';
+    const names=o.names;
+    [0,1].forEach(h=>{
+      const half=document.createElement('div');half.className='half';
+      const lab=document.createElement('span');lab.className='eyebrow';lab.textContent=names[0]+' = '+h;
+      const m=document.createElement('div');half.append(lab,m);wrap.append(half);
+      buildGrid(m,{...o,n:4,names:names.slice(1),offset:16*h,full:o});
+    });
+    el.append(wrap);
+    if(o.groups&&o.groups.length) el.append(buildLegend(el,o.groups));
+    return;
+  }
+  const m=document.createElement('div');el.append(m);
+  buildGrid(m,{...o,offset:0,full:o});
+  const g=(o.groups||[]).concat(o.zgroups||[]);
+  if(g.length) el.append(buildLegend(el,g,o.groups?o.groups.length:0));
+}
+function buildGrid(m,o){
+  const n=o.n,L=layout(n),names=o.names;
+  m.className='kmap'+(o.editable?' edit':'');
+  m.style.gridTemplateColumns='46px repeat('+L.cols.length+',50px)';
+  const rName=names.slice(0,L.rv).join(''), cName=names.slice(L.rv).join('');
+  const corner=document.createElement('div');corner.className='corner';
+  corner.innerHTML='<span class="r">'+rName+'</span><span class="c">'+cName+'</span>';m.append(corner);
+  L.cols.forEach(c=>{const d=document.createElement('div');d.className='lab';d.textContent=c;m.append(d);});
+  const ones=new Set(o.ones||[]),dcs=new Set(o.dcs||[]);
+  const allGroups=[...(o.groups||[]).map((g,i)=>({...g,gi:i,zero:false})),...(o.zgroups||[]).map((g,i)=>({...g,gi:(o.groups||[]).length+i,zero:true}))];
+  const pos={}; // minterm -> [r,c]
+  L.rows.forEach((r,ri)=>L.cols.forEach((c,ci)=>{pos[o.offset+parseInt(r+c,2)]=[ri,ci];}));
+  const at=(ri,ci)=>o.offset+parseInt(L.rows[(ri+L.rows.length)%L.rows.length]+L.cols[(ci+L.cols.length)%L.cols.length],2);
+  L.rows.forEach((r,ri)=>{
+    const rl=document.createElement('div');rl.className='lab';rl.textContent=r;m.append(rl);
+    L.cols.forEach((c,ci)=>{
+      const idx=o.offset+parseInt(r+c,2);
+      const cell=document.createElement(o.editable?'button':'div');
+      cell.className='cell';cell.dataset.m=idx;
+      if(o.editable){cell.type='button';cell.setAttribute('aria-label','minterm '+idx);}
+      let v='';
+      if(ones.has(idx)){cell.classList.add('one');v='1';}
+      else if(dcs.has(idx)){cell.classList.add('dc');v='X';}
+      else if(o.zeros){cell.classList.add('zero');v='0';}
+      cell.innerHTML=(o.editable?'<span class="idx">'+idx+'</span>':'')+'<span class="v">'+(o.index&&!v?'m'+sub(idx):v)+'</span>';
+      if(o.index&&!v) cell.querySelector('.v').style.cssText='font-size:.8rem;font-weight:400;color:var(--muted)';
+      // group outlines
+      allGroups.forEach(g=>{
+        const set=new Set(g.cells);
+        if(!set.has(idx))return;
+        const k=g.gi%6, inset=3+4*(g.gi%5);
+        const R=L.rows.length,C=L.cols.length;
+        const nb={t:[ri-1,ci],b:[ri+1,ci],l:[ri,ci-1],r:[ri,ci+1]};
+        const open={};
+        for(const s in nb){const [a,b]=nb[s];
+          const inside=a>=0&&a<R&&b>=0&&b<C;
+          if(inside) open[s]=set.has(at(a,b));
+          else{ const vert=(s==='t'||s==='b');
+            const full=vert?[...Array(R).keys()].every(q=>set.has(at(q,ci))):[...Array(C).keys()].every(q=>set.has(at(ri,q)));
+            open[s]=(vert?R:C)>2&&!full&&set.has(at(a,b)); }
+        }
+        const d=document.createElement('span');d.className='terms';d.dataset.g=g.gi;
+        const col='var('+GCOL[k]+')';
+        const st=d.style;
+        st.top=open.t?'-1px':inset+'px';st.bottom=open.b?'-1px':inset+'px';st.left=open.l?'-1px':inset+'px';st.right=open.r?'-1px':inset+'px';
+        st.borderStyle=g.zero?'dashed':'solid';st.borderColor=col;
+        st.borderWidth=(open.t?0:2.5)+'px '+(open.r?0:2.5)+'px '+(open.b?0:2.5)+'px '+(open.l?0:2.5)+'px';
+        st.borderRadius=((!open.t&&!open.l)?'7px':'0')+' '+((!open.t&&!open.r)?'7px':'0')+' '+((!open.b&&!open.r)?'7px':'0')+' '+((!open.b&&!open.l)?'7px':'0');
+        cell.append(d);
+      });
+      if(o.editable) cell.addEventListener('click',()=>o.onCell(idx));
+      m.append(cell);
+    });
+  });
+}
+function buildLegend(el,groups,firstZero){
+  const lg=document.createElement('div');lg.className='legend';
+  groups.forEach((g,i)=>{
+    const b=document.createElement('button');b.type='button';
+    b.style.color='var('+GCOL[i%6]+')';
+    if(firstZero!==undefined&&i>=firstZero) b.style.borderStyle='dashed';
+    b.textContent=g.label;
+    const on=()=>{ $$('.cell',el).forEach(c=>{const has=c.querySelector('.terms[data-g="'+i+'"]');c.classList.toggle('dim',!has);}); };
+    const off=()=>$$('.cell',el).forEach(c=>c.classList.remove('dim'));
+    b.addEventListener('mouseenter',on);b.addEventListener('mouseleave',off);
+    b.addEventListener('focus',on);b.addEventListener('blur',off);
+    lg.append(b);
+  });
+  return lg;
+}
+function parseGroups(s){ if(!s) return []; return s.split(';').map(x=>{const i=x.lastIndexOf(':');return {label:x.slice(0,i),cells:parseList(x.slice(i+1))};}); }
+function mountStatic(el){
+  const n=+el.dataset.n;
+  renderKmap(el,{n,names:namesFrom(el.dataset.names,n),ones:parseList(el.dataset.ones),dcs:parseList(el.dataset.dcs),
+    zeros:el.dataset.zeros==='1'||!!el.dataset.zgroups,index:el.dataset.index==='1',groups:parseGroups(el.dataset.groups),zgroups:parseGroups(el.dataset.zgroups)});
+}
+
+/* ---------- circuit drawer ---------- */
+function drawCircuit(el,type,terms,out='F'){
+  const kinds={'and-or':['and','or',0,0],'or-and':['or','and',0,0],'nand':['and','and',1,1],'nor':['or','or',1,1]}[type];
+  const [k1,k2,b1,b2]=kinds;
+  const pass=type==='and-or'||type==='or-and';
+  const gw=44, x1=64, x2=210, gap=14;
+  let y=12; const items=[];
+  terms.forEach(t=>{
+    if(t.length===1&&(pass||t[0][0]==='=')){ items.push({single:true,lit:t[0].replace(/^=/,''),y:y+10,h:20}); y+=20+gap; return; }
+    const h=Math.max(30,t.length*14+6);
+    items.push({lits:t,y,h}); y+=h+gap;
+  });
+  const H=Math.max(y,60), h2=Math.max(34,items.length*16+8), y2=H/2-h2/2;
+  const W=x2+gw+70;
+  let s='<svg viewBox="0 0 '+W+' '+(H+4)+'" width="'+W+'" role="img" aria-label="'+type+' circuit">';
+  const shape=(kind,x,yy,h)=>kind==='and'
+    ?'<path class="gate" d="M'+x+' '+yy+'h'+gw/2+'a'+h/2+' '+h/2+' 0 0 1 0 '+h+'h-'+gw/2+'z"/>'
+    :'<path class="gate" d="M'+x+' '+yy+'q'+gw*.3+' '+h/2+' 0 '+h+'q'+gw*.7+' 0 '+gw+' -'+h/2+'q-'+gw*.3+' -'+h/2+' -'+gw+' -'+h/2+'z"/>';
+  const back=(kind,x,yy,h,py)=>{ if(kind==='and') return x; const t=(py-yy)/h; return x+gw*.6*t*(1-t); };
+  const bub=(x,yy)=>'<circle class="gate" cx="'+(x+4)+'" cy="'+yy+'" r="4"/>';
+  const pins2=items.map((it,i)=>y2+(i+1)*h2/(items.length+1));
+  items.forEach((it,i)=>{
+    const py=pins2[i]; const xb=back(k2,x2,y2,h2,py);
+    if(it.single){
+      s+='<text class="ctext" x="'+(x1-26)+'" y="'+(it.y+4)+'" text-anchor="end">'+esc(it.lit)+'</text>';
+      s+='<path class="wire" d="M'+(x1-22)+' '+it.y+'H'+(x2-20-i*6)+'V'+py+'H'+xb+'"/>';
+      return;
+    }
+    it.lits.forEach((l,j)=>{const py1=it.y+(j+1)*it.h/(it.lits.length+1);
+      s+='<text class="ctext" x="'+(x1-26)+'" y="'+(py1+4)+'" text-anchor="end">'+esc(l)+'</text>';
+      s+='<path class="wire" d="M'+(x1-22)+' '+py1+'H'+back(k1,x1,it.y,it.h,py1)+'"/>';});
+    s+=shape(k1,x1,it.y,it.h);
+    let ox=x1+gw; if(b1){s+=bub(ox,it.y+it.h/2);ox+=8;}
+    const bx=x2-20-i*6;
+    s+='<path class="wire" d="M'+ox+' '+(it.y+it.h/2)+'H'+bx+'V'+py+'H'+xb+'"/>';
+  });
+  s+=shape(k2,x2,y2,h2);
+  let ox=x2+gw; if(b2){s+=bub(ox,y2+h2/2);ox+=8;}
+  s+='<path class="wire" d="M'+ox+' '+(y2+h2/2)+'H'+(W-26)+'"/><text class="ctext o" x="'+(W-22)+'" y="'+(y2+h2/2+4)+'">'+esc(out)+'</text></svg>';
+  el.innerHTML=s;
+}
+function mountCircuit(el){ drawCircuit(el,el.dataset.type,el.dataset.terms.split('|').map(t=>t.split(',')),el.dataset.out||'F'); }
+
+/* ---------- reasoning generator (lab + problems) ---------- */
+function analyse(n,ones,dcs,names){
+  const all=[...Array(1<<n).keys()];
+  const r=solve(n,ones,dcs);
+  const zeros=all.filter(m=>!ones.includes(m)&&!dcs.includes(m));
+  const rc=solve(n,zeros,dcs);
+  const T=p=>termLits(p,n,names).join('')||'1';
+  const S=p=>{const a=sumLits(p,n,names);return a.length>1?'('+a.join(' + ')+')':(a[0]||'0');};
+  let sop,pos,alts=[];
+  if(!ones.length){sop='0';pos='0';}
+  else if(!zeros.length){sop='1';pos='1';}
+  else{
+    alts=r.solutions.map(s=>s.map(T).join(' + '));sop=alts[0];
+    pos=rc.solutions[0].map(S).join('');
+  }
+  const lits=(!ones.length||!zeros.length)?0:r.solutions[0].reduce((a,p)=>a+p.lits,0);
+  return {r,rc,zeros,sop,pos,alts,lits,T,S};
+}
+function explainSteps(n,ones,dcs,names,A){
+  A=A||analyse(n,ones,dcs,names);
+  const {r,rc,T,S}=A; const steps=[];
+  const km=(groups,zg)=>({n,names,ones,dcs,zeros:true,groups,zgroups:zg});
+  steps.push({html:'<p><b>Plot.</b> 1s in '+ones.map(m=>'m'+sub(m)).join(', ')+(dcs.length?'; X in '+dcs.map(m=>'m'+sub(m)).join(', '):'')+'. Every other square is 0.</p>',map:km([])});
+  if(!ones.length){steps.push({final:1,html:'<p>No 1s, so F = 0.</p><span class="ans">F = 0</span>'});return steps;}
+  if(!A.zeros.length){steps.push({final:1,html:'<p>Every square is 1 or X, so one group covers the whole map.</p><span class="ans">F = 1</span>'});return steps;}
+  steps.push({html:'<p><b>All prime implicants</b> (groups that cannot grow): '+r.pis.map(p=>'<span class="t">'+T(p)+'</span> ('+p.ms.join(',')+')').join(', ')+'.</p>',map:km(r.pis.map(p=>({label:T(p),cells:p.ms})))});
+  if(r.ess.length){
+    const why=r.ess.map(p=>{const m=r.ones.find(m=>r.pis.filter(q=>q.covers.includes(m)).length===1&&p.covers.includes(m));return 'm'+sub(m)+' is covered only by <span class="t">'+T(p)+'</span>';});
+    steps.push({html:'<p><b>Essential PIs.</b> '+why.join('; ')+'. These must be in the answer.</p>',map:km(r.ess.map(p=>({label:T(p),cells:p.ms})))});
+  } else steps.push({html:'<p><b>Essential PIs:</b> none. Every 1 is covered by at least two PIs, so the choice is open (a cyclic map).</p>'});
+  if(r.rem.length){
+    const sol=r.solutions[0], extra=sol.filter(p=>!r.ess.includes(p));
+    steps.push({html:'<p><b>Still uncovered:</b> '+r.rem.map(m=>'m'+sub(m)).join(', ')+'. The cheapest way to cover them: '+extra.map(p=>'<span class="t">'+T(p)+'</span>').join(' + ')+'.'+(A.alts.length>1?' There are '+A.alts.length+' equally cheap choices.':'')+'</p>',map:km(sol.map(p=>({label:T(p),cells:p.ms})))});
+  } else steps.push({html:'<p>The essential PIs already cover every 1, so nothing else is needed.</p>'});
+  steps.push({html:'<p><b>Minimal SOP</b> ('+A.lits+' literals):</p><span class="ans">F = '+A.sop+'</span>'+(A.alts.length>1?'<p class="muted">Also minimal: '+A.alts.slice(1,4).map(a=>'<span class="t">'+a+'</span>').join(', ')+'</p>':'')});
+  const zs=rc.solutions[0];
+  steps.push({final:1,html:'<p><b>POS:</b> group the 0s'+(dcs.length?' (Xs may help again)':'')+' to get <span class="t">F\' = '+zs.map(T).join(' + ')+'</span>, then complement each term.</p><span class="ans">F = '+A.pos+'</span>',map:{n,names,ones,dcs,zeros:true,zgroups:zs.map(p=>({label:T(p)+" (F')",cells:p.ms}))}});
+  return steps;
+}
+function renderSteps(ol,steps){
+  ol.innerHTML='';
+  steps.forEach(s=>{
+    const li=document.createElement('li');if(s.final)li.className='final';
+    const d=document.createElement('div');d.innerHTML=s.html;
+    if(s.map){const k=document.createElement('div');d.append(k);renderKmap(k,s.map);}
+    if(s.circ){s.circ.forEach(c=>{const k=document.createElement('div');k.className='circuit';d.append(k);drawCircuit(k,c[0],c[1],c[2]);});}
+    li.append(d);ol.append(li);
+  });
+}
+
+/* ---------- stepper ---------- */
+function makeStepper(box,onDone){
+  const ol=$('.steps',box); if(!ol) return;
+  let ctrl=$('.ctrl',box);
+  if(!ctrl){ctrl=document.createElement('div');ctrl.className='ctrl';box.append(ctrl);}
+  ctrl.innerHTML='<button type="button" class="btn nx">Show next step</button><button type="button" class="btn ghost al">Show all</button><button type="button" class="btn ghost rs">Start over</button><span class="muted cnt" style="font-size:.85rem"></span>';
+  const items=()=>$$(':scope > li',ol);
+  let shown=1;
+  const upd=()=>{const it=items();it.forEach((li,i)=>li.hidden=i>=shown);
+    $('.nx',ctrl).disabled=shown>=it.length;$('.cnt',ctrl).textContent='Step '+Math.min(shown,it.length)+' of '+it.length;
+    if(shown>=it.length&&onDone)onDone();};
+  $('.nx',ctrl).onclick=()=>{shown++;upd();const li=items()[shown-1];li&&li.scrollIntoView({block:'nearest',behavior:'smooth'});};
+  $('.al',ctrl).onclick=()=>{shown=items().length;upd();};
+  $('.rs',ctrl).onclick=()=>{shown=1;upd();};
+  box._reset=()=>{shown=1;upd();};
+  upd();
+}
+
+/* ---------- progress ---------- */
+const STORE='bt102co-u3-ladder';
+let done=new Set();
+try{done=new Set(JSON.parse(localStorage.getItem(STORE)||'[]'));}catch(e){}
+function markDone(id){ if(done.has(id))return; done.add(id); try{localStorage.setItem(STORE,JSON.stringify([...done]));}catch(e){} paintLadder(); }
+const levels=$$('section.level');
+function paintLadder(){
+  const toc=$('#toc');
+  if(!toc.children.length){
+    let grp=null,cur='';
+    levels.forEach(sec=>{
+      const g=sec.dataset.group||'';
+      if(g!==cur){cur=g;grp=document.createElement('div');grp.className='grp';
+        const gh=document.createElement('div');gh.className='gh'+(/^3\./.test(g)?' syl':'');gh.textContent=g;grp.append(gh);toc.append(grp);}
+      const a=document.createElement('a');a.href='#'+sec.id;a.dataset.id=sec.id;if(sec.dataset.optional)a.className='opt';
+      a.innerHTML='<span class="n">'+sec.dataset.code+'</span><span>'+sec.dataset.short+'</span>';grp.append(a);
+    });
+  }
+  $$('#toc a').forEach(a=>a.classList.toggle('done',done.has(a.dataset.id)));
+  const core=levels.filter(x=>x.id!=='lab'&&!x.dataset.optional).map(x=>x.id);
+  const k=core.filter(id=>done.has(id)).length;
+  $('#progtext').textContent=k+' of '+core.length+' syllabus subtopics checked';$('#progbar').style.width=(100*k/core.length)+'%';
+}
+paintLadder();
+if('IntersectionObserver' in window){
+  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)$$('#toc a').forEach(a=>a.classList.toggle('here',a.dataset.id===e.target.id));}),{rootMargin:'-30% 0px -60% 0px'});
+  levels.forEach(s=>io.observe(s));
+}
+
+/* ---------- mount static content ---------- */
+$$('.kmap-mount').forEach(mountStatic);
+$$('.circuit[data-type]').forEach(mountCircuit);
+levels.forEach(sec=>{
+  const steppers=$$('[data-stepper]',sec), quiz=$('.quiz',sec);
+  const finished=new Set();
+  steppers.forEach((b,i)=>makeStepper(b,()=>{finished.add(i);if(!quiz&&finished.size===steppers.length)markDone(sec.id);}));
+});
+$$('.quiz').forEach(q=>{
+  const ans=+q.dataset.answer, fb=$('.fb',q), sec=q.closest('section');
+  $$('.opts button',q).forEach((b,i)=>b.addEventListener('click',()=>{
+    $$('.opts button',q).forEach(x=>x.classList.remove('right','wrong'));
+    if(i===ans){b.classList.add('right');fb.className='fb ok';fb.textContent='Correct. '+q.dataset.explain;markDone(sec.id);}
+    else{b.classList.add('wrong');fb.className='fb no';fb.textContent='Not quite. Look again at the rule above and try another option.';}
+  }));
+});
+
+/* ---------- lab ---------- */
+const PRESETS=[
+  ['Ex 3-1 · Σ(2,3,4,5)',3,[2,3,4,5],[]],['Ex 3-3 · Σ(0,2,4,5,6)',3,[0,2,4,5,6],[]],
+  ['Ex 3-5 · 11 minterms',4,[0,1,2,4,5,6,8,9,12,13,14],[]],['Fig 3-11 · four answers',4,[0,2,3,5,7,8,9,10,11,13,15],[]],
+  ['Ex 3-8 · SOP and POS',4,[0,1,2,5,8,9,10],[]],['Ex 3-9 · Σ(0,6)',3,[0,6],[]],
+  ['Ex 3-12 · don\'t-cares (optional)',4,[1,3,7,11,15],[0,2,5]],['Ex 3-14 · Σ(1,4,6,7,8,9,10,11,15)',4,[1,4,6,7,8,9,10,11,15],[]],
+  ['Exam 2025 · Σ(0,2,4,7,10,12) + d',4,[0,2,4,7,10,12],[1,3,5,6,8]],['Attendance warning (A=P B=L C=M D=T)',4,[0,2,3,4,6,8,10,12,13,14,15],[]]
+];
+const lab={n:4,names:'xyz',ones:new Set([0,2,3,5,7,8,9,10,11,13,15]),dcs:new Set()};
+PRESETS.forEach((p,i)=>{const o=document.createElement('option');o.value=i;o.textContent=p[0];$('#preset').append(o);});
+function labRender(fromInputs){
+  const n=lab.n, names=namesFrom(lab.names,n), max=(1<<n)-1;
+  const err=$('#laberr');err.hidden=true;
+  if(!fromInputs){$('#mins').value=[...lab.ones].sort((a,b)=>a-b).join(', ');$('#dcs').value=[...lab.dcs].sort((a,b)=>a-b).join(', ');}
+  const ones=[...lab.ones].sort((a,b)=>a-b), dcs=[...lab.dcs].sort((a,b)=>a-b);
+  const A=analyse(n,ones,dcs,names);
+  const groups=(ones.length&&A.zeros.length)?A.r.solutions[0].map(p=>({label:A.T(p),cells:p.ms})):[];
+  renderKmap($('#labmap'),{n,names,ones,dcs,zeros:true,editable:true,groups,onCell:m=>{
+    if(lab.ones.has(m)){lab.ones.delete(m);lab.dcs.add(m);} else if(lab.dcs.has(m)){lab.dcs.delete(m);} else lab.ones.add(m);
+    labRender(false);}});
+  const fn='F('+names.join(', ')+')';
+  $('#labres').innerHTML='<dt>Function</dt><dd><span class="eq">'+fn+' = Σ('+ones.join(', ')+')'+(dcs.length?' + d('+dcs.join(', ')+')':'')+'</span></dd>'+
+    '<dt>Min SOP</dt><dd><span class="ans">F = '+A.sop+'</span>'+(A.alts.length>1?' <span class="muted">('+A.alts.length+' equal answers)</span>':'')+'</dd>'+
+    '<dt>Min POS</dt><dd><span class="ans">F = '+A.pos+'</span></dd>'+
+    '<dt>Prime impl.</dt><dd>'+(A.r.pis.length?A.r.pis.map(p=>'<span class="t" style="'+(A.r.ess.includes(p)?'':'color:var(--muted)')+'">'+A.T(p)+'</span>').join(', ')+' <span class="muted">(essentials in colour)</span>':'none')+'</dd>';
+  const c=$('#labcirc');c.innerHTML='';
+  if(ones.length&&A.zeros.length){
+    const f1=document.createElement('figure'),f2=document.createElement('figure');
+    const d1=document.createElement('div');d1.className='circuit';const d2=document.createElement('div');d2.className='circuit';
+    drawCircuit(d1,'nand',A.r.solutions[0].map(p=>termLits(p,n,names)));
+    drawCircuit(d2,'nor',A.rc.solutions[0].map(p=>sumLits(p,n,names)));
+    f1.append(d1);f1.insertAdjacentHTML('beforeend','<figcaption>NAND-NAND from the minimal SOP</figcaption>');
+    f2.append(d2);f2.insertAdjacentHTML('beforeend','<figcaption>NOR-NOR from the minimal POS</figcaption>');
+    c.append(f1,f2);
+  }
+  renderSteps($('#labsteps'),explainSteps(n,ones,dcs,names,A));
+}
+function readInputs(){
+  const max=(1<<lab.n)-1, o=parseList($('#mins').value), d=parseList($('#dcs').value);
+  const bad=[...o,...d].filter(x=>!Number.isInteger(x)||x<0||x>max);
+  if(bad.length){const e=$('#laberr');e.textContent='Minterm numbers must be whole numbers from 0 to '+max+' for '+lab.n+' variables. Check: '+bad.join(', ');e.hidden=false;return;}
+  lab.ones=new Set(o);lab.dcs=new Set(d.filter(x=>!lab.ones.has(x)));labRender(true);
+}
+$('#mins').addEventListener('input',readInputs);$('#dcs').addEventListener('input',readInputs);
+$('#names').addEventListener('change',e=>{lab.names=e.target.value;labRender(false);});
+$$('#nseg button').forEach(b=>b.addEventListener('click',()=>setN(+b.dataset.n)));
+function setN(n){lab.n=n;$$('#nseg button').forEach(x=>x.setAttribute('aria-pressed',+x.dataset.n===n));const max=(1<<n)-1;
+  lab.ones=new Set([...lab.ones].filter(m=>m<=max));lab.dcs=new Set([...lab.dcs].filter(m=>m<=max));}
+$('#clear').addEventListener('click',()=>{lab.ones.clear();lab.dcs.clear();labRender(false);});
+$('#preset').addEventListener('change',e=>{if(e.target.value==='')return;const p=PRESETS[+e.target.value];setN(p[1]);lab.ones=new Set(p[2]);lab.dcs=new Set(p[3]);labRender(false);});
+$$('#nseg button').forEach(b=>b.addEventListener('click',()=>labRender(false)));
+function openInLab(n,ones,dcs,names){setN(n);lab.names=names&&names[0]==='A'?'ABC':'xyz';$('#names').value=lab.names;lab.ones=new Set(ones);lab.dcs=new Set(dcs||[]);labRender(false);$('#lab').scrollIntoView({behavior:'smooth'});markDone('lab');}
+labRender(false);
+
+/* ---------- problem set ---------- */
+const NM4=['A','B','C','D'], NMw=['w','x','y','z'], NM3=['x','y','z'];
+const P=[
+ {tier:'Tier 1 · Read the map',note:'Routine 3-variable mapping (Syllabus 3.1). Aim for under two minutes each.',items:[
+  {src:'Problem 3-1(a)',stmt:'Simplify F(x, y, z) = Σ(0, 1, 5, 7).',map:[3,[0,1,5,7],[],'xyz']},
+  {src:'Problem 3-1(d)',stmt:'Simplify F(A, B, C) = Σ(0, 2, 3, 4, 6).',map:[3,[0,2,3,4,6],[],'ABC']},
+  {src:'Problem 3-2(a)',stmt:'Simplify xy + x\'y\'z\' + x\'yz\' using a three-variable map.',pre:['<p><b>Convert to minterms first.</b> xy covers 110 and 111 (m₆, m₇). x\'y\'z\' is m₀. x\'yz\' is m₂. So F = Σ(0, 2, 6, 7).</p>'],map:[3,[0,2,6,7],[],'xyz']}
+ ]},
+ {tier:'Tier 2 · Four-variable maps',note:'Four-variable maps where the choice of groups matters. Find the essential prime implicants before anything else.',items:[
+  {src:'Problem 3-4(b)',stmt:'Simplify F(A, B, C, D) = Σ(0, 1, 2, 4, 5, 7, 11, 15).',think:'Before opening the steps: m₇ can join two different pairs. Does the choice change the literal count?',map:[4,[0,1,2,4,5,7,11,15],[],'ABCD']},
+  {src:'Problem 3-7(b)',stmt:'Simplify F(A, B, C, D) = Σ(0, 2, 3, 5, 7, 8, 10, 11, 14, 15) by first finding the essential prime implicants.',map:[4,[0,2,3,5,7,8,10,11,14,15],[],'ABCD']}
+ ]},
+ {tier:'Tier 3 · SOP and POS',note:'Syllabus 3.2. Read Π lists as 0s, group 0s for F\', then complement.',items:[
+  {src:'Problem 3-9(b)',stmt:'Simplify F(A, B, C, D) = Π(1, 3, 5, 7, 13, 15) in product of sums.',pre:['<p><b>Read the Π list as 0s.</b> Squares 1, 3, 5, 7, 13, 15 hold 0; every other square holds 1. So F = Σ(0, 2, 4, 6, 8, 9, 10, 11, 12, 14).</p>'],map:[4,[0,2,4,6,8,9,10,11,12,14],[],'ABCD']},
+  {src:'Problem 3-9(d)',stmt:'Simplify F(A, B, C, D) = Π(0, 1, 2, 3, 4, 10, 11) in product of sums.',pre:['<p><b>Read the Π list as 0s.</b> Squares 0, 1, 2, 3, 4, 10, 11 hold 0; every other square holds 1. So F = Σ(5, 6, 7, 8, 9, 12, 13, 14, 15).</p>'],map:[4,[5,6,7,8,9,12,13,14,15],[],'ABCD']}
+ ]},
+ {tier:'Tier 4 · NAND and NOR',note:'Syllabus 3.3. Pick the right standard form for the gate type, then convert.',items:[
+  {src:'Problem 3-13',stmt:'Draw a NAND logic diagram that implements the complement of F(A, B, C, D) = Σ(0, 1, 2, 3, 4, 8, 9, 12).',custom:[
+    {html:'<p><b>Decide what to simplify.</b> The output wanted is F\'. Its 1s are F\'s 0s: Σ(5, 6, 7, 10, 11, 13, 14, 15). This is case (b) of Table 3-3: combine the 0s of F.</p>',map:{n:4,names:NM4,ones:[0,1,2,3,4,8,9,12],dcs:[],zeros:true}},
+    {html:'<p><b>Group the 0s.</b> Centre block m₅ m₇ m₁₃ m₁₅ → BD; m₆ m₇ m₁₄ m₁₅ → BC; m₁₀ m₁₁ m₁₄ m₁₅ → AC.</p>',map:{n:4,names:NM4,ones:[0,1,2,3,4,8,9,12],dcs:[],zeros:true,zgroups:[{label:'BD',cells:[5,7,13,15]},{label:'BC',cells:[6,7,14,15]},{label:'AC',cells:[10,11,14,15]}]}},
+    {html:'<p><b>Write F\' in SOP:</b> <span class="t">F\' = BD + BC + AC</span>. NAND-NAND copies AND-OR directly.</p>',circ:[['nand',[['B','D'],['B','C'],['A','C']],"F'"]]},
+    {final:1,html:'<p>Two levels, four NAND gates, output F\' directly. Adding a one-input NAND after it would give F (three levels).</p><span class="ans">F\' = [(BD)\'(BC)\'(AC)\']\'</span>'}],open:[4,[0,1,2,3,4,8,9,12],[],'ABCD']},
+  {src:'Problem 3-15(a)',stmt:'Simplify F = wx\' + y\'z\' + w\'yz\' and implement it with a two-level NOR circuit.',think:'NOR-NOR needs product of sums. Which squares do you group?',custom:[
+    {html:'<p><b>Plot the terms.</b> wx\' → m₈–m₁₁. y\'z\' → m₀, m₄, m₈, m₁₂. w\'yz\' → m₂, m₆.</p>',map:{n:4,names:NMw,ones:[0,2,4,6,8,9,10,11,12],dcs:[],zeros:true}},
+    {html:'<p><b>Group the 0s</b> (NOR needs POS): m₁ m₃ m₅ m₇ → <span class="t">w\'z</span>; m₅ m₇ m₁₃ m₁₅ → <span class="t">xz</span>; m₁₄ m₁₅ → <span class="t">wxy</span>.</p>',map:{n:4,names:NMw,ones:[0,2,4,6,8,9,10,11,12],dcs:[],zeros:true,zgroups:[{label:"w'z",cells:[1,3,5,7]},{label:'xz',cells:[5,7,13,15]},{label:'wxy',cells:[14,15]}]}},
+    {html:'<p><b>Complement:</b> <span class="t">F\' = w\'z + xz + wxy</span>, so <span class="t">F = (w + z\')(x\' + z\')(w\' + x\' + y\')</span>.</p>'},
+    {final:1,html:'<p>One NOR per sum term, one NOR at the output. (For comparison, the 1s give SOP <span class="t">w\'z\' + wx\' + y\'z\'</span>, which suits NAND.)</p>',circ:[['nor',[['w',"z'"],["x'","z'"],["w'","x'","y'"]],'F']]}],open:[4,[0,2,4,6,8,9,10,11,12],[],'xyz']}
+ ]},
+ {tier:'Tier 5 · Think critically',note:'Each of these needs a decision the textbook procedure does not make for you.',items:[
+  {src:'Spot the error',stmt:'A student simplified F(x, y, z) = Σ(0, 1, 2, 3, 6) to F = x\' + y. Is it right?',think:'Test the answer, don\'t re-solve. Which minterms does x\' + y switch on?',custom:[
+    {html:'<p><b>Expand the student\'s answer.</b> x\' covers m₀–m₃. y covers m₂, m₃, m₆, m₇. Together: Σ(0, 1, 2, 3, 6, 7).</p>'},
+    {html:'<p><b>Compare.</b> m₇ = xyz is switched on, but it is not in F. The student grouped m₆ with m₇ as if m₇ were a 1.</p>',map:{n:3,names:NM3,ones:[0,1,2,3,6],dcs:[],zeros:true}},
+    {html:'<p><b>Fix it.</b> m₆ must pair with m₂ directly above it in column 10: <span class="t">yz\'</span>.</p>',map:{n:3,names:NM3,ones:[0,1,2,3,6],dcs:[],zeros:true,groups:[{label:"x'",cells:[0,1,2,3]},{label:"yz'",cells:[2,6]}]}},
+    {final:1,html:'<p>A group may only contain 1s. Check every answer by expanding it back to minterms.</p><span class="ans">F = x\' + yz\'</span>'}]},
+  {src:'From words to gates',stmt:'Design a 3-input majority circuit: output 1 when at least two of x, y, z are 1. Use NAND gates only.',think:'No minterm list is given. Build the truth table yourself.',custom:[
+    {html:'<p><b>Truth table to minterms.</b> Two or more 1s: 011, 101, 110, 111 → F = Σ(3, 5, 6, 7).</p>',map:{n:3,names:NM3,ones:[3,5,6,7],dcs:[],zeros:true}},
+    {html:'<p><b>Group.</b> m₇ sits in three overlapping pairs: m₃m₇ → <span class="t">yz</span>, m₅m₇ → <span class="t">xz</span>, m₆m₇ → <span class="t">xy</span>. All three are essential.</p>',map:{n:3,names:NM3,ones:[3,5,6,7],dcs:[],zeros:true,groups:[{label:'yz',cells:[3,7]},{label:'xz',cells:[5,7]},{label:'xy',cells:[6,7]}]}},
+    {final:1,html:'<p>SOP <span class="t">F = xy + yz + xz</span> goes straight to NAND-NAND: three 2-input NANDs feeding one 3-input NAND.</p>',circ:[['nand',[['x','y'],['y','z'],['x','z']],'F']]}],open:[3,[3,5,6,7],[],'xyz']},
+  {src:'Problem 3-11, extended',stmt:'F(A, B, C, D) = Σ(0, 2, 5, 6, 7, 8, 10). Which two-level circuit needs fewer gate inputs: NAND-NAND or NOR-NOR?',think:'Simplify both forms, then count. The shorter-looking expression is not always cheaper.',custom:[
+    {html:'<p><b>SOP from the 1s:</b> corners → <span class="t">B\'D\'</span>; m₅ m₇ → <span class="t">A\'BD</span>; m₆ with m₂ or m₇ → <span class="t">A\'CD\'</span> or <span class="t">A\'BC</span>.</p>',map:{n:4,names:NM4,ones:[0,2,5,6,7,8,10],dcs:[],zeros:true,groups:[{label:"B'D'",cells:[0,2,8,10]},{label:"A'BD",cells:[5,7]},{label:"A'CD'",cells:[2,6]}]}},
+    {html:'<p><b>POS from the 0s:</b> <span class="t">F\' = B\'D + BC\'D\' + AB</span>, so <span class="t">F = (B + D\')(B\' + C + D)(A\' + B\')</span>.</p>',map:{n:4,names:NM4,ones:[0,2,5,6,7,8,10],dcs:[],zeros:true,zgroups:[{label:"B'D",cells:[1,3,9,11]},{label:"BC'D'",cells:[4,12]},{label:'AB',cells:[12,13,14,15]}]}},
+    {html:'<p><b>Count gate inputs.</b> NAND-NAND: 2 + 3 + 3 at the first level, 3 at the output = 11 inputs, 4 gates. NOR-NOR: 2 + 3 + 2, plus 3 = 10 inputs, 4 gates.</p>'},
+    {final:1,html:'<p>NOR-NOR wins by one input. Always simplify both forms before committing to a gate family.</p>',circ:[['nand',[["B'","D'"],["A'",'B','D'],["A'",'C',"D'"]],'F'],['nor',[['B',"D'"],["B'",'C','D'],["A'","B'"]],'F']]}],open:[4,[0,2,5,6,7,8,10],[],'ABCD']}
+ ]}
+];
+const OP=[
+ {tier:'Optional practice',note:'Uses the optional topics above: don\'t-cares, multilevel NAND and tabulation.',items:[
+  {src:'Problem 3-22(b) · O2',stmt:'Simplify F(A, B, C, D) = Σ(0, 6, 8, 13, 14) with don\'t-cares d = Σ(2, 4, 10).',map:[4,[0,6,8,13,14],[2,4,10],'ABCD']},
+  {src:'Problem 3-24 · O2',stmt:'A circuit implements F = A\'C + AC\'D\'. The input combination A = C = 1 can never occur. Find a simpler F.',think:'The don\'t-cares are not listed. Where on the map does A = C = 1?',custom:[
+    {html:'<p><b>Find the minterms.</b> A\'C → 0010, 0011, 0110, 0111 = m₂, m₃, m₆, m₇. AC\'D\' → 1000, 1100 = m₈, m₁₂.</p>'},
+    {html:'<p><b>Turn the wording into don\'t-cares.</b> A = 1 and C = 1 means 1x1x: m₁₀, m₁₁, m₁₄, m₁₅. Those inputs never occur, so mark them X.</p>',map:{n:4,names:NM4,ones:[2,3,6,7,8,12],dcs:[10,11,14,15],zeros:true}},
+    {html:'<p><b>Group with the Xs.</b> The two middle columns (C = 1) now form a block of eight → <span class="t">C</span>. m₈ and m₁₂ join X₁₀ and X₁₄ → <span class="t">AD\'</span>.</p>',map:{n:4,names:NM4,ones:[2,3,6,7,8,12],dcs:[10,11,14,15],zeros:true,groups:[{label:'C',cells:[2,3,6,7,10,11,14,15]},{label:"AD'",cells:[8,10,12,14]}]}},
+    {final:1,html:'<p>Five literals became three.</p><span class="ans">F = C + AD\'</span>'}],open:[4,[2,3,6,7,8,12],[10,11,14,15],'ABCD']},
+  {src:'Problem 3-25 · O2',stmt:'Implement F(A, B, C, D) = Σ(0, 1, 2, 9, 11) with d = Σ(8, 10, 14, 15) using no more than two NOR gates. Both normal and complemented inputs are available.',think:'Two NOR gates means two levels of one gate each. Which standard form has only two terms?',custom:[
+    {html:'<p><b>NOR wants POS,</b> and two gates means the POS must have at most two sum terms. So group the 0s.</p>',map:{n:4,names:NM4,ones:[0,1,2,9,11],dcs:[8,10,14,15],zeros:true}},
+    {html:'<p><b>Group the 0s, using X₁₄ and X₁₅.</b> Rows 01 and 11 (B = 1) hold only 0s and Xs → <span class="t">B</span>. The last 0, m₃, pairs with m₇ in column 11 → <span class="t">A\'CD</span>.</p>',map:{n:4,names:NM4,ones:[0,1,2,9,11],dcs:[8,10,14,15],zeros:true,zgroups:[{label:'B',cells:[4,5,6,7,12,13,14,15]},{label:"A'CD",cells:[3,7]}]}},
+    {html:'<p><b>Complement:</b> <span class="t">F\' = B + A\'CD</span> gives <span class="t">F = B\'(A + C\' + D\')</span>.</p>'},
+    {final:1,html:'<p>First NOR: (A + C\' + D\')\'. Second NOR takes that output and B: [B + (A + C\' + D\')\']\' = B\'(A + C\' + D\'). Exactly two NOR gates.</p>',circ:[['nor',[["A","C'","D'"],["=B"]],'F']]}],open:[4,[0,1,2,9,11],[8,10,14,15],'ABCD']},
+  {src:'Problem 3-14 · multilevel',stmt:'Implement (AB + A\'B\')(CD\' + C\'D) using only two-input NAND gates.',think:'The expression is a product of two sums of products, so it is not two-level. Build each bracket first.',custom:[
+    {html:'<p><b>Spot the parts.</b> AB + A\'B\' and CD\' + C\'D are each a 2-term SOP, so each is a small NAND-NAND block.</p>'},
+    {html:'<p><b>Block 1:</b> G1 = (AB)\', G2 = (A\'B\')\', G3 = (G1·G2)\' = AB + A\'B\'.<br><b>Block 2:</b> G4 = (CD\')\', G5 = (C\'D)\', G6 = (G4·G5)\' = CD\' + C\'D.</p>'},
+    {html:'<p><b>AND the blocks with NANDs.</b> G7 = (G3·G6)\' gives the complement. G8 = (G7·G7)\', a NAND with both inputs tied, inverts it.</p>'},
+    {final:1,html:'<p>Eight two-input NAND gates. Multilevel NAND circuits are covered properly in Unit 4.3.</p><span class="ans">F = (G7·G7)\' = (AB + A\'B\')(CD\' + C\'D)</span>'}]},
+  {src:'Problem 3-27(a) · O5',stmt:'Simplify P(A, B, C, D, E, F, G) = Σ(20, 28, 52, 60) by the tabulation method.',think:'Seven variables means a 128-square map. Why is tabulation the only sane choice here?',custom:[
+    {html:'<p><b>Binary, grouped by 1s</b> (ABCDEFG): 20 = 0010100 (two 1s); 28 = 0011100, 52 = 0110100 (three); 60 = 0111100 (four).</p>'},
+    {html:'<p><b>First pass:</b> 20,28 differ by 8 (D) → 001-100. 20,52 differ by 32 (B) → 0-10100. 28,60 (32) → 0-11100. 52,60 (8) → 011-100. All four originals ticked.</p>'},
+    {html:'<p><b>Second pass:</b> terms with dashes in the same place combine. 20,28,52,60 with dashes at B and D → 0-1-100. Nothing is left over.</p>'},
+    {final:1,html:'<p>One prime implicant covers all four minterms: A = 0, C = 1, E = 1, F = 0, G = 0.</p><span class="ans">P = A\'CEF\'G\'</span>'}]}
+ ]}
+];
+function buildProblems(data,pc,doneId){
+  data.forEach(t=>{
+    const tier=document.createElement('div');tier.className='tier';
+    tier.innerHTML='<h3>'+t.tier+'</h3><p class="muted" style="max-width:66ch">'+t.note+'</p>';
+    t.items.forEach(it=>{
+      const box=document.createElement('div');box.className='prob';
+      box.innerHTML='<span class="src">'+it.src+'</span><p class="stmt">'+it.stmt+'</p>'+(it.think?'<p class="think">'+it.think+'</p>':'')+'<ol class="steps"></ol>';
+      let steps;
+      if(it.custom) steps=it.custom;
+      else{const [n,o,d,nm]=it.map; steps=(it.pre||[]).map(h=>({html:h})).concat(explainSteps(n,o,d,nm.split('')));}
+      steps=[{html:'<p class="muted">Work it on paper first, then reveal one step at a time.</p>'}].concat(steps);
+      renderSteps($('.steps',box),steps);
+      tier.append(box);
+      makeStepper(box,()=>{box._seen=true;if($$('.prob',pc).every(p=>p._seen))markDone(doneId);});
+      const op=it.open||it.map;
+      if(op){const b=document.createElement('button');b.type='button';b.className='btn ghost';b.textContent='Open in lab';b.onclick=()=>openInLab(op[0],op[1],op[2],op[3].split(''));$('.ctrl',box).append(b);}
+    });
+    pc.append(tier);
+  });
+}
+P[2].tier='SOP and POS';P[3].tier='NAND and NOR';P[4].tier='Mixed problems';
+buildProblems([P[0],P[1]],$('#probs31'),'p31');
+buildProblems([P[2]],$('#probs32'),'p32');
+buildProblems([P[3]],$('#probs33'),'p33');
+buildProblems([P[4]],$('#probscrit'),'crit');
+buildProblems(OP,$('#optproblems'),'oprob');
+
+/* ---------- O1 converter ---------- */
+function convRender(){
+  const n=+$('#cvn').value, max=(1<<n)-1, nm='ABCD'.slice(0,n).split('');
+  const list=parseList($('#cvm').value), err=$('#cverr');
+  const bad=list.filter(x=>!Number.isInteger(x)||x<0||x>max);
+  if(bad.length){err.textContent='Index numbers run from 0 to '+max+' for '+n+' variables. Check: '+bad.join(', ');err.hidden=false;return;}
+  err.hidden=true;
+  const ones=[...new Set(list)].sort((a,b)=>a-b), zeros=[...Array(max+1).keys()].filter(m=>!ones.includes(m));
+  const mt=m=>nm.map((v,i)=>v+((m>>(n-1-i))&1?'':"'")).join('');
+  const Mt=m=>'('+nm.map((v,i)=>v+((m>>(n-1-i))&1?"'":'')).join(' + ')+')';
+  $('#cvout').innerHTML='<dt>Σ form</dt><dd><span class="eq">F = Σ('+ones.join(', ')+')</span></dd>'+
+    '<dt>Π form</dt><dd><span class="ans">F = Π('+zeros.join(', ')+')</span></dd>'+
+    '<dt>Minterms</dt><dd><span class="eq">F = '+(ones.length?ones.map(mt).join(' + '):'0')+'</span></dd>'+
+    '<dt>Maxterms</dt><dd><span class="eq">F = '+(zeros.length?zeros.map(Mt).join(''):'1')+'</span></dd>';
+}
+$('#cvn').addEventListener('change',convRender);$('#cvm').addEventListener('input',convRender);convRender();
+
+</script>
+
+</body></html>

@@ -40,4 +40,44 @@
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
+  <url>
+    <loc>https://gupta-niraj.com.np/teaching/digital-logic.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://gupta-niraj.com.np/teaching/digital-logic/unit-1-number-systems.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://gupta-niraj.com.np/teaching/digital-logic/unit-2-boolean-algebra-and-logic-gates.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://gupta-niraj.com.np/teaching/digital-logic/unit-3-simplification-of-boolean-functions.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://gupta-niraj.com.np/teaching/digital-logic/unit-4-combinational-logic.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://gupta-niraj.com.np/teaching/digital-logic/unit-5-combinational-logic-msi-lsi.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://gupta-niraj.com.np/teaching/digital-logic/unit-6-sequential-logic.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://gupta-niraj.com.np/teaching/digital-logic/unit-7-registers-and-counters.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
 </urlset>
