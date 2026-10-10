@@ -28,7 +28,11 @@ Static HTML/CSS/JS served by GitHub Pages at <https://gupta-niraj.com.np>.
    python _tools/seo.py           # meta tags, JSON-LD, sitemap.xml, robots.txt, llms.txt
    python _tools/check_site.py    # links, metadata, sitemap
    ```
-4. Commit and push; GitHub Pages deploys in under a minute.
+4. Commit and push; GitHub Pages deploys in under a minute. Then notify Bing and other IndexNow engines:
+
+   ```
+   python _tools/indexnow.py      # submits every sitemap URL
+   ```
 
 Raw course material in `teaching/Uniglobe college/` is a local working folder and is ignored by git.
 
