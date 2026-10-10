@@ -39,6 +39,9 @@ PERSON = {
                    'C Programming', 'Python', 'Data Mining'],
     'sameAs': ['https://www.researchgate.net/publication/370580661'],
     'image': IMAGE,
+    'email': 'mailto:guptaniraj2051@gmail.com',
+    'subjectOf': {'@type': 'DigitalDocument', 'name': 'Curriculum Vitae', 'encodingFormat': 'application/pdf',
+                  'url': SITE + '/assets/Niraj_Kumar_Gupta_CV.pdf'},
 }
 RIGHTS = {'copyrightHolder': {'@type': 'Person', '@id': PERSON_ID, 'name': AUTHOR}, 'copyrightYear': 2026,
           'usageInfo': SITE + '/privacy.html'}
@@ -296,6 +299,7 @@ def write_llms():
              f'Content may be quoted and cited with a link to the lesson page. Terms: {SITE}/privacy.html', '',
              '## Site', '',
              f'- [Home]({SITE}/): profile, experience, education and research of {AUTHOR}',
+             f'- [CV (PDF)]({SITE}/assets/Niraj_Kumar_Gupta_CV.pdf)',
              f'- [Teaching Hub]({SITE}/teaching/): all subjects', '']
     for key, sub in CATALOG.items():
         facts = SUBJECTS[key]

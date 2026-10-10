@@ -7,6 +7,7 @@ Content may be quoted and cited with a link to the lesson page. Terms: https://g
 ## Site
 
 - [Home](https://gupta-niraj.com.np/): profile, experience, education and research of Niraj Kumar Gupta
+- [CV (PDF)](https://gupta-niraj.com.np/assets/Niraj_Kumar_Gupta_CV.pdf)
 - [Teaching Hub](https://gupta-niraj.com.np/teaching/): all subjects
 
 ## Digital Logic (BT102CO)
