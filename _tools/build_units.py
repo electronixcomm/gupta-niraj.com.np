@@ -241,6 +241,19 @@ else{var b2=d.querySelector('#nkg-unitbar .nkg-tocbtn');if(b2)b2.remove()}
 FONT_LINK = '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600&amp;display=swap">'
 
 
+
+def write_text(path, s):
+    """Write with a short retry: Windows sometimes holds a brief lock on files just written."""
+    import time
+    for attempt in range(6):
+        try:
+            path.write_text(s, encoding='utf-8', newline='')
+            return
+        except OSError:
+            if attempt == 5:
+                raise
+            time.sleep(0.5)
+
 def esc(s):
     return html.escape(s, quote=True)
 
@@ -312,7 +325,7 @@ def build_page(key, i, seq):
     s = re.sub(r'<html(?![^>]*\blang=)', '<html lang="en"', s, count=1)
     if not re.search(r'<meta[^>]+name=["\']?viewport', s[:s.find('<body')]):
         s = re.sub(r'<head[^>]*>', lambda mm: mm.group(0) + '\n<meta name="viewport" content="width=device-width, initial-scale=1.0">', s, count=1)
-    path.write_text(s, encoding='utf-8', newline='')
+    write_text(path, s)
 
 
 KIND_LABEL = {'notes': 'Lesson', 'slides': 'Slides', 'lab': 'Lab'}
@@ -374,7 +387,7 @@ def build_subject(key):
         a = s.index('    <section class="section">')
         b = s.index('  </main>')
         s = s[:a] + '    ' + section + '\n' + s[b:]
-    path.write_text(s, encoding='utf-8', newline='')
+    write_text(path, s)
 
 
 if __name__ == '__main__':
