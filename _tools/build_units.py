@@ -171,6 +171,7 @@ BAR_CSS = """
 #nkg-unitfoot .nkg-k{font:600 11px/1 Inter,-apple-system,"Segoe UI",sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#c9a14a}
 #nkg-unitfoot .nkg-t{font-size:15px;font-weight:600}
 #nkg-unitfoot .nkg-copy{flex-basis:100%;font-size:12px;color:#8c93ab;text-align:center;padding-top:6px}
+#nkg-unitfoot .nkg-copy a.nkg-priv{color:#c9a14a!important;font:inherit}
 @media (max-width:640px){
   #nkg-unitbar .nkg-subj,#nkg-unitbar .nkg-sep{display:none}
   #nkg-unitbar .nkg-btn span{display:none}
@@ -312,7 +313,7 @@ def build_page(key, i, seq):
         cards.append(f'<a class="nkg-card next" href="{href(nxt)}"><span class="nkg-k">Next &#8250;</span><span class="nkg-t">{esc(nxt["label"] + " · " + nxt["topic"])}</span></a>')
     foot = (f'<!--nkg:foot--><nkg-unitfoot id="nkg-unitfoot" role="navigation" aria-label="Lesson navigation"><span class="nkg-in">'
             + ''.join(cards) +
-            f'<span class="nkg-copy">Niraj Kumar Gupta · Teaching Hub · {esc(sub["name"])} ({esc(sub["code"])})</span>'
+            f'<span class="nkg-copy">&copy; Niraj Kumar Gupta · Teaching Hub · {esc(sub["name"])} ({esc(sub["code"])}) · <a class="nkg-priv" href="/privacy.html">Privacy &amp; terms</a></span>'
             f'</span></nkg-unitfoot><script>{BAR_JS}</script><!--/nkg:foot-->')
 
     m = re.search(r'<body[^>]*>', s)

@@ -40,6 +40,8 @@ PERSON = {
     'sameAs': ['https://www.researchgate.net/publication/370580661'],
     'image': IMAGE,
 }
+RIGHTS = {'copyrightHolder': {'@type': 'Person', '@id': PERSON_ID, 'name': AUTHOR}, 'copyrightYear': 2026,
+          'usageInfo': SITE + '/privacy.html'}
 PERSON_REF = {'@type': 'Person', '@id': PERSON_ID, 'name': AUTHOR, 'url': SITE + '/'}
 
 # Subject pages: path -> course facts. Lesson-based subjects come from CATALOG.
@@ -178,7 +180,7 @@ def build_lessons(sitemap):
                  'description': desc, 'url': url, 'inLanguage': 'en', 'learningResourceType': kind,
                  'educationalLevel': facts['level'], 'isAccessibleForFree': True, 'teaches': topic,
                  'keywords': f'{topic}, {sub["name"]}, {sub["code"]}', 'dateModified': date, 'image': IMAGE,
-                 'author': PERSON_REF, 'publisher': PERSON_REF,
+                 'author': PERSON_REF, 'publisher': PERSON_REF, **RIGHTS,
                  'isPartOf': {'@type': 'Course', '@id': course_url + '#course', 'name': sub['name'], 'courseCode': sub['code'], 'url': course_url}},
                 crumbs([('Home', SITE + '/'), ('Teaching Hub', SITE + '/teaching/'), (sub['name'], course_url), (f'{label} · {topic}', url)]),
             ]
@@ -200,7 +202,7 @@ def build_subjects(sitemap):
         name = CATALOG[key]['name'] if key in CATALOG else facts['name']
         course = {'@type': 'Course', '@id': url + '#course', 'name': name, 'description': desc, 'url': url,
                   'inLanguage': 'en', 'isAccessibleForFree': True, 'educationalLevel': facts['level'],
-                  'image': IMAGE, 'author': PERSON_REF, 'instructor': PERSON_REF,
+                  'image': IMAGE, 'author': PERSON_REF, 'instructor': PERSON_REF, **RIGHTS,
                   'provider': ({'@type': 'CollegeOrUniversity', 'name': facts['provider']} if facts['provider']
                                else {'@type': 'Person', '@id': PERSON_ID, 'name': AUTHOR}),
                   'offers': {'@type': 'Offer', 'category': 'Free', 'price': 0, 'priceCurrency': 'USD'},
@@ -249,6 +251,22 @@ def build_home(sitemap):
     sitemap.append((SITE + '/', git_date('index.html'), 'monthly', '1.0'))
 
 
+def build_privacy(sitemap):
+    rel = 'privacy.html'
+    path = ROOT / rel
+    url = f'{SITE}/{rel}'
+    s = path.read_text(encoding='utf-8')
+    s = re.sub(r'\s*<meta name="robots" content="[^"]*" />', '', s)
+    write_text(path, s)
+    title, desc = page_title(s), page_desc(s)
+    graph = [{'@type': 'WebPage', '@id': url + '#page', 'name': title, 'url': url, 'description': desc, 'inLanguage': 'en',
+              'author': PERSON_REF, 'isPartOf': {'@id': SITE + '/#website'}},
+             crumbs([('Home', SITE + '/'), ('Privacy & terms', url)])]
+    inject(path, ''.join(head_meta(title, desc, url, with_desc=False, with_canon=False)) +
+           ld({'@context': 'https://schema.org', '@graph': graph}))
+    sitemap.append((url, git_date(rel), 'yearly', '0.3'))
+
+
 def write_sitemap(entries):
     rows = ''.join(f'  <url>\n    <loc>{u}</loc>\n    <lastmod>{d}</lastmod>\n    <changefreq>{c}</changefreq>\n    <priority>{p}</priority>\n  </url>\n'
                    for u, d, c, p in entries)
@@ -275,7 +293,7 @@ def write_llms():
              f'> Free, openly accessible university teaching material written by {AUTHOR}, Senior Engineer at NDCL '
              '(Nepal) and lecturer. Each lesson is a self-contained interactive HTML page with explanations, '
              'worked examples, diagrams and practice questions.', '',
-             'Content may be quoted and cited with a link to the lesson page.', '',
+             f'Content may be quoted and cited with a link to the lesson page. Terms: {SITE}/privacy.html', '',
              '## Site', '',
              f'- [Home]({SITE}/): profile, experience, education and research of {AUTHOR}',
              f'- [Teaching Hub]({SITE}/teaching/): all subjects', '']
@@ -303,6 +321,7 @@ if __name__ == '__main__':
     build_hub(entries)
     build_subjects(entries)
     build_lessons(entries)
+    build_privacy(entries)
     write_sitemap(entries)
     write_robots()
     write_llms()

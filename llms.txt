@@ -2,7 +2,7 @@
 
 > Free, openly accessible university teaching material written by Niraj Kumar Gupta, Senior Engineer at NDCL (Nepal) and lecturer. Each lesson is a self-contained interactive HTML page with explanations, worked examples, diagrams and practice questions.
 
-Content may be quoted and cited with a link to the lesson page.
+Content may be quoted and cited with a link to the lesson page. Terms: https://gupta-niraj.com.np/privacy.html
 
 ## Site
 

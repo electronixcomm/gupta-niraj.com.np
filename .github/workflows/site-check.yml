@@ -1,0 +1,22 @@
+name: Site check
+
+# Checks links, page metadata, structured data and the sitemap on every push.
+# It only reports problems; GitHub Pages deploys independently.
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check links, metadata and sitemap
+        run: python _tools/check_site.py
