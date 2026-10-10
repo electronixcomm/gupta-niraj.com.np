@@ -55,7 +55,7 @@ CATALOG = {
         'code': 'NCS 485',
         'units': [
             (1, 'Introduction to Switching & Routing', 'Where switches and routers sit in a network, IP addressing review, and first steps on the Cisco CLI.', [
-                ('unit-1-1-routers-and-switches.html', 'Unit 1.1', 'Role of Routers & Switches', 'slides', 'Slide deck reviewing computer network basics'),
+                ('unit-1-1-routers-and-switches.html', 'Unit 1.1', 'Role of Routers & Switches', 'notes', 'Computer network basics review: OSI, TCP/IP, Layer 2 vs Layer 3'),
                 ('unit-1-2-ip-addressing-review.html', 'Unit 1.2', 'IP Addressing Review', 'notes', 'Classful vs classless addressing and network design'),
                 ('unit-1-2-switching-vs-routing.html', 'Unit 1.2', 'Switching vs Routing', 'notes', 'Frames, packets and forwarding, with an ARP/CAM walkthrough'),
                 ('unit-1-3-cisco-ios-cli-basics.html', 'Unit 1.3', 'Cisco IOS & CLI Basics', 'notes', 'CLI modes, memory and the switch boot process'),
@@ -96,10 +96,21 @@ CATALOG = {
 
 # Layout-only tweaks for pages whose own layout needs them. Never content.
 PAGE_CSS = {
+    # Slide deck shown as one scrolling page: every slide visible in order, slide Prev/Next removed.
     'unit-1-1-routers-and-switches.html': (
-        'body{flex-direction:column!important;justify-content:flex-start!important;align-items:stretch!important}'
-        '.deck-container{height:calc(100vh - 50px)!important;max-height:none!important;margin:0 auto}'
-        '@media (max-width:700px){.slide{padding:24px 18px!important}}'
+        'body{display:block!important;overflow:visible!important;overflow-x:clip!important;min-height:0!important}'
+        '.deck-container{display:block!important;width:auto!important;height:auto!important;max-width:1180px!important;'
+        'max-height:none!important;margin:0 auto!important;padding:28px 20px 4px!important;background:transparent!important;box-shadow:none!important}'
+        '.slide{display:flex!important;opacity:1!important;height:auto!important;position:relative!important;'
+        'background:#161b22;border:1px solid #30363d;border-radius:14px;box-shadow:0 14px 40px rgba(0,0,0,.45);'
+        'padding:40px 48px 70px!important;margin:0 0 28px!important;scroll-margin-top:16px}'
+        '.slide.title-slide{min-height:420px;background:radial-gradient(circle at center,#1f242d 0%,#0d1117 100%)}'
+        '.content-area{overflow:visible!important}'
+        '.slide-footer{left:48px!important;right:48px!important}'
+        '.nav-controls{display:none!important}'
+        '@media (max-width:760px){.content-area{flex-direction:column!important}'
+        '.slide{padding:26px 18px 64px!important}.slide-footer{left:18px!important;right:18px!important}'
+        '.title-slide h1{font-size:2.2rem!important}.slide-header{flex-wrap:wrap;gap:6px}.slide-header h2{font-size:1.5rem!important}}'
     ),
     'unit-1-2-switching-vs-routing.html': (
         'body{padding-top:50px!important}.rail{top:50px!important}'
