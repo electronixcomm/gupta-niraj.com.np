@@ -134,8 +134,9 @@ def head_meta(title, desc, url, og_type='website', with_desc=True, with_canon=Tr
 
 def inject(path, block):
     s = path.read_text(encoding='utf-8')
-    s = re.sub(r'\n?<!--nkg:seo-->.*?<!--/nkg:seo-->', '', s, flags=re.S)
-    block = '\n<!--nkg:seo-->' + block + '<!--/nkg:seo-->'
+    # drop the previous block together with the blank lines around it, so reruns don't add whitespace
+    s = re.sub(r'\s*<!--nkg:seo-->.*?<!--/nkg:seo-->\s*', '\n', s, flags=re.S)
+    block = '<!--nkg:seo-->' + block + '<!--/nkg:seo-->'
     k = s.find('</head>')
     if k == -1:  # page whose head is only implied: put metadata right after the first <head>-less marker
         m = re.search(r'<body[^>]*>', s)
