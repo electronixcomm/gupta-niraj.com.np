@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lab Companion · Command Cheat Sheet — Switching &amp; Routing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f2f5f8;--panel:#ffffff;--ink:#16232e;--muted:#566674;--line:#d5dde4;--accent:#1d5b8f;--code-bg:#101c26;--code-ink:#d7e6f2;--ok:#1f7a4d;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1a23;--panel:#16252f;--ink:#e3edf4;--muted:#9bb0bf;--line:#2b3f4d;--accent:#6db2ea;--code-bg:#0a121a;--code-ink:#d7e6f2;--ok:#59c48c}}
+*{box-sizing:border-box}
+html{scroll-padding-top:4.5rem}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:52rem;margin:0 auto;padding:0 1.1rem 3rem}
+header.top{padding:2rem 0 .6rem}
+h1{font-size:1.7rem;line-height:1.25;margin:0 0 .3rem;font-weight:600}
+h1+h3{margin:0 0 .6rem;color:var(--muted);font-weight:400;font-size:1rem}
+.bar{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding:.5rem 0}
+.bar .in{max-width:52rem;margin:0 auto;padding:0 1.1rem;display:flex;gap:.6rem;align-items:center}
+.bar select{flex:1;min-width:0;font:inherit;font-size:.9rem;padding:.3rem .5rem;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink)}
+.bar .meta{font-size:.88rem;color:var(--muted);white-space:nowrap}
+h2{font-size:1.3rem;margin:2.2rem 0 .5rem;padding-top:.4rem;border-top:1px solid var(--line);font-weight:600}
+h3{font-size:1.05rem;margin:1.4rem 0 .3rem;color:var(--accent);font-weight:600}
+p{margin:.5rem 0}
+hr{border:0;border-top:1px solid var(--line);margin:2rem 0}
+ul,ol{padding-left:1.3rem}
+li{margin:.25rem 0}
+ul.task{list-style:none;padding-left:0}
+ul.task li{display:flex;gap:.6rem;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:.5rem .75rem;margin:.35rem 0}
+ul.task input{margin-top:.38rem;width:1.05rem;height:1.05rem;flex:none;accent-color:var(--ok)}
+ul.task li.done{opacity:.6}
+ul.task li.done label{text-decoration:line-through}
+ul.task label{flex:1;cursor:pointer}
+code{font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;font-size:.88em}
+p code,li code,td code{background:var(--panel);border:1px solid var(--line);padding:0 .3em;border-radius:4px}
+pre{position:relative;background:var(--code-bg);color:var(--code-ink);padding:.8rem .95rem;border-radius:8px;overflow-x:auto;margin:.6rem 0;font:.85rem/1.55 "IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace}
+pre code{font-size:inherit;background:none;border:0;padding:0;color:inherit}
+.copy{position:absolute;top:.35rem;right:.4rem;font:.72rem "IBM Plex Sans",sans-serif;background:#243746;color:#d7e6f2;border:1px solid #3a5266;border-radius:5px;padding:.15rem .5rem;cursor:pointer;opacity:.85}
+.copy:hover,.copy:focus-visible{opacity:1}
+.tw{overflow-x:auto;margin:.7rem 0}
+table{border-collapse:collapse;width:100%;font-size:.9rem;background:var(--panel)}
+th,td{border:1px solid var(--line);padding:.4rem .6rem;text-align:left;vertical-align:top}
+th{background:var(--bg);font-weight:600}
+strong{font-weight:600}
+@media print{.bar,.copy{display:none}body{background:#fff;color:#000}pre{white-space:pre-wrap}ul.task li{break-inside:avoid}}
+</style><!--nkg:seo--><meta name="description" content="Lab Companion · Command Cheat Sheet: Every command for Labs 1–8, with verification and troubleshooting. Free interactive lab guide for Switching &amp; Routing (NCS 485, Pokhara University) by Niraj Kumar Gupta."><link rel="canonical" href="https://gupta-niraj.com.np/teaching/switching-routing/lab-command-cheat-sheet.html"><meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1"><meta name="author" content="Niraj Kumar Gupta"><meta property="og:type" content="article"><meta property="og:site_name" content="Niraj Kumar Gupta · Teaching Hub"><meta property="og:title" content="Lab Companion · Command Cheat Sheet — Switching &amp; Routing"><meta property="og:description" content="Lab Companion · Command Cheat Sheet: Every command for Labs 1–8, with verification and troubleshooting. Free interactive lab guide for Switching &amp; Routing (NCS 485, Pokhara University) by Niraj Kumar Gupta."><meta property="og:url" content="https://gupta-niraj.com.np/teaching/switching-routing/lab-command-cheat-sheet.html"><meta property="og:image" content="https://gupta-niraj.com.np/assets/og-image.jpg"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="Niraj Kumar Gupta — Teaching Hub"><meta property="og:locale" content="en_US"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Lab Companion · Command Cheat Sheet — Switching &amp; Routing"><meta name="twitter:description" content="Lab Companion · Command Cheat Sheet: Every command for Labs 1–8, with verification and troubleshooting. Free interactive lab guide for Switching &amp; Routing (NCS 485, Pokhara University) by Niraj Kumar Gupta."><meta name="twitter:image" content="https://gupta-niraj.com.np/assets/og-image.jpg"><meta property="article:author" content="https://gupta-niraj.com.np/"><meta property="article:modified_time" content="2026-10-11"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://gupta-niraj.com.np/teaching/switching-routing/lab-command-cheat-sheet.html#lesson","name":"Lab Companion · Command Cheat Sheet","headline":"Lab Companion · Command Cheat Sheet — Switching & Routing","description":"Lab Companion · Command Cheat Sheet: Every command for Labs 1–8, with verification and troubleshooting. Free interactive lab guide for Switching & Routing (NCS 485, Pokhara University) by Niraj Kumar Gupta.","url":"https://gupta-niraj.com.np/teaching/switching-routing/lab-command-cheat-sheet.html","inLanguage":"en","learningResourceType":"Lab guide","educationalLevel":"Undergraduate","isAccessibleForFree":true,"teaches":"Command Cheat Sheet","keywords":"Command Cheat Sheet, Switching & Routing, NCS 485","dateModified":"2026-10-11","image":"https://gupta-niraj.com.np/assets/og-image.jpg","author":{"@type":"Person","@id":"https://gupta-niraj.com.np/#person","name":"Niraj Kumar Gupta","url":"https://gupta-niraj.com.np/"},"publisher":{"@type":"Person","@id":"https://gupta-niraj.com.np/#person","name":"Niraj Kumar Gupta","url":"https://gupta-niraj.com.np/"},"copyrightHolder":{"@type":"Person","@id":"https://gupta-niraj.com.np/#person","name":"Niraj Kumar Gupta"},"copyrightYear":2026,"usageInfo":"https://gupta-niraj.com.np/privacy.html","isPartOf":{"@type":"Course","@id":"https://gupta-niraj.com.np/teaching/switching-routing.html#course","name":"Switching & Routing","courseCode":"NCS 485","url":"https://gupta-niraj.com.np/teaching/switching-routing.html"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://gupta-niraj.com.np/"},{"@type":"ListItem","position":2,"name":"Teaching Hub","item":"https://gupta-niraj.com.np/teaching/"},{"@type":"ListItem","position":3,"name":"Switching & Routing","item":"https://gupta-niraj.com.np/teaching/switching-routing.html"},{"@type":"ListItem","position":4,"name":"Lab Companion · Command Cheat Sheet","item":"https://gupta-niraj.com.np/teaching/switching-routing/lab-command-cheat-sheet.html"}]}]}</script><!--/nkg:seo-->
+</head><body><!--nkg:bar--><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600&amp;display=swap"><style>
+#nkg-unitbar,#nkg-unitfoot{all:initial;display:block;box-sizing:border-box;position:relative;z-index:2147483000;align-self:stretch;justify-self:stretch;
+  background:#0b1d3a;color:#fbf9f3;font:500 14px/1.2 Inter,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+#nkg-unitbar{height:50px;border-bottom:2px solid #c9a14a}
+#nkg-unitbar[data-mode=fixed]{position:fixed;top:0;left:0;right:0}
+#nkg-unitfoot{border-top:2px solid #c9a14a;margin-top:48px}
+#nkg-unitbar *,#nkg-unitfoot *{box-sizing:border-box}
+#nkg-unitbar .nkg-in,#nkg-unitfoot .nkg-in{display:flex;align-items:center;gap:12px;height:100%;max-width:1280px;margin:0 auto;padding:0 16px}
+#nkg-unitfoot .nkg-in{padding:18px 16px;gap:12px;flex-wrap:wrap}
+#nkg-unitbar a,#nkg-unitfoot a{color:#fbf9f3!important;text-decoration:none!important;background:none;border:0;font:inherit;cursor:pointer}
+#nkg-unitbar .nkg-mark{flex:none;display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;
+  background:linear-gradient(135deg,#11295a,#1c3a78);color:#d9b769;font:700 11px/1 Georgia,serif;letter-spacing:.02em;box-shadow:0 0 0 1px rgba(201,161,74,.5)}
+#nkg-unitbar .nkg-subj{flex:none;font-weight:600;white-space:nowrap}
+#nkg-unitbar .nkg-subj:hover{color:#d9b769!important}
+#nkg-unitbar .nkg-sep{flex:none;color:#c9a14a}
+#nkg-unitbar .nkg-unit{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#cdd5e3}
+#nkg-unitbar .nkg-unit b{color:#d9b769;font-weight:600;margin-right:6px}
+#nkg-unitbar .nkg-nav{flex:none;display:flex;gap:6px}
+#nkg-unitbar .nkg-btn{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:6px;border:1px solid rgba(251,249,243,.22)!important;white-space:nowrap}
+#nkg-unitbar .nkg-btn:hover{border-color:#c9a14a!important;color:#d9b769!important}
+#nkg-unitbar .nkg-btn[aria-disabled=true]{opacity:.35;pointer-events:none}
+#nkg-unitfoot .nkg-card{flex:1 1 260px;display:flex;flex-direction:column;gap:4px;padding:12px 16px;border-radius:8px;border:1px solid rgba(251,249,243,.18)!important}
+#nkg-unitfoot .nkg-card:hover{border-color:#c9a14a!important}
+#nkg-unitfoot .nkg-card.next{text-align:right}
+#nkg-unitfoot .nkg-k{font:600 11px/1 Inter,-apple-system,"Segoe UI",sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#c9a14a}
+#nkg-unitfoot .nkg-t{font-size:15px;font-weight:600}
+#nkg-unitfoot .nkg-copy{flex-basis:100%;font-size:12px;color:#8c93ab;text-align:center;padding-top:6px}
+#nkg-unitfoot .nkg-copy a.nkg-priv{color:#c9a14a!important;font:inherit}
+@media (max-width:640px){
+  #nkg-unitbar .nkg-subj,#nkg-unitbar .nkg-sep{display:none}
+  #nkg-unitbar .nkg-btn span{display:none}
+  #nkg-unitbar .nkg-btn{padding:0 10px}
+}
+@media (max-width:760px){table{display:block;max-width:100%;overflow-x:auto}}
+#nkg-unitbar .nkg-tocbtn{display:none}
+html.nkg-toc-narrow #nkg-unitbar .nkg-tocbtn{display:inline-flex}
+#nkg-toc{all:initial;position:fixed;z-index:2147482990;left:12px;top:62px;width:260px;display:none;flex-direction:column;box-sizing:border-box;
+  background:#0b1d3a;color:#cdd5e3;border:1px solid rgba(201,161,74,.35);border-radius:12px;box-shadow:0 10px 30px rgba(6,18,42,.28);
+  font:500 13.5px/1.35 Inter,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden}
+#nkg-toc *{box-sizing:border-box}
+html.nkg-toc-wide #nkg-toc[data-wide="1"]{display:flex}
+#nkg-toc .nkg-toc-h{flex:none;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px 14px 12px 16px;
+  font:600 11px/1 Inter,-apple-system,"Segoe UI",sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#c9a14a;border-bottom:1px solid rgba(251,249,243,.1)}
+#nkg-toc .nkg-toc-x{display:none;place-items:center;width:30px;height:30px;border-radius:6px;border:1px solid rgba(251,249,243,.22);color:#fbf9f3;font:400 18px/1 Inter,sans-serif;cursor:pointer;background:none}
+#nkg-toc .nkg-toc-list{display:block;flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:8px 8px 14px;scrollbar-width:thin;scrollbar-color:#1c3a78 transparent}
+#nkg-toc a{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;color:#cdd5e3!important;text-decoration:none!important;
+  padding:7px 10px 7px 12px;margin:1px 0;border-left:2px solid transparent;border-radius:0 6px 6px 0;cursor:pointer}
+#nkg-toc a.l3{padding-left:24px;font-size:12.5px;color:#9fb0c8!important}
+#nkg-toc a:hover{background:rgba(251,249,243,.06);color:#fbf9f3!important}
+#nkg-toc a.on{border-left-color:#c9a14a;background:rgba(201,161,74,.13);color:#fbf9f3!important}
+html.nkg-toc-narrow #nkg-toc{z-index:2147483002;display:flex;left:0;top:0!important;bottom:0;height:auto!important;width:min(300px,86vw);border-radius:0 12px 12px 0;border-left:0;
+  transform:translateX(-105%);visibility:hidden;transition:transform .25s ease,visibility .25s}
+html.nkg-toc-narrow.nkg-toc-open #nkg-toc{transform:none;visibility:visible}
+html.nkg-toc-narrow #nkg-toc .nkg-toc-x{display:inline-grid}
+#nkg-toc-scrim{all:initial;display:none;position:fixed;inset:0;z-index:2147482989;background:rgba(6,18,42,.45)}
+html.nkg-toc-open #nkg-toc-scrim{display:block;z-index:2147483001}
+@media (prefers-reduced-motion:reduce){html.nkg-toc-narrow #nkg-toc{transition:none}}
+</style><nkg-unitbar id="nkg-unitbar" data-mode="flow" role="navigation" aria-label="Course navigation"><span class="nkg-in"><a class="nkg-mark" href="/teaching/" title="Teaching Hub">NKG</a><a class="nkg-subj" href="/teaching/switching-routing.html">Switching &amp; Routing</a><span class="nkg-sep">/</span><span class="nkg-unit"><b>Lab Companion</b>Command Cheat Sheet</span><span class="nkg-nav"><a class="nkg-btn nkg-tocbtn" href="#" role="button" title="Contents">&#9776;<span> Contents</span></a><a class="nkg-btn" href="/teaching/switching-routing/unit-8-lab-series.html" title="Previous: Unit 8 Lab · WAN, ACL &amp; NAT Lab Series">&#8249;<span> Prev</span></a><a class="nkg-btn" href="/teaching/switching-routing.html" title="All units">&#9638;<span> All units</span></a><a class="nkg-btn" href="/teaching/switching-routing/lab-practice-checklist.html" title="Next: Lab Companion · Practice Checklist"><span>Next </span>&#8250;</a></span></span></nkg-unitbar><nkg-toc id="nkg-toc" data-wide="0" role="navigation" aria-label="Page contents"><span class="nkg-toc-h">Contents<button class="nkg-toc-x" type="button" aria-label="Close contents">&times;</button></span><span class="nkg-toc-list"></span></nkg-toc><nkg-scrim id="nkg-toc-scrim"></nkg-scrim><!--/nkg:bar-->
+<div class="bar"><div class="in"><select id="jump" aria-label="Jump to stage"><option value="">Jump to stage…</option><option value="s0">Stage 0. Start clean</option><option value="s1">Stage 1. Build, cable, address [Lab 1]</option><option value="s2">Stage 2. Hostname, banners, saving</option><option value="s3">Stage 3. Console and privileged mode</option><option value="s4">Stage 4. VTY baseline and management address</option><option value="s5">Stage 5. SSH</option><option value="s6">Stage 6. Port hygiene</option><option value="s7">Stage 7. VLANs [Labs 3A, 3B, 7]</option><option value="s8">Stage 8. Trunks</option><option value="s9">Stage 9. Router-on-a-stick + DHCP relay [Lab 3B]</option><option value="s10">Stage 10. Layer 3 switch (SVIs) [Lab 3A]</option><option value="s11">Stage 11. Router links and static routing [Lab 4]</option><option value="s12">Stage 12. RIPv2 [Lab 5]</option><option value="s13">Stage 13. OSPF [Lab 6]</option><option value="s14">Stage 14. STP, port security, EtherChannel [Lab 7]</option><option value="s15">Stage 15. HDLC, PPP, CHAP [Lab 8]</option><option value="s16">Stage 16. ACLs [Lab 8]</option><option value="s17">Stage 17. NAT / PAT [Lab 8]</option><option value="s18">Stage 18. Hardening</option><option value="s19">Stage 19. Verification quick reference</option><option value="s20">Stage 20. Save, back up, wipe, recover</option><option value="s21">Troubleshooting matrix</option><option value="s22">Memory aids</option><option value="s23">Common gotchas</option></select><span class="meta">Tap a code block to copy</span></div></div>
+<div class="wrap"><header class="top"></header>
+<h1>Cisco Networking Labs — Command Cheat Sheet</h1>
+<h3>One flow, from a blank device to NAT, plus wipe and password recovery</h3>
+<p>Same stage order as the Practice Checklist. All commands start from <code>enable</code> → <code>configure terminal</code> unless noted.</p>
+<pre><code>Switch&gt; enable
+Switch# configure terminal
+Switch(config)#
+</code></pre>
+<p>Necessity key: <strong>Required</strong> = does not work without it; <strong>Recommended</strong> = good practice; <strong>Verify</strong> = check command; <strong>Optional</strong> = situational.</p>
+<hr />
+<h2 id="s0">Stage 0. Start clean</h2>
+<pre><code>Switch# erase startup-config          ! same as: write erase
+Switch# delete flash:vlan.dat         ! switches only: VLAN database
+Switch# reload                        ! answer &quot;no&quot; to save; &quot;no&quot; to setup dialog
+</code></pre>
+<ul>
+<li><code>erase startup-config</code> does not change the running config; it takes effect at <code>reload</code>.</li>
+<li>If asked "System configuration has been modified. Save?" answer <strong>no</strong>, or you restore what you just erased.</li>
+<li>There is no single command for everything; this three-command sequence is the closest. Verify with <code>show startup-config</code> ("startup-config is not present").</li>
+</ul>
+<h2 id="s1">Stage 1. Build, cable, address [Lab 1]</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Link</th>
+<th>Cable</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>End device to switch</td>
+<td>Copper straight-through</td>
+</tr>
+<tr>
+<td>Switch–switch, router–router, PC–PC</td>
+<td>Copper cross-over</td>
+</tr>
+<tr>
+<td>PC to console</td>
+<td>Rollover</td>
+</tr>
+<tr>
+<td>Serial</td>
+<td>DCE/DTE; <code>clock rate</code> on DCE only</td>
+</tr>
+</tbody>
+</table></div>
+<pre><code>PC&gt; ipconfig /all
+PC&gt; arp -a
+Switch# show mac address-table
+</code></pre>
+<p>The first ping often drops one packet while ARP resolves.</p>
+<h2 id="s2">Stage 2. Hostname, banners, saving</h2>
+<pre><code>SW1(config)# hostname SW1
+SW1(config)# no ip domain-lookup
+SW1(config)# banner motd #Authorized Access Only#
+SW1(config)# banner login #Please enter your credentials#
+SW1(config)# banner exec #Welcome to SW1#
+SW1# copy running-config startup-config     ! or: write memory
+</code></pre>
+<p><code>#</code> is the delimiter; use any character not in your message. Order shown at login: MOTD, login banner, credentials, exec banner.</p>
+<h2 id="s3">Stage 3. Console and privileged mode</h2>
+<pre><code>SW1(config)# line console 0
+SW1(config-line)# password Cisco123
+SW1(config-line)# login
+SW1(config-line)# logging synchronous
+SW1(config-line)# exec-timeout 5 0
+SW1(config)# enable secret StrongPass1
+SW1(config)# service password-encryption
+</code></pre>
+<ul>
+<li><code>enable password</code> is legacy plaintext; if both exist the secret wins. Keep only the secret.</li>
+<li>Type 7 (<code>service password-encryption</code>) is reversible; type 5 (<code>enable secret</code>, <code>username ... secret</code>) is an MD5 hash.</li>
+</ul>
+<h2 id="s4">Stage 4. VTY baseline and management address</h2>
+<pre><code>SW1(config)# line vty 0 15
+SW1(config-line)# password Cisco123
+SW1(config-line)# login
+SW1(config)# interface vlan 1
+SW1(config-if)# ip address 192.168.1.10 255.255.255.0
+SW1(config-if)# no shutdown
+SW1(config)# ip default-gateway 192.168.1.1
+</code></pre>
+<p>Telnet cannot work until the SVI has an IP and is up.</p>
+<h2 id="s5">Stage 5. SSH</h2>
+<pre><code>SW1(config)# ip domain-name uniglobe.com.np
+SW1(config)# username admin privilege 15 secret AdminPass1
+SW1(config)# crypto key generate rsa general-keys modulus 2048
+SW1(config)# ip ssh version 2
+SW1(config)# line vty 0 15
+SW1(config-line)# login local
+SW1(config-line)# transport input ssh
+SW1(config)# ip ssh time-out 60
+SW1(config)# ip ssh authentication-retries 3
+PC&gt; ssh -l admin 192.168.1.10
+</code></pre>
+<ul>
+<li>Hostname and domain name must exist before the RSA keys.</li>
+<li><code>login local</code> ignores the line password; a user without <code>privilege 15</code> lands at <code>&gt;</code> and must type <code>enable</code>.</li>
+<li>Change <code>transport input</code> from the console, never from the VTY session you are using.</li>
+</ul>
+<div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th>Telnet</th>
+<th>SSH</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TCP port</td>
+<td>23</td>
+<td>22</td>
+</tr>
+<tr>
+<td>Encrypted</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Needs</td>
+<td>VTY login</td>
+<td>Hostname, domain, RSA keys, local user</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="s6">Stage 6. Port hygiene</h2>
+<pre><code>SW1(config)# interface fa0/1
+SW1(config-if)# description PC0
+SW1(config)# interface range fa0/4 - 24
+SW1(config-if-range)# shutdown
+</code></pre>
+<h2 id="s7">Stage 7. VLANs [Labs 3A, 3B, 7]</h2>
+<pre><code>SW1(config)# vtp mode transparent
+SW1(config)# vlan 10
+SW1(config-vlan)# name Sales
+SW1(config)# interface range fa0/1 - 10
+SW1(config-if-range)# switchport mode access
+SW1(config-if-range)# switchport access vlan 10
+SW1(config)# no vlan 30                   ! deletes the VLAN
+SW1# show vlan brief
+SW1# show vlan id 10
+</code></pre>
+<p>Ports of a deleted VLAN stay assigned and show <strong>inactive</strong>; they do not return to VLAN 1.</p>
+<h2 id="s8">Stage 8. Trunks</h2>
+<pre><code>SW1(config)# interface gi0/1
+SW1(config-if)# switchport mode trunk
+SW1(config-if)# switchport trunk native vlan 999
+SW1(config-if)# switchport trunk allowed vlan 10,20,100
+SW1# show interfaces trunk
+SW1# show interfaces gi0/1 switchport
+</code></pre>
+<p>Native VLAN must match on both ends or CDP reports a native VLAN mismatch.</p>
+<h2 id="s9">Stage 9. Router-on-a-stick + DHCP relay [Lab 3B]</h2>
+<pre><code>Router(config)# interface g0/0/0
+Router(config-if)# no shutdown                      ! parent has no IP
+Router(config)# interface g0/0/0.10
+Router(config-subif)# encapsulation dot1Q 10
+Router(config-subif)# ip address 192.168.1.1 255.255.255.0
+Router(config-subif)# ip helper-address 172.16.100.2
+</code></pre>
+<ul>
+<li>The helper converts the client broadcast to a unicast and writes the subinterface address (giaddr); the server picks the pool from it.</li>
+<li>No DHCP address: check trunk allowed list, dot1Q ID, helper address, server gateway and a pool per subnet.</li>
+</ul>
+<h2 id="s10">Stage 10. Layer 3 switch (SVIs) [Lab 3A]</h2>
+<pre><code>SW1(config)# ip routing
+SW1(config)# interface vlan 10
+SW1(config-if)# ip address 192.168.1.1 255.255.255.0
+SW1(config-if)# no shutdown
+SW1(config)# interface fa0/24
+SW1(config-if)# no switchport                        ! routed uplink
+SW1(config-if)# ip address 10.0.0.1 255.255.255.252
+</code></pre>
+<p>An SVI is up/up only if its VLAN exists and has at least one active port.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th>Router-on-a-stick</th>
+<th>Layer 3 switch</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Link</td>
+<td>802.1Q trunk to router</td>
+<td>None</td>
+</tr>
+<tr>
+<td>Gateway</td>
+<td>Subinterface</td>
+<td>SVI</td>
+</tr>
+<tr>
+<td>Key commands</td>
+<td><code>encapsulation dot1Q</code></td>
+<td><code>ip routing</code>, <code>interface vlan</code></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="s11">Stage 11. Router links and static routing [Lab 4]</h2>
+<pre><code>Router(config)# interface s0/0/0
+Router(config-if)# ip address 10.0.2.1 255.255.255.252
+Router(config-if)# clock rate 64000                   ! DCE end only
+Router(config-if)# no shutdown
+Router(config)# ip route 192.168.3.0 255.255.255.0 10.0.12.2         ! AD 1
+Router(config)# ip route 192.168.3.0 255.255.255.0 10.0.12.6 100     ! floating
+Router(config)# ip route 0.0.0.0 0.0.0.0 172.31.0.1                  ! default
+</code></pre>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Source</th>
+<th>AD</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Connected</td>
+<td>0</td>
+</tr>
+<tr>
+<td>Static</td>
+<td>1</td>
+</tr>
+<tr>
+<td>OSPF</td>
+<td>110</td>
+</tr>
+<tr>
+<td>RIP</td>
+<td>120</td>
+</tr>
+<tr>
+<td>Floating static (lab values)</td>
+<td>10, 100, 200</td>
+</tr>
+</tbody>
+</table></div>
+<p>A floating route appears only when the AD 1 route disappears. A next hop that is not on a connected network is never installed.</p>
+<h2 id="s12">Stage 12. RIPv2 [Lab 5]</h2>
+<pre><code>Router(config)# router rip
+Router(config-router)# version 2
+Router(config-router)# no auto-summary
+Router(config-router)# network 10.0.0.0
+Router(config-router)# passive-interface g0/2          ! LAN ports only
+Router(config-router)# default-information originate   ! edge router only
+Router(config-router)# redistribute static
+</code></pre>
+<p><code>network</code> takes classful networks. Never make a router-to-router link passive. A hop count of 16 means unreachable.</p>
+<h2 id="s13">Stage 13. OSPF [Lab 6]</h2>
+<pre><code>Router(config)# router ospf 10
+Router(config-router)# router-id 1.1.1.1
+Router(config-router)# network 10.0.1.0 0.0.0.3 area 0
+Router(config-router)# passive-interface g0/2
+Router(config-router)# default-information originate
+Router(config-router)# redistribute static subnets
+Router(config-router)# auto-cost reference-bandwidth 1000     ! same on every router
+Router(config-if)# ip ospf cost 1                              ! both ends
+Router# clear ip ospf process                                  ! after a router-id change
+</code></pre>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Prefix</th>
+<th>Wildcard</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>/30</td>
+<td>0.0.0.3</td>
+</tr>
+<tr>
+<td>/24</td>
+<td>0.0.0.255</td>
+</tr>
+</tbody>
+</table></div>
+<p>Neighbour mismatches: area ID, stub flag, authentication, Hello/Dead timers; also subnet, wildcard, passive interface. DR election: priority, then router ID, 0 never; point-to-point links elect none.</p>
+<h2 id="s14">Stage 14. STP, port security, EtherChannel [Lab 7]</h2>
+<pre><code>SW1(config)# spanning-tree vlan 99,110,120 root primary       ! 24576 + VLAN
+SW2(config)# spanning-tree vlan 99,110,120 root secondary     ! 28672 + VLAN
+SW1(config)# spanning-tree mode rapid-pvst
+SW1(config-if)# spanning-tree portfast
+SW1(config-if)# spanning-tree bpduguard enable
+SW1(config-if)# switchport port-security
+SW1(config-if)# switchport port-security maximum 1
+SW1(config-if)# switchport port-security mac-address sticky
+SW1(config-if)# switchport port-security violation shutdown    ! or restrict / protect
+SW1(config-if)# switchport port-security aging time 10
+SW1(config-if)# switchport port-security aging type inactivity
+SW1(config)# interface range gi0/1 - 2
+SW1(config-if-range)# channel-group 1 mode active              ! other side: passive
+SW1(config)# interface port-channel 1
+SW1(config-if)# switchport mode trunk
+</code></pre>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Violation mode</th>
+<th>Port</th>
+<th>Log</th>
+<th>Counter</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>shutdown</td>
+<td>err-disabled</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>restrict</td>
+<td>Up</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>protect</td>
+<td>Up</td>
+<td>No</td>
+<td>No</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>Recover err-disabled: fix the cause, then <code>shutdown</code> / <code>no shutdown</code>.</li>
+<li>LACP forms with active/active or active/passive; passive/passive shows (I); a mismatch shows (s); good bundle <code>Po1(SU)</code> with members (P).</li>
+<li>PortFast on device ports only, always with BPDU Guard. Root bridge has no root port. PVST+ outage about 30 s, Rapid PVST+ about one lost ping.</li>
+</ul>
+<h2 id="s15">Stage 15. HDLC, PPP, CHAP [Lab 8]</h2>
+<pre><code>Router(config-if)# clock rate 128000                  ! DCE end
+Router(config-if)# encapsulation ppp
+Router(config-if)# ppp authentication chap
+Router(config)# username HQ password Cisco123          ! the OTHER router's hostname
+Router# debug ppp authentication
+Router# undebug all
+</code></pre>
+<p>HDLC is the default; a PPP/HDLC mismatch gives <code>up, line protocol down</code>. Good result: <code>Encapsulation PPP, LCP Open</code>.</p>
+<h2 id="s16">Stage 16. ACLs [Lab 8]</h2>
+<pre><code>Router(config)# ip access-list standard NO-GUEST
+Router(config-std-nacl)# deny host 192.168.10.20
+Router(config-std-nacl)# permit any
+Router(config)# interface g0/0
+Router(config-if)# ip access-group NO-GUEST out
+Router(config)# access-list 5 permit host 192.168.20.10
+Router(config)# line vty 0 4
+Router(config-line)# access-class 5 in
+Router(config)# ip access-list extended BRANCH-IN
+Router(config-ext-nacl)# permit tcp 192.168.10.0 0.0.0.255 host 192.168.20.100 eq www
+Router(config-ext-nacl)# permit icmp 192.168.10.0 0.0.0.255 host 192.168.20.100 echo
+Router(config-ext-nacl)# deny ip 192.168.10.0 0.0.0.255 192.168.20.0 0.0.0.255
+Router(config-ext-nacl)# permit ip any any
+</code></pre>
+<p>Standard: source only, place near the destination. Extended: source, destination and port, place near the source. Top-down, first match wins, implicit deny at the end.</p>
+<h2 id="s17">Stage 17. NAT / PAT [Lab 8]</h2>
+<pre><code>Router(config)# interface g0/0
+Router(config-if)# ip nat inside
+Router(config)# interface s0/0/1
+Router(config-if)# ip nat outside
+Router(config)# ip nat inside source static 192.168.20.100 209.165.200.229
+Router(config)# access-list 1 permit 192.168.10.0 0.0.0.255
+Router(config)# ip nat inside source list 1 interface s0/0/1 overload
+</code></pre>
+<p><code>overload</code> = PAT. The ISP does not route private addresses, so the internet cannot ping 192.168.20.100.</p>
+<h2 id="s18">Stage 18. Hardening</h2>
+<pre><code>Router(config)# service password-encryption
+Router(config-if)# no cdp enable                       ! on the ISP link
+Router(config-if)# ip access-group OUTSIDE-IN in       ! deny private sources, permit ip any any
+</code></pre>
+<h2 id="s19">Stage 19. Verification quick reference</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Topic</th>
+<th>Commands</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>First check, always</td>
+<td><code>show ip interface brief</code></td>
+</tr>
+<tr>
+<td>Host</td>
+<td><code>ipconfig /all</code>, <code>arp -a</code>, <code>ping</code>, <code>tracert</code></td>
+</tr>
+<tr>
+<td>Switch</td>
+<td><code>show mac address-table [dynamic|interface|vlan]</code>, <code>clear mac address-table dynamic</code>, <code>show interfaces status</code>, <code>show interfaces fa0/1 switchport</code></td>
+</tr>
+<tr>
+<td>Router ARP</td>
+<td><code>show ip arp</code> (or <code>show arp</code>); empty until the router has talked to a host</td>
+</tr>
+<tr>
+<td>VLAN / trunk</td>
+<td><code>show vlan brief</code>, <code>show vlan id 10</code>, <code>show interfaces trunk</code></td>
+</tr>
+<tr>
+<td>Remote access</td>
+<td><code>show ip ssh</code>, <code>show ssh</code>, <code>show line vty 0 15</code>, <code>show crypto key mypubkey rsa</code></td>
+</tr>
+<tr>
+<td>Routing</td>
+<td><code>show ip route [static|rip|ospf]</code>, <code>show ip protocols</code></td>
+</tr>
+<tr>
+<td>OSPF</td>
+<td><code>show ip ospf neighbor</code>, <code>show ip ospf interface g0/0</code>, <code>show ip ospf database</code></td>
+</tr>
+<tr>
+<td>STP / security</td>
+<td><code>show spanning-tree vlan 110</code>, <code>show spanning-tree summary</code>, <code>show port-security interface fa0/5</code>, <code>show interfaces status err-disabled</code></td>
+</tr>
+<tr>
+<td>EtherChannel</td>
+<td><code>show etherchannel summary</code></td>
+</tr>
+<tr>
+<td>WAN</td>
+<td><code>show interfaces serial 0/0/0</code>, <code>show controllers serial 0/0/0</code>, <code>debug ppp authentication</code></td>
+</tr>
+<tr>
+<td>ACL / NAT</td>
+<td><code>show access-lists</code>, <code>show ip interface g0/0</code>, <code>show ip nat translations</code>, <code>show ip nat statistics</code></td>
+</tr>
+<tr>
+<td>Neighbours</td>
+<td><code>show cdp neighbors [detail]</code>, <code>show lldp neighbors</code></td>
+</tr>
+<tr>
+<td>Filter output</td>
+<td><code>show running-config | section router ospf</code>, <code>| include nat</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>Reading output:
+- <code>up/up</code> working; <code>up/down</code> Layer 2 problem (encapsulation, keepalive, clock); <code>down/down</code> cable or far end; <code>administratively down</code> use <code>no shutdown</code>.
+- Ping <code>!</code> / Reply success; <code>.</code> / timeout no reply; <code>U</code> / unreachable a router has no route.
+- Route codes: C connected, L local, S static, S<em> default, R RIP, O OSPF, O</em>E2 default via OSPF, E2 external; <code>[AD/metric]</code>.</p>
+<h2 id="s20">Stage 20. Save, back up, wipe, recover</h2>
+<pre><code>SW1# copy running-config startup-config      ! or: write memory
+SW1# copy running-config tftp                ! backup, if a TFTP server exists
+SW1# show running-config
+</code></pre>
+<h3>Wipe in one go</h3>
+<pre><code>Router# erase startup-config
+Router# reload                               ! answer &quot;no&quot; to save
+Switch# erase startup-config
+Switch# delete flash:vlan.dat
+Switch# reload
+</code></pre>
+<p>Verify: <code>show startup-config</code> reports it is not present, and the initial configuration dialog appears (answer <code>no</code>).</p>
+<h3>Forgot the password: router (ROMMON, Cisco ISR family)</h3>
+<pre><code>(power cycle; send Break within about 60 s: Ctrl+Break in a terminal program)
+rommon 1 &gt; confreg 0x2142              ! ignore the saved config at boot
+rommon 2 &gt; reset
+Router&gt; enable                         ! no password; answer &quot;no&quot; to setup dialog
+Router# copy startup-config running-config     ! restores the old config
+Router# configure terminal
+Router(config)# enable secret NewPass1
+Router(config)# interface g0/0
+Router(config-if)# no shutdown                  ! interfaces come back shut; repeat for each
+Router(config)# config-register 0x2102          ! back to normal boot
+Router(config)# end
+Router# copy running-config startup-config
+Router# reload
+Router# show version                            ! &quot;Configuration register is 0x2102&quot;
+</code></pre>
+<ul>
+<li>Order matters: copy startup into running first. Saving first overwrites your real config with a blank one.</li>
+<li>Packet Tracer: a Ctrl+C during boot is commonly used instead of Break; check your version.</li>
+</ul>
+<h3>Forgot the password: switch (Catalyst 2960 family)</h3>
+<pre><code>(hold the Mode button, power on, release when the SYSTEM LED changes; prompt &quot;switch:&quot;)
+switch: flash_init
+switch: load_helper
+switch: dir flash:
+switch: rename flash:config.text flash:config.text.old
+switch: boot
+Switch&gt; enable                         ! answer &quot;no&quot; to the setup dialog
+Switch# rename flash:config.text.old flash:config.text
+Switch# copy flash:config.text system:running-config
+Switch# configure terminal
+Switch(config)# enable secret NewPass1
+Switch(config)# end
+Switch# copy running-config startup-config
+</code></pre>
+<ul>
+<li>Mode-button timing differs by model; follow Cisco's guide for yours.</li>
+<li>I believe Packet Tracer does not simulate the Mode-button procedure on switches; practise router recovery there and switch recovery on real hardware.</li>
+<li><code>no service password-recovery</code> disables this method; the only way back is a full wipe, which erases the config.</li>
+<li>Recovery requires physical console access, which is why physical security matters. Use it only on equipment you own or are authorised to manage.</li>
+</ul>
+<hr />
+<h2 id="s21">Troubleshooting matrix</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Likely cause</th>
+<th>Check</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cannot ping the switch</td>
+<td>Vlan1 shut, wrong mask, port shut</td>
+<td><code>show ip interface brief</code></td>
+</tr>
+<tr>
+<td>SSH refused</td>
+<td>No RSA key, no domain name, VTY not allowing SSH</td>
+<td><code>show ip ssh</code>, <code>line vty</code></td>
+</tr>
+<tr>
+<td>Lands at <code>&gt;</code> after SSH</td>
+<td>User lacks <code>privilege 15</code></td>
+<td><code>enable</code> or fix the username</td>
+</tr>
+<tr>
+<td>SVI up/down</td>
+<td>VLAN missing or no active port</td>
+<td><code>show vlan brief</code></td>
+</tr>
+<tr>
+<td>Cross-VLAN ping fails (L3 switch)</td>
+<td><code>ip routing</code> off, wrong host gateway</td>
+<td><code>show ip route</code></td>
+</tr>
+<tr>
+<td>No DHCP address</td>
+<td>Trunk allowed list, dot1Q ID, helper, server gateway/pool</td>
+<td><code>show interfaces trunk</code></td>
+</tr>
+<tr>
+<td>Failover does not happen</td>
+<td>Floating AD not higher, wrong next hop, interface still up</td>
+<td><code>show ip route static</code></td>
+</tr>
+<tr>
+<td>No OSPF neighbour</td>
+<td>Area, timers, wildcard, passive mismatch</td>
+<td><code>show ip ospf interface</code></td>
+</tr>
+<tr>
+<td>Stub network missing</td>
+<td><code>redistribute static subnets</code> missing</td>
+<td><code>show ip protocols</code></td>
+</tr>
+<tr>
+<td>Serial up, protocol down</td>
+<td>HDLC/PPP mismatch, CHAP, clock</td>
+<td><code>show interfaces serial</code></td>
+</tr>
+<tr>
+<td>Port err-disabled</td>
+<td>BPDU Guard or port security</td>
+<td><code>show interfaces status err-disabled</code></td>
+</tr>
+<tr>
+<td>EtherChannel not forming</td>
+<td>passive/passive, speed mismatch</td>
+<td><code>show etherchannel summary</code></td>
+</tr>
+<tr>
+<td>No internet from hosts</td>
+<td>NAT roles or ACL wrong, no return route</td>
+<td><code>show ip nat translations</code></td>
+</tr>
+<tr>
+<td>Config gone after reload</td>
+<td>Never saved, or config register 0x2142</td>
+<td><code>show startup-config</code>, <code>show version</code></td>
+</tr>
+<tr>
+<td>Router boots to setup dialog</td>
+<td>Config wiped, or register ignoring NVRAM</td>
+<td><code>show version</code></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="s22">Memory aids</h2>
+<ul>
+<li>OSPF wildcard: block size minus one (/30 = 0.0.0.3, /24 = 0.0.0.255).</li>
+<li>OSPF neighbour mismatches: Area, Stub flag, Authentication, Hello/Dead timers.</li>
+<li>Floating static: give the backup a higher AD than the primary and the protocol in use.</li>
+<li>Recovery register: 0x2142 skips the config, 0x2102 is normal.</li>
+<li>Save after every stage; changes live only in RAM until saved.</li>
+</ul>
+<h2 id="s23">Common gotchas</h2>
+<ul>
+<li><code>clock rate</code> goes on the DCE end only.</li>
+<li><code>network</code> in RIP is classful; in OSPF it is subnet plus wildcard.</li>
+<li>Router interfaces need <code>no shutdown</code>; switch ports are up by default.</li>
+<li><code>redistribute static</code> in OSPF needs <code>subnets</code>.</li>
+<li>ACL order matters: specific permits above the <code>deny</code>, and mind the implicit deny.</li>
+<li><code>ip nat inside</code> is needed on the branch-facing serial, or branch traffic is not translated.</li>
+<li>Sticky MAC addresses are lost on reload unless saved.</li>
+<li>Turn debugging off with <code>undebug all</code>.</li>
+<li>Never change <code>transport input</code> on the VTY line you are logged in on.</li>
+<li>Never save the config before restoring it during password recovery.</li>
+</ul>
+</div>
+<script>
+(function(){
+ var KEY="Networking_Lab_Cheat_Sheet.html";
+ function get(){try{return JSON.parse(localStorage.getItem(KEY)||"{}")}catch(e){return {}}}
+ function set(o){try{localStorage.setItem(KEY,JSON.stringify(o))}catch(e){}}
+ var st=get(),boxes=document.querySelectorAll('ul.task input');
+ function prog(){var p=document.getElementById('prog');if(!p)return;var d=0;boxes.forEach(function(b){if(b.checked)d++});p.textContent=d+" / "+boxes.length+" done"}
+ boxes.forEach(function(b){
+  if(st[b.id]){b.checked=true;b.parentNode.classList.add('done')}
+  b.addEventListener('change',function(){b.parentNode.classList.toggle('done',b.checked);var o=get();if(b.checked)o[b.id]=1;else delete o[b.id];set(o);prog()})
+ });prog();
+ document.getElementById('jump').addEventListener('change',function(e){var t=document.getElementById(e.target.value);if(t)t.scrollIntoView({behavior:'smooth'})});
+ document.querySelectorAll('pre').forEach(function(pre){
+  var b=document.createElement('button');b.type='button';b.className='copy';b.textContent='Copy';
+  b.addEventListener('click',function(){var t=pre.querySelector('code').innerText;
+   (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){b.textContent='Copied'},function(){var r=document.createRange();r.selectNodeContents(pre.querySelector('code'));var s=window.getSelection();s.removeAllRanges();s.addRange(r);b.textContent='Selected'});
+   setTimeout(function(){b.textContent='Copy'},1500)});
+  pre.appendChild(b)});
+})();
+</script><!--nkg:foot--><nkg-unitfoot id="nkg-unitfoot" role="navigation" aria-label="Lesson navigation"><span class="nkg-in"><a class="nkg-card prev" href="/teaching/switching-routing/unit-8-lab-series.html"><span class="nkg-k">&#8249; Previous</span><span class="nkg-t">Unit 8 Lab · WAN, ACL &amp; NAT Lab Series</span></a><a class="nkg-card" href="/teaching/switching-routing.html"><span class="nkg-k">NCS 485</span><span class="nkg-t">All Switching &amp; Routing units</span></a><a class="nkg-card next" href="/teaching/switching-routing/lab-practice-checklist.html"><span class="nkg-k">Next &#8250;</span><span class="nkg-t">Lab Companion · Practice Checklist</span></a><span class="nkg-copy">&copy; Niraj Kumar Gupta · Teaching Hub · Switching &amp; Routing (NCS 485) · <a class="nkg-priv" href="/privacy.html">Privacy &amp; terms</a></span></span></nkg-unitfoot><script>(function(){
+var d=document,h=d.documentElement,B=d.body,bar=d.getElementById('nkg-unitbar'),ft=d.getElementById('nkg-unitfoot'),toc=d.getElementById('nkg-toc'),
+list=toc&&toc.querySelector('.nkg-toc-list'),hs=[],links=[],basePL=null,wideOK=toc&&toc.getAttribute('data-wide')==='1';
+function px(v){return parseFloat(v)||0}
+if(toc){try{
+  var all=[].slice.call(d.querySelectorAll('h2,h3')).filter(function(x){return !x.closest('#nkg-unitbar,#nkg-unitfoot,#nkg-toc')&&x.getClientRects().length&&x.textContent.trim()});
+  if(all.filter(function(x){return x.tagName==='H2'}).length>8)all=all.filter(function(x){return x.tagName==='H2'});
+  all.forEach(function(x,i){if(!x.id)x.id='nkg-s-'+(i+1);var a=d.createElement('a');a.href='#'+x.id;a.textContent=[].map.call(x.childNodes,function(c){return c.textContent}).join(' ').replace(/\s+/g,' ').trim();
+    a.className=x.tagName==='H3'?'l3':'l2';a.addEventListener('click',function(){h.classList.remove('nkg-toc-open')});list.appendChild(a);hs.push(x);links.push(a)});
+  if(!hs.length){toc.remove();toc=null;}
+}catch(e){toc=null}}
+function place(){if(!toc)return;
+  if(h.classList.contains('nkg-toc-wide')){var top=Math.max(12,(bar?bar.getBoundingClientRect().bottom:0)+12),bot=innerHeight-12;
+    if(ft){var fb=ft.getBoundingClientRect().top-12;if(fb<bot)bot=fb}toc.style.top=top+'px';toc.style.height=Math.max(140,bot-top)+'px'}
+  else{toc.style.top='';toc.style.height=''}
+  var cur=0;for(var i=0;i<hs.length;i++){if(hs[i].getBoundingClientRect().top<90)cur=i;else break}
+  for(var j=0;j<links.length;j++)links[j].classList.toggle('on',j===cur);
+  var a=links[cur];if(a&&list.clientHeight){if(a.offsetTop<list.scrollTop||a.offsetTop>list.scrollTop+list.clientHeight-40)list.scrollTop=a.offsetTop-list.clientHeight/3}}
+function layout(){try{
+  if(toc){if(basePL===null){B.style.removeProperty('padding-left');basePL=px(getComputedStyle(B).paddingLeft)}
+    var wide=wideOK&&innerWidth>=1200;h.classList.toggle('nkg-toc-wide',wide);h.classList.toggle('nkg-toc-narrow',innerWidth<1200);
+    if(wide){h.classList.remove('nkg-toc-open');B.style.setProperty('padding-left',(basePL+284)+'px','important')}else B.style.removeProperty('padding-left')}
+  var cs=getComputedStyle(B),l=px(cs.paddingLeft)+px(cs.marginLeft),r=px(cs.paddingRight)+px(cs.marginRight);
+  if(bar&&bar.getAttribute('data-mode')!=='fixed'){var t=px(cs.paddingTop)+px(cs.marginTop);bar.style.marginTop=-t+'px';bar.style.marginLeft=-l+'px';bar.style.marginRight=-r+'px';bar.style.marginBottom=px(cs.paddingTop)+'px'}
+  if(ft){ft.style.marginLeft=-l+'px';ft.style.marginRight=-r+'px';ft.style.marginBottom=-(px(cs.paddingBottom)+px(cs.marginBottom))+'px'}
+  place()}catch(e){}}
+var tick=false;function onScroll(){if(!tick){tick=true;requestAnimationFrame(function(){tick=false;place()})}}
+layout();addEventListener('resize',layout);addEventListener('scroll',onScroll,{passive:true});addEventListener('load',layout);
+if(toc){var btn=d.querySelector('#nkg-unitbar .nkg-tocbtn'),sc=d.getElementById('nkg-toc-scrim'),x=toc.querySelector('.nkg-toc-x');
+  function close(){h.classList.remove('nkg-toc-open')}
+  if(btn)btn.addEventListener('click',function(e){e.preventDefault();h.classList.toggle('nkg-toc-open');place()});
+  if(sc)sc.addEventListener('click',close);if(x)x.addEventListener('click',close);
+  d.addEventListener('keydown',function(e){if(e.key==='Escape')close()});}
+else{var b2=d.querySelector('#nkg-unitbar .nkg-tocbtn');if(b2)b2.remove()}
+})();</script><!--/nkg:foot-->
+</body></html>

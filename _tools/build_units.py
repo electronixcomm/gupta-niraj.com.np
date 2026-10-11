@@ -90,6 +90,12 @@ CATALOG = {
                 ('unit-8-wan-acl-nat.html', 'Unit 8', 'WAN, ACL & NAT', 'notes', 'PPP/HDLC, access control lists and network address translation'),
                 ('unit-8-lab-series.html', 'Unit 8 Lab', 'WAN, ACL & NAT Lab Series', 'lab', 'PPP/HDLC, ACL filtering and NAT for internet access'),
             ], [('lab-8-ppp-hdlc-acl-nat.pkz', 'Lab 8 · PPP/HDLC, ACL and NAT')]),
+            # Non-numeric "unit": course-wide lab material, shown as "Labs 1–8".
+            ('Labs', 'Lab Companion', 'Commands, a practice checklist and self-test questions for every lab, stage by stage.', [
+                ('lab-command-cheat-sheet.html', 'Lab Companion', 'Command Cheat Sheet', 'lab', 'Every command for Labs 1–8, with verification and troubleshooting'),
+                ('lab-practice-checklist.html', 'Lab Companion', 'Practice Checklist', 'lab', 'Tick off each stage from a clean start to backup and recovery'),
+                ('lab-question-bank.html', 'Lab Companion', 'Command Question Bank', 'lab', 'Questions by lab to test yourself on commands and output'),
+            ], []),
         ],
     },
 }
@@ -340,14 +346,15 @@ def build_subject(key):
     n_lessons = sum(1 for u in units for l in u[3] if l[3] != 'lab')
     n_labs = sum(1 for u in units for l in u[3] if l[3] == 'lab')
     n_files = sum(len(u[4]) for u in units)
-    stats = [f'<span><strong>{len(units)}</strong> units</span>', f'<span><strong>{n_lessons}</strong> lessons</span>']
+    stats = [f'<span><strong>{sum(isinstance(u[0], int) for u in units)}</strong> units</span>', f'<span><strong>{n_lessons}</strong> lessons</span>']
     if n_labs:
         stats.append(f'<span><strong>{n_labs}</strong> lab guides</span>')
     if n_files:
         stats.append(f'<span><strong>{n_files}</strong> downloads</span>')
-    jump = ''.join(f'<a href="#unit-{u[0]}">{u[0]}</a>' for u in units)
+    jump = ''.join(f'<a href="#unit-{str(u[0]).lower()}">{u[0]}</a>' for u in units)
     blocks = []
     for num, utitle, usum, lessons, files in units:
+        badge = f'<span>Unit</span>{num}' if isinstance(num, int) else f'<span>{esc(num)}</span>1–{units[-2][0]}'
         items = ''.join(
             f'''
               <li class="lesson"><a href="/teaching/{key}/{f}">
@@ -361,8 +368,8 @@ def build_subject(key):
                 f'<a class="file-chip" href="/teaching/{key}/downloads/{f}" download><span class="file-ext">{f.rsplit(".", 1)[1]}</span>{esc(t)}</a>'
                 for f, t in files) + '</div>'
         blocks.append(f'''
-        <article class="unit" id="unit-{num}">
-          <div class="unit-num"><span>Unit</span>{num}</div>
+        <article class="unit" id="unit-{str(num).lower()}">
+          <div class="unit-num">{badge}</div>
           <div class="unit-body">
             <h2>{esc(utitle)}</h2>
             <p class="unit-summary">{esc(usum)}</p>

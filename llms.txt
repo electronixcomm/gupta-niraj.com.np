@@ -45,6 +45,9 @@ Course page: https://gupta-niraj.com.np/teaching/switching-routing.html — taug
 - [Unit 7 Lab · Switching Lab Series](https://gupta-niraj.com.np/teaching/switching-routing/unit-7-lab-series.html): VLANs, STP, port security, EtherChannel and trouble tickets
 - [Unit 8 · WAN, ACL & NAT](https://gupta-niraj.com.np/teaching/switching-routing/unit-8-wan-acl-nat.html): PPP/HDLC, access control lists and network address translation
 - [Unit 8 Lab · WAN, ACL & NAT Lab Series](https://gupta-niraj.com.np/teaching/switching-routing/unit-8-lab-series.html): PPP/HDLC, ACL filtering and NAT for internet access
+- [Lab Companion · Command Cheat Sheet](https://gupta-niraj.com.np/teaching/switching-routing/lab-command-cheat-sheet.html): Every command for Labs 1–8, with verification and troubleshooting
+- [Lab Companion · Practice Checklist](https://gupta-niraj.com.np/teaching/switching-routing/lab-practice-checklist.html): Tick off each stage from a clean start to backup and recovery
+- [Lab Companion · Command Question Bank](https://gupta-niraj.com.np/teaching/switching-routing/lab-question-bank.html): Questions by lab to test yourself on commands and output
 
 ## Other subjects
 

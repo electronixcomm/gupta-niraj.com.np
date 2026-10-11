@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lab Companion · Practice Checklist — Switching &amp; Routing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f2f5f8;--panel:#ffffff;--ink:#16232e;--muted:#566674;--line:#d5dde4;--accent:#1d5b8f;--code-bg:#101c26;--code-ink:#d7e6f2;--ok:#1f7a4d;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1a23;--panel:#16252f;--ink:#e3edf4;--muted:#9bb0bf;--line:#2b3f4d;--accent:#6db2ea;--code-bg:#0a121a;--code-ink:#d7e6f2;--ok:#59c48c}}
+*{box-sizing:border-box}
+html{scroll-padding-top:4.5rem}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:52rem;margin:0 auto;padding:0 1.1rem 3rem}
+header.top{padding:2rem 0 .6rem}
+h1{font-size:1.7rem;line-height:1.25;margin:0 0 .3rem;font-weight:600}
+h1+h3{margin:0 0 .6rem;color:var(--muted);font-weight:400;font-size:1rem}
+.bar{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding:.5rem 0}
+.bar .in{max-width:52rem;margin:0 auto;padding:0 1.1rem;display:flex;gap:.6rem;align-items:center}
+.bar select{flex:1;min-width:0;font:inherit;font-size:.9rem;padding:.3rem .5rem;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink)}
+.bar .meta{font-size:.88rem;color:var(--muted);white-space:nowrap}
+h2{font-size:1.3rem;margin:2.2rem 0 .5rem;padding-top:.4rem;border-top:1px solid var(--line);font-weight:600}
+h3{font-size:1.05rem;margin:1.4rem 0 .3rem;color:var(--accent);font-weight:600}
+p{margin:.5rem 0}
+hr{border:0;border-top:1px solid var(--line);margin:2rem 0}
+ul,ol{padding-left:1.3rem}
+li{margin:.25rem 0}
+ul.task{list-style:none;padding-left:0}
+ul.task li{display:flex;gap:.6rem;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:.5rem .75rem;margin:.35rem 0}
+ul.task input{margin-top:.38rem;width:1.05rem;height:1.05rem;flex:none;accent-color:var(--ok)}
+ul.task li.done{opacity:.6}
+ul.task li.done label{text-decoration:line-through}
+ul.task label{flex:1;cursor:pointer}
+code{font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;font-size:.88em}
+p code,li code,td code{background:var(--panel);border:1px solid var(--line);padding:0 .3em;border-radius:4px}
+pre{position:relative;background:var(--code-bg);color:var(--code-ink);padding:.8rem .95rem;border-radius:8px;overflow-x:auto;margin:.6rem 0;font:.85rem/1.55 "IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace}
+pre code{font-size:inherit;background:none;border:0;padding:0;color:inherit}
+.copy{position:absolute;top:.35rem;right:.4rem;font:.72rem "IBM Plex Sans",sans-serif;background:#243746;color:#d7e6f2;border:1px solid #3a5266;border-radius:5px;padding:.15rem .5rem;cursor:pointer;opacity:.85}
+.copy:hover,.copy:focus-visible{opacity:1}
+.tw{overflow-x:auto;margin:.7rem 0}
+table{border-collapse:collapse;width:100%;font-size:.9rem;background:var(--panel)}
+th,td{border:1px solid var(--line);padding:.4rem .6rem;text-align:left;vertical-align:top}
+th{background:var(--bg);font-weight:600}
+strong{font-weight:600}
+@media print{.bar,.copy{display:none}body{background:#fff;color:#000}pre{white-space:pre-wrap}ul.task li{break-inside:avoid}}
+</style><!--nkg:seo--><meta name="description" content="Lab Companion · Practice Checklist: Tick off each stage from a clean start to backup and recovery. Free interactive lab guide for Switching &amp; Routing (NCS 485, Pokhara University) by Niraj Kumar Gupta."><link rel="canonical" href="https://gupta-niraj.com.np/teaching/switching-routing/lab-practice-checklist.html"><meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1"><meta name="author" content="Niraj Kumar Gupta"><meta property="og:type" content="article"><meta property="og:site_name" content="Niraj Kumar Gupta · Teaching Hub"><meta property="og:title" content="Lab Companion · Practice Checklist — Switching &amp; Routing"><meta property="og:description" content="Lab Companion · Practice Checklist: Tick off each stage from a clean start to backup and recovery. Free interactive lab guide for Switching &amp; Routing (NCS 485, Pokhara University) by Niraj Kumar Gupta."><meta property="og:url" content="https://gupta-niraj.com.np/teaching/switching-routing/lab-practice-checklist.html"><meta property="og:image" content="https://gupta-niraj.com.np/assets/og-image.jpg"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="Niraj Kumar Gupta — Teaching Hub"><meta property="og:locale" content="en_US"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Lab Companion · Practice Checklist — Switching &amp; Routing"><meta name="twitter:description" content="Lab Companion · Practice Checklist: Tick off each stage from a clean start to backup and recovery. Free interactive lab guide for Switching &amp; Routing (NCS 485, Pokhara University) by Niraj Kumar Gupta."><meta name="twitter:image" content="https://gupta-niraj.com.np/assets/og-image.jpg"><meta property="article:author" content="https://gupta-niraj.com.np/"><meta property="article:modified_time" content="2026-10-11"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://gupta-niraj.com.np/teaching/switching-routing/lab-practice-checklist.html#lesson","name":"Lab Companion · Practice Checklist","headline":"Lab Companion · Practice Checklist — Switching & Routing","description":"Lab Companion · Practice Checklist: Tick off each stage from a clean start to backup and recovery. Free interactive lab guide for Switching & Routing (NCS 485, Pokhara University) by Niraj Kumar Gupta.","url":"https://gupta-niraj.com.np/teaching/switching-routing/lab-practice-checklist.html","inLanguage":"en","learningResourceType":"Lab guide","educationalLevel":"Undergraduate","isAccessibleForFree":true,"teaches":"Practice Checklist","keywords":"Practice Checklist, Switching & Routing, NCS 485","dateModified":"2026-10-11","image":"https://gupta-niraj.com.np/assets/og-image.jpg","author":{"@type":"Person","@id":"https://gupta-niraj.com.np/#person","name":"Niraj Kumar Gupta","url":"https://gupta-niraj.com.np/"},"publisher":{"@type":"Person","@id":"https://gupta-niraj.com.np/#person","name":"Niraj Kumar Gupta","url":"https://gupta-niraj.com.np/"},"copyrightHolder":{"@type":"Person","@id":"https://gupta-niraj.com.np/#person","name":"Niraj Kumar Gupta"},"copyrightYear":2026,"usageInfo":"https://gupta-niraj.com.np/privacy.html","isPartOf":{"@type":"Course","@id":"https://gupta-niraj.com.np/teaching/switching-routing.html#course","name":"Switching & Routing","courseCode":"NCS 485","url":"https://gupta-niraj.com.np/teaching/switching-routing.html"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://gupta-niraj.com.np/"},{"@type":"ListItem","position":2,"name":"Teaching Hub","item":"https://gupta-niraj.com.np/teaching/"},{"@type":"ListItem","position":3,"name":"Switching & Routing","item":"https://gupta-niraj.com.np/teaching/switching-routing.html"},{"@type":"ListItem","position":4,"name":"Lab Companion · Practice Checklist","item":"https://gupta-niraj.com.np/teaching/switching-routing/lab-practice-checklist.html"}]}]}</script><!--/nkg:seo-->
+</head><body><!--nkg:bar--><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600&amp;display=swap"><style>
+#nkg-unitbar,#nkg-unitfoot{all:initial;display:block;box-sizing:border-box;position:relative;z-index:2147483000;align-self:stretch;justify-self:stretch;
+  background:#0b1d3a;color:#fbf9f3;font:500 14px/1.2 Inter,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+#nkg-unitbar{height:50px;border-bottom:2px solid #c9a14a}
+#nkg-unitbar[data-mode=fixed]{position:fixed;top:0;left:0;right:0}
+#nkg-unitfoot{border-top:2px solid #c9a14a;margin-top:48px}
+#nkg-unitbar *,#nkg-unitfoot *{box-sizing:border-box}
+#nkg-unitbar .nkg-in,#nkg-unitfoot .nkg-in{display:flex;align-items:center;gap:12px;height:100%;max-width:1280px;margin:0 auto;padding:0 16px}
+#nkg-unitfoot .nkg-in{padding:18px 16px;gap:12px;flex-wrap:wrap}
+#nkg-unitbar a,#nkg-unitfoot a{color:#fbf9f3!important;text-decoration:none!important;background:none;border:0;font:inherit;cursor:pointer}
+#nkg-unitbar .nkg-mark{flex:none;display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;
+  background:linear-gradient(135deg,#11295a,#1c3a78);color:#d9b769;font:700 11px/1 Georgia,serif;letter-spacing:.02em;box-shadow:0 0 0 1px rgba(201,161,74,.5)}
+#nkg-unitbar .nkg-subj{flex:none;font-weight:600;white-space:nowrap}
+#nkg-unitbar .nkg-subj:hover{color:#d9b769!important}
+#nkg-unitbar .nkg-sep{flex:none;color:#c9a14a}
+#nkg-unitbar .nkg-unit{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#cdd5e3}
+#nkg-unitbar .nkg-unit b{color:#d9b769;font-weight:600;margin-right:6px}
+#nkg-unitbar .nkg-nav{flex:none;display:flex;gap:6px}
+#nkg-unitbar .nkg-btn{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:6px;border:1px solid rgba(251,249,243,.22)!important;white-space:nowrap}
+#nkg-unitbar .nkg-btn:hover{border-color:#c9a14a!important;color:#d9b769!important}
+#nkg-unitbar .nkg-btn[aria-disabled=true]{opacity:.35;pointer-events:none}
+#nkg-unitfoot .nkg-card{flex:1 1 260px;display:flex;flex-direction:column;gap:4px;padding:12px 16px;border-radius:8px;border:1px solid rgba(251,249,243,.18)!important}
+#nkg-unitfoot .nkg-card:hover{border-color:#c9a14a!important}
+#nkg-unitfoot .nkg-card.next{text-align:right}
+#nkg-unitfoot .nkg-k{font:600 11px/1 Inter,-apple-system,"Segoe UI",sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#c9a14a}
+#nkg-unitfoot .nkg-t{font-size:15px;font-weight:600}
+#nkg-unitfoot .nkg-copy{flex-basis:100%;font-size:12px;color:#8c93ab;text-align:center;padding-top:6px}
+#nkg-unitfoot .nkg-copy a.nkg-priv{color:#c9a14a!important;font:inherit}
+@media (max-width:640px){
+  #nkg-unitbar .nkg-subj,#nkg-unitbar .nkg-sep{display:none}
+  #nkg-unitbar .nkg-btn span{display:none}
+  #nkg-unitbar .nkg-btn{padding:0 10px}
+}
+@media (max-width:760px){table{display:block;max-width:100%;overflow-x:auto}}
+#nkg-unitbar .nkg-tocbtn{display:none}
+html.nkg-toc-narrow #nkg-unitbar .nkg-tocbtn{display:inline-flex}
+#nkg-toc{all:initial;position:fixed;z-index:2147482990;left:12px;top:62px;width:260px;display:none;flex-direction:column;box-sizing:border-box;
+  background:#0b1d3a;color:#cdd5e3;border:1px solid rgba(201,161,74,.35);border-radius:12px;box-shadow:0 10px 30px rgba(6,18,42,.28);
+  font:500 13.5px/1.35 Inter,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden}
+#nkg-toc *{box-sizing:border-box}
+html.nkg-toc-wide #nkg-toc[data-wide="1"]{display:flex}
+#nkg-toc .nkg-toc-h{flex:none;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px 14px 12px 16px;
+  font:600 11px/1 Inter,-apple-system,"Segoe UI",sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#c9a14a;border-bottom:1px solid rgba(251,249,243,.1)}
+#nkg-toc .nkg-toc-x{display:none;place-items:center;width:30px;height:30px;border-radius:6px;border:1px solid rgba(251,249,243,.22);color:#fbf9f3;font:400 18px/1 Inter,sans-serif;cursor:pointer;background:none}
+#nkg-toc .nkg-toc-list{display:block;flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:8px 8px 14px;scrollbar-width:thin;scrollbar-color:#1c3a78 transparent}
+#nkg-toc a{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;color:#cdd5e3!important;text-decoration:none!important;
+  padding:7px 10px 7px 12px;margin:1px 0;border-left:2px solid transparent;border-radius:0 6px 6px 0;cursor:pointer}
+#nkg-toc a.l3{padding-left:24px;font-size:12.5px;color:#9fb0c8!important}
+#nkg-toc a:hover{background:rgba(251,249,243,.06);color:#fbf9f3!important}
+#nkg-toc a.on{border-left-color:#c9a14a;background:rgba(201,161,74,.13);color:#fbf9f3!important}
+html.nkg-toc-narrow #nkg-toc{z-index:2147483002;display:flex;left:0;top:0!important;bottom:0;height:auto!important;width:min(300px,86vw);border-radius:0 12px 12px 0;border-left:0;
+  transform:translateX(-105%);visibility:hidden;transition:transform .25s ease,visibility .25s}
+html.nkg-toc-narrow.nkg-toc-open #nkg-toc{transform:none;visibility:visible}
+html.nkg-toc-narrow #nkg-toc .nkg-toc-x{display:inline-grid}
+#nkg-toc-scrim{all:initial;display:none;position:fixed;inset:0;z-index:2147482989;background:rgba(6,18,42,.45)}
+html.nkg-toc-open #nkg-toc-scrim{display:block;z-index:2147483001}
+@media (prefers-reduced-motion:reduce){html.nkg-toc-narrow #nkg-toc{transition:none}}
+</style><nkg-unitbar id="nkg-unitbar" data-mode="flow" role="navigation" aria-label="Course navigation"><span class="nkg-in"><a class="nkg-mark" href="/teaching/" title="Teaching Hub">NKG</a><a class="nkg-subj" href="/teaching/switching-routing.html">Switching &amp; Routing</a><span class="nkg-sep">/</span><span class="nkg-unit"><b>Lab Companion</b>Practice Checklist</span><span class="nkg-nav"><a class="nkg-btn nkg-tocbtn" href="#" role="button" title="Contents">&#9776;<span> Contents</span></a><a class="nkg-btn" href="/teaching/switching-routing/lab-command-cheat-sheet.html" title="Previous: Lab Companion · Command Cheat Sheet">&#8249;<span> Prev</span></a><a class="nkg-btn" href="/teaching/switching-routing.html" title="All units">&#9638;<span> All units</span></a><a class="nkg-btn" href="/teaching/switching-routing/lab-question-bank.html" title="Next: Lab Companion · Command Question Bank"><span>Next </span>&#8250;</a></span></span></nkg-unitbar><nkg-toc id="nkg-toc" data-wide="0" role="navigation" aria-label="Page contents"><span class="nkg-toc-h">Contents<button class="nkg-toc-x" type="button" aria-label="Close contents">&times;</button></span><span class="nkg-toc-list"></span></nkg-toc><nkg-scrim id="nkg-toc-scrim"></nkg-scrim><!--/nkg:bar-->
+<div class="bar"><div class="in"><select id="jump" aria-label="Jump to stage"><option value="">Jump to stage…</option><option value="s0">Stage 0. Start clean (do this before every lab)</option><option value="s1">Stage 1. Build, cable, address a simple LAN [Lab 1]</option><option value="s2">Stage 2. Hostname, banners, saving [Lab 2 / Unit 2]</option><option value="s3">Stage 3. Console and privileged mode</option><option value="s4">Stage 4. VTY baseline and management address</option><option value="s5">Stage 5. SSH [Lab 2]</option><option value="s6">Stage 6. Port hygiene</option><option value="s7">Stage 7. VLANs [Labs 3A, 3B, 7]</option><option value="s8">Stage 8. Trunks</option><option value="s9">Stage 9. Inter-VLAN routing: router-on-a-stick + DHCP relay [Lab 3B]</option><option value="s10">Stage 10. Inter-VLAN routing: Layer 3 switch [Lab 3A]</option><option value="s11">Stage 11. Router links and static routing [Lab 4]</option><option value="s12">Stage 12. Dynamic routing: RIPv2 [Lab 5]</option><option value="s13">Stage 13. Dynamic routing: OSPF [Lab 6]</option><option value="s14">Stage 14. STP, port security, EtherChannel [Lab 7]</option><option value="s15">Stage 15. WAN links: HDLC, PPP, CHAP [Lab 8]</option><option value="s16">Stage 16. ACLs [Lab 8]</option><option value="s17">Stage 17. NAT and PAT [Lab 8]</option><option value="s18">Stage 18. Hardening [Lab 8]</option><option value="s19">Stage 19. Verification sweep (repeat after every major stage)</option><option value="s20">Stage 20. Save, back up, wipe and recover</option></select><span class="meta" id="prog"></span></div></div>
+<div class="wrap"><header class="top"></header>
+<h1>Cisco Networking Labs — Practice Checklist</h1>
+<h3>One flow, from a blank device to NAT, plus wipe and password recovery</h3>
+<p>Work top to bottom on Packet Tracer (or real gear). After every step run the <code>show</code> / <code>ping</code> check written beside it before you continue. Lab references in brackets show where each stage appears in the lab series.</p>
+<hr />
+<h2 id="s0">Stage 0. Start clean (do this before every lab)</h2>
+<ul class="task">
+<li><input type="checkbox" id="t1"><label for="t1"><code>enable</code>, then <code>erase startup-config</code> (same as <code>write erase</code>)</label></li>
+<li><input type="checkbox" id="t2"><label for="t2">Switch only: <code>delete flash:vlan.dat</code> (VLANs are stored here, not in startup-config)</label></li>
+<li><input type="checkbox" id="t3"><label for="t3"><code>reload</code>; answer <code>no</code> if asked to save the modified configuration</label></li>
+<li><input type="checkbox" id="t4"><label for="t4">At the "initial configuration dialog" answer <code>no</code></label></li>
+<li><input type="checkbox" id="t5"><label for="t5">Verify: <code>show running-config</code> is default, <code>show vlan brief</code> lists only default VLANs, <code>show ip interface brief</code> has no IP addresses</label></li>
+</ul>
+<h2 id="s1">Stage 1. Build, cable, address a simple LAN [Lab 1]</h2>
+<ul class="task">
+<li><input type="checkbox" id="t6"><label for="t6">Place and rename devices exactly as the lab states; switch Fa0/1–Fa0/4 to PC0, Server0, Laptop0, Printer0</label></li>
+<li><input type="checkbox" id="t7"><label for="t7">Cable: end device to switch = straight-through; switch to switch, router to router = cross-over; PC console = rollover; serial = DCE/DTE</label></li>
+<li><input type="checkbox" id="t8"><label for="t8">Static IPs (e.g. .2, .3, .4, .6 with /24); no gateway in a flat LAN</label></li>
+<li><input type="checkbox" id="t9"><label for="t9">Verify: ping all devices, <code>arp -a</code>, <code>ipconfig /all</code>, switch <code>show mac address-table</code> lists four dynamic MACs</label></li>
+<li><input type="checkbox" id="t10"><label for="t10">Save the .pkt and record the ping results</label></li>
+</ul>
+<h2 id="s2">Stage 2. Hostname, banners, saving [Lab 2 / Unit 2]</h2>
+<ul class="task">
+<li><input type="checkbox" id="t11"><label for="t11"><code>enable</code>, <code>configure terminal</code>, <code>hostname SW1</code>; <code>no ip domain-lookup</code></label></li>
+<li><input type="checkbox" id="t12"><label for="t12"><code>banner motd</code>, <code>banner login</code>, <code>banner exec</code></label></li>
+<li><input type="checkbox" id="t13"><label for="t13"><code>copy running-config startup-config</code>, <code>reload</code>; hostname and banners persist</label></li>
+<li><input type="checkbox" id="t14"><label for="t14">Verify the order after logout: MOTD, login banner, credentials, exec banner</label></li>
+</ul>
+<h2 id="s3">Stage 3. Console and privileged mode</h2>
+<ul class="task">
+<li><input type="checkbox" id="t15"><label for="t15"><code>line console 0</code>: <code>password</code>, <code>login</code>, <code>logging synchronous</code>, <code>exec-timeout 5 0</code></label></li>
+<li><input type="checkbox" id="t16"><label for="t16"><code>enable password</code> (legacy), then <code>enable secret</code>; the secret overrides the password; keep only the secret</label></li>
+<li><input type="checkbox" id="t17"><label for="t17"><code>service password-encryption</code></label></li>
+<li><input type="checkbox" id="t18"><label for="t18">Verify: log out and in; <code>show running-config</code> shows a hashed secret and type 7 line passwords</label></li>
+</ul>
+<h2 id="s4">Stage 4. VTY baseline and management address</h2>
+<ul class="task">
+<li><input type="checkbox" id="t19"><label for="t19"><code>line vty 0 15</code>: <code>password</code>, <code>login</code>; Telnet fails at this point because no management IP exists yet</label></li>
+<li><input type="checkbox" id="t20"><label for="t20"><code>interface vlan 1</code>: <code>ip address</code>, <code>no shutdown</code>; <code>ip default-gateway</code></label></li>
+<li><input type="checkbox" id="t21"><label for="t21">Verify: <code>show ip interface brief</code> (Vlan1 up/up), ping from a PC, Telnet now works</label></li>
+</ul>
+<h2 id="s5">Stage 5. SSH [Lab 2]</h2>
+<ul class="task">
+<li><input type="checkbox" id="t22"><label for="t22"><code>ip domain-name</code>, <code>username admin privilege 15 secret</code>, <code>crypto key generate rsa general-keys modulus 2048</code></label></li>
+<li><input type="checkbox" id="t23"><label for="t23"><code>ip ssh version 2</code>; VTY <code>login local</code>, <code>transport input ssh</code>; <code>ip ssh time-out 60</code>, <code>ip ssh authentication-retries 3</code></label></li>
+<li><input type="checkbox" id="t24"><label for="t24">Verify: <code>show crypto key mypubkey rsa</code>, <code>show ip ssh</code> (version 2), SSH in from a PC, Telnet refused</label></li>
+<li><input type="checkbox" id="t25"><label for="t25">Save and reload, then SSH again</label></li>
+</ul>
+<h2 id="s6">Stage 6. Port hygiene</h2>
+<ul class="task">
+<li><input type="checkbox" id="t26"><label for="t26"><code>description</code> on every used port</label></li>
+<li><input type="checkbox" id="t27"><label for="t27"><code>shutdown</code> on unused ports (e.g. <code>interface range fa0/4 - 24</code>)</label></li>
+<li><input type="checkbox" id="t28"><label for="t28">Verify: <code>show interfaces status</code></label></li>
+</ul>
+<h2 id="s7">Stage 7. VLANs [Labs 3A, 3B, 7]</h2>
+<ul class="task">
+<li><input type="checkbox" id="t29"><label for="t29">Create VLANs with names (10, 20, 30; Lab 7 also 99, 999 and others); <code>vtp mode transparent</code> where the lab requires it</label></li>
+<li><input type="checkbox" id="t30"><label for="t30">Assign access ports (single port and <code>interface range</code>); verify with <code>show vlan brief</code></label></li>
+<li><input type="checkbox" id="t31"><label for="t31">Move a port to another VLAN; delete a VLAN with <code>no vlan 30</code></label></li>
+<li><input type="checkbox" id="t32"><label for="t32">Confirm the deleted VLAN's ports stay assigned and show inactive (they do not return to VLAN 1); reassign them</label></li>
+</ul>
+<h2 id="s8">Stage 8. Trunks</h2>
+<ul class="task">
+<li><input type="checkbox" id="t33"><label for="t33"><code>switchport mode trunk</code>, <code>switchport trunk native vlan 999</code>, <code>switchport trunk allowed vlan 10,20,100</code></label></li>
+<li><input type="checkbox" id="t34"><label for="t34">Verify: <code>show interfaces trunk</code>, <code>show interfaces fa0/1 switchport</code>; native VLAN matches on both ends</label></li>
+</ul>
+<h2 id="s9">Stage 9. Inter-VLAN routing: router-on-a-stick + DHCP relay [Lab 3B]</h2>
+<ul class="task">
+<li><input type="checkbox" id="t35"><label for="t35">Switch port to router is a trunk; router parent interface <code>no shutdown</code> (no IP)</label></li>
+<li><input type="checkbox" id="t36"><label for="t36">Subinterfaces: <code>encapsulation dot1Q &lt;id&gt;</code> then <code>ip address</code> (the VLAN gateway)</label></li>
+<li><input type="checkbox" id="t37"><label for="t37"><code>ip helper-address &lt;server&gt;</code> on client-facing subinterfaces; DHCP server has a pool per subnet and a gateway</label></li>
+<li><input type="checkbox" id="t38"><label for="t38">Verify: laptops get 192.168.x.x addresses, cross-VLAN ping works, <code>tracert</code> first hop is the subinterface, <code>show ip interface brief</code> all up/up</label></li>
+</ul>
+<h2 id="s10">Stage 10. Inter-VLAN routing: Layer 3 switch [Lab 3A]</h2>
+<ul class="task">
+<li><input type="checkbox" id="t39"><label for="t39"><code>ip routing</code>; an SVI per VLAN with <code>ip address</code> and <code>no shutdown</code></label></li>
+<li><input type="checkbox" id="t40"><label for="t40">Hosts use the SVI as gateway; routed uplink uses <code>no switchport</code> plus an IP</label></li>
+<li><input type="checkbox" id="t41"><label for="t41">Verify: <code>show ip route</code> lists connected VLAN subnets, SVIs up/up, cross-VLAN ping, <code>tracert</code></label></li>
+<li><input type="checkbox" id="t42"><label for="t42">Compare the two methods: scaling, speed, hardware</label></li>
+</ul>
+<h2 id="s11">Stage 11. Router links and static routing [Lab 4]</h2>
+<ul class="task">
+<li><input type="checkbox" id="t43"><label for="t43">Address links with /30 networks; <code>clock rate</code> on the DCE end of serial links; <code>no shutdown</code> on every router interface</label></li>
+<li><input type="checkbox" id="t44"><label for="t44">Primary static routes, floating backup routes with a higher AD (e.g. 100), default route</label></li>
+<li><input type="checkbox" id="t45"><label for="t45">Verify: <code>show ip route static</code>, cross-site ping and <code>tracert</code></label></li>
+<li><input type="checkbox" id="t46"><label for="t46">Failover test: keep <code>ping -t</code> running, shut the primary link, confirm the backup route appears, then <code>no shutdown</code></label></li>
+</ul>
+<h2 id="s12">Stage 12. Dynamic routing: RIPv2 [Lab 5]</h2>
+<ul class="task">
+<li><input type="checkbox" id="t47"><label for="t47">Add HWIC-2T modules (power off first) and cable the serial links</label></li>
+<li><input type="checkbox" id="t48"><label for="t48"><code>router rip</code>, <code>version 2</code>, <code>no auto-summary</code>, <code>network</code> statements (classful), <code>passive-interface</code> on LAN ports only</label></li>
+<li><input type="checkbox" id="t49"><label for="t49"><code>default-information originate</code> on the edge; floating default (AD 200); <code>redistribute static</code> where needed</label></li>
+<li><input type="checkbox" id="t50"><label for="t50">ISP return routes for the internal networks</label></li>
+<li><input type="checkbox" id="t51"><label for="t51">Verify: <code>show ip protocols</code>, <code>show ip route rip</code>, end-to-end ping; shut the ISP link and confirm the floating default appears</label></li>
+</ul>
+<h2 id="s13">Stage 13. Dynamic routing: OSPF [Lab 6]</h2>
+<ul class="task">
+<li><input type="checkbox" id="t52"><label for="t52"><code>router ospf 10</code>, <code>router-id</code>, <code>network &lt;subnet&gt; &lt;wildcard&gt; area 0</code>, passive LAN ports</label></li>
+<li><input type="checkbox" id="t53"><label for="t53"><code>default-information originate</code> on the edge; <code>redistribute static subnets</code> for stub networks</label></li>
+<li><input type="checkbox" id="t54"><label for="t54">Verify: <code>show ip ospf neighbor</code> (FULL), <code>show ip route ospf</code>, <code>show ip ospf interface</code>, <code>show ip ospf database</code>, <code>show ip protocols</code></label></li>
+<li><input type="checkbox" id="t55"><label for="t55">Cost: predict, then change <code>ip ospf cost</code> (both ends) and <code>auto-cost reference-bandwidth</code> (all routers); test failover</label></li>
+<li><input type="checkbox" id="t56"><label for="t56">Solve the injected faults using <code>show</code> commands only</label></li>
+</ul>
+<h2 id="s14">Stage 14. STP, port security, EtherChannel [Lab 7]</h2>
+<ul class="task">
+<li><input type="checkbox" id="t57"><label for="t57">Predict the root and blocked ports; <code>root primary</code> / <code>root secondary</code>; record the PVST+ outage (about 30 s)</label></li>
+<li><input type="checkbox" id="t58"><label for="t58"><code>spanning-tree mode rapid-pvst</code>; <code>portfast</code> + <code>bpduguard enable</code> on device ports; trigger and recover BPDU Guard</label></li>
+<li><input type="checkbox" id="t59"><label for="t59">Port security: <code>maximum</code>, <code>mac-address sticky</code>, violation <code>shutdown</code>/<code>restrict</code>/<code>protect</code>; aging; save the config after sticky MACs</label></li>
+<li><input type="checkbox" id="t60"><label for="t60">LACP EtherChannel (active/passive), trunk on <code>port-channel 1</code></label></li>
+<li><input type="checkbox" id="t61"><label for="t61">Verify: <code>show spanning-tree vlan 110</code>, <code>show port-security interface</code>, <code>show etherchannel summary</code> (Po1(SU)), <code>show interfaces status err-disabled</code></label></li>
+<li><input type="checkbox" id="t62"><label for="t62">Solve the trouble tickets</label></li>
+</ul>
+<h2 id="s15">Stage 15. WAN links: HDLC, PPP, CHAP [Lab 8]</h2>
+<ul class="task">
+<li><input type="checkbox" id="t63"><label for="t63"><code>clock rate 128000</code> on the DCE end; static routes; verify HDLC (default) with <code>show interfaces serial</code></label></li>
+<li><input type="checkbox" id="t64"><label for="t64">Observe a PPP/HDLC mismatch (up/down)</label></li>
+<li><input type="checkbox" id="t65"><label for="t65"><code>encapsulation ppp</code>, <code>ppp authentication chap</code>, <code>username &lt;other hostname&gt; password</code>; verify <code>LCP Open</code></label></li>
+<li><input type="checkbox" id="t66"><label for="t66">Test a wrong password with <code>debug ppp authentication</code>; <code>undebug all</code></label></li>
+</ul>
+<h2 id="s16">Stage 16. ACLs [Lab 8]</h2>
+<ul class="task">
+<li><input type="checkbox" id="t67"><label for="t67">Standard ACL near the destination (named); <code>ip access-group ... out</code></label></li>
+<li><input type="checkbox" id="t68"><label for="t68">VTY restriction: <code>access-list 5</code> + <code>access-class 5 in</code></label></li>
+<li><input type="checkbox" id="t69"><label for="t69">Extended ACL near the source; permits above the <code>deny</code>; <code>ip access-group ... in</code></label></li>
+<li><input type="checkbox" id="t70"><label for="t70">Verify: five-test table, <code>show access-lists</code> counters, <code>show ip interface</code> shows the ACL and direction</label></li>
+</ul>
+<h2 id="s17">Stage 17. NAT and PAT [Lab 8]</h2>
+<ul class="task">
+<li><input type="checkbox" id="t71"><label for="t71"><code>ip nat inside</code> on LAN and branch-facing serial, <code>ip nat outside</code> on the ISP link</label></li>
+<li><input type="checkbox" id="t72"><label for="t72">Static NAT for the server; ACL + <code>overload</code> for PAT</label></li>
+<li><input type="checkbox" id="t73"><label for="t73">Verify: <code>show ip nat translations</code>, <code>show ip nat statistics</code>; internal hosts reach the internet; the internet cannot reach private addresses</label></li>
+</ul>
+<h2 id="s18">Stage 18. Hardening [Lab 8]</h2>
+<ul class="task">
+<li><input type="checkbox" id="t74"><label for="t74"><code>service password-encryption</code>, <code>no cdp enable</code> on the ISP link, anti-spoofing ACL on the outside port</label></li>
+<li><input type="checkbox" id="t75"><label for="t75">Retest NAT and ACLs after hardening</label></li>
+</ul>
+<h2 id="s19">Stage 19. Verification sweep (repeat after every major stage)</h2>
+<ul class="task">
+<li><input type="checkbox" id="t76"><label for="t76"><code>show ip interface brief</code> first, always</label></li>
+<li><input type="checkbox" id="t77"><label for="t77"><code>show vlan brief</code>, <code>show interfaces trunk</code></label></li>
+<li><input type="checkbox" id="t78"><label for="t78"><code>show mac address-table</code> (then <code>clear mac address-table dynamic</code> and watch it repopulate); <code>show ip arp</code> on routers</label></li>
+<li><input type="checkbox" id="t79"><label for="t79"><code>show ip route</code>, <code>show ip protocols</code>, neighbour tables</label></li>
+<li><input type="checkbox" id="t80"><label for="t80">Pings: host to gateway, across VLANs, remote PC to the management IP; <code>tracert</code> / <code>traceroute</code></label></li>
+<li><input type="checkbox" id="t81"><label for="t81"><code>show ip ssh</code>, <code>show ssh</code>, <code>show line vty 0 15</code>; Telnet rejected</label></li>
+<li><input type="checkbox" id="t82"><label for="t82"><code>show cdp neighbors</code> (and <code>detail</code>), <code>show lldp neighbors</code></label></li>
+<li><input type="checkbox" id="t83"><label for="t83">If configured: <code>show port-security</code>, <code>show spanning-tree</code>, <code>show etherchannel summary</code></label></li>
+<li><input type="checkbox" id="t84"><label for="t84">Read the full <code>show running-config</code> against what you intended</label></li>
+<li><input type="checkbox" id="t85"><label for="t85">Write what each command does in your own words (viva / lab exam)</label></li>
+</ul>
+<h2 id="s20">Stage 20. Save, back up, wipe and recover</h2>
+<ul class="task">
+<li><input type="checkbox" id="t86"><label for="t86"><code>copy running-config startup-config</code> (or <code>write memory</code>); back up with <code>copy running-config tftp</code> or paste to a text file</label></li>
+<li><input type="checkbox" id="t87"><label for="t87">Reload to prove settings persist</label></li>
+<li><input type="checkbox" id="t88"><label for="t88"><strong>Wipe in one go</strong>: router <code>erase startup-config</code> then <code>reload</code>; switch also <code>delete flash:vlan.dat</code>; verify <code>show startup-config</code> says it is not present and the initial dialog appears</label></li>
+<li><input type="checkbox" id="t89"><label for="t89"><strong>Forgot the password (router)</strong>: console in, break into ROMMON, <code>confreg 0x2142</code>, <code>reset</code>, answer <code>no</code> to setup, <code>enable</code>, <code>copy startup-config running-config</code>, set a new <code>enable secret</code>, <code>no shutdown</code> the interfaces, <code>config-register 0x2102</code>, save, reload; verify with <code>show version</code></label></li>
+<li><input type="checkbox" id="t90"><label for="t90"><strong>Forgot the password (switch)</strong>: Mode button boot, <code>flash_init</code>, <code>load_helper</code>, rename <code>config.text</code>, <code>boot</code>, rename it back, <code>copy flash:config.text system:running-config</code>, set a new secret, save</label></li>
+<li><input type="checkbox" id="t91"><label for="t91">Confirm you can log in with the new password after a reload</label></li>
+<li><input type="checkbox" id="t92"><label for="t92">Note that recovery needs physical console access, and that <code>no service password-recovery</code> disables it (then only a full wipe works)</label></li>
+</ul>
+<hr />
+<p><strong>One-sitting order:</strong> Clean start → Hostname → Banners → Console → Enable secret → VTY + SVI → SSH → Ports → VLANs → Trunks → Router-on-a-stick → L3 switch → Static routes → RIP → OSPF → STP/port security/EtherChannel → PPP/CHAP → ACL → NAT → Hardening → Verify → Save/Wipe/Recover.</p>
+</div>
+<script>
+(function(){
+ var KEY="Networking_Lab_Practice_Checklist.html";
+ function get(){try{return JSON.parse(localStorage.getItem(KEY)||"{}")}catch(e){return {}}}
+ function set(o){try{localStorage.setItem(KEY,JSON.stringify(o))}catch(e){}}
+ var st=get(),boxes=document.querySelectorAll('ul.task input');
+ function prog(){var p=document.getElementById('prog');if(!p)return;var d=0;boxes.forEach(function(b){if(b.checked)d++});p.textContent=d+" / "+boxes.length+" done"}
+ boxes.forEach(function(b){
+  if(st[b.id]){b.checked=true;b.parentNode.classList.add('done')}
+  b.addEventListener('change',function(){b.parentNode.classList.toggle('done',b.checked);var o=get();if(b.checked)o[b.id]=1;else delete o[b.id];set(o);prog()})
+ });prog();
+ document.getElementById('jump').addEventListener('change',function(e){var t=document.getElementById(e.target.value);if(t)t.scrollIntoView({behavior:'smooth'})});
+ document.querySelectorAll('pre').forEach(function(pre){
+  var b=document.createElement('button');b.type='button';b.className='copy';b.textContent='Copy';
+  b.addEventListener('click',function(){var t=pre.querySelector('code').innerText;
+   (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){b.textContent='Copied'},function(){var r=document.createRange();r.selectNodeContents(pre.querySelector('code'));var s=window.getSelection();s.removeAllRanges();s.addRange(r);b.textContent='Selected'});
+   setTimeout(function(){b.textContent='Copy'},1500)});
+  pre.appendChild(b)});
+})();
+</script><!--nkg:foot--><nkg-unitfoot id="nkg-unitfoot" role="navigation" aria-label="Lesson navigation"><span class="nkg-in"><a class="nkg-card prev" href="/teaching/switching-routing/lab-command-cheat-sheet.html"><span class="nkg-k">&#8249; Previous</span><span class="nkg-t">Lab Companion · Command Cheat Sheet</span></a><a class="nkg-card" href="/teaching/switching-routing.html"><span class="nkg-k">NCS 485</span><span class="nkg-t">All Switching &amp; Routing units</span></a><a class="nkg-card next" href="/teaching/switching-routing/lab-question-bank.html"><span class="nkg-k">Next &#8250;</span><span class="nkg-t">Lab Companion · Command Question Bank</span></a><span class="nkg-copy">&copy; Niraj Kumar Gupta · Teaching Hub · Switching &amp; Routing (NCS 485) · <a class="nkg-priv" href="/privacy.html">Privacy &amp; terms</a></span></span></nkg-unitfoot><script>(function(){
+var d=document,h=d.documentElement,B=d.body,bar=d.getElementById('nkg-unitbar'),ft=d.getElementById('nkg-unitfoot'),toc=d.getElementById('nkg-toc'),
+list=toc&&toc.querySelector('.nkg-toc-list'),hs=[],links=[],basePL=null,wideOK=toc&&toc.getAttribute('data-wide')==='1';
+function px(v){return parseFloat(v)||0}
+if(toc){try{
+  var all=[].slice.call(d.querySelectorAll('h2,h3')).filter(function(x){return !x.closest('#nkg-unitbar,#nkg-unitfoot,#nkg-toc')&&x.getClientRects().length&&x.textContent.trim()});
+  if(all.filter(function(x){return x.tagName==='H2'}).length>8)all=all.filter(function(x){return x.tagName==='H2'});
+  all.forEach(function(x,i){if(!x.id)x.id='nkg-s-'+(i+1);var a=d.createElement('a');a.href='#'+x.id;a.textContent=[].map.call(x.childNodes,function(c){return c.textContent}).join(' ').replace(/\s+/g,' ').trim();
+    a.className=x.tagName==='H3'?'l3':'l2';a.addEventListener('click',function(){h.classList.remove('nkg-toc-open')});list.appendChild(a);hs.push(x);links.push(a)});
+  if(!hs.length){toc.remove();toc=null;}
+}catch(e){toc=null}}
+function place(){if(!toc)return;
+  if(h.classList.contains('nkg-toc-wide')){var top=Math.max(12,(bar?bar.getBoundingClientRect().bottom:0)+12),bot=innerHeight-12;
+    if(ft){var fb=ft.getBoundingClientRect().top-12;if(fb<bot)bot=fb}toc.style.top=top+'px';toc.style.height=Math.max(140,bot-top)+'px'}
+  else{toc.style.top='';toc.style.height=''}
+  var cur=0;for(var i=0;i<hs.length;i++){if(hs[i].getBoundingClientRect().top<90)cur=i;else break}
+  for(var j=0;j<links.length;j++)links[j].classList.toggle('on',j===cur);
+  var a=links[cur];if(a&&list.clientHeight){if(a.offsetTop<list.scrollTop||a.offsetTop>list.scrollTop+list.clientHeight-40)list.scrollTop=a.offsetTop-list.clientHeight/3}}
+function layout(){try{
+  if(toc){if(basePL===null){B.style.removeProperty('padding-left');basePL=px(getComputedStyle(B).paddingLeft)}
+    var wide=wideOK&&innerWidth>=1200;h.classList.toggle('nkg-toc-wide',wide);h.classList.toggle('nkg-toc-narrow',innerWidth<1200);
+    if(wide){h.classList.remove('nkg-toc-open');B.style.setProperty('padding-left',(basePL+284)+'px','important')}else B.style.removeProperty('padding-left')}
+  var cs=getComputedStyle(B),l=px(cs.paddingLeft)+px(cs.marginLeft),r=px(cs.paddingRight)+px(cs.marginRight);
+  if(bar&&bar.getAttribute('data-mode')!=='fixed'){var t=px(cs.paddingTop)+px(cs.marginTop);bar.style.marginTop=-t+'px';bar.style.marginLeft=-l+'px';bar.style.marginRight=-r+'px';bar.style.marginBottom=px(cs.paddingTop)+'px'}
+  if(ft){ft.style.marginLeft=-l+'px';ft.style.marginRight=-r+'px';ft.style.marginBottom=-(px(cs.paddingBottom)+px(cs.marginBottom))+'px'}
+  place()}catch(e){}}
+var tick=false;function onScroll(){if(!tick){tick=true;requestAnimationFrame(function(){tick=false;place()})}}
+layout();addEventListener('resize',layout);addEventListener('scroll',onScroll,{passive:true});addEventListener('load',layout);
+if(toc){var btn=d.querySelector('#nkg-unitbar .nkg-tocbtn'),sc=d.getElementById('nkg-toc-scrim'),x=toc.querySelector('.nkg-toc-x');
+  function close(){h.classList.remove('nkg-toc-open')}
+  if(btn)btn.addEventListener('click',function(e){e.preventDefault();h.classList.toggle('nkg-toc-open');place()});
+  if(sc)sc.addEventListener('click',close);if(x)x.addEventListener('click',close);
+  d.addEventListener('keydown',function(e){if(e.key==='Escape')close()});}
+else{var b2=d.querySelector('#nkg-unitbar .nkg-tocbtn');if(b2)b2.remove()}
+})();</script><!--/nkg:foot-->
+</body></html>
