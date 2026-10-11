@@ -122,13 +122,19 @@
   </url>
   <url>
     <loc>https://gupta-niraj.com.np/teaching/switching-routing/unit-1-3-cisco-ios-cli-basics.html</loc>
-    <lastmod>2026-10-10</lastmod>
+    <lastmod>2026-10-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://gupta-niraj.com.np/teaching/switching-routing/unit-1-lab-simple-lan.html</loc>
+    <lastmod>2026-10-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://gupta-niraj.com.np/teaching/switching-routing/unit-2-2-switching-methods.html</loc>
-    <lastmod>2026-10-10</lastmod>
+    <lastmod>2026-10-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -146,31 +152,61 @@
   </url>
   <url>
     <loc>https://gupta-niraj.com.np/teaching/switching-routing/unit-2-4-managing-switch-configuration.html</loc>
-    <lastmod>2026-10-10</lastmod>
+    <lastmod>2026-10-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://gupta-niraj.com.np/teaching/switching-routing/unit-2-lab-switch-config-remote-access.html</loc>
+    <lastmod>2026-10-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://gupta-niraj.com.np/teaching/switching-routing/unit-3-1-vlan-concepts.html</loc>
-    <lastmod>2026-10-10</lastmod>
+    <lastmod>2026-10-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://gupta-niraj.com.np/teaching/switching-routing/unit-3-lab-3a-layer3-switch.html</loc>
+    <lastmod>2026-10-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://gupta-niraj.com.np/teaching/switching-routing/unit-3-lab-3b-router-on-a-stick.html</loc>
+    <lastmod>2026-10-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://gupta-niraj.com.np/teaching/switching-routing/unit-4-static-routing.html</loc>
-    <lastmod>2026-10-10</lastmod>
+    <lastmod>2026-10-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://gupta-niraj.com.np/teaching/switching-routing/unit-4-lab-static-default-routes.html</loc>
+    <lastmod>2026-10-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://gupta-niraj.com.np/teaching/switching-routing/unit-5-distance-vector-rip.html</loc>
-    <lastmod>2026-10-10</lastmod>
+    <lastmod>2026-10-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://gupta-niraj.com.np/teaching/switching-routing/unit-5-lab-ripv2.html</loc>
+    <lastmod>2026-10-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://gupta-niraj.com.np/teaching/switching-routing/unit-6-link-state-and-hybrid-routing.html</loc>
-    <lastmod>2026-10-10</lastmod>
+    <lastmod>2026-10-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>

@@ -59,22 +59,29 @@ CATALOG = {
                 ('unit-1-2-ip-addressing-review.html', 'Unit 1.2', 'IP Addressing Review', 'notes', 'Classful vs classless addressing and network design'),
                 ('unit-1-2-switching-vs-routing.html', 'Unit 1.2', 'Switching vs Routing', 'notes', 'Frames, packets and forwarding, with an ARP/CAM walkthrough'),
                 ('unit-1-3-cisco-ios-cli-basics.html', 'Unit 1.3', 'Cisco IOS & CLI Basics', 'notes', 'CLI modes, memory and the switch boot process'),
+                ('unit-1-lab-simple-lan.html', 'Lab 1', 'Introduction to Packet Tracer & a Simple LAN', 'lab', 'Build, cable and address a small LAN, then test it'),
             ], [('lab-1-simple-lan.pkt', 'Lab 1 · Building a simple LAN')]),
             (2, 'Switch Fundamentals & Configuration', 'How a switch forwards frames, and how to configure, secure and verify it.', [
                 ('unit-2-2-switching-methods.html', 'Unit 2.2', 'Switching Methods', 'notes', 'Store-and-forward, cut-through and fragment-free'),
                 ('unit-2-3-mac-address-table.html', 'Unit 2.3', 'MAC Address Table & Frame Forwarding', 'notes', 'How a switch learns, floods and forwards'),
                 ('unit-2-3-basic-switch-setup.html', 'Unit 2.3', 'Basic Switch Configuration', 'notes', 'Hostname, management IP, console, VTY and SSH'),
                 ('unit-2-4-managing-switch-configuration.html', 'Unit 2.4', 'Managing & Verifying Switch Configuration', 'notes', 'Show commands, saving and backing up configurations'),
-            ], [('switch-config-cheat-sheet.pdf', 'Switch configuration cheat sheet')]),
+                ('unit-2-lab-switch-config-remote-access.html', 'Lab 2', 'Initial Switch Configuration & Remote Access', 'lab', 'Hostname, passwords, management IP, SSH and connectivity tests'),
+            ], [('lab-2-switch-config-remote-access.pkt', 'Lab 2 · Switch configuration and remote access'),
+                ('switch-config-cheat-sheet.pdf', 'Switch configuration cheat sheet')]),
             (3, 'VLANs', 'Breaking one switch into many broadcast domains, trunks and inter-VLAN routing.', [
                 ('unit-3-1-vlan-concepts.html', 'Unit 3.1', 'VLAN Concepts & Configuration', 'notes', 'Purpose, membership and configuration of VLANs'),
-            ], [('lab-3-router-on-a-stick.pkt', 'Lab 3 · Router-on-a-stick'),
-                ('lab-3b-intervlan-layer3-switch.pkt', 'Lab 3b · Inter-VLAN with Layer 3 switch')]),
+                ('unit-3-lab-3a-layer3-switch.html', 'Lab 3A', 'Inter-VLAN Routing with a Layer 3 Switch', 'lab', 'SVIs and IP routing on a multilayer switch'),
+                ('unit-3-lab-3b-router-on-a-stick.html', 'Lab 3B', 'VLANs, Trunks & Router-on-a-Stick', 'lab', 'VLANs, 802.1Q trunks and subinterfaces on one router'),
+            ], [('lab-3b-intervlan-layer3-switch.pkt', 'Lab 3A · Inter-VLAN with Layer 3 switch'),
+                ('lab-3-router-on-a-stick.pkt', 'Lab 3B · Router-on-a-stick')]),
             (4, 'Static Routing', 'How a router decides where a packet goes, and how to tell it by hand.', [
                 ('unit-4-static-routing.html', 'Unit 4', 'Static Routing', 'notes', 'Static and default routes in multi-router topologies'),
+                ('unit-4-lab-static-default-routes.html', 'Lab 4', 'Static & Default Routes', 'lab', 'Static and default routes across a multi-router topology'),
             ], [('lab-4-static-default-routes.pkt', 'Lab 4 · Static and default routes')]),
             (5, 'Distance Vector Routing', 'Routers sharing what they know with their neighbours: RIP and its limits.', [
                 ('unit-5-distance-vector-rip.html', 'Unit 5', 'Distance Vector Routing (RIP)', 'notes', 'RIP versions, updates, timers and loop prevention'),
+                ('unit-5-lab-ripv2.html', 'Lab 5', 'RIPv2 Routing', 'lab', 'Configure RIPv2, verify updates and debug RIP routing'),
             ], [('lab-5-ripv2.pkt', 'Lab 5 · RIP v2')]),
             (6, 'Link-State & Hybrid Routing', 'OSPF and EIGRP in theory and in the lab.', [
                 ('unit-6-link-state-and-hybrid-routing.html', 'Unit 6', 'Link-State & Hybrid Routing Protocols', 'notes', 'OSPF concepts, areas and the SPF algorithm'),

@@ -1,0 +1,455 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lab 2 · Initial Switch Configuration &amp; Remote Access — Switching &amp; Routing</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f6f7f9;--card:#fff;--tx:#1d2330;--mut:#5d6679;--ac:#0b6bcb;--bd:#dde1e8;--code:#eef1f6;--warn:#fff4dc}
+:root[data-theme="dark"]{--bg:#12151c;--card:#1b202b;--tx:#e6e9f0;--mut:#9aa3b5;--ac:#5aa8ff;--bd:#2c3342;--code:#242b39;--warn:#3a3016}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12151c;--card:#1b202b;--tx:#e6e9f0;--mut:#9aa3b5;--ac:#5aa8ff;--bd:#2c3342;--code:#242b39;--warn:#3a3016}}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:940px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:1.65rem;margin:.2em 0}h2{font-size:1.2rem;margin:0 0 10px;color:var(--ac)}h3{font-size:1rem;margin:14px 0 6px}
+.sub{color:var(--mut);margin:0 0 14px}
+section{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:18px;margin:16px 0}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--bd);background:#fff}
+.sc{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{border:1px solid var(--bd);padding:6px 9px;text-align:left;white-space:nowrap}th{background:var(--code)}
+code{background:var(--code);padding:1px 6px;border-radius:5px;font-size:.88em}
+.warn{background:var(--warn);border-radius:8px;padding:10px 14px;margin:10px 0}
+ol li,ul li{margin:6px 0}
+.road{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0}.road span{border:1px solid var(--bd);border-radius:20px;padding:2px 11px;font-size:.8rem;color:var(--mut)}.road .on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.lab{border-left:5px solid var(--ac)}.tag{display:inline-block;background:var(--ac);color:#fff;border-radius:6px;padding:1px 9px;font-size:.8rem;margin-right:8px}
+.chk{background:var(--code);border-radius:8px;padding:8px 12px;margin:10px 0;font-size:.92rem}
+details{margin-top:6px}summary{cursor:pointer;color:var(--ac)}
+pre{background:var(--code);border-radius:8px;padding:10px 12px;overflow-x:auto;font-size:.82rem;line-height:1.45;margin:8px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;margin:10px 0}figure{margin:0}figcaption{font-size:.85rem;color:var(--mut);margin-bottom:4px}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.tabs button{background:var(--code);color:var(--tx);border:1px solid var(--bd);border-radius:8px 8px 0 0;padding:7px 14px;font:inherit;cursor:pointer}.tabs button[aria-selected=true]{background:var(--ac);color:#fff;border-color:var(--ac)}.cp{background:var(--ac);color:#fff;border:0;border-radius:8px;padding:7px 14px;font:inherit;cursor:pointer;float:right;margin:0 0 6px 8px}#code{clear:both;max-height:520px;overflow:auto}
+svg text{fill:var(--tx);font:13px system-ui,sans-serif}svg .box{fill:var(--code);stroke:var(--tx);stroke-width:1.5}svg .ln{stroke:var(--tx);stroke-width:2;fill:none}svg .con{stroke:#e0831d;stroke-width:2.5;stroke-dasharray:7 5;fill:none}svg .lbl{font-size:12px;fill:var(--mut)}
+</style>
+<!--nkg:seo--><meta name="description" content="Lab 2 · Initial Switch Configuration &amp; Remote Access: Hostname, passwords, management IP, SSH and connectivity tests. Free interactive lab guide for Switching &amp; Routing (NCS 485, Pokhara University) by Niraj Kumar Gupta."><link rel="canonical" href="https://gupta-niraj.com.np/teaching/switching-routing/unit-2-lab-switch-config-remote-access.html"><meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1"><meta name="author" content="Niraj Kumar Gupta"><meta property="og:type" content="article"><meta property="og:site_name" content="Niraj Kumar Gupta · Teaching Hub"><meta property="og:title" content="Lab 2 · Initial Switch Configuration &amp; Remote Access — Switching &amp; Routing"><meta property="og:description" content="Lab 2 · Initial Switch Configuration &amp; Remote Access: Hostname, passwords, management IP, SSH and connectivity tests. Free interactive lab guide for Switching &amp; Routing (NCS 485, Pokhara University) by Niraj Kumar Gupta."><meta property="og:url" content="https://gupta-niraj.com.np/teaching/switching-routing/unit-2-lab-switch-config-remote-access.html"><meta property="og:image" content="https://gupta-niraj.com.np/assets/og-image.jpg"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="Niraj Kumar Gupta — Teaching Hub"><meta property="og:locale" content="en_US"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Lab 2 · Initial Switch Configuration &amp; Remote Access — Switching &amp; Routing"><meta name="twitter:description" content="Lab 2 · Initial Switch Configuration &amp; Remote Access: Hostname, passwords, management IP, SSH and connectivity tests. Free interactive lab guide for Switching &amp; Routing (NCS 485, Pokhara University) by Niraj Kumar Gupta."><meta name="twitter:image" content="https://gupta-niraj.com.np/assets/og-image.jpg"><meta property="article:author" content="https://gupta-niraj.com.np/"><meta property="article:modified_time" content="2026-10-11"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LearningResource","@id":"https://gupta-niraj.com.np/teaching/switching-routing/unit-2-lab-switch-config-remote-access.html#lesson","name":"Lab 2 · Initial Switch Configuration & Remote Access","headline":"Lab 2 · Initial Switch Configuration & Remote Access — Switching & Routing","description":"Lab 2 · Initial Switch Configuration & Remote Access: Hostname, passwords, management IP, SSH and connectivity tests. Free interactive lab guide for Switching & Routing (NCS 485, Pokhara University) by Niraj Kumar Gupta.","url":"https://gupta-niraj.com.np/teaching/switching-routing/unit-2-lab-switch-config-remote-access.html","inLanguage":"en","learningResourceType":"Lab guide","educationalLevel":"Undergraduate","isAccessibleForFree":true,"teaches":"Initial Switch Configuration & Remote Access","keywords":"Initial Switch Configuration & Remote Access, Switching & Routing, NCS 485","dateModified":"2026-10-11","image":"https://gupta-niraj.com.np/assets/og-image.jpg","author":{"@type":"Person","@id":"https://gupta-niraj.com.np/#person","name":"Niraj Kumar Gupta","url":"https://gupta-niraj.com.np/"},"publisher":{"@type":"Person","@id":"https://gupta-niraj.com.np/#person","name":"Niraj Kumar Gupta","url":"https://gupta-niraj.com.np/"},"copyrightHolder":{"@type":"Person","@id":"https://gupta-niraj.com.np/#person","name":"Niraj Kumar Gupta"},"copyrightYear":2026,"usageInfo":"https://gupta-niraj.com.np/privacy.html","isPartOf":{"@type":"Course","@id":"https://gupta-niraj.com.np/teaching/switching-routing.html#course","name":"Switching & Routing","courseCode":"NCS 485","url":"https://gupta-niraj.com.np/teaching/switching-routing.html"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://gupta-niraj.com.np/"},{"@type":"ListItem","position":2,"name":"Teaching Hub","item":"https://gupta-niraj.com.np/teaching/"},{"@type":"ListItem","position":3,"name":"Switching & Routing","item":"https://gupta-niraj.com.np/teaching/switching-routing.html"},{"@type":"ListItem","position":4,"name":"Lab 2 · Initial Switch Configuration & Remote Access","item":"https://gupta-niraj.com.np/teaching/switching-routing/unit-2-lab-switch-config-remote-access.html"}]}]}</script><!--/nkg:seo-->
+</head><body><!--nkg:bar--><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600&amp;display=swap"><style>
+#nkg-unitbar,#nkg-unitfoot{all:initial;display:block;box-sizing:border-box;position:relative;z-index:2147483000;align-self:stretch;justify-self:stretch;
+  background:#0b1d3a;color:#fbf9f3;font:500 14px/1.2 Inter,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+#nkg-unitbar{height:50px;border-bottom:2px solid #c9a14a}
+#nkg-unitbar[data-mode=fixed]{position:fixed;top:0;left:0;right:0}
+#nkg-unitfoot{border-top:2px solid #c9a14a;margin-top:48px}
+#nkg-unitbar *,#nkg-unitfoot *{box-sizing:border-box}
+#nkg-unitbar .nkg-in,#nkg-unitfoot .nkg-in{display:flex;align-items:center;gap:12px;height:100%;max-width:1280px;margin:0 auto;padding:0 16px}
+#nkg-unitfoot .nkg-in{padding:18px 16px;gap:12px;flex-wrap:wrap}
+#nkg-unitbar a,#nkg-unitfoot a{color:#fbf9f3!important;text-decoration:none!important;background:none;border:0;font:inherit;cursor:pointer}
+#nkg-unitbar .nkg-mark{flex:none;display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;
+  background:linear-gradient(135deg,#11295a,#1c3a78);color:#d9b769;font:700 11px/1 Georgia,serif;letter-spacing:.02em;box-shadow:0 0 0 1px rgba(201,161,74,.5)}
+#nkg-unitbar .nkg-subj{flex:none;font-weight:600;white-space:nowrap}
+#nkg-unitbar .nkg-subj:hover{color:#d9b769!important}
+#nkg-unitbar .nkg-sep{flex:none;color:#c9a14a}
+#nkg-unitbar .nkg-unit{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#cdd5e3}
+#nkg-unitbar .nkg-unit b{color:#d9b769;font-weight:600;margin-right:6px}
+#nkg-unitbar .nkg-nav{flex:none;display:flex;gap:6px}
+#nkg-unitbar .nkg-btn{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:6px;border:1px solid rgba(251,249,243,.22)!important;white-space:nowrap}
+#nkg-unitbar .nkg-btn:hover{border-color:#c9a14a!important;color:#d9b769!important}
+#nkg-unitbar .nkg-btn[aria-disabled=true]{opacity:.35;pointer-events:none}
+#nkg-unitfoot .nkg-card{flex:1 1 260px;display:flex;flex-direction:column;gap:4px;padding:12px 16px;border-radius:8px;border:1px solid rgba(251,249,243,.18)!important}
+#nkg-unitfoot .nkg-card:hover{border-color:#c9a14a!important}
+#nkg-unitfoot .nkg-card.next{text-align:right}
+#nkg-unitfoot .nkg-k{font:600 11px/1 Inter,-apple-system,"Segoe UI",sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#c9a14a}
+#nkg-unitfoot .nkg-t{font-size:15px;font-weight:600}
+#nkg-unitfoot .nkg-copy{flex-basis:100%;font-size:12px;color:#8c93ab;text-align:center;padding-top:6px}
+#nkg-unitfoot .nkg-copy a.nkg-priv{color:#c9a14a!important;font:inherit}
+@media (max-width:640px){
+  #nkg-unitbar .nkg-subj,#nkg-unitbar .nkg-sep{display:none}
+  #nkg-unitbar .nkg-btn span{display:none}
+  #nkg-unitbar .nkg-btn{padding:0 10px}
+}
+@media (max-width:760px){table{display:block;max-width:100%;overflow-x:auto}}
+#nkg-unitbar .nkg-tocbtn{display:none}
+html.nkg-toc-narrow #nkg-unitbar .nkg-tocbtn{display:inline-flex}
+#nkg-toc{all:initial;position:fixed;z-index:2147482990;left:12px;top:62px;width:260px;display:none;flex-direction:column;box-sizing:border-box;
+  background:#0b1d3a;color:#cdd5e3;border:1px solid rgba(201,161,74,.35);border-radius:12px;box-shadow:0 10px 30px rgba(6,18,42,.28);
+  font:500 13.5px/1.35 Inter,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden}
+#nkg-toc *{box-sizing:border-box}
+html.nkg-toc-wide #nkg-toc[data-wide="1"]{display:flex}
+#nkg-toc .nkg-toc-h{flex:none;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px 14px 12px 16px;
+  font:600 11px/1 Inter,-apple-system,"Segoe UI",sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#c9a14a;border-bottom:1px solid rgba(251,249,243,.1)}
+#nkg-toc .nkg-toc-x{display:none;place-items:center;width:30px;height:30px;border-radius:6px;border:1px solid rgba(251,249,243,.22);color:#fbf9f3;font:400 18px/1 Inter,sans-serif;cursor:pointer;background:none}
+#nkg-toc .nkg-toc-list{display:block;flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:8px 8px 14px;scrollbar-width:thin;scrollbar-color:#1c3a78 transparent}
+#nkg-toc a{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;color:#cdd5e3!important;text-decoration:none!important;
+  padding:7px 10px 7px 12px;margin:1px 0;border-left:2px solid transparent;border-radius:0 6px 6px 0;cursor:pointer}
+#nkg-toc a.l3{padding-left:24px;font-size:12.5px;color:#9fb0c8!important}
+#nkg-toc a:hover{background:rgba(251,249,243,.06);color:#fbf9f3!important}
+#nkg-toc a.on{border-left-color:#c9a14a;background:rgba(201,161,74,.13);color:#fbf9f3!important}
+html.nkg-toc-narrow #nkg-toc{z-index:2147483002;display:flex;left:0;top:0!important;bottom:0;height:auto!important;width:min(300px,86vw);border-radius:0 12px 12px 0;border-left:0;
+  transform:translateX(-105%);visibility:hidden;transition:transform .25s ease,visibility .25s}
+html.nkg-toc-narrow.nkg-toc-open #nkg-toc{transform:none;visibility:visible}
+html.nkg-toc-narrow #nkg-toc .nkg-toc-x{display:inline-grid}
+#nkg-toc-scrim{all:initial;display:none;position:fixed;inset:0;z-index:2147482989;background:rgba(6,18,42,.45)}
+html.nkg-toc-open #nkg-toc-scrim{display:block;z-index:2147483001}
+@media (prefers-reduced-motion:reduce){html.nkg-toc-narrow #nkg-toc{transition:none}}
+</style><nkg-unitbar id="nkg-unitbar" data-mode="flow" role="navigation" aria-label="Course navigation"><span class="nkg-in"><a class="nkg-mark" href="/teaching/" title="Teaching Hub">NKG</a><a class="nkg-subj" href="/teaching/switching-routing.html">Switching &amp; Routing</a><span class="nkg-sep">/</span><span class="nkg-unit"><b>Lab 2</b>Initial Switch Configuration &amp; Remote Access</span><span class="nkg-nav"><a class="nkg-btn nkg-tocbtn" href="#" role="button" title="Contents">&#9776;<span> Contents</span></a><a class="nkg-btn" href="/teaching/switching-routing/unit-2-4-managing-switch-configuration.html" title="Previous: Unit 2.4 · Managing &amp; Verifying Switch Configuration">&#8249;<span> Prev</span></a><a class="nkg-btn" href="/teaching/switching-routing.html" title="All units">&#9638;<span> All units</span></a><a class="nkg-btn" href="/teaching/switching-routing/unit-3-1-vlan-concepts.html" title="Next: Unit 3.1 · VLAN Concepts &amp; Configuration"><span>Next </span>&#8250;</a></span></span></nkg-unitbar><nkg-toc id="nkg-toc" data-wide="0" role="navigation" aria-label="Page contents"><span class="nkg-toc-h">Contents<button class="nkg-toc-x" type="button" aria-label="Close contents">&times;</button></span><span class="nkg-toc-list"></span></nkg-toc><nkg-scrim id="nkg-toc-scrim"></nkg-scrim><!--/nkg:bar--><main>
+<h1>Lab 2: Initial Switch Configuration, Remote Access Setup and Testing Connectivity</h1>
+<p class="sub">Packet Tracer · 2960-24TT switch · Problem statement with solution</p>
+<div class="road"><span>1 Intro to PT/GNS3</span><span class="on">2 Switch setup &amp; remote access</span><span>3 VLANs &amp; router-on-a-stick</span><span>4 Static &amp; default routes</span><span>5 RIPv2</span><span>6 OSPF / EIGRP</span><span>7 STP, port security, EtherChannel</span><span>8 PPP/HDLC, ACL, NAT</span></div>
+
+<section><h2>1. Scenario</h2>
+<p>A branch office has just received a new, unconfigured switch. The network team must set it up before it goes into the wiring closet: give it a name and a warning banner, protect it with passwords, assign it a management IP address, and make it manageable from the administrator's laptop without walking to the closet. They must enable secure SSH access, decide whether to keep Telnet as a legacy fallback, and finally test and save the configuration.</p>
+<p>The switch connects three devices on 192.168.1.0/24, as in Lab 1. The administrator's PC0 configures it first through the <b>console cable</b>. Laptop0 is used later for <b>remote access</b>.</p>
+<h3>Learning objectives</h3>
+<ul><li>Use the console connection and move between IOS modes (user EXEC, privileged EXEC, global configuration).</li>
+<li>Configure the hostname, banner, console security, enable secret and password encryption.</li>
+<li>Give the switch a management IP address on VLAN 1.</li>
+<li>Configure SSH (RSA 2048, version 2) and Telnet remote access with local accounts, and explain why SSH is preferred.</li>
+<li>Test connectivity, verify the configuration and save it.</li></ul>
+<img alt="Lab 2 topology" src="data:image/png;base64,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FH42UOddunTJ29tb/5P/zDPPlHcieICxmMgKpfKCXqlVqn0GtosXLyYmJkqPL1y40L179//973+2r56dnf3yyy/rP1/jxo2jo6P58UAdlpSU1KlTJ/3PfFBQUG5uLtWCWk3GVWTYqKCg4Lnnntu+fbsQIjQ09JNPPnF0dLRx3R9//HHGjBlarVZaDAkJ+fzzz21fHagtVCrV+PHjb9++LYSws7P773//+9prr0nX8oDai6wAW506deqJJ544f/58USuHXL5q1aoHH3zQxtUPHTo0ZsyYkydPSosDBw5cvXp1+/btqVjUmeu5X3/99RtvvCFNw9akSZNVq1b5+vqWuWJODpUHE05ONW6X6NsIWz388MOHDx8eNmyYtKhWq3v27Gn7+Iy9evXav3+/n5+ftPjnn3/27t17586dVCzqgLy8vFdffTUkJEQKCg899FBCQoItQQGoFew/+OADagE2atiw4fjx45s0abJ9+/bCwkKtVrtq1aqbN28+/fTTttwv7uLiMn78eCcnpx07duh0uqysrJ9//tnFxcXb25tGWtReN27c8Pf3X7NmjbTo7e29devWhx9+2MbVbZ59BfWFg0ON2yWuQeBuqNXq8ePHnzlzRlrs16/f6tWrbf/juGXLlgkTJly9elVaHDVq1I8//tisWTMqFrWORqPx8/M7ceKEtDhp0qTFixc7OzvbXgLXIFAC1yBQR8jl8kOHDvn7+0uL+/bt69Wrl36s+zI9++yzhw4d0s+as379+n79+iUlJVGxqF127Njh5eWlDwqffPLJsmXLyhUUgFqBrIC71LJly/Xr10dEREi3M9y8eXP06NGzZs3S3+xgXceOHXfu3Dlr1iz9yZmXl9fy5cupWNQWS5Ysee65527cuCGEcHFxWbNmjX46FYCsABSRyWSzZ8/evXu3/urDt99+6+3tferUKVtWb9CgwTfffPPLL780bNhQCJGdnT158uQZM2bk0CaLmq2goODNN998+eWXpZlU27dv/8cff4wZM6aCN5MWMdg5aFOJ5xZ4OzvLnJ1lzs7eC9KMX0ldMFhW/JJs8ILUuyhcpEUMLi7BeWa8he3KZm66mz03a9NMmfPgiLQS6xY9Y9MnMlOCKFktMzdV+Y/IpiAbNho/s+SXSFZA3SVNoDd69GhpMT09XTr222jixIl79+7t3LmztPjdd98NGjRI3xMC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fnB2dhZCZGZmBgQEvP766/rLGTXB1q1bvby8NBqNtPjpp5/+9NNPTk5OfONAncQ1CKAqqNXq8ePHnzlzRlrs06fP6tWrXV1draxy6NChMWPGnDx5UlocOHDg6tWr27dvX+2fRalUzpw5UxoKomHDhsuXLx81ahRfMUC7AoB7IpfLDx06NGLECGnxwIEDvXv3tn5xoVevXvv379ffQPHnn3/27t17586d1fgpCgoKQkJCgoKCpKDQoUOHXbt2ERSAOs/+gw8+oBaAKuDi4jJ+/PjmzZtv27atsLAwJydnzZo1V65ceeaZZxwcHKys4uTktGPHDp1Ol5WV9fPPP7u4uHh7e1f97ZS3bt0aM2bMzz//LC326dNn27ZtnTt35psF6jyuQQBVbd++fePGjTt16pQQQiaT/fHHHwMHDrS+ypYtWyZMmHD16lVpcdSoUT/++GOzZs2qbJ9Pnz49fPjwo0ePSotjxoxZunRpw4YN+TaB+oBrEEBV69ev38GDB0ePHi2EmDt3rhQUrKf2Z5999tChQ/3795cW169f369fv6SkKhojOSEhwdPTUx8U/vOf/6xevZqgANCuAKBy6XS6X3/9deTIkdItEu+//356evrXX3/t4uJiaZXc3Nw333xzwYIF0qKLi4tSqZw0aVKl7ucvv/wyffr03NxcIUSDBg2ioqIqe4sAyAoAStqyZcvzzz+v0+k8PDyio6OtD760YsWKl19++c6dO9Liq6++Gh4eXhn3KxYWFs6dO/eTTz6RFlu3bh0TE1PrJqoAcO+4BgFUv9jYWCm1JyUl9e3bV99/0KyJEyfu3btX36nwu+++GzRokP5uzIpy586dcePG6YPCo48+unfvXoICQFYAUD2++eab7777TmobyMrKmjJlyvTp07Oysiy9v0ePHvv27ZN6PAgh9u7d27t3b/1MlffuwoULgwcPXrt2rbTo6+u7e/du66NTAyArAKhEMpnslVdeSUxM1LcW/Pjjj56ensnJyZZWadq06Zo1a7766iupu8O1a9eGDh368ccfFxYW3uPOHDx40NPTc//+/dJicHDwhg0bmjZtytcE1N+/UfRXAGqOzMzMV199dfny5dKii4vLt99+O23aNCujKezatSsgIODixYv6NoCff/65ZcuWd7cDv/766+TJk6XOEA4ODgsXLlQoFHwvAFmBrADUIDqd7qef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"><p class="sub">Solid lines are copper straight-through cables to Fa0/1 (PC0), Fa0/2 (Server0) and Fa0/3 (Laptop0). The dashed line from PC0 is the console (rollover) cable to the switch console port.</p></section>
+
+<section><h2>2. Addressing and credentials (given)</h2>
+<div class="sc"><table><tr><th>Device</th><th>Port</th><th>Address</th><th>Connects to</th><th>Role</th></tr>
+<tr><td>UniGlobe-Main-Switch</td><td>interface Vlan1 (SVI)</td><td>192.168.1.10 / 255.255.255.0</td><td>-</td><td>Management address</td></tr>
+<tr><td>PC0</td><td>Fa0 and RS232</td><td>192.168.1.2 / 255.255.255.0</td><td>Fa0/1 and Console</td><td>Local (console) admin</td></tr>
+<tr><td>Server0</td><td>Fa0</td><td>192.168.1.3 / 255.255.255.0</td><td>Fa0/2</td><td>Test target</td></tr>
+<tr><td>Laptop0</td><td>Fa0</td><td>192.168.1.4 / 255.255.255.0</td><td>Fa0/3</td><td>Remote admin (Telnet/SSH)</td></tr></table></div>
+<div class="sc" style="margin-top:12px"><table><tr><th>Item</th><th>Value to use (lab only)</th></tr>
+<tr><td>Hostname</td><td>UniGlobe-Main-Switch</td></tr>
+<tr><td>Domain name</td><td>uniglobe.com.np</td></tr>
+<tr><td>Password for every connection (enable secret, console, VTY lines, user admin)</td><td>UniGlobe2026</td></tr>
+<tr><td>SSH user</td><td>admin (privilege 15)</td></tr>
+<tr><td>RSA key size / SSH version</td><td>2048 bits / version 2</td></tr>
+<tr><td>Console and VTY timeout</td><td>10 minutes 0 seconds</td></tr>
+<tr><td>Default gateway for the switch</td><td>192.168.1.1 (reserved for a future router)</td></tr></table></div>
+<p class="sub">This lab uses one shared password to keep it simple. On real equipment use strong, unique passwords for each purpose. Hosts need no default gateway in this lab because there is no router.</p></section>
+
+<section class="lab" id="p1"><h2><span class="tag">Part 1</span>Build the network and connect by console</h2>
+<ol><li>Place UniGlobe-Main-Switch (2960-24TT), PC0, Server0 and Laptop0. Connect PC0, Server0 and Laptop0 to Fa0/1, Fa0/2 and Fa0/3 with straight-through cables.</li>
+<li>Connect PC0's <b>RS232</b> port to UniGlobe-Main-Switch's <b>Console</b> port with a console (rollover) cable.</li>
+<li>Set the three hosts' IP addresses and masks. On PC0 open <b>Desktop &gt; Terminal</b> and connect using the default settings.</li></ol>
+<div class="chk"><b>Checkpoint:</b> The terminal on PC0 shows the <code>Switch&gt;</code> prompt (press Enter if it is blank).</div>
+<details><summary>Show solution</summary><ul>
+<li>Terminal settings: 9600 bits per second, 8 data bits, no parity, 1 stop bit, flow control none.</li>
+<li>Host IPs: PC0 192.168.1.2, Server0 192.168.1.3, Laptop0 192.168.1.4, all with mask 255.255.255.0 (Config &gt; FastEthernet0 &gt; Static).</li>
+<li>The console cable is the only way to configure a brand-new switch because it has no IP address or passwords yet.</li></ul></details></section>
+
+<section class="lab" id="p2"><h2><span class="tag">Part 2</span>Basic switch configuration</h2>
+<ol><li>Move from user EXEC to privileged EXEC and then to global configuration mode.</li>
+<li>Set the hostname, stop the switch from treating mistyped commands as hostnames, and add a warning banner.</li></ol>
+<div class="chk"><b>Checkpoint:</b> The prompt changes to <code>UniGlobe-Main-Switch(config)#</code>. A mistyped command returns an error immediately instead of a long DNS delay.</div>
+<details><summary>Show solution</summary><pre>Switch&gt; enable
+Switch# configure terminal
+Switch(config)# hostname UniGlobe-Main-Switch
+UniGlobe-Main-Switch(config)# no ip domain-lookup
+UniGlobe-Main-Switch(config)# banner motd #Authorized access only. Disconnect now if you are not authorized.#</pre>
+<ul><li><b>User EXEC</b> (<code>&gt;</code>) allows limited viewing. <b>Privileged EXEC</b> (<code>#</code>) allows all <code>show</code> and <code>copy</code> commands. <b>Global configuration</b> changes the whole device.</li>
+<li><code>no ip domain-lookup</code> stops the switch from trying to resolve a mistyped word as a hostname.</li></ul></details></section>
+
+<section class="lab" id="p3"><h2><span class="tag">Part 3</span>Secure console access</h2>
+<ol><li>Check the console line with <code>show line console 0</code> and note its number and speed.</li>
+<li>Set a console password, require login, keep log messages from interrupting typing and disconnect idle sessions after 10 minutes.</li>
+<li>Encrypt the plain-text passwords stored in the configuration.</li></ol>
+<div class="chk"><b>Checkpoint:</b> Log out of the console (<code>exit</code>) and back in: the switch asks for <code>UniGlobe2026</code>. In <code>show running-config</code> the console password appears as <code>password 7 ...</code>, not in clear text.</div>
+<details><summary>Show solution</summary><pre>UniGlobe-Main-Switch# show line console 0
+UniGlobe-Main-Switch# configure terminal
+UniGlobe-Main-Switch(config)# line console 0
+UniGlobe-Main-Switch(config-line)# password UniGlobe2026
+UniGlobe-Main-Switch(config-line)# login
+UniGlobe-Main-Switch(config-line)# logging synchronous
+UniGlobe-Main-Switch(config-line)# exec-timeout 10 0
+UniGlobe-Main-Switch(config-line)# exit
+UniGlobe-Main-Switch(config)# service password-encryption</pre>
+<ul><li><code>login</code> makes the line ask for its password. Without it the password is never checked.</li>
+<li><code>logging synchronous</code> redraws your typing after a log message so commands are not split.</li>
+<li><code>exec-timeout 10 0</code> is the default, so it will <b>not</b> appear in <code>show running-config</code>. It still protects an unattended console.</li>
+<li><code>service password-encryption</code> converts line passwords to type 7. This is reversible and only stops shoulder-surfing, so it is not real protection.</li></ul></details></section>
+
+<section class="lab" id="p4"><h2><span class="tag">Part 4</span>Management address and port descriptions</h2>
+<ol><li>Give UniGlobe-Main-Switch a management IP address on <code>interface vlan 1</code> and bring it up. Set the default gateway.</li>
+<li>Add a description to each used port, and shut down the unused ports.</li></ol>
+<div class="chk"><b>Checkpoint:</b> <code>show ip interface brief</code> shows Vlan1 up/up with 192.168.1.10. UniGlobe-Main-Switch can ping PC0, Server0 and Laptop0.</div>
+<details><summary>Show solution</summary><pre>UniGlobe-Main-Switch(config)# interface vlan 1
+UniGlobe-Main-Switch(config-if)# ip address 192.168.1.10 255.255.255.0
+UniGlobe-Main-Switch(config-if)# no shutdown
+UniGlobe-Main-Switch(config-if)# exit
+UniGlobe-Main-Switch(config)# ip default-gateway 192.168.1.1
+UniGlobe-Main-Switch(config)# interface FastEthernet0/1
+UniGlobe-Main-Switch(config-if)# description PC0-admin
+UniGlobe-Main-Switch(config)# interface FastEthernet0/2
+UniGlobe-Main-Switch(config-if)# description Server0
+UniGlobe-Main-Switch(config)# interface FastEthernet0/3
+UniGlobe-Main-Switch(config-if)# description Laptop0
+UniGlobe-Main-Switch(config)# interface range FastEthernet0/4-24
+UniGlobe-Main-Switch(config-if-range)# shutdown
+UniGlobe-Main-Switch(config-if-range)# interface range GigabitEthernet0/1-2
+UniGlobe-Main-Switch(config-if-range)# shutdown</pre></details>
+<details><summary>Concept note: why does a layer 2 switch need an IP address?</summary>
+<p>A switch forwards frames by MAC address and needs no IP to do so. The address belongs to a virtual interface (the SVI) and is used only for <b>management</b>: remote login, ping from the switch, and SNMP or syslog later. The <code>ip default-gateway</code> command lets the switch answer admins on other subnets. It has no effect here because there is no router yet.</p></details></section>
+
+<section class="lab" id="p5"><h2><span class="tag">Part 5</span>Remote access: privileged mode, SSH and Telnet</h2>
+<ol><li>Protect privileged mode with an enable secret.</li>
+<li>Create the local user <b>admin</b> (privilege 15), set the domain name <code>uniglobe.com.np</code>, generate a <b>2048-bit</b> RSA key and enforce SSH version 2.</li>
+<li>Configure the VTY lines (0 to 15) to authenticate against the local user database, with <code>logging synchronous</code> and a 10-minute timeout. Allow <b>SSH only</b> and test from Laptop0 with <code>ssh -l admin 192.168.1.10</code>.</li>
+<li>Allow Telnet as a legacy fallback with <code>transport input telnet ssh</code> and test <code>telnet 192.168.1.10</code> from Laptop0.</li>
+<li>Decide whether Telnet should stay. If not, return the lines to SSH only.</li></ol>
+<div class="chk"><b>Checkpoint:</b> <code>show ip ssh</code> reports SSH enabled, version 2. Laptop0 logs in over SSH with <code>admin</code> / <code>UniGlobe2026</code> and sees the banner. Telnet is refused in step 3 and works in step 4.</div>
+<details><summary>Show solution: privileged mode and SSH</summary><pre>UniGlobe-Main-Switch(config)# enable secret UniGlobe2026
+UniGlobe-Main-Switch(config)# ip domain-name uniglobe.com.np
+UniGlobe-Main-Switch(config)# username admin privilege 15 secret UniGlobe2026
+UniGlobe-Main-Switch(config)# crypto key generate rsa general-keys modulus 2048
+UniGlobe-Main-Switch(config)# ip ssh version 2
+UniGlobe-Main-Switch(config)# line vty 0 15
+UniGlobe-Main-Switch(config-line)# password UniGlobe2026
+UniGlobe-Main-Switch(config-line)# login local
+UniGlobe-Main-Switch(config-line)# logging synchronous
+UniGlobe-Main-Switch(config-line)# exec-timeout 10 0
+UniGlobe-Main-Switch(config-line)# transport input ssh
+UniGlobe-Main-Switch(config-line)# exit</pre>
+<p class="sub">Key generation needs the hostname and the domain name set first. A 2048-bit key satisfies the minimum of 768 bits for SSH version 2 and the common 1024-bit recommendation.</p></details>
+<details><summary>Show solution: allow Telnet as well, then harden</summary><pre>UniGlobe-Main-Switch(config)# line vty 0 15
+UniGlobe-Main-Switch(config-line)# transport input telnet ssh
+UniGlobe-Main-Switch(config-line)# exit
+
+! Recommended final state: SSH only
+UniGlobe-Main-Switch(config)# line vty 0 15
+UniGlobe-Main-Switch(config-line)# transport input ssh</pre></details>
+<details><summary>Concept note: the <code>transport input</code> command (SSH only, Telnet only or both)</summary>
+<p>Each <code>transport input</code> line is a complete command on the VTY lines. It decides which remote protocols the switch accepts. <b>The last command you enter replaces the previous one</b>, so you can switch between the modes during the lab.</p>
+<div class="sc"><table><tr><th>Command (under <code>line vty 0 15</code>)</th><th>Allowed</th><th><code>ssh -l admin 192.168.1.10</code></th><th><code>telnet 192.168.1.10</code></th></tr>
+<tr><td><code>transport input ssh</code></td><td>SSH only</td><td>Works</td><td>Refused</td></tr>
+<tr><td><code>transport input telnet</code></td><td>Telnet only</td><td>Refused</td><td>Works</td></tr>
+<tr><td><code>transport input telnet ssh</code></td><td>Both</td><td>Works</td><td>Works</td></tr>
+<tr><td><code>transport input none</code></td><td>No remote access</td><td>Refused</td><td>Refused</td></tr></table></div>
+<ul><li>Test each mode from Laptop0 and record the result in the table above.</li>
+<li>Change the mode from the <b>console</b> (PC0), not from the remote session you are using, or you can lock yourself out.</li>
+<li>The SSH lines in the configuration (domain name, RSA key, local user) stay in place whichever mode you choose. Only <code>transport input</code> changes what is accepted.</li></ul></details>
+<details><summary>Concept notes: login local, privilege 15 and password types</summary><ul>
+<li><b><code>login local</code> and the line password:</b> with <code>login local</code> the switch checks the username and password in the local database. The line's own <code>password UniGlobe2026</code> is <b>not used</b>, so it is harmless but redundant. Use plain <code>login</code> if you want a line-only password.</li>
+<li><b>Telnet with <code>login local</code>:</b> Telnet users are also asked for a username and password, but both still cross the network in <b>clear text</b>.</li>
+<li><b>Privilege 15:</b> a user created with <code>privilege 15</code> logs in straight to the <code>#</code> prompt. Without it the user lands at <code>&gt;</code> and must type <code>enable</code>.</li>
+<li><b>Type 7 vs type 5:</b> <code>service password-encryption</code> gives type 7 (reversible, used for line passwords). <code>enable secret</code> and <code>username ... secret</code> are stored as type 5 (MD5 hash). They use the same hash here because the password and salt are the same.</li></ul></details>
+<details><summary>Concept note: Telnet vs SSH</summary>
+<div class="sc"><table><tr><th>Feature</th><th>Telnet</th><th>SSH</th></tr>
+<tr><td>TCP port</td><td>23</td><td>22</td></tr>
+<tr><td>Encryption</td><td>None: usernames and passwords travel in clear text</td><td>Encrypted session</td></tr>
+<tr><td>Requires</td><td>VTY login</td><td>Hostname, domain name, RSA keys, local user, crypto image</td></tr>
+<tr><td>Use today</td><td>Only for legacy devices or labs</td><td>Standard for remote management</td></tr></table></div></details></section>
+
+<section class="lab" id="p6"><h2><span class="tag">Part 6</span>Test connectivity, verify and save</h2>
+<ol><li>Ping between the hosts and from the switch, and ping the switch from Laptop0 and PC0.</li>
+<li>Log in from Laptop0 over SSH, run <code>show users</code> and compare your <code>show running-config</code> with the reference below.</li>
+<li>Save the configuration, then confirm it survives a reload.</li></ol>
+<div class="chk"><b>Checkpoint:</b> All pings succeed (the first may time out while ARP resolves). <code>show running-config</code> and <code>show startup-config</code> match, and the settings are still present after <code>reload</code>.</div>
+<details><summary>Show solution</summary>
+<div class="sc"><table><tr><th>Test</th><th>From</th><th>Command</th><th>Expected</th></tr>
+<tr><td>Host to host</td><td>PC0</td><td><code>ping 192.168.1.3</code> and <code>ping 192.168.1.4</code></td><td>Replies</td></tr>
+<tr><td>Host to switch</td><td>Laptop0</td><td><code>ping 192.168.1.10</code></td><td>Replies</td></tr>
+<tr><td>Switch to host</td><td>UniGlobe-Main-Switch</td><td><code>ping 192.168.1.4</code></td><td>!!!!! (5 of 5)</td></tr>
+<tr><td>Remote login (SSH)</td><td>Laptop0</td><td><code>ssh -l admin 192.168.1.10</code></td><td>Banner, password prompt, then <code>#</code> prompt</td></tr>
+<tr><td>Remote login (Telnet)</td><td>Laptop0</td><td><code>telnet 192.168.1.10</code></td><td>Works only while <code>transport input telnet ssh</code> is set</td></tr></table></div>
+<pre>show running-config
+show startup-config
+show ip interface brief
+show interfaces status
+show mac address-table
+show ip ssh
+show crypto key mypubkey rsa
+show users
+
+UniGlobe-Main-Switch# copy running-config startup-config
+UniGlobe-Main-Switch# reload</pre>
+<ul><li>Until you save, the configuration lives only in RAM and is lost on reload. <code>copy running-config startup-config</code> (or <code>write memory</code>) writes it to NVRAM.</li>
+<li><code>show users</code> shows the console and the active VTY session while Laptop0 is connected.</li></ul></details>
+<details><summary>Reference running-config from the finished lab (key lines)</summary><pre>hostname UniGlobe-Main-Switch
+enable secret 5 $1$mERr$eEig/nWjNiv.AZsNOQ/O80
+service password-encryption
+no ip domain-lookup
+ip domain-name uniglobe.com.np
+ip ssh version 2
+username admin secret 5 $1$mERr$eEig/nWjNiv.AZsNOQ/O80
+!
+interface FastEthernet0/1
+ description PC0-admin
+interface FastEthernet0/2
+ description Server0
+interface FastEthernet0/3
+ description Laptop0
+interface FastEthernet0/4 ... FastEthernet0/24    (shutdown)
+interface GigabitEthernet0/1 and 0/2              (shutdown)
+interface Vlan1
+ ip address 192.168.1.10 255.255.255.0
+ip default-gateway 192.168.1.1
+banner motd ^CAuthorized access only. Disconnect now if you are not authorized.^C
+line con 0
+ password 7 081442472E150A1517595C567C
+ logging synchronous
+ login
+line vty 0 4
+ password 7 081442472E150A1517595C567C
+ logging synchronous
+ login local
+ transport input ssh
+line vty 5 15
+ (same as line vty 0 4)</pre>
+<ul><li>The captured config shows <code>transport input ssh</code> (SSH only) and <code>username admin secret</code> without <code>privilege 15</code>. If yours matches, SSH users arrive at the <code>&gt;</code> prompt and must type <code>enable</code>. Add <code>privilege 15</code> to the username to land directly at <code>#</code>.</li>
+<li><code>exec-timeout 10 0</code> is missing from the listing only because it is the default value.</li>
+<li>The RSA key pair is not shown in <code>show running-config</code>. Use <code>show crypto key mypubkey rsa</code>.</li></ul></details>
+<details><summary>Troubleshooting</summary><ul>
+<li><b>Cannot ping the switch:</b> Vlan1 is shut down, the mask is wrong, or the host port was shut down.</li>
+<li><b>SSH refused:</b> RSA keys not generated, no domain name, or the VTY lines do not allow SSH.</li>
+<li><b>Telnet refused:</b> <code>transport input ssh</code> is set, which is the intended secure state.</li>
+<li><b>"Login invalid":</b> the user <code>admin</code> does not exist or the password is wrong. Passwords are case-sensitive.</li>
+<li><b>Lands at <code>&gt;</code> instead of <code>#</code>:</b> the user has no privilege 15. Type <code>enable</code>.</li></ul></details></section>
+
+<section id="scripts"><h2>Appendix: copy-ready scripts</h2>
+<p class="sub">Copy and paste into the switch CLI from the console. This is the full answer key, so keep it away from students.</p>
+<div class="tabs" role="tablist" id="tabs"></div>
+<button class="cp" id="cp" type="button">Copy script</button>
+<pre id="code"></pre><p class="sub" id="note"></p></section>
+</main>
+<script>
+(function(){
+var S={
+'Full script':{t:`enable
+configure terminal
+hostname UniGlobe-Main-Switch
+no ip domain-lookup
+banner motd #Authorized access only. Disconnect now if you are not authorized.#
+line console 0
+ password UniGlobe2026
+ login
+ logging synchronous
+ exec-timeout 10 0
+ exit
+service password-encryption
+interface vlan 1
+ ip address 192.168.1.10 255.255.255.0
+ no shutdown
+ exit
+ip default-gateway 192.168.1.1
+interface FastEthernet0/1
+ description PC0-admin
+interface FastEthernet0/2
+ description Server0
+interface FastEthernet0/3
+ description Laptop0
+interface range FastEthernet0/4-24
+ shutdown
+interface range GigabitEthernet0/1-2
+ shutdown
+exit
+enable secret UniGlobe2026
+ip domain-name uniglobe.com.np
+username admin privilege 15 secret UniGlobe2026
+crypto key generate rsa general-keys modulus 2048
+ip ssh version 2
+line vty 0 15
+ password UniGlobe2026
+ login local
+ logging synchronous
+ exec-timeout 10 0
+ transport input ssh
+ exit
+end
+write memory`,n:'Complete configuration in lab order, ending with SSH only. Allow Telnet with the "Telnet fallback" tab if the exercise needs it.'},
+'Console security':{t:`! ==========================================
+! CONSOLE SECURITY CONFIGURATION SCRIPT
+! ==========================================
+enable
+! Step 1: Verify the console line
+show line console 0
+configure terminal
+! Step 2: Console line parameters
+line console 0
+ password UniGlobe2026
+ login
+ logging synchronous
+ exec-timeout 10 0
+ exit
+! Step 3: Encrypt leftover clear-text passwords
+service password-encryption
+end`,n:'Part 3. Console password, login, timeout and password encryption.'},
+'Remote access & crypto':{t:`! ==========================================
+! REMOTE ACCESS & CRYPTO CONFIGURATION SCRIPT
+! ==========================================
+configure terminal
+! Step 4: Privileged EXEC security
+enable secret UniGlobe2026
+! Step 5: VTY lines
+line vty 0 15
+! The line password is not used while "login local" is set
+ password UniGlobe2026
+ login local
+ logging synchronous
+ exec-timeout 10 0
+ exit
+! Step 6: SSH version 2 and local user
+username admin privilege 15 secret UniGlobe2026
+ip domain-name uniglobe.com.np
+crypto key generate rsa general-keys modulus 2048
+ip ssh version 2
+! Step 7: Allowed VTY transports (SSH only is the recommended final state)
+line vty 0 15
+ transport input ssh
+ exit
+end`,n:'Part 5. Hostname must already be set before the key is generated.'},
+'Telnet fallback':{t:`configure terminal
+line vty 0 15
+ transport input telnet ssh
+ exit
+end`,n:'Optional. Allows legacy Telnet as well as SSH. Telnet sends credentials in clear text.'},
+'Telnet only':{t:`configure terminal
+line vty 0 15
+ transport input telnet
+ exit
+end`,n:'Test only: Telnet is accepted and SSH is refused. Credentials are sent in clear text.'},
+'Back to SSH only':{t:`configure terminal
+line vty 0 15
+ transport input ssh
+ exit
+end`,n:'Recommended final state after testing Telnet.'},
+'Hosts':{t:`PC0:     Config > FastEthernet0 > Static 192.168.1.2 / 255.255.255.0 (no gateway)
+         Desktop > Terminal: 9600 baud, 8 data bits, no parity, 1 stop bit, flow control none
+Server0: Config > FastEthernet0 > Static 192.168.1.3 / 255.255.255.0
+Laptop0: Config > FastEthernet0 > Static 192.168.1.4 / 255.255.255.0
+         Desktop > Command Prompt: ssh -l admin 192.168.1.10   (password UniGlobe2026)
+                                   telnet 192.168.1.10          (only while Telnet is allowed)`,n:'Host settings (GUI).'}
+};
+var tabs=document.getElementById('tabs'),code=document.getElementById('code'),note=document.getElementById('note'),cp=document.getElementById('cp'),cur='Full script';
+function show(k){cur=k;code.textContent=S[k].t;note.textContent=S[k].n;cp.textContent='Copy script';
+Array.prototype.forEach.call(tabs.children,function(b){b.setAttribute('aria-selected',b.dataset.k===k?'true':'false');});}
+Object.keys(S).forEach(function(k){var b=document.createElement('button');b.type='button';b.textContent=k;b.dataset.k=k;b.setAttribute('role','tab');b.onclick=function(){show(k);};tabs.appendChild(b);});
+cp.onclick=function(){var t=S[cur].t;function ok(){cp.textContent='Copied!';setTimeout(function(){cp.textContent='Copy script';},1500);}
+function fb(){var a=document.createElement('textarea');a.value=t;a.style.position='fixed';a.style.opacity='0';document.body.appendChild(a);a.select();try{document.execCommand('copy');ok();}catch(e){cp.textContent='Select and copy manually';}document.body.removeChild(a);}
+try{navigator.clipboard.writeText(t).then(ok,fb);}catch(e){fb();}};
+show('Full script');
+})();
+</script><!--nkg:foot--><nkg-unitfoot id="nkg-unitfoot" role="navigation" aria-label="Lesson navigation"><span class="nkg-in"><a class="nkg-card prev" href="/teaching/switching-routing/unit-2-4-managing-switch-configuration.html"><span class="nkg-k">&#8249; Previous</span><span class="nkg-t">Unit 2.4 · Managing &amp; Verifying Switch Configuration</span></a><a class="nkg-card" href="/teaching/switching-routing.html"><span class="nkg-k">NCS 485</span><span class="nkg-t">All Switching &amp; Routing units</span></a><a class="nkg-card next" href="/teaching/switching-routing/unit-3-1-vlan-concepts.html"><span class="nkg-k">Next &#8250;</span><span class="nkg-t">Unit 3.1 · VLAN Concepts &amp; Configuration</span></a><span class="nkg-copy">&copy; Niraj Kumar Gupta · Teaching Hub · Switching &amp; Routing (NCS 485) · <a class="nkg-priv" href="/privacy.html">Privacy &amp; terms</a></span></span></nkg-unitfoot><script>(function(){
+var d=document,h=d.documentElement,B=d.body,bar=d.getElementById('nkg-unitbar'),ft=d.getElementById('nkg-unitfoot'),toc=d.getElementById('nkg-toc'),
+list=toc&&toc.querySelector('.nkg-toc-list'),hs=[],links=[],basePL=null,wideOK=toc&&toc.getAttribute('data-wide')==='1';
+function px(v){return parseFloat(v)||0}
+if(toc){try{
+  var all=[].slice.call(d.querySelectorAll('h2,h3')).filter(function(x){return !x.closest('#nkg-unitbar,#nkg-unitfoot,#nkg-toc')&&x.getClientRects().length&&x.textContent.trim()});
+  if(all.filter(function(x){return x.tagName==='H2'}).length>8)all=all.filter(function(x){return x.tagName==='H2'});
+  all.forEach(function(x,i){if(!x.id)x.id='nkg-s-'+(i+1);var a=d.createElement('a');a.href='#'+x.id;a.textContent=[].map.call(x.childNodes,function(c){return c.textContent}).join(' ').replace(/\s+/g,' ').trim();
+    a.className=x.tagName==='H3'?'l3':'l2';a.addEventListener('click',function(){h.classList.remove('nkg-toc-open')});list.appendChild(a);hs.push(x);links.push(a)});
+  if(!hs.length){toc.remove();toc=null;}
+}catch(e){toc=null}}
+function place(){if(!toc)return;
+  if(h.classList.contains('nkg-toc-wide')){var top=Math.max(12,(bar?bar.getBoundingClientRect().bottom:0)+12),bot=innerHeight-12;
+    if(ft){var fb=ft.getBoundingClientRect().top-12;if(fb<bot)bot=fb}toc.style.top=top+'px';toc.style.height=Math.max(140,bot-top)+'px'}
+  else{toc.style.top='';toc.style.height=''}
+  var cur=0;for(var i=0;i<hs.length;i++){if(hs[i].getBoundingClientRect().top<90)cur=i;else break}
+  for(var j=0;j<links.length;j++)links[j].classList.toggle('on',j===cur);
+  var a=links[cur];if(a&&list.clientHeight){if(a.offsetTop<list.scrollTop||a.offsetTop>list.scrollTop+list.clientHeight-40)list.scrollTop=a.offsetTop-list.clientHeight/3}}
+function layout(){try{
+  if(toc){if(basePL===null){B.style.removeProperty('padding-left');basePL=px(getComputedStyle(B).paddingLeft)}
+    var wide=wideOK&&innerWidth>=1200;h.classList.toggle('nkg-toc-wide',wide);h.classList.toggle('nkg-toc-narrow',innerWidth<1200);
+    if(wide){h.classList.remove('nkg-toc-open');B.style.setProperty('padding-left',(basePL+284)+'px','important')}else B.style.removeProperty('padding-left')}
+  var cs=getComputedStyle(B),l=px(cs.paddingLeft)+px(cs.marginLeft),r=px(cs.paddingRight)+px(cs.marginRight);
+  if(bar&&bar.getAttribute('data-mode')!=='fixed'){var t=px(cs.paddingTop)+px(cs.marginTop);bar.style.marginTop=-t+'px';bar.style.marginLeft=-l+'px';bar.style.marginRight=-r+'px';bar.style.marginBottom=px(cs.paddingTop)+'px'}
+  if(ft){ft.style.marginLeft=-l+'px';ft.style.marginRight=-r+'px';ft.style.marginBottom=-(px(cs.paddingBottom)+px(cs.marginBottom))+'px'}
+  place()}catch(e){}}
+var tick=false;function onScroll(){if(!tick){tick=true;requestAnimationFrame(function(){tick=false;place()})}}
+layout();addEventListener('resize',layout);addEventListener('scroll',onScroll,{passive:true});addEventListener('load',layout);
+if(toc){var btn=d.querySelector('#nkg-unitbar .nkg-tocbtn'),sc=d.getElementById('nkg-toc-scrim'),x=toc.querySelector('.nkg-toc-x');
+  function close(){h.classList.remove('nkg-toc-open')}
+  if(btn)btn.addEventListener('click',function(e){e.preventDefault();h.classList.toggle('nkg-toc-open');place()});
+  if(sc)sc.addEventListener('click',close);if(x)x.addEventListener('click',close);
+  d.addEventListener('keydown',function(e){if(e.key==='Escape')close()});}
+else{var b2=d.querySelector('#nkg-unitbar .nkg-tocbtn');if(b2)b2.remove()}
+})();</script><!--/nkg:foot-->
+</body></html>
