@@ -59,7 +59,7 @@ CATALOG = {
                 ('unit-1-2-ip-addressing-review.html', 'Unit 1.2', 'IP Addressing Review', 'notes', 'Classful vs classless addressing and network design'),
                 ('unit-1-2-switching-vs-routing.html', 'Unit 1.2', 'Switching vs Routing', 'notes', 'Frames, packets and forwarding, with an ARP/CAM walkthrough'),
                 ('unit-1-3-cisco-ios-cli-basics.html', 'Unit 1.3', 'Cisco IOS & CLI Basics', 'notes', 'CLI modes, memory and the switch boot process'),
-                ('unit-1-lab-simple-lan.html', 'Lab 1', 'Introduction to Packet Tracer & a Simple LAN', 'lab', 'Build, cable and address a small LAN, then test it'),
+                ('unit-1-lab-simple-lan.html', 'Lab 1', 'Introduction to Packet Tracer & a Simple LAN', 'lab', 'Problem statement & solution · Build, cable and address a small LAN, then test it'),
             ], [('ip-network-design-calculator.xlsx', 'IP subnet & network design calculator'),
                 ('lab-1-simple-lan.pkt', 'Lab 1 · Building a simple LAN')]),
             (2, 'Switch Fundamentals & Configuration', 'How a switch forwards frames, and how to configure, secure and verify it.', [
@@ -67,36 +67,36 @@ CATALOG = {
                 ('unit-2-3-mac-address-table.html', 'Unit 2.3', 'MAC Address Table & Frame Forwarding', 'notes', 'How a switch learns, floods and forwards'),
                 ('unit-2-3-basic-switch-setup.html', 'Unit 2.3', 'Basic Switch Configuration', 'notes', 'Hostname, management IP, console, VTY and SSH'),
                 ('unit-2-4-managing-switch-configuration.html', 'Unit 2.4', 'Managing & Verifying Switch Configuration', 'notes', 'Show commands, saving and backing up configurations'),
-                ('unit-2-lab-switch-config-remote-access.html', 'Lab 2', 'Initial Switch Configuration & Remote Access', 'lab', 'Hostname, passwords, management IP, SSH and connectivity tests'),
+                ('unit-2-lab-switch-config-remote-access.html', 'Lab 2', 'Initial Switch Configuration & Remote Access', 'lab', 'Problem statement & solution · Hostname, passwords, management IP, SSH and connectivity tests'),
             ], [('lab-2-switch-config-remote-access.pkt', 'Lab 2 · Switch configuration and remote access'),
                 ('switch-config-cheat-sheet.pdf', 'Switch configuration cheat sheet')]),
             (3, 'VLANs', 'Breaking one switch into many broadcast domains, trunks and inter-VLAN routing.', [
                 ('unit-3-1-vlan-concepts.html', 'Unit 3.1', 'VLAN Concepts & Configuration', 'notes', 'Purpose, membership and configuration of VLANs'),
-                ('unit-3-lab-3a-layer3-switch.html', 'Lab 3A', 'Inter-VLAN Routing with a Layer 3 Switch', 'lab', 'SVIs and IP routing on a multilayer switch'),
-                ('unit-3-lab-3b-router-on-a-stick.html', 'Lab 3B', 'VLANs, Trunks & Router-on-a-Stick', 'lab', 'VLANs, 802.1Q trunks and subinterfaces on one router'),
+                ('unit-3-lab-3a-layer3-switch.html', 'Lab 3A', 'Inter-VLAN Routing with a Layer 3 Switch', 'lab', 'Problem statement & solution · SVIs and IP routing on a multilayer switch'),
+                ('unit-3-lab-3b-router-on-a-stick.html', 'Lab 3B', 'VLANs, Trunks & Router-on-a-Stick', 'lab', 'Problem statement & solution · VLANs, 802.1Q trunks and subinterfaces on one router'),
             ], [('lab-3b-intervlan-layer3-switch.pkt', 'Lab 3A · Inter-VLAN with Layer 3 switch'),
                 ('lab-3-router-on-a-stick.pkt', 'Lab 3B · Router-on-a-stick')]),
             (4, 'Static Routing', 'How a router decides where a packet goes, and how to tell it by hand.', [
                 ('unit-4-static-routing.html', 'Unit 4', 'Static Routing', 'notes', 'Static and default routes in multi-router topologies'),
-                ('unit-4-lab-static-default-routes.html', 'Lab 4', 'Static & Default Routes', 'lab', 'Static and default routes across a multi-router topology'),
+                ('unit-4-lab-static-default-routes.html', 'Lab 4', 'Static & Default Routes', 'lab', 'Problem statement & solution · Static and default routes across a multi-router topology'),
             ], [('lab-4-static-default-routes.pkt', 'Lab 4 · Static and default routes')]),
             (5, 'Distance Vector Routing', 'Routers sharing what they know with their neighbours: RIP and its limits.', [
                 ('unit-5-distance-vector-rip.html', 'Unit 5', 'Distance Vector Routing (RIP)', 'notes', 'RIP versions, updates, timers and loop prevention'),
-                ('unit-5-lab-ripv2.html', 'Lab 5', 'RIPv2 Routing', 'lab', 'Configure RIPv2, verify updates and debug RIP routing'),
+                ('unit-5-lab-ripv2.html', 'Lab 5', 'RIPv2 Routing', 'lab', 'Problem statement & solution · Configure RIPv2, verify updates and debug RIP routing'),
             ], [('lab-5-ripv2.pkt', 'Lab 5 · RIP v2')]),
             (6, 'Link-State & Hybrid Routing', 'OSPF and EIGRP in theory and in the lab.', [
                 ('unit-6-link-state-and-hybrid-routing.html', 'Unit 6', 'Link-State & Hybrid Routing Protocols', 'notes', 'OSPF concepts, areas and the SPF algorithm'),
                 ('unit-6-3-eigrp.html', 'Unit 6.3', 'EIGRP & Comparing RIP, OSPF, EIGRP', 'notes', 'EIGRP fundamentals with a design comparison matrix'),
-                ('unit-6-lab-ospf.html', 'Unit 6 Lab', 'OSPF Implementation', 'lab', 'Single-area OSPF in a multi-router topology'),
-                ('unit-6-lab-eigrp.html', 'Unit 6 Lab', 'EIGRP Implementation', 'lab', 'Basic EIGRP setup and verification'),
+                ('unit-6-lab-ospf.html', 'Lab 6', 'OSPF Implementation', 'lab', 'Problem statement & solution · Single-area OSPF in a multi-router topology'),
+                ('unit-6-lab-eigrp.html', 'Unit 6 Lab', 'EIGRP Implementation', 'lab', 'Problem statement & solution · Basic EIGRP setup and verification'),
             ], [('lab-6-ospf-single-area.pkt', 'Lab 6 · OSPF single area')]),
             (7, 'Advanced Switching', 'Redundant switched networks: STP, Rapid PVST+, port security and EtherChannel.', [
                 ('unit-7-advanced-switching.html', 'Unit 7', 'Advanced Switching', 'notes', 'STP, Rapid PVST+, port security and EtherChannel'),
-                ('unit-7-lab-series.html', 'Unit 7 Lab', 'Switching Lab Series', 'lab', 'VLANs, STP, port security, EtherChannel and trouble tickets'),
+                ('unit-7-lab-series.html', 'Lab 7', 'Switching Lab Series', 'lab', 'Problem statement & solution · VLANs, STP, port security, EtherChannel and trouble tickets'),
             ], [('lab-7-stp-port-security-etherchannel.pkt', 'Lab 7 · STP, port security, EtherChannel')]),
             (8, 'WAN, ACL & NAT', 'Connecting sites over WAN links, filtering traffic and sharing public addresses.', [
                 ('unit-8-wan-acl-nat.html', 'Unit 8', 'WAN, ACL & NAT', 'notes', 'PPP/HDLC, access control lists and network address translation'),
-                ('unit-8-lab-series.html', 'Unit 8 Lab', 'WAN, ACL & NAT Lab Series', 'lab', 'PPP/HDLC, ACL filtering and NAT for internet access'),
+                ('unit-8-lab-series.html', 'Lab 8', 'WAN, ACL & NAT Lab Series', 'lab', 'Problem statement & solution · PPP/HDLC, ACL filtering and NAT for internet access'),
             ], [('lab-8-ppp-hdlc-acl-nat.pkz', 'Lab 8 · PPP/HDLC, ACL and NAT')]),
             # Non-numeric "unit": course-wide lab material, shown as "Labs 1–8".
             ('Labs', 'Lab Companion', 'Commands, a practice checklist and self-test questions for every lab, stage by stage.', [
@@ -346,6 +346,15 @@ def build_page(key, i, seq):
 KIND_LABEL = {'notes': 'Lesson', 'slides': 'Slides', 'lab': 'Lab'}
 
 
+def lesson_title(label, topic, kind):
+    """Title on the subject page: numbered lessons ("2.3 · …") and labs ("Lab 3A · …") show their number."""
+    if '.' in label:
+        return label.replace('Unit ', '') + ' · ' + topic
+    if kind == 'lab' and label != 'Lab Companion':
+        return label + ' · ' + topic
+    return topic
+
+
 def build_subject(key):
     sub = CATALOG[key]
     path = ROOT / 'teaching' / f'{key}.html'
@@ -367,7 +376,7 @@ def build_subject(key):
             f'''
               <li class="lesson"><a href="/teaching/{key}/{f}">
                 <span class="lesson-kind {kind}">{KIND_LABEL[kind]}</span>
-                <span class="lesson-text"><span class="lesson-title">{esc(label.replace('Unit ', '') + ' · ' + topic if '.' in label else topic)}</span><span class="lesson-meta">{esc(meta)}</span></span>
+                <span class="lesson-text"><span class="lesson-title">{esc(lesson_title(label, topic, kind))}</span><span class="lesson-meta">{esc(meta)}</span></span>
                 <span class="lesson-go" aria-hidden="true">&rarr;</span>
               </a></li>''' for f, label, topic, kind, meta in lessons)
         dl = ''
