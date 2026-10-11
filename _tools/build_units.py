@@ -60,7 +60,8 @@ CATALOG = {
                 ('unit-1-2-switching-vs-routing.html', 'Unit 1.2', 'Switching vs Routing', 'notes', 'Frames, packets and forwarding, with an ARP/CAM walkthrough'),
                 ('unit-1-3-cisco-ios-cli-basics.html', 'Unit 1.3', 'Cisco IOS & CLI Basics', 'notes', 'CLI modes, memory and the switch boot process'),
                 ('unit-1-lab-simple-lan.html', 'Lab 1', 'Introduction to Packet Tracer & a Simple LAN', 'lab', 'Build, cable and address a small LAN, then test it'),
-            ], [('lab-1-simple-lan.pkt', 'Lab 1 · Building a simple LAN')]),
+            ], [('ip-network-design-calculator.xlsx', 'IP subnet & network design calculator'),
+                ('lab-1-simple-lan.pkt', 'Lab 1 · Building a simple LAN')]),
             (2, 'Switch Fundamentals & Configuration', 'How a switch forwards frames, and how to configure, secure and verify it.', [
                 ('unit-2-2-switching-methods.html', 'Unit 2.2', 'Switching Methods', 'notes', 'Store-and-forward, cut-through and fragment-free'),
                 ('unit-2-3-mac-address-table.html', 'Unit 2.3', 'MAC Address Table & Frame Forwarding', 'notes', 'How a switch learns, floods and forwards'),
