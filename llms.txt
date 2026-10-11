@@ -12,7 +12,7 @@ Content may be quoted and cited with a link to the lesson page. Terms: https://g
 
 ## Digital Logic (BT102CO)
 
-Course page: https://gupta-niraj.com.np/teaching/digital-logic.html — taught at Gateway Professional College (Purvanchal University).
+Course page: https://gupta-niraj.com.np/teaching/digital-logic.html — written by Niraj Kumar Gupta, taught at Gateway Professional College (Purvanchal University). Reference book: Digital Logic and Computer Design by M. Morris Mano.
 
 ### Unit 1: Number Systems
 
@@ -58,7 +58,7 @@ Shift registers, SISO/SIPO/PISO/PIPO, synchronous and asynchronous counters, rin
 
 ## Switching & Routing (NCS 485)
 
-Course page: https://gupta-niraj.com.np/teaching/switching-routing.html — taught at UniGlobe College (Pokhara University).
+Course page: https://gupta-niraj.com.np/teaching/switching-routing.html — written by Niraj Kumar Gupta, taught at UniGlobe College (Pokhara University).
 
 ### Unit 1: Introduction to Switching & Routing
 

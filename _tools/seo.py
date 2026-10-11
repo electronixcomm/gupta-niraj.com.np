@@ -48,6 +48,12 @@ RIGHTS = {'copyrightHolder': {'@type': 'Person', '@id': PERSON_ID, 'name': AUTHO
           'usageInfo': SITE + '/privacy.html'}
 PERSON_REF = {'@type': 'Person', '@id': PERSON_ID, 'name': AUTHOR, 'url': SITE + '/'}
 
+
+def book(sub):
+    """schema.org Book for a subject's reference textbook, or None."""
+    ref = sub.get('reference')
+    return {'@type': 'Book', 'name': ref[0], 'author': {'@type': 'Person', 'name': ref[1]}} if ref else None
+
 # Subject pages: path -> course facts. Lesson-based subjects come from CATALOG.
 SUBJECTS = {
     'digital-logic': dict(code='BT102CO', provider='Gateway Professional College (Purvanchal University)', level='Undergraduate, Year I'),
@@ -227,6 +233,7 @@ def build_lessons(sitemap):
                  'about': {'@type': 'Thing', 'name': unit_name}, 'position': pos, 'mainEntityOfPage': url,
                  'datePublished': published, 'dateModified': date, 'image': IMAGE,
                  'author': PERSON_REF, 'publisher': PERSON_REF, **RIGHTS,
+                 **({'isBasedOn': book(sub)} if book(sub) else {}),
                  'isPartOf': {'@type': 'Course', '@id': course_url + '#course', 'name': sub['name'], 'courseCode': sub['code'], 'url': course_url}},
                 crumbs([('Home', SITE + '/'), ('Teaching Hub', SITE + '/teaching/'), (sub['name'], course_url), (f'{label} · {topic}', url)]),
             ]
@@ -266,6 +273,8 @@ def build_subjects(sitemap):
                                            'description': d} for n, t, d, _, _ in units]
             course['teaches'] = [t for _, t, _, _, _ in units]
             course['dateModified'] = git_date(rel)
+            if book(CATALOG[key]):
+                course['isBasedOn'] = book(CATALOG[key])
         graph = [course, crumbs([('Home', SITE + '/'), ('Teaching Hub', SITE + '/teaching/'), (name, url)])]
         inject(path, ''.join(head_meta(title, desc, url, with_desc=False, with_canon=False)) +
                ld({'@context': 'https://schema.org', '@graph': graph}))
@@ -354,7 +363,8 @@ def write_llms():
     for key, sub in CATALOG.items():
         facts = SUBJECTS[key]
         lines += [f'## {sub["name"]} ({sub["code"]})', '',
-                  f'Course page: {SITE}/teaching/{key}.html — taught at {facts["provider"]}.', '']
+                  f'Course page: {SITE}/teaching/{key}.html — written by {AUTHOR}, taught at {facts["provider"]}.'
+                  + (f' Reference book: {sub["reference"][0]} by {sub["reference"][1]}.' if sub.get('reference') else ''), '']
         for num, utitle, usum, lessons, files in sub['units']:
             lines += [f'### {"Unit " + str(num) + ": " if isinstance(num, int) else ""}{utitle}', '', usum, '']
             for f, label, topic, kind, meta in lessons:

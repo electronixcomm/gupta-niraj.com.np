@@ -26,6 +26,7 @@ CATALOG = {
     'digital-logic': {
         'name': 'Digital Logic',
         'code': 'BT102CO',
+        'reference': ('Digital Logic and Computer Design', 'M. Morris Mano'),
         'units': [
             (1, 'Number Systems', 'Binary, octal, decimal and hexadecimal; conversions, complements and binary codes.', [
                 ('unit-1-number-systems.html', 'Unit 1', 'Number Systems', 'notes', 'Interactive notes with an MCQ practice test'),
@@ -325,9 +326,11 @@ def build_page(key, i, seq):
     cards.append(f'<a class="nkg-card" href="{hub}"><span class="nkg-k">{esc(sub["code"])}</span><span class="nkg-t">All {esc(sub["name"])} units</span></a>')
     if nxt:
         cards.append(f'<a class="nkg-card next" href="{href(nxt)}"><span class="nkg-k">Next &#8250;</span><span class="nkg-t">{esc(nxt["label"] + " · " + nxt["topic"])}</span></a>')
+    ref = sub.get('reference')
+    ref_html = f'Reference: <i>{esc(ref[0])}</i>, {esc(ref[1])} · ' if ref else ''
     foot = (f'<!--nkg:foot--><nkg-unitfoot id="nkg-unitfoot" role="navigation" aria-label="Lesson navigation"><span class="nkg-in">'
             + ''.join(cards) +
-            f'<span class="nkg-copy">&copy; Niraj Kumar Gupta · Teaching Hub · {esc(sub["name"])} ({esc(sub["code"])}) · <a class="nkg-priv" href="/privacy.html">Privacy &amp; terms</a></span>'
+            f'<span class="nkg-copy">&copy; Niraj Kumar Gupta · Teaching Hub · {esc(sub["name"])} ({esc(sub["code"])}) · {ref_html}<a class="nkg-priv" href="/privacy.html">Privacy &amp; terms</a></span>'
             f'</span></nkg-unitfoot><script>{BAR_JS}</script><!--/nkg:foot-->')
 
     m = re.search(r'<body[^>]*>', s)
