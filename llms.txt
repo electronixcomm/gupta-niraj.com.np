@@ -117,7 +117,7 @@ OSPF and EIGRP in theory and in the lab.
 - [Unit 6 · Link-State & Hybrid Routing Protocols](https://gupta-niraj.com.np/teaching/switching-routing/unit-6-link-state-and-hybrid-routing.html): OSPF concepts, areas and the SPF algorithm
 - [Unit 6.3 · EIGRP & Comparing RIP, OSPF, EIGRP](https://gupta-niraj.com.np/teaching/switching-routing/unit-6-3-eigrp.html): EIGRP fundamentals with a design comparison matrix
 - [Lab 6 · OSPF Implementation](https://gupta-niraj.com.np/teaching/switching-routing/unit-6-lab-ospf.html): Problem statement & solution · Single-area OSPF in a multi-router topology
-- [Unit 6 Lab · EIGRP Implementation](https://gupta-niraj.com.np/teaching/switching-routing/unit-6-lab-eigrp.html): Problem statement & solution · Basic EIGRP setup and verification
+- [Lab 6B · EIGRP Implementation](https://gupta-niraj.com.np/teaching/switching-routing/unit-6-lab-eigrp.html): Problem statement & solution · Basic EIGRP setup and verification
 - Download: [Lab 6 · OSPF single area](https://gupta-niraj.com.np/teaching/switching-routing/downloads/lab-6-ospf-single-area.pkt)
 
 ### Unit 7: Advanced Switching

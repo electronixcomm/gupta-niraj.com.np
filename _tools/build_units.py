@@ -89,7 +89,7 @@ CATALOG = {
                 ('unit-6-link-state-and-hybrid-routing.html', 'Unit 6', 'Link-State & Hybrid Routing Protocols', 'notes', 'OSPF concepts, areas and the SPF algorithm'),
                 ('unit-6-3-eigrp.html', 'Unit 6.3', 'EIGRP & Comparing RIP, OSPF, EIGRP', 'notes', 'EIGRP fundamentals with a design comparison matrix'),
                 ('unit-6-lab-ospf.html', 'Lab 6', 'OSPF Implementation', 'lab', 'Problem statement & solution · Single-area OSPF in a multi-router topology'),
-                ('unit-6-lab-eigrp.html', 'Unit 6 Lab', 'EIGRP Implementation', 'lab', 'Problem statement & solution · Basic EIGRP setup and verification'),
+                ('unit-6-lab-eigrp.html', 'Lab 6B', 'EIGRP Implementation', 'lab', 'Problem statement & solution · Basic EIGRP setup and verification'),
             ], [('lab-6-ospf-single-area.pkt', 'Lab 6 · OSPF single area')]),
             (7, 'Advanced Switching', 'Redundant switched networks: STP, Rapid PVST+, port security and EtherChannel.', [
                 ('unit-7-advanced-switching.html', 'Unit 7', 'Advanced Switching', 'notes', 'STP, Rapid PVST+, port security and EtherChannel'),
