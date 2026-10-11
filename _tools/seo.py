@@ -7,8 +7,9 @@ It (idempotently):
     canonical, robots, Open Graph / Twitter tags and schema.org JSON-LD
     (Person/WebSite on the homepage, Course on subject pages,
     LearningResource on lessons, BreadcrumbList everywhere),
-  * regenerates sitemap.xml with <lastmod> dates,
-  * writes robots.txt and llms.txt.
+  * regenerates sitemap.xml with <lastmod> dates that move only when a page's
+    own content changes (rebuilt bars/metadata and line endings are ignored),
+  * writes robots.txt and llms.txt (course outline by unit, with downloads).
 Page content is never touched.
 """
 import datetime
@@ -63,7 +64,8 @@ HUB_DESC = ('Free teaching material by Niraj Kumar Gupta: interactive lessons, l
             'AI/ML, Python & Data Science and WEKA.')
 
 AI_AGENTS = ['GPTBot', 'OAI-SearchBot', 'ChatGPT-User', 'ClaudeBot', 'Claude-SearchBot', 'Claude-User',
-             'PerplexityBot', 'Perplexity-User', 'Google-Extended', 'Applebot-Extended', 'CCBot',
+             'PerplexityBot', 'Perplexity-User', 'Google-Extended', 'Applebot', 'Applebot-Extended', 'CCBot',
+             'DuckAssistBot', 'MistralAI-User', 'Meta-ExternalAgent', 'Amazonbot',
              'Bingbot', 'Googlebot', 'DuckDuckBot', 'YandexBot']
 
 
@@ -97,13 +99,48 @@ def crumbs(items):
         {'@type': 'ListItem', 'position': i + 1, 'name': n, 'item': u} for i, (n, u) in enumerate(items)]}
 
 
+# Generated parts of a page (bars, SEO block, <title>) don't count as a content change.
+GENERATED = re.compile(r'<!--nkg:(\w+)-->.*?<!--/nkg:\1-->|<title>.*?</title>', re.S)
+
+
+def content_key(s):
+    return re.sub(r'\s+', '', GENERATED.sub('', s))
+
+
+def git_dates(rel):
+    """(published, modified) for a page, from git history.
+
+    modified = date of the oldest commit since which the page content (ignoring generated
+    parts and line endings) has stayed the same; today if it differs from the last commit.
+    Rebuilding navigation or metadata therefore never bumps the date search engines see.
+    """
+    log = subprocess.run(['git', 'log', '--format=%H %cs', '--', rel], cwd=ROOT,
+                         capture_output=True, text=True).stdout.split()
+    commits = list(zip(log[0::2], log[1::2]))
+    if not commits:
+        return TODAY, TODAY
+    current = content_key((ROOT / rel).read_text(encoding='utf-8'))
+    modified = TODAY
+    for sha, day in commits:
+        old = subprocess.run(['git', 'show', f'{sha}:{rel}'], cwd=ROOT, capture_output=True).stdout
+        if content_key(old.decode('utf-8', 'replace')) != current:
+            break
+        modified = day
+    return commits[-1][1], modified
+
+
 def git_date(rel):
-    """Last change date: today if the file has uncommitted changes, else its last commit date."""
-    dirty = subprocess.run(['git', 'status', '--porcelain', '--', rel], cwd=ROOT, capture_output=True, text=True).stdout.strip()
-    if dirty:
-        return TODAY
-    out = subprocess.run(['git', 'log', '-1', '--format=%cs', '--', rel], cwd=ROOT, capture_output=True, text=True).stdout.strip()
-    return out or TODAY
+    return git_dates(rel)[1]
+
+
+def lesson_desc(label, topic, meta, kind, sub, uni):
+    """Meta description kept within ~160 characters so search results show it whole."""
+    for d in (f'{label} · {topic}: {meta}. Free {kind.lower()} for {sub["name"]} ({sub["code"]}, {uni}).',
+              f'{label} · {topic}: {meta}. Free {kind.lower()} for {sub["name"]} ({sub["code"]}).',
+              f'{topic}: {meta}. Free {kind.lower()} for {sub["name"]} ({sub["code"]}).'):
+        if len(d) <= 160:
+            return d
+    return d
 
 
 def head_meta(title, desc, url, og_type='website', with_desc=True, with_canon=True):
@@ -169,27 +206,33 @@ def build_lessons(sitemap):
     for key, sub in CATALOG.items():
         facts = SUBJECTS[key]
         course_url = f'{SITE}/teaching/{key}.html'
-        for p in pages_in_order(key):
+        uni = facts['provider'].split('(')[-1].rstrip(')')
+        unit_titles = {u[0]: u[1] for u in sub['units']}
+        for pos, p in enumerate(pages_in_order(key), 1):
             rel = f'teaching/{key}/{p["file"]}'
             path = ROOT / rel
             url = f'{SITE}/{rel}'
             topic, label = p['topic'], p['label']
             kind = {'lab': 'Lab guide', 'slides': 'Presentation', 'notes': 'Lesson'}[p['kind']]
-            desc = (f'{label} · {topic}: {p["meta"]}. Free interactive {kind.lower()} for {sub["name"]} '
-                    f'({sub["code"]}, {facts["provider"].split("(")[-1].rstrip(")")}) by {AUTHOR}.')
+            desc = lesson_desc(label, topic, p['meta'], kind, sub, uni)
             title = f'{label} · {topic} — {sub["name"]}'
-            date = git_date(rel)
+            published, date = git_dates(rel)
+            unit = p['unit']
+            unit_name = (f'Unit {unit}: ' if isinstance(unit, int) else '') + unit_titles[unit]
             graph = [
                 {'@type': 'LearningResource', '@id': url + '#lesson', 'name': f'{label} · {topic}', 'headline': title,
                  'description': desc, 'url': url, 'inLanguage': 'en', 'learningResourceType': kind,
                  'educationalLevel': facts['level'], 'isAccessibleForFree': True, 'teaches': topic,
-                 'keywords': f'{topic}, {sub["name"]}, {sub["code"]}', 'dateModified': date, 'image': IMAGE,
+                 'keywords': f'{topic}, {unit_titles[unit]}, {sub["name"]}, {sub["code"]}',
+                 'about': {'@type': 'Thing', 'name': unit_name}, 'position': pos, 'mainEntityOfPage': url,
+                 'datePublished': published, 'dateModified': date, 'image': IMAGE,
                  'author': PERSON_REF, 'publisher': PERSON_REF, **RIGHTS,
                  'isPartOf': {'@type': 'Course', '@id': course_url + '#course', 'name': sub['name'], 'courseCode': sub['code'], 'url': course_url}},
                 crumbs([('Home', SITE + '/'), ('Teaching Hub', SITE + '/teaching/'), (sub['name'], course_url), (f'{label} · {topic}', url)]),
             ]
             block = ''.join(head_meta(title, desc, url, og_type='article')) + \
-                f'<meta property="article:author" content="{SITE}/"><meta property="article:modified_time" content="{date}">' + \
+                f'<meta property="article:author" content="{SITE}/"><meta property="article:published_time" content="{published}">' \
+                f'<meta property="article:modified_time" content="{date}">' + \
                 ld({'@context': 'https://schema.org', '@graph': graph})
             inject(path, block)
             sitemap.append((url, date, 'monthly', '0.7'))
@@ -215,8 +258,14 @@ def build_subjects(sitemap):
         if facts['code']:
             course['courseCode'] = facts['code']
         if key in CATALOG:
-            course['hasPart'] = [{'@type': 'LearningResource', 'name': f'{p["label"]} · {p["topic"]}',
-                                  'url': f'{SITE}/teaching/{key}/{p["file"]}'} for p in pages_in_order(key)]
+            units = CATALOG[key]['units']
+            course['hasPart'] = [{'@type': 'LearningResource', 'position': i, 'name': f'{p["label"]} · {p["topic"]}',
+                                  'url': f'{SITE}/teaching/{key}/{p["file"]}'} for i, p in enumerate(pages_in_order(key), 1)]
+            # Unit outline: lets search and answer engines describe what the course covers.
+            course['syllabusSections'] = [{'@type': 'Syllabus', 'name': (f'Unit {n}: ' if isinstance(n, int) else '') + t,
+                                           'description': d} for n, t, d, _, _ in units]
+            course['teaches'] = [t for _, t, _, _, _ in units]
+            course['dateModified'] = git_date(rel)
         graph = [course, crumbs([('Home', SITE + '/'), ('Teaching Hub', SITE + '/teaching/'), (name, url)])]
         inject(path, ''.join(head_meta(title, desc, url, with_desc=False, with_canon=False)) +
                ld({'@context': 'https://schema.org', '@graph': graph}))
@@ -307,9 +356,12 @@ def write_llms():
         lines += [f'## {sub["name"]} ({sub["code"]})', '',
                   f'Course page: {SITE}/teaching/{key}.html — taught at {facts["provider"]}.', '']
         for num, utitle, usum, lessons, files in sub['units']:
+            lines += [f'### {"Unit " + str(num) + ": " if isinstance(num, int) else ""}{utitle}', '', usum, '']
             for f, label, topic, kind, meta in lessons:
                 lines.append(f'- [{label} · {topic}]({SITE}/teaching/{key}/{f}): {meta}')
-        lines.append('')
+            for f, t in files:
+                lines.append(f'- Download: [{t}]({SITE}/teaching/{key}/downloads/{f})')
+            lines.append('')
     lines += ['## Other subjects', '']
     for key, facts in SUBJECTS.items():
         if key in CATALOG:
