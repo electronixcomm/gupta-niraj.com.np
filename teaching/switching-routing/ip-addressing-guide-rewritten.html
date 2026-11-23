@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IP Addressing: From Classes to CIDR, LPM and VLSM (Review Class)</title>
+<style>
+:root{--bg:#FBFAF6;--paper:#fff;--ink:#221F1B;--soft:#5A5650;--rule:#DEDACF;--acc:#9E1B32;--accs:#F4E4E6;--sl:#223047;--sls:#EDF0F4;--mono:Consolas,Menlo,monospace;--serif:Georgia,serif;--sans:-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 var(--sans)}
+.sheet{max-width:900px;margin:0 auto;background:var(--paper);padding:48px clamp(20px,5vw,64px) 72px;border:1px solid var(--rule);border-top:0;border-bottom:0}
+.kicker{font:12.5px var(--mono);color:var(--acc);margin:0 0 8px}
+h1{font:clamp(28px,4vw,36px)/1.2 var(--serif);color:var(--sl);margin:0 0 12px}
+.sub{color:var(--soft);margin:0 0 32px;padding-bottom:24px;border-bottom:3px solid var(--sl)}
+h2{font:24px var(--serif);color:var(--sl);margin:48px 0 10px;padding-bottom:8px;border-bottom:1px solid var(--rule)}
+h3{font:18px var(--serif);margin:26px 0 8px}
+.n{color:var(--acc);font-family:var(--mono);font-size:.8em;margin-right:8px}
+p{margin:0 0 12px}
+.box{background:var(--accs);border-left:3px solid var(--acc);padding:14px 18px;margin:16px 0;border-radius:2px}
+.box p{margin:0}.box p+p{margin-top:8px}
+.box b.l{display:block;font:700 12px var(--mono);color:var(--acc);margin-bottom:4px}
+table{width:100%;border-collapse:collapse;margin:12px 0 22px;font-size:14px}
+caption{text-align:left;font:12px var(--mono);color:var(--soft);margin-bottom:5px}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--rule)}
+th{background:var(--sl);color:#fff;font-size:13px}
+tbody tr:nth-child(even){background:var(--sls)}
+.m{font-family:var(--mono);font-size:13px}
+.tw{overflow-x:auto}
+code{font-family:var(--mono);background:var(--sls);padding:1px 5px;border-radius:3px;font-size:.92em}
+pre{background:var(--sl);color:#EAEFF5;padding:16px 18px;border-radius:4px;overflow-x:auto;font:13px/1.55 var(--mono);margin:12px 0 20px}
+pre .a{color:#E8B4BC}pre .r{color:#9FD3A0}
+.k{background:var(--accs);border-bottom:2px solid var(--acc);padding:0 3px;font-weight:600}
+ol.st{counter-reset:s;list-style:none;padding:0;margin:12px 0}
+ol.st li{counter-increment:s;position:relative;padding:8px 12px 8px 46px;margin:7px 0;background:var(--sls);border-left:3px solid var(--sl)}
+ol.st li::before{content:counter(s);position:absolute;left:11px;top:8px;width:24px;height:24px;line-height:24px;border-radius:50%;background:var(--sl);color:#fff;font:700 13px var(--sans);text-align:center}
+ul{margin:0 0 14px;padding-left:22px}li{margin-bottom:4px}
+footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);font-size:13px;color:var(--soft)}
+</style>
+</head>
+<body>
+<div class="sheet">
+
+<p class="kicker">NETWORK DESIGN REFERENCE · REVIEW CLASS</p>
+<h1>IP Addressing: From Classes to CIDR, LPM and VLSM <span style="color:var(--acc);font-size:.6em;white-space:nowrap">(Review Class)</span></h1>
+<p class="sub">In this guide we study three things: <b>subnetting</b> (carving one block into smaller networks), <b>supernetting, i.e. summarization</b> (merging many networks into one route), and <b>how a router actually works in two steps</b>: first it <b>builds its routing table</b> (administrative distance, then metric), then it <b>forwards each packet</b> (longest-prefix match). Three Nepali case studies and VLSM tie it together.</p>
+
+<h2><span class="n">1</span>The Problem Classes Created</h2>
+<p>An IPv4 address is 32 bits, written as four octets (<code>192.168.1.10</code>). Every address splits into a <b>network ID</b> (which network) and a <b>host ID</b> (which device). The whole story is about <i>where that split falls</i>.</p>
+<p>Until 1993 the first bits of an address fixed the split, giving five classes:</p>
+<div class="tw"><table>
+<caption>Table 1 — The five classes (127.x.x.x is reserved for loopback)</caption>
+<thead><tr><th>Class</th><th>Leading bits</th><th>First octet</th><th>Default mask</th><th>Hosts / network</th></tr></thead>
+<tbody>
+<tr><td>A</td><td class="m">0</td><td>1–126</td><td class="m">/8</td><td>16,777,214</td></tr>
+<tr><td>B</td><td class="m">10</td><td>128–191</td><td class="m">/16</td><td>65,534</td></tr>
+<tr><td>C</td><td class="m">110</td><td>192–223</td><td class="m">/24</td><td>254</td></tr>
+<tr><td>D</td><td class="m">1110</td><td>224–239</td><td colspan="2">Multicast</td></tr>
+<tr><td>E</td><td class="m">1111</td><td>240–255</td><td colspan="2">Experimental</td></tr>
+</tbody></table></div>
+<p>To identify a class, read the first octet: <code>172.16.0.0</code> → 172 = <code>10101100</code> → leading bits <code>10</code> → Class B.</p>
+
+<div class="box"><b class="l">THE PROBLEM</b>
+<p>The boundaries were rigid. A company needing 300 hosts could not get “a bit more than a Class C”; it received a whole Class B (65,534 addresses) and wasted over 65,000. Multiplied across the internet, this drained IPv4 space and bloated routing tables.</p></div>
+
+<h3><span class="n">1.1</span>The Fix: CIDR (RFC 1519, 1993)</h3>
+<p><b>Classless Inter-Domain Routing</b> drops the classes. An explicit prefix length <code>/n</code> (anywhere from /0 to /32) marks the split, regardless of the first octet. That unlocks two opposite tools:</p>
+<ul>
+<li><b>Subnetting</b> borrows <i>host</i> bits to cut one network into smaller ones sized to real need.</li>
+<li><b>Supernetting</b> borrows <i>network</i> bits to merge contiguous networks into one advertised route.</li>
+</ul>
+
+<h2><span class="n">2</span>Reading a Prefix</h2>
+<p>A prefix and a mask say the same thing: every <b>1</b> in the mask is a network bit, every <b>0</b> a host bit. <code>/26</code> = <code>11111111.11111111.11111111.11000000</code> = <code>255.255.255.192</code>, leaving 6 host bits → 64 addresses, 62 usable.</p>
+<ul>
+<li><b>Network address:</b> all host bits 0. Names the block; never assigned.</li>
+<li><b>Broadcast address:</b> all host bits 1. Reaches every host; always the block’s last address.</li>
+<li><b>Usable hosts:</b> everything strictly between the two.</li>
+</ul>
+<div class="tw"><table>
+<caption>Table 2 — Common prefixes</caption>
+<thead><tr><th>Prefix</th><th>Mask</th><th>Host bits</th><th>Total</th><th>Usable</th><th>Typical use</th></tr></thead>
+<tbody>
+<tr><td class="m">/8</td><td class="m">255.0.0.0</td><td>24</td><td>16,777,216</td><td>16,777,214</td><td>Huge private block</td></tr>
+<tr><td class="m">/16</td><td class="m">255.255.0.0</td><td>16</td><td>65,536</td><td>65,534</td><td>Campus</td></tr>
+<tr><td class="m">/24</td><td class="m">255.255.255.0</td><td>8</td><td>256</td><td>254</td><td>Standard LAN</td></tr>
+<tr><td class="m">/26</td><td class="m">255.255.255.192</td><td>6</td><td>64</td><td>62</td><td>Quarter of a /24</td></tr>
+<tr><td class="m">/27</td><td class="m">255.255.255.224</td><td>5</td><td>32</td><td>30</td><td>Branch / servers</td></tr>
+<tr><td class="m">/28</td><td class="m">255.255.255.240</td><td>4</td><td>16</td><td>14</td><td>Small VLAN / DMZ</td></tr>
+<tr><td class="m">/30</td><td class="m">255.255.255.252</td><td>2</td><td>4</td><td>2</td><td>Point-to-point</td></tr>
+<tr><td class="m">/31</td><td class="m">255.255.255.254</td><td>1</td><td>2</td><td>2 (RFC 3021)</td><td>Point-to-point, saves space</td></tr>
+</tbody></table></div>
+<div class="box"><b class="l">MASK SHORTCUT</b>
+<p>Full octets are 255. In the partial octet take <code>k = n mod 8</code> bits: 1→128, 2→192, 3→224, 4→240, 5→248, 6→252, 7→254; later octets are 0. <span class="k">Block size = 256 − mask octet.</span> Example: /27 → 224 → block size 32.</p></div>
+
+<h3><span class="n">2.1</span>The Two Extremes</h3>
+<ul>
+<li><b>/0 matches everything.</b> No bits are compared, so <code>0.0.0.0/0</code> catches every destination: the default route to the ISP, the firewall “any”, the default a core advertises to branches. It always loses to anything more specific.</li>
+<li><b>/32 matches one host.</b> No network ID, no broadcast. Used for loopbacks (stable router identity for OSPF/BGP), host routes that override a covering /24, tunnel endpoints, single-IP firewall rules, and RTBH (an ISP routes a DDoS victim’s /32 to Null0).</li>
+</ul>
+
+<h2><span class="n">3</span>Subnetting: Carving a Block</h2>
+<div class="box"><b class="l">PROBLEM STATEMENT</b>
+<p>Split <code>192.168.10.0/24</code> into <code>/27</code> subnets. How many are there, how big is each, and what are their network, host-range and broadcast addresses?</p></div>
+
+<h3><span class="n">3.1</span>Two Sizing Formulas</h3>
+<p>Each extra bit doubles a count, so exact sizes come from log₂, <i>rounded up</i> (a fractional bit cannot exist).</p>
+<div class="box"><b class="l">FORMULA 1 — HOST BITS FOR H HOSTS</b>
+<p><code>n = ⌈log₂(H + 2)⌉</code>, then prefix = 32 − n. The “+2” covers the network and broadcast addresses. Check: 2ⁿ − 2 ≥ H.</p></div>
+<div class="box"><b class="l">FORMULA 2 — SUBNET BITS FOR N SUBNETS</b>
+<p><code>s = ⌈log₂(N)⌉</code>. Check: 2ˢ ≥ N.</p></div>
+
+<h3><span class="n">3.2</span>The Method</h3>
+<ol class="st">
+<li><b>Start from the parent.</b> 192.168.10.0 is Class C → <code>/24</code>, <span class="k">8 host bits</span>.</li>
+<li><b>Count borrowed bits.</b> New prefix − old = 27 − 24 = <span class="k">3</span>.</li>
+<li><b>Count subnets.</b> 2³ = <span class="k">8</span>.</li>
+<li><b>Count hosts.</b> 5 host bits → 32 addresses, <span class="k">30 usable</span>.</li>
+<li><b>Find block size.</b> Mask octet 224 → 256 − 224 = <span class="k">32</span>.</li>
+<li><b>List subnets.</b> Start at 0, keep adding 32: 0, 32, 64, 96, 128, 160, 192, 224. Next would be 256, which rolls into the next octet, so it is the stop signal, not a ninth subnet.</li>
+<li><b>Fill rows.</b> Broadcast = next start − 1; usable = network + 1 to broadcast − 1.</li>
+</ol>
+<div class="tw"><table>
+<caption>Table 3 — The eight /27 subnets (mask 255.255.255.224)</caption>
+<thead><tr><th>#</th><th>Network</th><th>Usable</th><th>Broadcast</th></tr></thead>
+<tbody>
+<tr><td>1</td><td class="m">192.168.10.0</td><td class="m">.1 – .30</td><td class="m">.31</td></tr>
+<tr><td>2</td><td class="m">192.168.10.32</td><td class="m">.33 – .62</td><td class="m">.63</td></tr>
+<tr><td>3</td><td class="m">192.168.10.64</td><td class="m">.65 – .94</td><td class="m">.95</td></tr>
+<tr><td>4</td><td class="m">192.168.10.96</td><td class="m">.97 – .126</td><td class="m">.127</td></tr>
+<tr><td>5</td><td class="m">192.168.10.128</td><td class="m">.129 – .158</td><td class="m">.159</td></tr>
+<tr><td>6</td><td class="m">192.168.10.160</td><td class="m">.161 – .190</td><td class="m">.191</td></tr>
+<tr><td>7</td><td class="m">192.168.10.192</td><td class="m">.193 – .222</td><td class="m">.223</td></tr>
+<tr><td>8</td><td class="m">192.168.10.224</td><td class="m">.225 – .254</td><td class="m">.255</td></tr>
+</tbody></table></div>
+<div class="box"><b class="l">THE 256 RULE (SELF-CHECK)</b>
+<p>In the octet where the split happens, <span class="k">subnets × block size = 256</span> (here 8 × 32). If it fails, a step is wrong. When borrowed bits spill into a second octet, apply it per octet: /8 → /18 borrows 10 bits, giving 4 × 64 in the third octet, repeated for 256 second-octet values = 1,024 subnets.</p></div>
+<div class="box"><b class="l">COMMON MISTAKES</b>
+<p><b>32 is addresses, not hosts</b> (30 usable). <b>The last broadcast</b> is .255 (224 + 31), not .225. <b>Subnet zero</b> is usable under classless rules; old classful rules discarded the first and last subnets (2ⁿ − 2).</p></div>
+
+<h2><span class="n">4</span>How a Router Picks the Path</h2>
+<div class="box"><b class="l">PROBLEM STATEMENT</b>
+<p>A router holds many overlapping routes, learned from several protocols. When a packet for <code>192.168.12.41</code> arrives, which route forwards it, and which routes are even allowed into the table?</p></div>
+<p>Two separate decisions answer this: <b>AD and metric</b> build the table; <b>longest-prefix match</b> forwards each packet.</p>
+
+<h3><span class="n">4.1</span>Forwarding: Longest-Prefix Match (LPM)</h3>
+<ol class="st">
+<li><b>Read the destination</b> from the packet.</li>
+<li><b>AND it with each route’s mask</b> (not the route’s address). Full octets: 255 keeps, 0 clears. Partial octet: use binary.</li>
+<li><b>Compare with the route’s network address.</b> Equal = match.</li>
+<li><b>Pick the longest matching prefix.</b> Table order is irrelevant.</li>
+</ol>
+<div class="tw"><table>
+<caption>Destination 192.168.12.41 against five routes</caption>
+<thead><tr><th>Route</th><th>Dest AND mask</th><th>Match?</th><th>Prefix</th></tr></thead>
+<tbody>
+<tr><td class="m">0.0.0.0/0</td><td class="m">0.0.0.0</td><td>Yes</td><td>0</td></tr>
+<tr><td class="m">192.168.0.0/16</td><td class="m">192.168.0.0</td><td>Yes</td><td>16</td></tr>
+<tr><td class="m">192.168.12.0/24</td><td class="m">192.168.12.0</td><td>Yes</td><td>24</td></tr>
+<tr><td class="m">192.168.12.40/30</td><td class="m">192.168.12.40</td><td>Yes</td><td><span class="k">30</span></td></tr>
+<tr><td class="m">192.168.12.64/26</td><td class="m">192.168.12.0</td><td>No (≠ .64)</td><td>–</td></tr>
+</tbody></table></div>
+<pre>/30:  41 = 00101001  AND 252 = 11111100  →  00101000 = 40  ✓ equals .40
+/26:  41 = 00101001  AND 192 = 11000000  →  00000000 =  0  ✗ not .64
+<span class="r">Longest match = /30 → forwarded to the 192.168.12.40/30 next hop</span></pre>
+<p>Specific beats general, even for one host: with routes <code>0/0</code>, <code>10.10.0.0/16</code>, <code>10.10.20.0/24</code> and <code>10.10.20.99/32</code>, the address .99 follows the /32 (firewall), .45 follows the /24 (server VLAN), and 8.8.8.8 falls to the default.</p>
+<div class="box"><b class="l">COMMON TRAP</b>
+<p>Eyeballing whole octets stops at 24 bits and misses matches hidden in the third or fourth octet. Always AND with the mask. Example: 10.50.130.5 vs <code>10.50.64.0/18</code>: 130 AND 192 = 128 ≠ 64, no match.</p></div>
+
+<h3><span class="n">4.2</span>Building the Table: AD, then Metric</h3>
+<p>The same prefix may be offered by several sources (static, OSPF, RIP, BGP…). Each protocol measures “best” differently, so metrics from different protocols cannot be compared. <b>Administrative distance (AD)</b> ranks the <i>sources</i> by trustworthiness; the <b>metric</b> (lower is better) ranks routes <i>within</i> one source.</p>
+<div class="tw"><table>
+<caption>Table 4 — Typical Cisco AD and metric by source</caption>
+<thead><tr><th>Source</th><th>AD</th><th>Metric</th></tr></thead>
+<tbody>
+<tr><td>Connected</td><td>0</td><td>–</td></tr>
+<tr><td>Static</td><td>1</td><td>None in practice; AD alone decides</td></tr>
+<tr><td>eBGP</td><td>20</td><td>Policy attributes (AS-path, local pref, MED…)</td></tr>
+<tr><td>EIGRP (internal)</td><td>90</td><td>Composite (bandwidth + delay)</td></tr>
+<tr><td>OSPF</td><td>110</td><td>Cost: reference bandwidth ÷ link bandwidth, summed</td></tr>
+<tr><td>IS-IS</td><td>115</td><td>Link metric</td></tr>
+<tr><td>RIP</td><td>120</td><td>Hop count (16 = unreachable)</td></tr>
+<tr><td>iBGP</td><td>200</td><td>Policy attributes</td></tr>
+<tr><td>Unknown</td><td>255</td><td>Never installed</td></tr>
+</tbody></table></div>
+<p>The router keeps <b>one selection per prefix</b>:</p>
+<ol class="st">
+<li><b>Group by identical prefix and length.</b> Different lengths are different destinations; all are installed.</li>
+<li><b>Lowest AD wins.</b> Metrics are not compared across sources.</li>
+<li><b>Equal AD → lowest metric wins.</b></li>
+<li><b>Equal metric too → ECMP.</b> Several next hops share the load.</li>
+<li><b>Losers wait in reserve</b> and return if the winner fails. A <i>floating static</i> (AD set above the dynamic protocol, e.g. 200) works exactly this way.</li>
+</ol>
+<p><b>Example:</b> for <code>10.10.20.0/24</code>, static (AD 1), OSPF cost 10 and 25 (AD 110) and RIP (AD 120) all compete. Static is installed; if it vanishes, OSPF cost 10 takes over, then cost 25, then RIP.</p>
+<div class="box"><b class="l">KEY POINT</b>
+<p><span class="k">AD decides which source supplies a prefix; LPM decides which prefix forwards the packet.</span> An iBGP /32 (AD 200) still beats an OSPF /24 (AD 110) at forwarding time, because AD never enters the forwarding decision.</p></div>
+
+<h2><span class="n">5</span>Summarization: Many Routes, One Advertisement</h2>
+<p><i>One postal code for a whole district: the core needs a single entry, not one per street.</i></p>
+<div class="box"><b class="l">PROBLEM STATEMENT</b>
+<p>A backbone router holds four separate routes, <code>192.168.16.0/24</code> to <code>192.168.19.0/24</code>. Can one route replace them without claiming any address that is not theirs?</p></div>
+<p>Summarization (supernetting) collapses several specific routes into one. It <b>shrinks routing tables</b> (saving memory and CPU), <b>hides flapping</b> of individual subnets from the rest of the network, and <b>cuts routing updates</b>. It works only when the networks fit together exactly. The shared leading bits give the answer:</p>
+<pre>3rd octet:  16 = 00010000   17 = 00010001   18 = 00010010   19 = 00010011
+First 6 bits identical → 8 + 8 + 6 = 22   <span class="r">→ 192.168.16.0/22 (255.255.252.0)</span></pre>
+
+<h3><span class="n">5.1</span>The Rule</h3>
+<p>For networks of equal size (prefix <code>p</code>, block size <code>b</code> in the octet where they differ), work in ascending order:</p>
+<ol class="st">
+<li><b>Check contiguity first.</b> Each start must equal the previous start + <code>b</code>. A gap ends the run; summarize each run separately. Let <code>N</code> be the networks in the run.</li>
+<li><b>Test how many can be grouped.</b> Let <code>n</code> = the number of contiguous networks you try to merge: 2, 4, 8… (<span class="k">powers of 2 only</span>, n ≤ N). The group spans <code>b × n</code>. It passes when this statement is <b>True</b>:
+<pre style="margin:8px 0 6px">(start value in the octet)  mod  (block size × n)  ==  0</pre>
+Read it as: <i>the first network’s value in the changing octet must divide evenly by the block size times the number of networks grouped</i>. Example: starts 16, 17, 18, 19 with b = 1 and n = 4 → <code>16 mod (1 × 4) = 0</code> → True, so they merge. Starts 10–13 → <code>10 mod (1 × 4) = 2</code> → False, so n = 4 fails.</li>
+<li><b>Take the largest n that passes.</b> If even n = 2 fails, advertise that network unchanged.</li>
+<li><b>Compute the summary.</b> New prefix = <span class="k">p − log₂(n)</span>. It starts at the first network, spans <code>b × n</code> (its new block size), and ends at start + b × n − 1.</li>
+<li><b>If n &lt; N,</b> repeat from the first uncovered network.</li>
+<li><b>Verify</b> that the summaries cover exactly the original networks and nothing more.</li>
+</ol>
+<div class="tw"><table>
+<caption>Table 5 — The rule applied (largest n tested first)</caption>
+<thead><tr><th>Networks</th><th>b</th><th>N</th><th>Test: start mod (b × n) == 0 ?</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td class="m">10.0.0.0/14, 10.4.0.0/14 (Chaudhary)</td><td>4</td><td>2</td><td>n=2: 0 mod (4×2=8) = 0 → True ✓</td><td><span class="k">10.0.0.0/13</span></td></tr>
+<tr><td class="m">172.16.32, 40, 48, 56 .0/21 (Pokhara)</td><td>8</td><td>4</td><td>n=4: 32 mod (8×4=32) = 0 → True ✓</td><td><span class="k">172.16.32.0/19</span></td></tr>
+<tr><td class="m">200.10.0 – 3.0/24 (Vianet)</td><td>1</td><td>4</td><td>n=4: 0 mod (1×4=4) = 0 → True ✓</td><td><span class="k">200.10.0.0/22</span></td></tr>
+<tr><td class="m">192.168.16 – 19.0/24</td><td>1</td><td>4</td><td>n=4: 16 mod (1×4=4) = 0 → True ✓</td><td><span class="k">192.168.16.0/22</span></td></tr>
+<tr><td class="m">172.16.10 – 13.0/24</td><td>1</td><td>4</td><td>n=4: 10 mod 4 = 2 → False ✗ · n=2: 10 mod 2 = 0 → True ✓</td><td><span class="k">172.16.10.0/23</span> + <span class="k">172.16.12.0/23</span></td></tr>
+<tr><td class="m">172.20.48, 56, 64, 72 .0/21</td><td>8</td><td>4</td><td>n=4: 48 mod (8×4=32) = 16 → False ✗ · n=2: 48 mod (8×2=16) = 0 → True ✓</td><td><span class="k">172.20.48.0/20</span> + <span class="k">172.20.64.0/20</span></td></tr>
+</tbody></table></div>
+<div class="box"><b class="l">WHY POWERS OF 2 ONLY</b>
+<p>A prefix shortens by whole bits, so a summary always covers 2<sup>k</sup> equal blocks. The modulo test can pass for other sizes and mislead: <code>48 mod (8 × 3) = 0</code> is true in the last example, yet three /21 blocks cannot form one prefix. The misaligned case 172.16.10 – 13 shows the cost of forcing it: one route <code>172.16.8.0/21</code> would also swallow .8, .9, .14 and .15.</p></div>
+<p>Chaudhary’s two regions (Nepal and India) merge into one /13 covering 10.0.0.0 – 10.7.255.255; Pokhara’s Library, Administration and Hostels 1 and 2 merge into one /19 covering 172.16.32.0 – 172.16.63.255 (both worked in Section 6). Vianet is the classic proof of why CIDR replaced classful rules: four separate Class C routes become one /22, a prefix that does not exist among the classful /8, /16 and /24.</p>
+
+<h3><span class="n">5.2</span>When a Summary Spills</h3>
+<div class="box"><b class="l">PROBLEM STATEMENT</b>
+<p>Router A owns <code>10.1.0.0/24</code>, <code>.1.0/24</code> and <code>.2.0/24</code> and advertises the whole <code>10.1.0.0/22</code>. Router B, elsewhere on the WAN, owns <code>10.1.3.0/24</code> and advertises it. The /22 covers addresses A does not own. What happens to traffic for them?</p></div>
+<ul>
+<li><b>B is up:</b> the Core sees both routes for 10.1.3.50. The /24 is longer, so traffic goes to B. The specific route punches a hole in the summary.</li>
+<li><b>Traffic for 10.1.1.20:</b> only the /22 matches, so the Core sends it to A, and A’s own /24 delivers it.</li>
+<li><b>B’s link is down:</b> the /24 disappears, the /22 now matches 10.1.3.50, and the Core sends it to A. A has no route for it, falls back to its default route toward the Core, and the packet <span class="k">loops until TTL expires</span>.</li>
+</ul>
+<div class="box"><b class="l">THE FIX — NULL0 DISCARD ROUTE</b>
+<p>Any router that originates a summary also holds <code>10.1.0.0/22 → Null0</code>. Many protocols add it automatically (EIGRP summary, OSPF <code>area range</code>); otherwise: <code>ip route 10.1.0.0 255.255.252.0 Null0</code>.</p></div>
+<pre>Router A: 10.1.0.0/24, .1.0/24, .2.0/24 connected · 10.1.0.0/22 → Null0 · 0.0.0.0/0 → Core
+
+10.1.1.20: /24 beats /22 and /0  <span class="r">→ delivered to LAN 2</span>
+10.1.3.50: /22 → Null0 beats /0  <span class="r">→ dropped at once, no loop</span></pre>
+<p>The same longest-prefix rule keeps A’s specific /24s winning while the /22 catches only the one block A lacks.</p>
+
+<h2><span class="n">6</span>Three Case Studies</h2>
+<p>Each follows the same path: pick a class, size the prefix with Formula 1, subnet with the method from Section 3, then supernet two or four blocks.</p>
+
+<h3><span class="n">6.1</span>Class A: Chaudhary Group</h3>
+<div class="box"><b class="l">PROBLEM STATEMENT</b>
+<p><b>Chaudhary Group</b> receives the private block <code>10.0.0.0/8</code>. Six regional hubs (Nepal, India, Middle East, Africa, Southeast Asia, Europe) each need up to 250,000 devices. Design the subnets, give each region’s network, host range and broadcast, and summarize two adjacent regions for the backbone.</p></div>
+<p><b>Why Class A?</b> Class C tops out at 254 hosts and Class B at 65,534, both far short of 250,000. Only Class A (16,777,214) fits.</p>
+<ol class="st">
+<li><b>Size the prefix.</b> n = ⌈log₂(250,002)⌉ = <span class="k">18</span> host bits → <span class="k">/14</span> (255.252.0.0). Check: 2¹⁸ − 2 = 262,142 ≥ 250,000 ✓</li>
+<li><b>Count subnets.</b> Borrowed = 14 − 8 = 6 bits → 64 subnets, plenty for 6 regions.</li>
+<li><b>Block size</b> in the 2nd octet = 256 − 252 = <span class="k">4</span>. Check: 64 × 4 = 256 ✓. Start at 0, add 4; the other 58 stay free.</li>
+</ol>
+<div class="tw"><table>
+<caption>Table 6 — Chaudhary Group regional subnets (262,142 usable each)</caption>
+<thead><tr><th>Region</th><th>Network</th><th>Host range</th><th>Broadcast</th></tr></thead>
+<tbody>
+<tr><td>Nepal HQ</td><td class="m">10.0.0.0/14</td><td class="m">10.0.0.1 – 10.3.255.254</td><td class="m">10.3.255.255</td></tr>
+<tr><td>India</td><td class="m">10.4.0.0/14</td><td class="m">10.4.0.1 – 10.7.255.254</td><td class="m">10.7.255.255</td></tr>
+<tr><td>Middle East</td><td class="m">10.8.0.0/14</td><td class="m">10.8.0.1 – 10.11.255.254</td><td class="m">10.11.255.255</td></tr>
+<tr><td>Africa</td><td class="m">10.12.0.0/14</td><td class="m">10.12.0.1 – 10.15.255.254</td><td class="m">10.15.255.255</td></tr>
+<tr><td>Southeast Asia</td><td class="m">10.16.0.0/14</td><td class="m">10.16.0.1 – 10.19.255.254</td><td class="m">10.19.255.255</td></tr>
+<tr><td>Europe</td><td class="m">10.20.0.0/14</td><td class="m">10.20.0.1 – 10.23.255.254</td><td class="m">10.23.255.255</td></tr>
+</tbody></table></div>
+<p><b>Supernet Nepal + India.</b> N = 2 (k = 1), block size 4, starts 0 and 4 contiguous, span = 2 × 4 = 8, and 0 mod 8 = 0 ✓. New prefix = 14 − 1 = <span class="k">/13</span>.</p>
+<pre>10.0.0.0/14 + 10.4.0.0/14  <span class="a">↓ aggregate</span>  <span class="r">10.0.0.0/13 (255.248.0.0): 10.0.0.0 – 10.7.255.255</span></pre>
+
+<h3><span class="n">6.2</span>Class B: Pokhara University</h3>
+<div class="box"><b class="l">PROBLEM STATEMENT</b>
+<p><b>Pokhara University</b> receives <code>172.16.0.0/16</code>. Ten blocks (four faculties, library, administration, four hostels) each need up to 2,000 hosts. Design the subnets, give network and broadcast addresses, and merge four adjacent blocks into one backbone route.</p></div>
+<ol class="st">
+<li><b>Size the prefix.</b> n = ⌈log₂(2,002)⌉ = <span class="k">11</span> → <span class="k">/21</span> (255.255.248.0). Check: 2¹¹ − 2 = 2,046 ≥ 2,000 ✓</li>
+<li><b>Count subnets.</b> Borrowed = 21 − 16 = 5 bits → 32 subnets, enough for 10.</li>
+<li><b>Block size</b> in the 3rd octet = 256 − 248 = <span class="k">8</span>. Check: 32 × 8 = 256 ✓. Start at 0, add 8; 22 stay free.</li>
+</ol>
+<div class="tw"><table>
+<caption>Table 7 — Pokhara University subnets (2,046 usable each)</caption>
+<thead><tr><th>Block</th><th>Network</th><th>Host range</th><th>Broadcast</th></tr></thead>
+<tbody>
+<tr><td>Science &amp; Technology</td><td class="m">172.16.0.0/21</td><td class="m">172.16.0.1 – 172.16.7.254</td><td class="m">172.16.7.255</td></tr>
+<tr><td>Management</td><td class="m">172.16.8.0/21</td><td class="m">172.16.8.1 – 172.16.15.254</td><td class="m">172.16.15.255</td></tr>
+<tr><td>Humanities &amp; Soc. Sci.</td><td class="m">172.16.16.0/21</td><td class="m">172.16.16.1 – 172.16.23.254</td><td class="m">172.16.23.255</td></tr>
+<tr><td>Health Sciences</td><td class="m">172.16.24.0/21</td><td class="m">172.16.24.1 – 172.16.31.254</td><td class="m">172.16.31.255</td></tr>
+<tr><td>Central Library</td><td class="m">172.16.32.0/21</td><td class="m">172.16.32.1 – 172.16.39.254</td><td class="m">172.16.39.255</td></tr>
+<tr><td>Administration</td><td class="m">172.16.40.0/21</td><td class="m">172.16.40.1 – 172.16.47.254</td><td class="m">172.16.47.255</td></tr>
+<tr><td>Hostel 1</td><td class="m">172.16.48.0/21</td><td class="m">172.16.48.1 – 172.16.55.254</td><td class="m">172.16.55.255</td></tr>
+<tr><td>Hostel 2</td><td class="m">172.16.56.0/21</td><td class="m">172.16.56.1 – 172.16.63.254</td><td class="m">172.16.63.255</td></tr>
+<tr><td>Hostel 3</td><td class="m">172.16.64.0/21</td><td class="m">172.16.64.1 – 172.16.71.254</td><td class="m">172.16.71.255</td></tr>
+<tr><td>Hostel 4</td><td class="m">172.16.72.0/21</td><td class="m">172.16.72.1 – 172.16.79.254</td><td class="m">172.16.79.255</td></tr>
+</tbody></table></div>
+<p><b>Supernet Library, Administration, Hostel 1 and Hostel 2</b> (starts 32, 40, 48, 56). N = 4 (k = 2), block size 8, each start exactly 8 after the last, span = 4 × 8 = 32, and 32 mod 32 = 0 ✓. New prefix = 21 − 2 = <span class="k">/19</span> (255.255.224.0); 256 − 224 = 32 = span ✓.</p>
+<pre>172.16.32.0/21 + .40.0 + .48.0 + .56.0  <span class="a">↓ aggregate</span>  <span class="r">172.16.32.0/19: 172.16.32.0 – 172.16.63.255</span></pre>
+
+<h3><span class="n">6.3</span>Class C: UniGlobe College</h3>
+<div class="box"><b class="l">PROBLEM STATEMENT</b>
+<p><b>UniGlobe College</b> has <code>192.168.1.0/24</code> for its Kathmandu head office: four departments (Admissions, Academics, IT Support, Finance) of up to 25 hosts each. Its ISP, <b>Vianet Communications</b>, also assigned four contiguous public blocks, <code>200.10.0.0/24</code> to <code>200.10.3.0/24</code>, for branches in Kathmandu, Pokhara, Chitwan and Butwal. Subnet the head office, and show how Vianet advertises the branches as one route.</p></div>
+<ol class="st">
+<li><b>Size the prefix.</b> n = ⌈log₂(27)⌉ = <span class="k">5</span> → <span class="k">/27</span> (255.255.255.224). Check: 2⁵ − 2 = 30 ≥ 25 ✓</li>
+<li><b>Count subnets.</b> Borrowed = 27 − 24 = 3 bits → 8 subnets; 4 are used, 4 stay free.</li>
+<li><b>Block size</b> = 256 − 224 = <span class="k">32</span>. Check: 8 × 32 = 256 ✓</li>
+</ol>
+<div class="tw"><table>
+<caption>Table 8 — UniGlobe head-office subnets (30 usable each)</caption>
+<thead><tr><th>Department</th><th>Network</th><th>Host range</th><th>Broadcast</th></tr></thead>
+<tbody>
+<tr><td>Admissions</td><td class="m">192.168.1.0/27</td><td class="m">.1 – .30</td><td class="m">192.168.1.31</td></tr>
+<tr><td>Academics</td><td class="m">192.168.1.32/27</td><td class="m">.33 – .62</td><td class="m">192.168.1.63</td></tr>
+<tr><td>IT Support</td><td class="m">192.168.1.64/27</td><td class="m">.65 – .94</td><td class="m">192.168.1.95</td></tr>
+<tr><td>Finance</td><td class="m">192.168.1.96/27</td><td class="m">.97 – .126</td><td class="m">192.168.1.127</td></tr>
+</tbody></table></div>
+<p><b>Vianet’s supernet.</b> N = 4 (k = 2), a /24 steps by 1 in the 3rd octet (block size 1), starts 0–3 contiguous, span = 4 × 1 = 4, 0 mod 4 = 0 ✓. New prefix = 24 − 2 = <span class="k">/22</span>.</p>
+<pre>200.10.0.0/24 + .1.0 + .2.0 + .3.0  <span class="a">↓ aggregate</span>  <span class="r">200.10.0.0/22 (255.255.252.0): 200.10.0.0 – 200.10.3.255</span></pre>
+<p>This is the proof of CIDR’s value: a /22 does not exist in classful rules, which knew only /8, /16 and /24.</p>
+
+<h2><span class="n">7</span>VLSM: One Mask Is Not Enough</h2>
+<div class="box"><b class="l">PROBLEM STATEMENT</b>
+<p>Divide <code>192.168.50.0/24</code> among LAN A (Sales) 60 hosts, LAN B (Engineering) 25, LAN C (Guests) 10, and a router-to-router WAN link needing 2. Every case study so far used <b>FLSM</b> (one mask for all subnets: six /14s, ten /21s, four /27s), which works only when segments are similar in size. Here sizes differ wildly.</p></div>
+<p>With FLSM the mask must fit the largest segment (60 hosts → /26), so all four subnets become /26 and consume the entire /24. <b>VLSM</b> instead gives each segment only the block it needs.</p>
+
+<h3><span class="n">7.1</span>The VLSM Method</h3>
+<ol class="st">
+<li><b>Sort</b> segments largest first: 60, 25, 10, 2.</li>
+<li><b>Size each</b> with Formula 1: 60 → 6 bits → <span class="k">/26</span>; 25 → 5 → <span class="k">/27</span>; 10 → 4 → <span class="k">/28</span>; 2 → 2 → <span class="k">/30</span>.</li>
+<li><b>Find block sizes</b> (256 − mask octet): 64, 32, 16, 4.</li>
+<li><b>Place each block</b> right after the previous one; every start must be a multiple of its own block size.</li>
+</ol>
+<pre>LAN A  starts   0 (multiple of 64 ✓)   0 + 64  =  64
+LAN B  starts  64 (multiple of 32 ✓)  64 + 32  =  96
+LAN C  starts  96 (multiple of 16 ✓)  96 + 16  = 112
+WAN    starts 112 (multiple of  4 ✓) 112 + 4   = 116   <span class="r">116 &lt; 256 → fits; .116–.255 free</span></pre>
+<div class="tw"><table>
+<caption>Table 9 — VLSM allocation for 192.168.50.0/24</caption>
+<thead><tr><th>Segment</th><th>Hosts</th><th>Prefix</th><th>Network</th><th>Usable</th><th>Broadcast</th></tr></thead>
+<tbody>
+<tr><td>LAN A</td><td>60</td><td class="m">/26</td><td class="m">192.168.50.0</td><td class="m">.1 – .62</td><td class="m">.63</td></tr>
+<tr><td>LAN B</td><td>25</td><td class="m">/27</td><td class="m">192.168.50.64</td><td class="m">.65 – .94</td><td class="m">.95</td></tr>
+<tr><td>LAN C</td><td>10</td><td class="m">/28</td><td class="m">192.168.50.96</td><td class="m">.97 – .110</td><td class="m">.111</td></tr>
+<tr><td>WAN</td><td>2</td><td class="m">/30</td><td class="m">192.168.50.112</td><td class="m">.113 – .114</td><td class="m">.115</td></tr>
+</tbody></table></div>
+<div class="box"><b class="l">COMMON MISTAKES</b>
+<p><b>Starting right after the last host:</b> LAN C starts at .96, not .97 (97 AND 240 = 96, so .97 is a host inside .96/28). <b>Reserving the gateway:</b> only network and broadcast are reserved; .1 is a usable host. <b>Ignoring alignment:</b> every network ID must be a multiple of its block size. <b>Ending a range late:</b> the /27 at .64 ends at broadcast .95, so its last host is .94.</p></div>
+
+<h3><span class="n">7.2</span>The Payoff</h3>
+<div class="tw"><table>
+<caption>Table 10 — Address waste, FLSM versus VLSM (usable hosts)</caption>
+<thead><tr><th>Segment</th><th>Needed</th><th>FLSM (/26) usable</th><th>FLSM wasted</th><th>VLSM usable</th><th>VLSM wasted</th></tr></thead>
+<tbody>
+<tr><td>LAN A</td><td>60</td><td>62</td><td>2</td><td>62 (/26)</td><td>2</td></tr>
+<tr><td>LAN B</td><td>25</td><td>62</td><td>37</td><td>30 (/27)</td><td>5</td></tr>
+<tr><td>LAN C</td><td>10</td><td>62</td><td>52</td><td>14 (/28)</td><td>4</td></tr>
+<tr><td>WAN</td><td>2</td><td>62</td><td>60</td><td>2 (/30)</td><td>0</td></tr>
+<tr><td><b>Total</b></td><td><b>97</b></td><td><b>248</b></td><td><b>151</b></td><td><b>108</b></td><td><b>11</b></td></tr>
+</tbody></table></div>
+<p>FLSM hands the 2-host WAN link 64 addresses and leaves nothing free. VLSM gives it a /30 and keeps 140 addresses for growth.</p>
+<div class="tw"><table>
+<caption>Table 11 — FLSM versus VLSM</caption>
+<thead><tr><th>Aspect</th><th>FLSM</th><th>VLSM</th></tr></thead>
+<tbody>
+<tr><td>Mask</td><td>One for all subnets</td><td>Different per subnet</td></tr>
+<tr><td>Efficiency</td><td>Low when needs differ</td><td>High</td></tr>
+<tr><td>Planning</td><td>Simple: borrow s bits</td><td>Largest first, align to block size</td></tr>
+<tr><td>Routing protocol</td><td>Any, even RIPv1</td><td>Classless only (RIPv2, OSPF, EIGRP, IS-IS, BGP): masks must travel with routes</td></tr>
+<tr><td>Best for</td><td>Equal segments (identical labs, floors)</td><td>Mixed LANs and WAN links</td></tr>
+</tbody></table></div>
+
+<h2><span class="n">8</span>Classful vs. Classless at a Glance</h2>
+<div class="tw"><table>
+<thead><tr><th>Aspect</th><th>Classful</th><th>Classless (CIDR)</th></tr></thead>
+<tbody>
+<tr><td><b>Boundary</b></td><td>Fixed: /8, /16, /24</td><td>Any /n</td></tr>
+<tr><td><b>Efficiency</b></td><td>Poor, fixed block sizes</td><td>High, sized to need</td></tr>
+<tr><td><b>Subnetting</b></td><td>Class-default masks only</td><td>Full VLSM</td></tr>
+<tr><td><b>Supernetting</b></td><td>Impossible</td><td>Route aggregation</td></tr>
+<tr><td><b>Routing tables</b></td><td>Large</td><td>Compact</td></tr>
+<tr><td><b>Status</b></td><td>Obsolete since 1993</td><td>Standard everywhere</td></tr>
+</tbody></table></div>
+
+<h2><span class="n">9</span>Key Takeaways</h2>
+<ol>
+<li><b>Network address</b> = host bits all 0; <b>broadcast</b> = host bits all 1. Hosts lie between.</li>
+<li><b>Prefix and mask</b> are one boundary in two notations. Block size = 256 − mask octet.</li>
+<li><b>Subnetting</b> borrows host bits: subnets = 2^borrowed, and subnets × block size = 256 in the split octet.</li>
+<li><b>Sizing:</b> n = ⌈log₂(H + 2)⌉ host bits, prefix = 32 − n.</li>
+<li><b>/0</b> matches everything; <b>/32</b> matches one host.</li>
+<li><b>Forwarding</b> uses longest-prefix match on mask-ANDed addresses; <b>AD then metric</b> only choose which source supplies a prefix.</li>
+<li><b>Summarize</b> only power-of-2, contiguous, aligned groups; otherwise split into smaller exact summaries.</li>
+<li>A router that originates a summary needs a <b>Null0</b> discard route to prevent loops.</li>
+<li><b>FLSM</b> is simple but wasteful when sizes differ; <b>VLSM</b> allocates largest first, on block-size boundaries, and needs a classless protocol.</li>
+</ol>
+
+<footer>Chaudhary Group, Pokhara University, UniGlobe College and Vianet Communications appear for illustration only; the address blocks are hypothetical, not their production networks.</footer>
+</div>
+</body>
+</html>
